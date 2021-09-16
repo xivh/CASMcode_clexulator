@@ -834,7 +834,7 @@ def main():
     ]
 
     chunk = make_libcasm("clexulator", header_files,
-                         libadd=["-lcasm_global", "-libcasm_crystallography"])
+                         libadd=["-lcasm_global", "-lcasm_crystallography"])
     target = os.path.join("src", "casm", "Makemodule.am")
     string_to_file(chunk, target)
 
