@@ -193,6 +193,13 @@ class SuperNeighborList {
 
   size_type n_unitcells() const { return m_prim_grid_size; }
 
+  /// \brief Total number of sites in supercell
+  ///
+  /// Notes:
+  /// - Not all sites have associated point correlations. If
+  ///   `neighbor_index(site_index) == -1`, then no point correlations.
+  size_type n_sites() const { return m_site_index_to_neighbor_index.size(); }
+
   /// Get unitcell_index from site_index
   size_type unitcell_index(size_type site_index) const {
     return site_index % m_prim_grid_size;

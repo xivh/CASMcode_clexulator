@@ -9,7 +9,6 @@
 #include "casm/casm_io/json/jsonParser.hh"
 #include "casm/clexulator/BaseClexulator.hh"
 #include "casm/clexulator/Clexulator.hh"
-#include "casm/clexulator/Correlations.hh"
 #include "casm/crystallography/BasicStructure.hh"
 #include "casm/crystallography/io/BasicStructureIO.hh"
 #include "casm/global/filesystem.hh"

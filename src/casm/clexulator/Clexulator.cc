@@ -60,7 +60,7 @@ std::shared_ptr<RuntimeLibrary> make_shared_runtime_lib(
 
 }  // namespace Clexulator_impl
 
-/// \brief Construct a Clexulator
+/// \brief Clexulator factory function
 ///
 /// \param name Class name for the Clexulator, typically 'X_Clexulator', with X
 ///             referring to the system of interest (i.e. 'NiAl_Clexulator')
@@ -82,7 +82,6 @@ std::shared_ptr<RuntimeLibrary> make_shared_runtime_lib(
 /// rather than construct another using this constructor which will re-load the
 /// library.
 ///
-/// \brief Clexulator factor function
 Clexulator make_clexulator(std::string name, fs::path dirpath,
                            PrimNeighborList &nlist, std::string compile_options,
                            std::string so_options) {
@@ -127,6 +126,50 @@ Clexulator make_clexulator(std::string name, fs::path dirpath,
   nlist.expand(clex->neighborhood().begin(), clex->neighborhood().end());
 
   return Clexulator(name, std::move(clex), lib);
+}
+
+/// \brief Local Clexulator factory function
+///
+/// \param name Class name for the Clexulator, typically 'X_Clexulator', with X
+///             referring to the system of interest (i.e. 'NiAl_Clexulator')
+/// \param dirpath Directory containing numbered subdirectories (i.e. '0', '1',
+///     '2', ...) containing local Clexulator source files (i.e.
+///     'NiAl_Clexulator.cc')
+/// \param nlist, A PrimNeighborList to be updated to include the
+///     neighborhood of this Clexulator
+/// \param compile_options Compilation options
+/// \param so_options Shared library compilation options
+///
+/// If 'name' is 'X_Clexulator', and 'dirpath' is '/path/to', then for `<i> =
+/// 0, 1, ...` for which `path/to/<i>/X_Clexulator.cc' exists, this method will:
+/// - Look for '/path/to/<i>/X_Clexulator.so' and try to load it.
+/// - If not found, look for 'path/to/<i>/X_Clexulator.cc' and try to
+///   compile and load it.
+/// - If unsuccesful, will throw std::runtime_error.
+///
+/// The Clexulator has shared ownership of the loaded library,
+/// so it is preferrable to duplicate the Clexulator using it's copy constructor
+/// rather than construct another using this constructor which will re-load the
+/// library.
+///
+std::vector<Clexulator> make_local_clexulator(std::string name,
+                                              fs::path dirpath,
+                                              PrimNeighborList &nlist,
+                                              std::string compile_options,
+                                              std::string so_options) {
+  std::vector<Clexulator> result;
+  Index i = 0;
+  fs::path equiv_dir = dirpath / fs::path(std::to_string(i));
+  while (fs::exists(equiv_dir)) {
+    if (!fs::exists(equiv_dir / (name + ".cc"))) {
+      break;
+    }
+    result.push_back(
+        make_clexulator(name, equiv_dir, nlist, compile_options, so_options));
+    ++i;
+    equiv_dir = dirpath / fs::path(std::to_string(i));
+  }
+  return result;
 }
 
 }  // namespace clexulator
