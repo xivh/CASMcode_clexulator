@@ -83,15 +83,20 @@ class Clexulator {
 
   /// \brief The UnitCellCoord involved in calculating the basis functions,
   /// relative origin UnitCell
-  const std::set<xtal::UnitCellCoord> &site_neighborhood() const {
-    throw std::runtime_error("TODO: Clexulator::site_neighborhood");
+  std::set<xtal::UnitCellCoord> site_neighborhood() const {
+    std::set<xtal::UnitCellCoord> result;
+    for (Index i = 0; i < corr_size(); ++i) {
+      std::set<xtal::UnitCellCoord> const &tmp = this->site_neighborhood(i);
+      result.insert(tmp.begin(), tmp.end());
+    }
+    return result;
   }
 
   /// \brief The UnitCellCoord involved in calculating the basis functions
   /// for a particular orbit, relative origin UnitCell
   const std::set<xtal::UnitCellCoord> &site_neighborhood(
       size_type linear_orbit_index) const {
-    throw std::runtime_error("TODO: Clexulator::site_neighborhood");
+    return m_clex->site_neighborhood(linear_orbit_index);
   }
 
   /// \brief The UnitCellCoord involved in calculating the basis functions

@@ -1224,6 +1224,10 @@ OccClexulatorTest_Clexulator::OccClexulatorTest_Clexulator()
   m_weight_matrix.row(1) << 1, 2, 1;
   m_weight_matrix.row(2) << 1, 1, 2;
 
+  m_sublat_indices = std::set<int>{0};
+
+  m_n_sublattices = 1;
+
   m_neighborhood = std::set<xtal::UnitCell>{
       xtal::UnitCell(-3, 0, 0),   xtal::UnitCell(-3, 0, 3),
       xtal::UnitCell(-3, 1, 1),   xtal::UnitCell(-3, 3, 0),
@@ -1265,8 +1269,13 @@ OccClexulatorTest_Clexulator::OccClexulatorTest_Clexulator()
       xtal::UnitCell(3, 0, 0)};
 
   m_orbit_neighborhood.resize(corr_size());
+  m_orbit_site_neighborhood.resize(corr_size());
   m_orbit_neighborhood[1] = std::set<xtal::UnitCell>{xtal::UnitCell(0, 0, 0)};
   m_orbit_neighborhood[2] = m_orbit_neighborhood[1];
+
+  m_orbit_site_neighborhood[1] =
+      std::set<xtal::UnitCellCoord>{xtal::UnitCellCoord(0, 0, 0, 0)};
+  m_orbit_site_neighborhood[2] = m_orbit_site_neighborhood[1];
 
   m_orbit_neighborhood[3] = std::set<xtal::UnitCell>{
       xtal::UnitCell(-1, 0, 0), xtal::UnitCell(-1, 0, 1),
@@ -1279,6 +1288,17 @@ OccClexulatorTest_Clexulator::OccClexulatorTest_Clexulator()
   m_orbit_neighborhood[4] = m_orbit_neighborhood[3];
   m_orbit_neighborhood[5] = m_orbit_neighborhood[3];
 
+  m_orbit_site_neighborhood[3] = std::set<xtal::UnitCellCoord>{
+      xtal::UnitCellCoord(0, -1, 0, 0), xtal::UnitCellCoord(0, -1, 0, 1),
+      xtal::UnitCellCoord(0, -1, 1, 0), xtal::UnitCellCoord(0, 0, -1, 0),
+      xtal::UnitCellCoord(0, 0, -1, 1), xtal::UnitCellCoord(0, 0, 0, -1),
+      xtal::UnitCellCoord(0, 0, 0, 0),  xtal::UnitCellCoord(0, 0, 0, 1),
+      xtal::UnitCellCoord(0, 0, 1, -1), xtal::UnitCellCoord(0, 0, 1, 0),
+      xtal::UnitCellCoord(0, 1, -1, 0), xtal::UnitCellCoord(0, 1, 0, -1),
+      xtal::UnitCellCoord(0, 1, 0, 0)};
+  m_orbit_site_neighborhood[4] = m_orbit_site_neighborhood[3];
+  m_orbit_site_neighborhood[5] = m_orbit_site_neighborhood[3];
+
   m_orbit_neighborhood[6] = std::set<xtal::UnitCell>{
       xtal::UnitCell(-1, -1, 1), xtal::UnitCell(-1, 1, -1),
       xtal::UnitCell(-1, 1, 1),  xtal::UnitCell(0, 0, 0),
@@ -1286,6 +1306,14 @@ OccClexulatorTest_Clexulator::OccClexulatorTest_Clexulator()
       xtal::UnitCell(1, 1, -1)};
   m_orbit_neighborhood[7] = m_orbit_neighborhood[6];
   m_orbit_neighborhood[8] = m_orbit_neighborhood[6];
+
+  m_orbit_site_neighborhood[6] = std::set<xtal::UnitCellCoord>{
+      xtal::UnitCellCoord(0, -1, -1, 1), xtal::UnitCellCoord(0, -1, 1, -1),
+      xtal::UnitCellCoord(0, -1, 1, 1),  xtal::UnitCellCoord(0, 0, 0, 0),
+      xtal::UnitCellCoord(0, 1, -1, -1), xtal::UnitCellCoord(0, 1, -1, 1),
+      xtal::UnitCellCoord(0, 1, 1, -1)};
+  m_orbit_site_neighborhood[7] = m_orbit_site_neighborhood[6];
+  m_orbit_site_neighborhood[8] = m_orbit_site_neighborhood[6];
 
   m_orbit_neighborhood[9] = std::set<xtal::UnitCell>{
       xtal::UnitCell(-2, 0, 1),  xtal::UnitCell(-2, 1, 0),
@@ -1304,6 +1332,23 @@ OccClexulatorTest_Clexulator::OccClexulatorTest_Clexulator()
   m_orbit_neighborhood[10] = m_orbit_neighborhood[9];
   m_orbit_neighborhood[11] = m_orbit_neighborhood[9];
 
+  m_orbit_site_neighborhood[9] = std::set<xtal::UnitCellCoord>{
+      xtal::UnitCellCoord(0, -2, 0, 1),  xtal::UnitCellCoord(0, -2, 1, 0),
+      xtal::UnitCellCoord(0, -2, 1, 1),  xtal::UnitCellCoord(0, -1, -1, 0),
+      xtal::UnitCellCoord(0, -1, -1, 2), xtal::UnitCellCoord(0, -1, 0, -1),
+      xtal::UnitCellCoord(0, -1, 0, 2),  xtal::UnitCellCoord(0, -1, 2, -1),
+      xtal::UnitCellCoord(0, -1, 2, 0),  xtal::UnitCellCoord(0, 0, -2, 1),
+      xtal::UnitCellCoord(0, 0, -1, -1), xtal::UnitCellCoord(0, 0, -1, 2),
+      xtal::UnitCellCoord(0, 0, 0, 0),   xtal::UnitCellCoord(0, 0, 1, -2),
+      xtal::UnitCellCoord(0, 0, 1, 1),   xtal::UnitCellCoord(0, 0, 2, -1),
+      xtal::UnitCellCoord(0, 1, -2, 0),  xtal::UnitCellCoord(0, 1, -2, 1),
+      xtal::UnitCellCoord(0, 1, 0, -2),  xtal::UnitCellCoord(0, 1, 0, 1),
+      xtal::UnitCellCoord(0, 1, 1, -2),  xtal::UnitCellCoord(0, 1, 1, 0),
+      xtal::UnitCellCoord(0, 2, -1, -1), xtal::UnitCellCoord(0, 2, -1, 0),
+      xtal::UnitCellCoord(0, 2, 0, -1)};
+  m_orbit_site_neighborhood[10] = m_orbit_site_neighborhood[9];
+  m_orbit_site_neighborhood[11] = m_orbit_site_neighborhood[9];
+
   m_orbit_neighborhood[12] = std::set<xtal::UnitCell>{
       xtal::UnitCell(-2, 0, 0), xtal::UnitCell(-2, 0, 2),
       xtal::UnitCell(-2, 2, 0), xtal::UnitCell(0, -2, 0),
@@ -1315,6 +1360,17 @@ OccClexulatorTest_Clexulator::OccClexulatorTest_Clexulator()
   m_orbit_neighborhood[13] = m_orbit_neighborhood[12];
   m_orbit_neighborhood[14] = m_orbit_neighborhood[12];
 
+  m_orbit_site_neighborhood[12] = std::set<xtal::UnitCellCoord>{
+      xtal::UnitCellCoord(0, -2, 0, 0), xtal::UnitCellCoord(0, -2, 0, 2),
+      xtal::UnitCellCoord(0, -2, 2, 0), xtal::UnitCellCoord(0, 0, -2, 0),
+      xtal::UnitCellCoord(0, 0, -2, 2), xtal::UnitCellCoord(0, 0, 0, -2),
+      xtal::UnitCellCoord(0, 0, 0, 0),  xtal::UnitCellCoord(0, 0, 0, 2),
+      xtal::UnitCellCoord(0, 0, 2, -2), xtal::UnitCellCoord(0, 0, 2, 0),
+      xtal::UnitCellCoord(0, 2, -2, 0), xtal::UnitCellCoord(0, 2, 0, -2),
+      xtal::UnitCellCoord(0, 2, 0, 0)};
+  m_orbit_site_neighborhood[13] = m_orbit_site_neighborhood[12];
+  m_orbit_site_neighborhood[14] = m_orbit_site_neighborhood[12];
+
   m_orbit_neighborhood[15] = std::set<xtal::UnitCell>{
       xtal::UnitCell(-3, 1, 1),  xtal::UnitCell(-1, -1, -1),
       xtal::UnitCell(-1, -1, 3), xtal::UnitCell(-1, 3, -1),
@@ -1323,6 +1379,15 @@ OccClexulatorTest_Clexulator::OccClexulatorTest_Clexulator()
       xtal::UnitCell(3, -1, -1)};
   m_orbit_neighborhood[16] = m_orbit_neighborhood[15];
   m_orbit_neighborhood[17] = m_orbit_neighborhood[15];
+
+  m_orbit_site_neighborhood[15] = std::set<xtal::UnitCellCoord>{
+      xtal::UnitCellCoord(0, -3, 1, 1),  xtal::UnitCellCoord(0, -1, -1, -1),
+      xtal::UnitCellCoord(0, -1, -1, 3), xtal::UnitCellCoord(0, -1, 3, -1),
+      xtal::UnitCellCoord(0, 0, 0, 0),   xtal::UnitCellCoord(0, 1, -3, 1),
+      xtal::UnitCellCoord(0, 1, 1, -3),  xtal::UnitCellCoord(0, 1, 1, 1),
+      xtal::UnitCellCoord(0, 3, -1, -1)};
+  m_orbit_site_neighborhood[16] = m_orbit_site_neighborhood[15];
+  m_orbit_site_neighborhood[17] = m_orbit_site_neighborhood[15];
 
   m_orbit_neighborhood[18] = std::set<xtal::UnitCell>{
       xtal::UnitCell(-3, 0, 0), xtal::UnitCell(-3, 0, 3),
@@ -1335,6 +1400,17 @@ OccClexulatorTest_Clexulator::OccClexulatorTest_Clexulator()
   m_orbit_neighborhood[19] = m_orbit_neighborhood[18];
   m_orbit_neighborhood[20] = m_orbit_neighborhood[18];
 
+  m_orbit_site_neighborhood[18] = std::set<xtal::UnitCellCoord>{
+      xtal::UnitCellCoord(0, -3, 0, 0), xtal::UnitCellCoord(0, -3, 0, 3),
+      xtal::UnitCellCoord(0, -3, 3, 0), xtal::UnitCellCoord(0, 0, -3, 0),
+      xtal::UnitCellCoord(0, 0, -3, 3), xtal::UnitCellCoord(0, 0, 0, -3),
+      xtal::UnitCellCoord(0, 0, 0, 0),  xtal::UnitCellCoord(0, 0, 0, 3),
+      xtal::UnitCellCoord(0, 0, 3, -3), xtal::UnitCellCoord(0, 0, 3, 0),
+      xtal::UnitCellCoord(0, 3, -3, 0), xtal::UnitCellCoord(0, 3, 0, -3),
+      xtal::UnitCellCoord(0, 3, 0, 0)};
+  m_orbit_site_neighborhood[19] = m_orbit_site_neighborhood[18];
+  m_orbit_site_neighborhood[20] = m_orbit_site_neighborhood[18];
+
   m_orbit_neighborhood[21] = std::set<xtal::UnitCell>{
       xtal::UnitCell(-1, 0, 0), xtal::UnitCell(-1, 0, 1),
       xtal::UnitCell(-1, 1, 0), xtal::UnitCell(0, -1, 0),
@@ -1346,6 +1422,18 @@ OccClexulatorTest_Clexulator::OccClexulatorTest_Clexulator()
   m_orbit_neighborhood[22] = m_orbit_neighborhood[21];
   m_orbit_neighborhood[23] = m_orbit_neighborhood[21];
   m_orbit_neighborhood[24] = m_orbit_neighborhood[21];
+
+  m_orbit_site_neighborhood[21] = std::set<xtal::UnitCellCoord>{
+      xtal::UnitCellCoord(0, -1, 0, 0), xtal::UnitCellCoord(0, -1, 0, 1),
+      xtal::UnitCellCoord(0, -1, 1, 0), xtal::UnitCellCoord(0, 0, -1, 0),
+      xtal::UnitCellCoord(0, 0, -1, 1), xtal::UnitCellCoord(0, 0, 0, -1),
+      xtal::UnitCellCoord(0, 0, 0, 0),  xtal::UnitCellCoord(0, 0, 0, 1),
+      xtal::UnitCellCoord(0, 0, 1, -1), xtal::UnitCellCoord(0, 0, 1, 0),
+      xtal::UnitCellCoord(0, 1, -1, 0), xtal::UnitCellCoord(0, 1, 0, -1),
+      xtal::UnitCellCoord(0, 1, 0, 0)};
+  m_orbit_site_neighborhood[22] = m_orbit_site_neighborhood[21];
+  m_orbit_site_neighborhood[23] = m_orbit_site_neighborhood[21];
+  m_orbit_site_neighborhood[24] = m_orbit_site_neighborhood[21];
 
   m_orbit_neighborhood[25] = std::set<xtal::UnitCell>{
       xtal::UnitCell(-2, 0, 1),  xtal::UnitCell(-2, 1, 0),
@@ -1373,6 +1461,32 @@ OccClexulatorTest_Clexulator::OccClexulatorTest_Clexulator()
   m_orbit_neighborhood[29] = m_orbit_neighborhood[25];
   m_orbit_neighborhood[30] = m_orbit_neighborhood[25];
 
+  m_orbit_site_neighborhood[25] = std::set<xtal::UnitCellCoord>{
+      xtal::UnitCellCoord(0, -2, 0, 1),  xtal::UnitCellCoord(0, -2, 1, 0),
+      xtal::UnitCellCoord(0, -2, 1, 1),  xtal::UnitCellCoord(0, -1, -1, 0),
+      xtal::UnitCellCoord(0, -1, -1, 2), xtal::UnitCellCoord(0, -1, 0, -1),
+      xtal::UnitCellCoord(0, -1, 0, 0),  xtal::UnitCellCoord(0, -1, 0, 1),
+      xtal::UnitCellCoord(0, -1, 0, 2),  xtal::UnitCellCoord(0, -1, 1, 0),
+      xtal::UnitCellCoord(0, -1, 2, -1), xtal::UnitCellCoord(0, -1, 2, 0),
+      xtal::UnitCellCoord(0, 0, -2, 1),  xtal::UnitCellCoord(0, 0, -1, -1),
+      xtal::UnitCellCoord(0, 0, -1, 0),  xtal::UnitCellCoord(0, 0, -1, 1),
+      xtal::UnitCellCoord(0, 0, -1, 2),  xtal::UnitCellCoord(0, 0, 0, -1),
+      xtal::UnitCellCoord(0, 0, 0, 0),   xtal::UnitCellCoord(0, 0, 0, 1),
+      xtal::UnitCellCoord(0, 0, 1, -2),  xtal::UnitCellCoord(0, 0, 1, -1),
+      xtal::UnitCellCoord(0, 0, 1, 0),   xtal::UnitCellCoord(0, 0, 1, 1),
+      xtal::UnitCellCoord(0, 0, 2, -1),  xtal::UnitCellCoord(0, 1, -2, 0),
+      xtal::UnitCellCoord(0, 1, -2, 1),  xtal::UnitCellCoord(0, 1, -1, 0),
+      xtal::UnitCellCoord(0, 1, 0, -2),  xtal::UnitCellCoord(0, 1, 0, -1),
+      xtal::UnitCellCoord(0, 1, 0, 0),   xtal::UnitCellCoord(0, 1, 0, 1),
+      xtal::UnitCellCoord(0, 1, 1, -2),  xtal::UnitCellCoord(0, 1, 1, 0),
+      xtal::UnitCellCoord(0, 2, -1, -1), xtal::UnitCellCoord(0, 2, -1, 0),
+      xtal::UnitCellCoord(0, 2, 0, -1)};
+  m_orbit_site_neighborhood[26] = m_orbit_site_neighborhood[25];
+  m_orbit_site_neighborhood[27] = m_orbit_site_neighborhood[25];
+  m_orbit_site_neighborhood[28] = m_orbit_site_neighborhood[25];
+  m_orbit_site_neighborhood[29] = m_orbit_site_neighborhood[25];
+  m_orbit_site_neighborhood[30] = m_orbit_site_neighborhood[25];
+
   m_orbit_neighborhood[31] = std::set<xtal::UnitCell>{
       xtal::UnitCell(-2, 0, 0), xtal::UnitCell(-2, 0, 2),
       xtal::UnitCell(-2, 2, 0), xtal::UnitCell(-1, 0, 0),
@@ -1392,6 +1506,26 @@ OccClexulatorTest_Clexulator::OccClexulatorTest_Clexulator()
   m_orbit_neighborhood[34] = m_orbit_neighborhood[31];
   m_orbit_neighborhood[35] = m_orbit_neighborhood[31];
   m_orbit_neighborhood[36] = m_orbit_neighborhood[31];
+
+  m_orbit_site_neighborhood[31] = std::set<xtal::UnitCellCoord>{
+      xtal::UnitCellCoord(0, -2, 0, 0), xtal::UnitCellCoord(0, -2, 0, 2),
+      xtal::UnitCellCoord(0, -2, 2, 0), xtal::UnitCellCoord(0, -1, 0, 0),
+      xtal::UnitCellCoord(0, -1, 0, 1), xtal::UnitCellCoord(0, -1, 1, 0),
+      xtal::UnitCellCoord(0, 0, -2, 0), xtal::UnitCellCoord(0, 0, -2, 2),
+      xtal::UnitCellCoord(0, 0, -1, 0), xtal::UnitCellCoord(0, 0, -1, 1),
+      xtal::UnitCellCoord(0, 0, 0, -2), xtal::UnitCellCoord(0, 0, 0, -1),
+      xtal::UnitCellCoord(0, 0, 0, 0),  xtal::UnitCellCoord(0, 0, 0, 1),
+      xtal::UnitCellCoord(0, 0, 0, 2),  xtal::UnitCellCoord(0, 0, 1, -1),
+      xtal::UnitCellCoord(0, 0, 1, 0),  xtal::UnitCellCoord(0, 0, 2, -2),
+      xtal::UnitCellCoord(0, 0, 2, 0),  xtal::UnitCellCoord(0, 1, -1, 0),
+      xtal::UnitCellCoord(0, 1, 0, -1), xtal::UnitCellCoord(0, 1, 0, 0),
+      xtal::UnitCellCoord(0, 2, -2, 0), xtal::UnitCellCoord(0, 2, 0, -2),
+      xtal::UnitCellCoord(0, 2, 0, 0)};
+  m_orbit_site_neighborhood[32] = m_orbit_site_neighborhood[31];
+  m_orbit_site_neighborhood[33] = m_orbit_site_neighborhood[31];
+  m_orbit_site_neighborhood[34] = m_orbit_site_neighborhood[31];
+  m_orbit_site_neighborhood[35] = m_orbit_site_neighborhood[31];
+  m_orbit_site_neighborhood[36] = m_orbit_site_neighborhood[31];
 
   m_orbit_neighborhood[37] = std::set<xtal::UnitCell>{
       xtal::UnitCell(-3, 1, 1),   xtal::UnitCell(-2, 0, 1),
@@ -1425,6 +1559,38 @@ OccClexulatorTest_Clexulator::OccClexulatorTest_Clexulator()
   m_orbit_neighborhood[43] = m_orbit_neighborhood[37];
   m_orbit_neighborhood[44] = m_orbit_neighborhood[37];
 
+  m_orbit_site_neighborhood[37] = std::set<xtal::UnitCellCoord>{
+      xtal::UnitCellCoord(0, -3, 1, 1),   xtal::UnitCellCoord(0, -2, 0, 1),
+      xtal::UnitCellCoord(0, -2, 1, 0),   xtal::UnitCellCoord(0, -2, 1, 1),
+      xtal::UnitCellCoord(0, -1, -1, -1), xtal::UnitCellCoord(0, -1, -1, 0),
+      xtal::UnitCellCoord(0, -1, -1, 2),  xtal::UnitCellCoord(0, -1, -1, 3),
+      xtal::UnitCellCoord(0, -1, 0, -1),  xtal::UnitCellCoord(0, -1, 0, 0),
+      xtal::UnitCellCoord(0, -1, 0, 1),   xtal::UnitCellCoord(0, -1, 0, 2),
+      xtal::UnitCellCoord(0, -1, 1, 0),   xtal::UnitCellCoord(0, -1, 2, -1),
+      xtal::UnitCellCoord(0, -1, 2, 0),   xtal::UnitCellCoord(0, -1, 3, -1),
+      xtal::UnitCellCoord(0, 0, -2, 1),   xtal::UnitCellCoord(0, 0, -1, -1),
+      xtal::UnitCellCoord(0, 0, -1, 0),   xtal::UnitCellCoord(0, 0, -1, 1),
+      xtal::UnitCellCoord(0, 0, -1, 2),   xtal::UnitCellCoord(0, 0, 0, -1),
+      xtal::UnitCellCoord(0, 0, 0, 0),    xtal::UnitCellCoord(0, 0, 0, 1),
+      xtal::UnitCellCoord(0, 0, 1, -2),   xtal::UnitCellCoord(0, 0, 1, -1),
+      xtal::UnitCellCoord(0, 0, 1, 0),    xtal::UnitCellCoord(0, 0, 1, 1),
+      xtal::UnitCellCoord(0, 0, 2, -1),   xtal::UnitCellCoord(0, 1, -3, 1),
+      xtal::UnitCellCoord(0, 1, -2, 0),   xtal::UnitCellCoord(0, 1, -2, 1),
+      xtal::UnitCellCoord(0, 1, -1, 0),   xtal::UnitCellCoord(0, 1, 0, -2),
+      xtal::UnitCellCoord(0, 1, 0, -1),   xtal::UnitCellCoord(0, 1, 0, 0),
+      xtal::UnitCellCoord(0, 1, 0, 1),    xtal::UnitCellCoord(0, 1, 1, -3),
+      xtal::UnitCellCoord(0, 1, 1, -2),   xtal::UnitCellCoord(0, 1, 1, 0),
+      xtal::UnitCellCoord(0, 1, 1, 1),    xtal::UnitCellCoord(0, 2, -1, -1),
+      xtal::UnitCellCoord(0, 2, -1, 0),   xtal::UnitCellCoord(0, 2, 0, -1),
+      xtal::UnitCellCoord(0, 3, -1, -1)};
+  m_orbit_site_neighborhood[38] = m_orbit_site_neighborhood[37];
+  m_orbit_site_neighborhood[39] = m_orbit_site_neighborhood[37];
+  m_orbit_site_neighborhood[40] = m_orbit_site_neighborhood[37];
+  m_orbit_site_neighborhood[41] = m_orbit_site_neighborhood[37];
+  m_orbit_site_neighborhood[42] = m_orbit_site_neighborhood[37];
+  m_orbit_site_neighborhood[43] = m_orbit_site_neighborhood[37];
+  m_orbit_site_neighborhood[44] = m_orbit_site_neighborhood[37];
+
   m_orbit_neighborhood[45] = std::set<xtal::UnitCell>{
       xtal::UnitCell(-3, 0, 0), xtal::UnitCell(-3, 0, 3),
       xtal::UnitCell(-3, 3, 0), xtal::UnitCell(-2, 0, 0),
@@ -1452,6 +1618,34 @@ OccClexulatorTest_Clexulator::OccClexulatorTest_Clexulator()
   m_orbit_neighborhood[50] = m_orbit_neighborhood[45];
   m_orbit_neighborhood[51] = m_orbit_neighborhood[45];
   m_orbit_neighborhood[52] = m_orbit_neighborhood[45];
+
+  m_orbit_site_neighborhood[45] = std::set<xtal::UnitCellCoord>{
+      xtal::UnitCellCoord(0, -3, 0, 0), xtal::UnitCellCoord(0, -3, 0, 3),
+      xtal::UnitCellCoord(0, -3, 3, 0), xtal::UnitCellCoord(0, -2, 0, 0),
+      xtal::UnitCellCoord(0, -2, 0, 2), xtal::UnitCellCoord(0, -2, 2, 0),
+      xtal::UnitCellCoord(0, -1, 0, 0), xtal::UnitCellCoord(0, -1, 0, 1),
+      xtal::UnitCellCoord(0, -1, 1, 0), xtal::UnitCellCoord(0, 0, -3, 0),
+      xtal::UnitCellCoord(0, 0, -3, 3), xtal::UnitCellCoord(0, 0, -2, 0),
+      xtal::UnitCellCoord(0, 0, -2, 2), xtal::UnitCellCoord(0, 0, -1, 0),
+      xtal::UnitCellCoord(0, 0, -1, 1), xtal::UnitCellCoord(0, 0, 0, -3),
+      xtal::UnitCellCoord(0, 0, 0, -2), xtal::UnitCellCoord(0, 0, 0, -1),
+      xtal::UnitCellCoord(0, 0, 0, 0),  xtal::UnitCellCoord(0, 0, 0, 1),
+      xtal::UnitCellCoord(0, 0, 0, 2),  xtal::UnitCellCoord(0, 0, 0, 3),
+      xtal::UnitCellCoord(0, 0, 1, -1), xtal::UnitCellCoord(0, 0, 1, 0),
+      xtal::UnitCellCoord(0, 0, 2, -2), xtal::UnitCellCoord(0, 0, 2, 0),
+      xtal::UnitCellCoord(0, 0, 3, -3), xtal::UnitCellCoord(0, 0, 3, 0),
+      xtal::UnitCellCoord(0, 1, -1, 0), xtal::UnitCellCoord(0, 1, 0, -1),
+      xtal::UnitCellCoord(0, 1, 0, 0),  xtal::UnitCellCoord(0, 2, -2, 0),
+      xtal::UnitCellCoord(0, 2, 0, -2), xtal::UnitCellCoord(0, 2, 0, 0),
+      xtal::UnitCellCoord(0, 3, -3, 0), xtal::UnitCellCoord(0, 3, 0, -3),
+      xtal::UnitCellCoord(0, 3, 0, 0)};
+  m_orbit_site_neighborhood[46] = m_orbit_site_neighborhood[45];
+  m_orbit_site_neighborhood[47] = m_orbit_site_neighborhood[45];
+  m_orbit_site_neighborhood[48] = m_orbit_site_neighborhood[45];
+  m_orbit_site_neighborhood[49] = m_orbit_site_neighborhood[45];
+  m_orbit_site_neighborhood[50] = m_orbit_site_neighborhood[45];
+  m_orbit_site_neighborhood[51] = m_orbit_site_neighborhood[45];
+  m_orbit_site_neighborhood[52] = m_orbit_site_neighborhood[45];
 
   m_orbit_neighborhood[53] = std::set<xtal::UnitCell>{
       xtal::UnitCell(-3, 1, 1),   xtal::UnitCell(-2, 0, 1),
@@ -1489,6 +1683,42 @@ OccClexulatorTest_Clexulator::OccClexulatorTest_Clexulator()
   m_orbit_neighborhood[63] = m_orbit_neighborhood[53];
   m_orbit_neighborhood[64] = m_orbit_neighborhood[53];
 
+  m_orbit_site_neighborhood[53] = std::set<xtal::UnitCellCoord>{
+      xtal::UnitCellCoord(0, -3, 1, 1),   xtal::UnitCellCoord(0, -2, 0, 1),
+      xtal::UnitCellCoord(0, -2, 1, 0),   xtal::UnitCellCoord(0, -2, 1, 1),
+      xtal::UnitCellCoord(0, -1, -1, -1), xtal::UnitCellCoord(0, -1, -1, 0),
+      xtal::UnitCellCoord(0, -1, -1, 2),  xtal::UnitCellCoord(0, -1, -1, 3),
+      xtal::UnitCellCoord(0, -1, 0, -1),  xtal::UnitCellCoord(0, -1, 0, 0),
+      xtal::UnitCellCoord(0, -1, 0, 1),   xtal::UnitCellCoord(0, -1, 0, 2),
+      xtal::UnitCellCoord(0, -1, 1, 0),   xtal::UnitCellCoord(0, -1, 2, -1),
+      xtal::UnitCellCoord(0, -1, 2, 0),   xtal::UnitCellCoord(0, -1, 3, -1),
+      xtal::UnitCellCoord(0, 0, -2, 1),   xtal::UnitCellCoord(0, 0, -1, -1),
+      xtal::UnitCellCoord(0, 0, -1, 0),   xtal::UnitCellCoord(0, 0, -1, 1),
+      xtal::UnitCellCoord(0, 0, -1, 2),   xtal::UnitCellCoord(0, 0, 0, -1),
+      xtal::UnitCellCoord(0, 0, 0, 0),    xtal::UnitCellCoord(0, 0, 0, 1),
+      xtal::UnitCellCoord(0, 0, 1, -2),   xtal::UnitCellCoord(0, 0, 1, -1),
+      xtal::UnitCellCoord(0, 0, 1, 0),    xtal::UnitCellCoord(0, 0, 1, 1),
+      xtal::UnitCellCoord(0, 0, 2, -1),   xtal::UnitCellCoord(0, 1, -3, 1),
+      xtal::UnitCellCoord(0, 1, -2, 0),   xtal::UnitCellCoord(0, 1, -2, 1),
+      xtal::UnitCellCoord(0, 1, -1, 0),   xtal::UnitCellCoord(0, 1, 0, -2),
+      xtal::UnitCellCoord(0, 1, 0, -1),   xtal::UnitCellCoord(0, 1, 0, 0),
+      xtal::UnitCellCoord(0, 1, 0, 1),    xtal::UnitCellCoord(0, 1, 1, -3),
+      xtal::UnitCellCoord(0, 1, 1, -2),   xtal::UnitCellCoord(0, 1, 1, 0),
+      xtal::UnitCellCoord(0, 1, 1, 1),    xtal::UnitCellCoord(0, 2, -1, -1),
+      xtal::UnitCellCoord(0, 2, -1, 0),   xtal::UnitCellCoord(0, 2, 0, -1),
+      xtal::UnitCellCoord(0, 3, -1, -1)};
+  m_orbit_site_neighborhood[54] = m_orbit_site_neighborhood[53];
+  m_orbit_site_neighborhood[55] = m_orbit_site_neighborhood[53];
+  m_orbit_site_neighborhood[56] = m_orbit_site_neighborhood[53];
+  m_orbit_site_neighborhood[57] = m_orbit_site_neighborhood[53];
+  m_orbit_site_neighborhood[58] = m_orbit_site_neighborhood[53];
+  m_orbit_site_neighborhood[59] = m_orbit_site_neighborhood[53];
+  m_orbit_site_neighborhood[60] = m_orbit_site_neighborhood[53];
+  m_orbit_site_neighborhood[61] = m_orbit_site_neighborhood[53];
+  m_orbit_site_neighborhood[62] = m_orbit_site_neighborhood[53];
+  m_orbit_site_neighborhood[63] = m_orbit_site_neighborhood[53];
+  m_orbit_site_neighborhood[64] = m_orbit_site_neighborhood[53];
+
   m_orbit_neighborhood[65] = std::set<xtal::UnitCell>{
       xtal::UnitCell(-3, 0, 0), xtal::UnitCell(-3, 0, 3),
       xtal::UnitCell(-3, 3, 0), xtal::UnitCell(-2, 0, 0),
@@ -1518,6 +1748,36 @@ OccClexulatorTest_Clexulator::OccClexulatorTest_Clexulator()
   m_orbit_neighborhood[72] = m_orbit_neighborhood[65];
   m_orbit_neighborhood[73] = m_orbit_neighborhood[65];
   m_orbit_neighborhood[74] = m_orbit_neighborhood[65];
+
+  m_orbit_site_neighborhood[65] = std::set<xtal::UnitCellCoord>{
+      xtal::UnitCellCoord(0, -3, 0, 0), xtal::UnitCellCoord(0, -3, 0, 3),
+      xtal::UnitCellCoord(0, -3, 3, 0), xtal::UnitCellCoord(0, -2, 0, 0),
+      xtal::UnitCellCoord(0, -2, 0, 2), xtal::UnitCellCoord(0, -2, 2, 0),
+      xtal::UnitCellCoord(0, -1, 0, 0), xtal::UnitCellCoord(0, -1, 0, 1),
+      xtal::UnitCellCoord(0, -1, 1, 0), xtal::UnitCellCoord(0, 0, -3, 0),
+      xtal::UnitCellCoord(0, 0, -3, 3), xtal::UnitCellCoord(0, 0, -2, 0),
+      xtal::UnitCellCoord(0, 0, -2, 2), xtal::UnitCellCoord(0, 0, -1, 0),
+      xtal::UnitCellCoord(0, 0, -1, 1), xtal::UnitCellCoord(0, 0, 0, -3),
+      xtal::UnitCellCoord(0, 0, 0, -2), xtal::UnitCellCoord(0, 0, 0, -1),
+      xtal::UnitCellCoord(0, 0, 0, 0),  xtal::UnitCellCoord(0, 0, 0, 1),
+      xtal::UnitCellCoord(0, 0, 0, 2),  xtal::UnitCellCoord(0, 0, 0, 3),
+      xtal::UnitCellCoord(0, 0, 1, -1), xtal::UnitCellCoord(0, 0, 1, 0),
+      xtal::UnitCellCoord(0, 0, 2, -2), xtal::UnitCellCoord(0, 0, 2, 0),
+      xtal::UnitCellCoord(0, 0, 3, -3), xtal::UnitCellCoord(0, 0, 3, 0),
+      xtal::UnitCellCoord(0, 1, -1, 0), xtal::UnitCellCoord(0, 1, 0, -1),
+      xtal::UnitCellCoord(0, 1, 0, 0),  xtal::UnitCellCoord(0, 2, -2, 0),
+      xtal::UnitCellCoord(0, 2, 0, -2), xtal::UnitCellCoord(0, 2, 0, 0),
+      xtal::UnitCellCoord(0, 3, -3, 0), xtal::UnitCellCoord(0, 3, 0, -3),
+      xtal::UnitCellCoord(0, 3, 0, 0)};
+  m_orbit_site_neighborhood[66] = m_orbit_site_neighborhood[65];
+  m_orbit_site_neighborhood[67] = m_orbit_site_neighborhood[65];
+  m_orbit_site_neighborhood[68] = m_orbit_site_neighborhood[65];
+  m_orbit_site_neighborhood[69] = m_orbit_site_neighborhood[65];
+  m_orbit_site_neighborhood[70] = m_orbit_site_neighborhood[65];
+  m_orbit_site_neighborhood[71] = m_orbit_site_neighborhood[65];
+  m_orbit_site_neighborhood[72] = m_orbit_site_neighborhood[65];
+  m_orbit_site_neighborhood[73] = m_orbit_site_neighborhood[65];
+  m_orbit_site_neighborhood[74] = m_orbit_site_neighborhood[65];
 }
 
 OccClexulatorTest_Clexulator::~OccClexulatorTest_Clexulator() {
@@ -3783,28 +4043,28 @@ Scalar OccClexulatorTest_Clexulator::eval_bfunc_9_0() const {
 template <typename Scalar>
 Scalar OccClexulatorTest_Clexulator::eval_bfunc_9_1() const {
   return (occ_func_0_1(0) * occ_func_0_0(32) * occ_func_0_0(39) +
-          occ_func_0_1(35) * occ_func_0_0(7) * occ_func_0_0(0) +
-          occ_func_0_1(38) * occ_func_0_0(0) * occ_func_0_0(9) +
+          occ_func_0_0(35) * occ_func_0_0(7) * occ_func_0_1(0) +
+          occ_func_0_0(38) * occ_func_0_1(0) * occ_func_0_0(9) +
           occ_func_0_1(0) * occ_func_0_0(41) * occ_func_0_0(42) +
-          occ_func_0_1(36) * occ_func_0_0(0) * occ_func_0_0(10) +
+          occ_func_0_0(36) * occ_func_0_1(0) * occ_func_0_0(10) +
           occ_func_0_1(0) * occ_func_0_0(42) * occ_func_0_0(40) +
-          occ_func_0_1(35) * occ_func_0_0(0) * occ_func_0_0(12) +
+          occ_func_0_0(35) * occ_func_0_1(0) * occ_func_0_0(12) +
           occ_func_0_1(0) * occ_func_0_0(31) * occ_func_0_0(36) +
-          occ_func_0_1(42) * occ_func_0_0(0) * occ_func_0_0(8) +
+          occ_func_0_0(42) * occ_func_0_1(0) * occ_func_0_0(8) +
           occ_func_0_1(0) * occ_func_0_0(38) * occ_func_0_0(31) +
           occ_func_0_1(0) * occ_func_0_0(37) * occ_func_0_0(32) +
-          occ_func_0_1(33) * occ_func_0_0(0) * occ_func_0_0(12) +
+          occ_func_0_0(33) * occ_func_0_1(0) * occ_func_0_0(12) +
           occ_func_0_1(0) * occ_func_0_0(35) * occ_func_0_0(34) +
-          occ_func_0_1(41) * occ_func_0_0(0) * occ_func_0_0(7) +
+          occ_func_0_0(41) * occ_func_0_1(0) * occ_func_0_0(7) +
           occ_func_0_1(0) * occ_func_0_0(39) * occ_func_0_0(37) +
-          occ_func_0_1(39) * occ_func_0_0(0) * occ_func_0_0(11) +
-          occ_func_0_1(39) * occ_func_0_0(8) * occ_func_0_0(0) +
-          occ_func_0_1(37) * occ_func_0_0(10) * occ_func_0_0(0) +
-          occ_func_0_1(38) * occ_func_0_0(12) * occ_func_0_0(0) +
-          occ_func_0_1(34) * occ_func_0_0(11) * occ_func_0_0(0) +
+          occ_func_0_0(39) * occ_func_0_1(0) * occ_func_0_0(11) +
+          occ_func_0_0(39) * occ_func_0_0(8) * occ_func_0_1(0) +
+          occ_func_0_0(37) * occ_func_0_0(10) * occ_func_0_1(0) +
+          occ_func_0_0(38) * occ_func_0_0(12) * occ_func_0_1(0) +
+          occ_func_0_0(34) * occ_func_0_0(11) * occ_func_0_1(0) +
           occ_func_0_1(0) * occ_func_0_0(40) * occ_func_0_0(41) +
-          occ_func_0_1(42) * occ_func_0_0(9) * occ_func_0_0(0) +
-          occ_func_0_1(33) * occ_func_0_0(11) * occ_func_0_0(0) +
+          occ_func_0_0(42) * occ_func_0_0(9) * occ_func_0_1(0) +
+          occ_func_0_0(33) * occ_func_0_0(11) * occ_func_0_1(0) +
           occ_func_0_1(0) * occ_func_0_0(36) * occ_func_0_0(38)) /
          24.;
 }
@@ -3812,50 +4072,50 @@ template <typename Scalar>
 Scalar OccClexulatorTest_Clexulator::eval_bfunc_9_2() const {
   return ((0.707107 * occ_func_0_0(0) * occ_func_0_0(32) * occ_func_0_1(39) +
            0.707107 * occ_func_0_0(0) * occ_func_0_1(32) * occ_func_0_0(39)) +
-          (0.707107 * occ_func_0_0(35) * occ_func_0_0(7) * occ_func_0_1(0) +
-           0.707107 * occ_func_0_0(35) * occ_func_0_1(7) * occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(35) * occ_func_0_1(7) * occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(35) * occ_func_0_0(7) * occ_func_0_0(0)) +
           (0.707107 * occ_func_0_0(38) * occ_func_0_0(0) * occ_func_0_1(9) +
-           0.707107 * occ_func_0_0(38) * occ_func_0_1(0) * occ_func_0_0(9)) +
+           0.707107 * occ_func_0_1(38) * occ_func_0_0(0) * occ_func_0_0(9)) +
           (0.707107 * occ_func_0_0(0) * occ_func_0_0(41) * occ_func_0_1(42) +
            0.707107 * occ_func_0_0(0) * occ_func_0_1(41) * occ_func_0_0(42)) +
           (0.707107 * occ_func_0_0(36) * occ_func_0_0(0) * occ_func_0_1(10) +
-           0.707107 * occ_func_0_0(36) * occ_func_0_1(0) * occ_func_0_0(10)) +
+           0.707107 * occ_func_0_1(36) * occ_func_0_0(0) * occ_func_0_0(10)) +
           (0.707107 * occ_func_0_0(0) * occ_func_0_0(42) * occ_func_0_1(40) +
            0.707107 * occ_func_0_0(0) * occ_func_0_1(42) * occ_func_0_0(40)) +
           (0.707107 * occ_func_0_0(35) * occ_func_0_0(0) * occ_func_0_1(12) +
-           0.707107 * occ_func_0_0(35) * occ_func_0_1(0) * occ_func_0_0(12)) +
+           0.707107 * occ_func_0_1(35) * occ_func_0_0(0) * occ_func_0_0(12)) +
           (0.707107 * occ_func_0_0(0) * occ_func_0_0(31) * occ_func_0_1(36) +
            0.707107 * occ_func_0_0(0) * occ_func_0_1(31) * occ_func_0_0(36)) +
           (0.707107 * occ_func_0_0(42) * occ_func_0_0(0) * occ_func_0_1(8) +
-           0.707107 * occ_func_0_0(42) * occ_func_0_1(0) * occ_func_0_0(8)) +
+           0.707107 * occ_func_0_1(42) * occ_func_0_0(0) * occ_func_0_0(8)) +
           (0.707107 * occ_func_0_0(0) * occ_func_0_0(38) * occ_func_0_1(31) +
            0.707107 * occ_func_0_0(0) * occ_func_0_1(38) * occ_func_0_0(31)) +
           (0.707107 * occ_func_0_0(0) * occ_func_0_0(37) * occ_func_0_1(32) +
            0.707107 * occ_func_0_0(0) * occ_func_0_1(37) * occ_func_0_0(32)) +
           (0.707107 * occ_func_0_0(33) * occ_func_0_0(0) * occ_func_0_1(12) +
-           0.707107 * occ_func_0_0(33) * occ_func_0_1(0) * occ_func_0_0(12)) +
+           0.707107 * occ_func_0_1(33) * occ_func_0_0(0) * occ_func_0_0(12)) +
           (0.707107 * occ_func_0_0(0) * occ_func_0_0(35) * occ_func_0_1(34) +
            0.707107 * occ_func_0_0(0) * occ_func_0_1(35) * occ_func_0_0(34)) +
           (0.707107 * occ_func_0_0(41) * occ_func_0_0(0) * occ_func_0_1(7) +
-           0.707107 * occ_func_0_0(41) * occ_func_0_1(0) * occ_func_0_0(7)) +
+           0.707107 * occ_func_0_1(41) * occ_func_0_0(0) * occ_func_0_0(7)) +
           (0.707107 * occ_func_0_0(0) * occ_func_0_0(39) * occ_func_0_1(37) +
            0.707107 * occ_func_0_0(0) * occ_func_0_1(39) * occ_func_0_0(37)) +
           (0.707107 * occ_func_0_0(39) * occ_func_0_0(0) * occ_func_0_1(11) +
-           0.707107 * occ_func_0_0(39) * occ_func_0_1(0) * occ_func_0_0(11)) +
-          (0.707107 * occ_func_0_0(39) * occ_func_0_0(8) * occ_func_0_1(0) +
-           0.707107 * occ_func_0_0(39) * occ_func_0_1(8) * occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_0(37) * occ_func_0_0(10) * occ_func_0_1(0) +
-           0.707107 * occ_func_0_0(37) * occ_func_0_1(10) * occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_0(38) * occ_func_0_0(12) * occ_func_0_1(0) +
-           0.707107 * occ_func_0_0(38) * occ_func_0_1(12) * occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_0(34) * occ_func_0_0(11) * occ_func_0_1(0) +
-           0.707107 * occ_func_0_0(34) * occ_func_0_1(11) * occ_func_0_0(0)) +
+           0.707107 * occ_func_0_1(39) * occ_func_0_0(0) * occ_func_0_0(11)) +
+          (0.707107 * occ_func_0_0(39) * occ_func_0_1(8) * occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(39) * occ_func_0_0(8) * occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(37) * occ_func_0_1(10) * occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(37) * occ_func_0_0(10) * occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(38) * occ_func_0_1(12) * occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(38) * occ_func_0_0(12) * occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(34) * occ_func_0_1(11) * occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(34) * occ_func_0_0(11) * occ_func_0_0(0)) +
           (0.707107 * occ_func_0_0(0) * occ_func_0_0(40) * occ_func_0_1(41) +
            0.707107 * occ_func_0_0(0) * occ_func_0_1(40) * occ_func_0_0(41)) +
-          (0.707107 * occ_func_0_0(42) * occ_func_0_0(9) * occ_func_0_1(0) +
-           0.707107 * occ_func_0_0(42) * occ_func_0_1(9) * occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_0(33) * occ_func_0_0(11) * occ_func_0_1(0) +
-           0.707107 * occ_func_0_0(33) * occ_func_0_1(11) * occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(42) * occ_func_0_1(9) * occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(42) * occ_func_0_0(9) * occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(33) * occ_func_0_1(11) * occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(33) * occ_func_0_0(11) * occ_func_0_0(0)) +
           (0.707107 * occ_func_0_0(0) * occ_func_0_0(36) * occ_func_0_1(38) +
            0.707107 * occ_func_0_0(0) * occ_func_0_1(36) * occ_func_0_0(38))) /
          24.;
@@ -3864,50 +4124,50 @@ template <typename Scalar>
 Scalar OccClexulatorTest_Clexulator::eval_bfunc_9_3() const {
   return ((0.707107 * occ_func_0_1(0) * occ_func_0_0(32) * occ_func_0_1(39) +
            0.707107 * occ_func_0_1(0) * occ_func_0_1(32) * occ_func_0_0(39)) +
-          (0.707107 * occ_func_0_1(35) * occ_func_0_0(7) * occ_func_0_1(0) +
-           0.707107 * occ_func_0_1(35) * occ_func_0_1(7) * occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(38) * occ_func_0_0(0) * occ_func_0_1(9) +
+          (0.707107 * occ_func_0_0(35) * occ_func_0_1(7) * occ_func_0_1(0) +
+           0.707107 * occ_func_0_1(35) * occ_func_0_0(7) * occ_func_0_1(0)) +
+          (0.707107 * occ_func_0_0(38) * occ_func_0_1(0) * occ_func_0_1(9) +
            0.707107 * occ_func_0_1(38) * occ_func_0_1(0) * occ_func_0_0(9)) +
           (0.707107 * occ_func_0_1(0) * occ_func_0_0(41) * occ_func_0_1(42) +
            0.707107 * occ_func_0_1(0) * occ_func_0_1(41) * occ_func_0_0(42)) +
-          (0.707107 * occ_func_0_1(36) * occ_func_0_0(0) * occ_func_0_1(10) +
+          (0.707107 * occ_func_0_0(36) * occ_func_0_1(0) * occ_func_0_1(10) +
            0.707107 * occ_func_0_1(36) * occ_func_0_1(0) * occ_func_0_0(10)) +
           (0.707107 * occ_func_0_1(0) * occ_func_0_0(42) * occ_func_0_1(40) +
            0.707107 * occ_func_0_1(0) * occ_func_0_1(42) * occ_func_0_0(40)) +
-          (0.707107 * occ_func_0_1(35) * occ_func_0_0(0) * occ_func_0_1(12) +
+          (0.707107 * occ_func_0_0(35) * occ_func_0_1(0) * occ_func_0_1(12) +
            0.707107 * occ_func_0_1(35) * occ_func_0_1(0) * occ_func_0_0(12)) +
           (0.707107 * occ_func_0_1(0) * occ_func_0_0(31) * occ_func_0_1(36) +
            0.707107 * occ_func_0_1(0) * occ_func_0_1(31) * occ_func_0_0(36)) +
-          (0.707107 * occ_func_0_1(42) * occ_func_0_0(0) * occ_func_0_1(8) +
+          (0.707107 * occ_func_0_0(42) * occ_func_0_1(0) * occ_func_0_1(8) +
            0.707107 * occ_func_0_1(42) * occ_func_0_1(0) * occ_func_0_0(8)) +
           (0.707107 * occ_func_0_1(0) * occ_func_0_0(38) * occ_func_0_1(31) +
            0.707107 * occ_func_0_1(0) * occ_func_0_1(38) * occ_func_0_0(31)) +
           (0.707107 * occ_func_0_1(0) * occ_func_0_0(37) * occ_func_0_1(32) +
            0.707107 * occ_func_0_1(0) * occ_func_0_1(37) * occ_func_0_0(32)) +
-          (0.707107 * occ_func_0_1(33) * occ_func_0_0(0) * occ_func_0_1(12) +
+          (0.707107 * occ_func_0_0(33) * occ_func_0_1(0) * occ_func_0_1(12) +
            0.707107 * occ_func_0_1(33) * occ_func_0_1(0) * occ_func_0_0(12)) +
           (0.707107 * occ_func_0_1(0) * occ_func_0_0(35) * occ_func_0_1(34) +
            0.707107 * occ_func_0_1(0) * occ_func_0_1(35) * occ_func_0_0(34)) +
-          (0.707107 * occ_func_0_1(41) * occ_func_0_0(0) * occ_func_0_1(7) +
+          (0.707107 * occ_func_0_0(41) * occ_func_0_1(0) * occ_func_0_1(7) +
            0.707107 * occ_func_0_1(41) * occ_func_0_1(0) * occ_func_0_0(7)) +
           (0.707107 * occ_func_0_1(0) * occ_func_0_0(39) * occ_func_0_1(37) +
            0.707107 * occ_func_0_1(0) * occ_func_0_1(39) * occ_func_0_0(37)) +
-          (0.707107 * occ_func_0_1(39) * occ_func_0_0(0) * occ_func_0_1(11) +
+          (0.707107 * occ_func_0_0(39) * occ_func_0_1(0) * occ_func_0_1(11) +
            0.707107 * occ_func_0_1(39) * occ_func_0_1(0) * occ_func_0_0(11)) +
-          (0.707107 * occ_func_0_1(39) * occ_func_0_0(8) * occ_func_0_1(0) +
-           0.707107 * occ_func_0_1(39) * occ_func_0_1(8) * occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(37) * occ_func_0_0(10) * occ_func_0_1(0) +
-           0.707107 * occ_func_0_1(37) * occ_func_0_1(10) * occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(38) * occ_func_0_0(12) * occ_func_0_1(0) +
-           0.707107 * occ_func_0_1(38) * occ_func_0_1(12) * occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(34) * occ_func_0_0(11) * occ_func_0_1(0) +
-           0.707107 * occ_func_0_1(34) * occ_func_0_1(11) * occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(39) * occ_func_0_1(8) * occ_func_0_1(0) +
+           0.707107 * occ_func_0_1(39) * occ_func_0_0(8) * occ_func_0_1(0)) +
+          (0.707107 * occ_func_0_0(37) * occ_func_0_1(10) * occ_func_0_1(0) +
+           0.707107 * occ_func_0_1(37) * occ_func_0_0(10) * occ_func_0_1(0)) +
+          (0.707107 * occ_func_0_0(38) * occ_func_0_1(12) * occ_func_0_1(0) +
+           0.707107 * occ_func_0_1(38) * occ_func_0_0(12) * occ_func_0_1(0)) +
+          (0.707107 * occ_func_0_0(34) * occ_func_0_1(11) * occ_func_0_1(0) +
+           0.707107 * occ_func_0_1(34) * occ_func_0_0(11) * occ_func_0_1(0)) +
           (0.707107 * occ_func_0_1(0) * occ_func_0_0(40) * occ_func_0_1(41) +
            0.707107 * occ_func_0_1(0) * occ_func_0_1(40) * occ_func_0_0(41)) +
-          (0.707107 * occ_func_0_1(42) * occ_func_0_0(9) * occ_func_0_1(0) +
-           0.707107 * occ_func_0_1(42) * occ_func_0_1(9) * occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(33) * occ_func_0_0(11) * occ_func_0_1(0) +
-           0.707107 * occ_func_0_1(33) * occ_func_0_1(11) * occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(42) * occ_func_0_1(9) * occ_func_0_1(0) +
+           0.707107 * occ_func_0_1(42) * occ_func_0_0(9) * occ_func_0_1(0)) +
+          (0.707107 * occ_func_0_0(33) * occ_func_0_1(11) * occ_func_0_1(0) +
+           0.707107 * occ_func_0_1(33) * occ_func_0_0(11) * occ_func_0_1(0)) +
           (0.707107 * occ_func_0_1(0) * occ_func_0_0(36) * occ_func_0_1(38) +
            0.707107 * occ_func_0_1(0) * occ_func_0_1(36) * occ_func_0_0(38))) /
          24.;
@@ -3915,28 +4175,28 @@ Scalar OccClexulatorTest_Clexulator::eval_bfunc_9_3() const {
 template <typename Scalar>
 Scalar OccClexulatorTest_Clexulator::eval_bfunc_9_4() const {
   return (occ_func_0_0(0) * occ_func_0_1(32) * occ_func_0_1(39) +
-          occ_func_0_0(35) * occ_func_0_1(7) * occ_func_0_1(0) +
-          occ_func_0_0(38) * occ_func_0_1(0) * occ_func_0_1(9) +
+          occ_func_0_1(35) * occ_func_0_1(7) * occ_func_0_0(0) +
+          occ_func_0_1(38) * occ_func_0_0(0) * occ_func_0_1(9) +
           occ_func_0_0(0) * occ_func_0_1(41) * occ_func_0_1(42) +
-          occ_func_0_0(36) * occ_func_0_1(0) * occ_func_0_1(10) +
+          occ_func_0_1(36) * occ_func_0_0(0) * occ_func_0_1(10) +
           occ_func_0_0(0) * occ_func_0_1(42) * occ_func_0_1(40) +
-          occ_func_0_0(35) * occ_func_0_1(0) * occ_func_0_1(12) +
+          occ_func_0_1(35) * occ_func_0_0(0) * occ_func_0_1(12) +
           occ_func_0_0(0) * occ_func_0_1(31) * occ_func_0_1(36) +
-          occ_func_0_0(42) * occ_func_0_1(0) * occ_func_0_1(8) +
+          occ_func_0_1(42) * occ_func_0_0(0) * occ_func_0_1(8) +
           occ_func_0_0(0) * occ_func_0_1(38) * occ_func_0_1(31) +
           occ_func_0_0(0) * occ_func_0_1(37) * occ_func_0_1(32) +
-          occ_func_0_0(33) * occ_func_0_1(0) * occ_func_0_1(12) +
+          occ_func_0_1(33) * occ_func_0_0(0) * occ_func_0_1(12) +
           occ_func_0_0(0) * occ_func_0_1(35) * occ_func_0_1(34) +
-          occ_func_0_0(41) * occ_func_0_1(0) * occ_func_0_1(7) +
+          occ_func_0_1(41) * occ_func_0_0(0) * occ_func_0_1(7) +
           occ_func_0_0(0) * occ_func_0_1(39) * occ_func_0_1(37) +
-          occ_func_0_0(39) * occ_func_0_1(0) * occ_func_0_1(11) +
-          occ_func_0_0(39) * occ_func_0_1(8) * occ_func_0_1(0) +
-          occ_func_0_0(37) * occ_func_0_1(10) * occ_func_0_1(0) +
-          occ_func_0_0(38) * occ_func_0_1(12) * occ_func_0_1(0) +
-          occ_func_0_0(34) * occ_func_0_1(11) * occ_func_0_1(0) +
+          occ_func_0_1(39) * occ_func_0_0(0) * occ_func_0_1(11) +
+          occ_func_0_1(39) * occ_func_0_1(8) * occ_func_0_0(0) +
+          occ_func_0_1(37) * occ_func_0_1(10) * occ_func_0_0(0) +
+          occ_func_0_1(38) * occ_func_0_1(12) * occ_func_0_0(0) +
+          occ_func_0_1(34) * occ_func_0_1(11) * occ_func_0_0(0) +
           occ_func_0_0(0) * occ_func_0_1(40) * occ_func_0_1(41) +
-          occ_func_0_0(42) * occ_func_0_1(9) * occ_func_0_1(0) +
-          occ_func_0_0(33) * occ_func_0_1(11) * occ_func_0_1(0) +
+          occ_func_0_1(42) * occ_func_0_1(9) * occ_func_0_0(0) +
+          occ_func_0_1(33) * occ_func_0_1(11) * occ_func_0_0(0) +
           occ_func_0_0(0) * occ_func_0_1(36) * occ_func_0_1(38)) /
          24.;
 }
@@ -4050,72 +4310,72 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_9_1_at_0() const {
   return (occ_func_0_1(0) * occ_func_0_0(32) * occ_func_0_0(39) +
           occ_func_0_1(29) * occ_func_0_0(0) * occ_func_0_0(11) +
           occ_func_0_1(22) * occ_func_0_0(2) * occ_func_0_0(0) +
-          occ_func_0_1(35) * occ_func_0_0(7) * occ_func_0_0(0) +
-          occ_func_0_1(34) * occ_func_0_0(0) * occ_func_0_0(6) +
-          occ_func_0_1(0) * occ_func_0_0(27) * occ_func_0_0(26) +
-          occ_func_0_1(38) * occ_func_0_0(0) * occ_func_0_0(9) +
-          occ_func_0_1(36) * occ_func_0_0(4) * occ_func_0_0(0) +
-          occ_func_0_1(0) * occ_func_0_0(23) * occ_func_0_0(25) +
+          occ_func_0_0(35) * occ_func_0_0(7) * occ_func_0_1(0) +
+          occ_func_0_0(34) * occ_func_0_0(0) * occ_func_0_1(6) +
+          occ_func_0_0(0) * occ_func_0_0(27) * occ_func_0_1(26) +
+          occ_func_0_0(38) * occ_func_0_1(0) * occ_func_0_0(9) +
+          occ_func_0_0(36) * occ_func_0_1(4) * occ_func_0_0(0) +
+          occ_func_0_0(0) * occ_func_0_1(23) * occ_func_0_0(25) +
           occ_func_0_1(0) * occ_func_0_0(41) * occ_func_0_0(42) +
           occ_func_0_1(20) * occ_func_0_0(0) * occ_func_0_0(8) +
           occ_func_0_1(19) * occ_func_0_0(5) * occ_func_0_0(0) +
-          occ_func_0_1(36) * occ_func_0_0(0) * occ_func_0_0(10) +
-          occ_func_0_1(31) * occ_func_0_0(3) * occ_func_0_0(0) +
-          occ_func_0_1(0) * occ_func_0_0(25) * occ_func_0_0(30) +
+          occ_func_0_0(36) * occ_func_0_1(0) * occ_func_0_0(10) +
+          occ_func_0_0(31) * occ_func_0_1(3) * occ_func_0_0(0) +
+          occ_func_0_0(0) * occ_func_0_1(25) * occ_func_0_0(30) +
           occ_func_0_1(0) * occ_func_0_0(42) * occ_func_0_0(40) +
           occ_func_0_1(21) * occ_func_0_0(9) * occ_func_0_0(0) +
           occ_func_0_1(19) * occ_func_0_0(0) * occ_func_0_0(4) +
-          occ_func_0_1(35) * occ_func_0_0(0) * occ_func_0_0(12) +
-          occ_func_0_1(0) * occ_func_0_0(26) * occ_func_0_0(33) +
-          occ_func_0_1(28) * occ_func_0_0(1) * occ_func_0_0(0) +
+          occ_func_0_0(35) * occ_func_0_1(0) * occ_func_0_0(12) +
+          occ_func_0_0(0) * occ_func_0_1(26) * occ_func_0_0(33) +
+          occ_func_0_0(28) * occ_func_0_1(1) * occ_func_0_0(0) +
           occ_func_0_1(0) * occ_func_0_0(31) * occ_func_0_0(36) +
           occ_func_0_1(30) * occ_func_0_0(0) * occ_func_0_0(10) +
           occ_func_0_1(25) * occ_func_0_0(3) * occ_func_0_0(0) +
-          occ_func_0_1(42) * occ_func_0_0(0) * occ_func_0_0(8) +
-          occ_func_0_1(41) * occ_func_0_0(5) * occ_func_0_0(0) +
-          occ_func_0_1(0) * occ_func_0_0(19) * occ_func_0_0(20) +
+          occ_func_0_0(42) * occ_func_0_1(0) * occ_func_0_0(8) +
+          occ_func_0_0(41) * occ_func_0_1(5) * occ_func_0_0(0) +
+          occ_func_0_0(0) * occ_func_0_1(19) * occ_func_0_0(20) +
           occ_func_0_1(0) * occ_func_0_0(38) * occ_func_0_0(31) +
           occ_func_0_1(30) * occ_func_0_0(12) * occ_func_0_0(0) +
           occ_func_0_1(23) * occ_func_0_0(0) * occ_func_0_0(1) +
           occ_func_0_1(0) * occ_func_0_0(37) * occ_func_0_0(32) +
           occ_func_0_1(29) * occ_func_0_0(10) * occ_func_0_0(0) +
           occ_func_0_1(24) * occ_func_0_0(0) * occ_func_0_0(3) +
-          occ_func_0_1(33) * occ_func_0_0(0) * occ_func_0_0(12) +
-          occ_func_0_1(0) * occ_func_0_0(28) * occ_func_0_0(35) +
-          occ_func_0_1(26) * occ_func_0_0(1) * occ_func_0_0(0) +
+          occ_func_0_0(33) * occ_func_0_1(0) * occ_func_0_0(12) +
+          occ_func_0_0(0) * occ_func_0_1(28) * occ_func_0_0(35) +
+          occ_func_0_0(26) * occ_func_0_1(1) * occ_func_0_0(0) +
           occ_func_0_1(0) * occ_func_0_0(35) * occ_func_0_0(34) +
           occ_func_0_1(27) * occ_func_0_0(7) * occ_func_0_0(0) +
           occ_func_0_1(26) * occ_func_0_0(0) * occ_func_0_0(6) +
-          occ_func_0_1(41) * occ_func_0_0(0) * occ_func_0_0(7) +
-          occ_func_0_1(40) * occ_func_0_0(6) * occ_func_0_0(0) +
-          occ_func_0_1(0) * occ_func_0_0(20) * occ_func_0_0(21) +
+          occ_func_0_0(41) * occ_func_0_1(0) * occ_func_0_0(7) +
+          occ_func_0_0(40) * occ_func_0_1(6) * occ_func_0_0(0) +
+          occ_func_0_0(0) * occ_func_0_1(20) * occ_func_0_0(21) +
           occ_func_0_1(0) * occ_func_0_0(39) * occ_func_0_0(37) +
           occ_func_0_1(24) * occ_func_0_0(8) * occ_func_0_0(0) +
           occ_func_0_1(22) * occ_func_0_0(0) * occ_func_0_0(5) +
-          occ_func_0_1(39) * occ_func_0_0(0) * occ_func_0_0(11) +
-          occ_func_0_1(32) * occ_func_0_0(2) * occ_func_0_0(0) +
-          occ_func_0_1(0) * occ_func_0_0(22) * occ_func_0_0(29) +
-          occ_func_0_1(39) * occ_func_0_0(8) * occ_func_0_0(0) +
-          occ_func_0_1(37) * occ_func_0_0(0) * occ_func_0_0(5) +
-          occ_func_0_1(0) * occ_func_0_0(24) * occ_func_0_0(22) +
-          occ_func_0_1(37) * occ_func_0_0(10) * occ_func_0_0(0) +
-          occ_func_0_1(32) * occ_func_0_0(0) * occ_func_0_0(3) +
-          occ_func_0_1(0) * occ_func_0_0(29) * occ_func_0_0(24) +
-          occ_func_0_1(38) * occ_func_0_0(12) * occ_func_0_0(0) +
-          occ_func_0_1(31) * occ_func_0_0(0) * occ_func_0_0(1) +
-          occ_func_0_1(0) * occ_func_0_0(30) * occ_func_0_0(23) +
-          occ_func_0_1(34) * occ_func_0_0(11) * occ_func_0_0(0) +
-          occ_func_0_1(0) * occ_func_0_0(33) * occ_func_0_0(27) +
-          occ_func_0_1(28) * occ_func_0_0(0) * occ_func_0_0(2) +
+          occ_func_0_0(39) * occ_func_0_1(0) * occ_func_0_0(11) +
+          occ_func_0_0(32) * occ_func_0_1(2) * occ_func_0_0(0) +
+          occ_func_0_0(0) * occ_func_0_1(22) * occ_func_0_0(29) +
+          occ_func_0_0(39) * occ_func_0_0(8) * occ_func_0_1(0) +
+          occ_func_0_0(37) * occ_func_0_0(0) * occ_func_0_1(5) +
+          occ_func_0_0(0) * occ_func_0_0(24) * occ_func_0_1(22) +
+          occ_func_0_0(37) * occ_func_0_0(10) * occ_func_0_1(0) +
+          occ_func_0_0(32) * occ_func_0_0(0) * occ_func_0_1(3) +
+          occ_func_0_0(0) * occ_func_0_0(29) * occ_func_0_1(24) +
+          occ_func_0_0(38) * occ_func_0_0(12) * occ_func_0_1(0) +
+          occ_func_0_0(31) * occ_func_0_0(0) * occ_func_0_1(1) +
+          occ_func_0_0(0) * occ_func_0_0(30) * occ_func_0_1(23) +
+          occ_func_0_0(34) * occ_func_0_0(11) * occ_func_0_1(0) +
+          occ_func_0_0(0) * occ_func_0_0(33) * occ_func_0_1(27) +
+          occ_func_0_0(28) * occ_func_0_0(0) * occ_func_0_1(2) +
           occ_func_0_1(0) * occ_func_0_0(40) * occ_func_0_0(41) +
           occ_func_0_1(21) * occ_func_0_0(0) * occ_func_0_0(7) +
           occ_func_0_1(20) * occ_func_0_0(6) * occ_func_0_0(0) +
-          occ_func_0_1(42) * occ_func_0_0(9) * occ_func_0_0(0) +
-          occ_func_0_1(40) * occ_func_0_0(0) * occ_func_0_0(4) +
-          occ_func_0_1(0) * occ_func_0_0(21) * occ_func_0_0(19) +
-          occ_func_0_1(33) * occ_func_0_0(11) * occ_func_0_0(0) +
-          occ_func_0_1(0) * occ_func_0_0(34) * occ_func_0_0(28) +
-          occ_func_0_1(27) * occ_func_0_0(0) * occ_func_0_0(2) +
+          occ_func_0_0(42) * occ_func_0_0(9) * occ_func_0_1(0) +
+          occ_func_0_0(40) * occ_func_0_0(0) * occ_func_0_1(4) +
+          occ_func_0_0(0) * occ_func_0_0(21) * occ_func_0_1(19) +
+          occ_func_0_0(33) * occ_func_0_0(11) * occ_func_0_1(0) +
+          occ_func_0_0(0) * occ_func_0_0(34) * occ_func_0_1(28) +
+          occ_func_0_0(27) * occ_func_0_0(0) * occ_func_0_1(2) +
           occ_func_0_1(0) * occ_func_0_0(36) * occ_func_0_0(38) +
           occ_func_0_1(25) * occ_func_0_0(0) * occ_func_0_0(9) +
           occ_func_0_1(23) * occ_func_0_0(4) * occ_func_0_0(0)) /
@@ -4129,18 +4389,18 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_9_2_at_0() const {
            0.707107 * occ_func_0_0(29) * occ_func_0_1(0) * occ_func_0_0(11)) +
           (0.707107 * occ_func_0_0(22) * occ_func_0_0(2) * occ_func_0_1(0) +
            0.707107 * occ_func_0_0(22) * occ_func_0_1(2) * occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_0(35) * occ_func_0_0(7) * occ_func_0_1(0) +
-           0.707107 * occ_func_0_0(35) * occ_func_0_1(7) * occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_0(34) * occ_func_0_0(0) * occ_func_0_1(6) +
-           0.707107 * occ_func_0_0(34) * occ_func_0_1(0) * occ_func_0_0(6)) +
-          (0.707107 * occ_func_0_0(0) * occ_func_0_0(27) * occ_func_0_1(26) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(27) * occ_func_0_0(26)) +
+          (0.707107 * occ_func_0_0(35) * occ_func_0_1(7) * occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(35) * occ_func_0_0(7) * occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(34) * occ_func_0_1(0) * occ_func_0_0(6) +
+           0.707107 * occ_func_0_1(34) * occ_func_0_0(0) * occ_func_0_0(6)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_1(27) * occ_func_0_0(26) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_0(27) * occ_func_0_0(26)) +
           (0.707107 * occ_func_0_0(38) * occ_func_0_0(0) * occ_func_0_1(9) +
-           0.707107 * occ_func_0_0(38) * occ_func_0_1(0) * occ_func_0_0(9)) +
+           0.707107 * occ_func_0_1(38) * occ_func_0_0(0) * occ_func_0_0(9)) +
           (0.707107 * occ_func_0_0(36) * occ_func_0_0(4) * occ_func_0_1(0) +
-           0.707107 * occ_func_0_0(36) * occ_func_0_1(4) * occ_func_0_0(0)) +
+           0.707107 * occ_func_0_1(36) * occ_func_0_0(4) * occ_func_0_0(0)) +
           (0.707107 * occ_func_0_0(0) * occ_func_0_0(23) * occ_func_0_1(25) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(23) * occ_func_0_0(25)) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_0(23) * occ_func_0_0(25)) +
           (0.707107 * occ_func_0_0(0) * occ_func_0_0(41) * occ_func_0_1(42) +
            0.707107 * occ_func_0_0(0) * occ_func_0_1(41) * occ_func_0_0(42)) +
           (0.707107 * occ_func_0_0(20) * occ_func_0_0(0) * occ_func_0_1(8) +
@@ -4148,11 +4408,11 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_9_2_at_0() const {
           (0.707107 * occ_func_0_0(19) * occ_func_0_0(5) * occ_func_0_1(0) +
            0.707107 * occ_func_0_0(19) * occ_func_0_1(5) * occ_func_0_0(0)) +
           (0.707107 * occ_func_0_0(36) * occ_func_0_0(0) * occ_func_0_1(10) +
-           0.707107 * occ_func_0_0(36) * occ_func_0_1(0) * occ_func_0_0(10)) +
+           0.707107 * occ_func_0_1(36) * occ_func_0_0(0) * occ_func_0_0(10)) +
           (0.707107 * occ_func_0_0(31) * occ_func_0_0(3) * occ_func_0_1(0) +
-           0.707107 * occ_func_0_0(31) * occ_func_0_1(3) * occ_func_0_0(0)) +
+           0.707107 * occ_func_0_1(31) * occ_func_0_0(3) * occ_func_0_0(0)) +
           (0.707107 * occ_func_0_0(0) * occ_func_0_0(25) * occ_func_0_1(30) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(25) * occ_func_0_0(30)) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_0(25) * occ_func_0_0(30)) +
           (0.707107 * occ_func_0_0(0) * occ_func_0_0(42) * occ_func_0_1(40) +
            0.707107 * occ_func_0_0(0) * occ_func_0_1(42) * occ_func_0_0(40)) +
           (0.707107 * occ_func_0_0(21) * occ_func_0_0(9) * occ_func_0_1(0) +
@@ -4160,11 +4420,11 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_9_2_at_0() const {
           (0.707107 * occ_func_0_0(19) * occ_func_0_0(0) * occ_func_0_1(4) +
            0.707107 * occ_func_0_0(19) * occ_func_0_1(0) * occ_func_0_0(4)) +
           (0.707107 * occ_func_0_0(35) * occ_func_0_0(0) * occ_func_0_1(12) +
-           0.707107 * occ_func_0_0(35) * occ_func_0_1(0) * occ_func_0_0(12)) +
+           0.707107 * occ_func_0_1(35) * occ_func_0_0(0) * occ_func_0_0(12)) +
           (0.707107 * occ_func_0_0(0) * occ_func_0_0(26) * occ_func_0_1(33) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(26) * occ_func_0_0(33)) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_0(26) * occ_func_0_0(33)) +
           (0.707107 * occ_func_0_0(28) * occ_func_0_0(1) * occ_func_0_1(0) +
-           0.707107 * occ_func_0_0(28) * occ_func_0_1(1) * occ_func_0_0(0)) +
+           0.707107 * occ_func_0_1(28) * occ_func_0_0(1) * occ_func_0_0(0)) +
           (0.707107 * occ_func_0_0(0) * occ_func_0_0(31) * occ_func_0_1(36) +
            0.707107 * occ_func_0_0(0) * occ_func_0_1(31) * occ_func_0_0(36)) +
           (0.707107 * occ_func_0_0(30) * occ_func_0_0(0) * occ_func_0_1(10) +
@@ -4172,11 +4432,11 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_9_2_at_0() const {
           (0.707107 * occ_func_0_0(25) * occ_func_0_0(3) * occ_func_0_1(0) +
            0.707107 * occ_func_0_0(25) * occ_func_0_1(3) * occ_func_0_0(0)) +
           (0.707107 * occ_func_0_0(42) * occ_func_0_0(0) * occ_func_0_1(8) +
-           0.707107 * occ_func_0_0(42) * occ_func_0_1(0) * occ_func_0_0(8)) +
+           0.707107 * occ_func_0_1(42) * occ_func_0_0(0) * occ_func_0_0(8)) +
           (0.707107 * occ_func_0_0(41) * occ_func_0_0(5) * occ_func_0_1(0) +
-           0.707107 * occ_func_0_0(41) * occ_func_0_1(5) * occ_func_0_0(0)) +
+           0.707107 * occ_func_0_1(41) * occ_func_0_0(5) * occ_func_0_0(0)) +
           (0.707107 * occ_func_0_0(0) * occ_func_0_0(19) * occ_func_0_1(20) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(19) * occ_func_0_0(20)) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_0(19) * occ_func_0_0(20)) +
           (0.707107 * occ_func_0_0(0) * occ_func_0_0(38) * occ_func_0_1(31) +
            0.707107 * occ_func_0_0(0) * occ_func_0_1(38) * occ_func_0_0(31)) +
           (0.707107 * occ_func_0_0(30) * occ_func_0_0(12) * occ_func_0_1(0) +
@@ -4190,11 +4450,11 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_9_2_at_0() const {
           (0.707107 * occ_func_0_0(24) * occ_func_0_0(0) * occ_func_0_1(3) +
            0.707107 * occ_func_0_0(24) * occ_func_0_1(0) * occ_func_0_0(3)) +
           (0.707107 * occ_func_0_0(33) * occ_func_0_0(0) * occ_func_0_1(12) +
-           0.707107 * occ_func_0_0(33) * occ_func_0_1(0) * occ_func_0_0(12)) +
+           0.707107 * occ_func_0_1(33) * occ_func_0_0(0) * occ_func_0_0(12)) +
           (0.707107 * occ_func_0_0(0) * occ_func_0_0(28) * occ_func_0_1(35) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(28) * occ_func_0_0(35)) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_0(28) * occ_func_0_0(35)) +
           (0.707107 * occ_func_0_0(26) * occ_func_0_0(1) * occ_func_0_1(0) +
-           0.707107 * occ_func_0_0(26) * occ_func_0_1(1) * occ_func_0_0(0)) +
+           0.707107 * occ_func_0_1(26) * occ_func_0_0(1) * occ_func_0_0(0)) +
           (0.707107 * occ_func_0_0(0) * occ_func_0_0(35) * occ_func_0_1(34) +
            0.707107 * occ_func_0_0(0) * occ_func_0_1(35) * occ_func_0_0(34)) +
           (0.707107 * occ_func_0_0(27) * occ_func_0_0(7) * occ_func_0_1(0) +
@@ -4202,11 +4462,11 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_9_2_at_0() const {
           (0.707107 * occ_func_0_0(26) * occ_func_0_0(0) * occ_func_0_1(6) +
            0.707107 * occ_func_0_0(26) * occ_func_0_1(0) * occ_func_0_0(6)) +
           (0.707107 * occ_func_0_0(41) * occ_func_0_0(0) * occ_func_0_1(7) +
-           0.707107 * occ_func_0_0(41) * occ_func_0_1(0) * occ_func_0_0(7)) +
+           0.707107 * occ_func_0_1(41) * occ_func_0_0(0) * occ_func_0_0(7)) +
           (0.707107 * occ_func_0_0(40) * occ_func_0_0(6) * occ_func_0_1(0) +
-           0.707107 * occ_func_0_0(40) * occ_func_0_1(6) * occ_func_0_0(0)) +
+           0.707107 * occ_func_0_1(40) * occ_func_0_0(6) * occ_func_0_0(0)) +
           (0.707107 * occ_func_0_0(0) * occ_func_0_0(20) * occ_func_0_1(21) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(20) * occ_func_0_0(21)) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_0(20) * occ_func_0_0(21)) +
           (0.707107 * occ_func_0_0(0) * occ_func_0_0(39) * occ_func_0_1(37) +
            0.707107 * occ_func_0_0(0) * occ_func_0_1(39) * occ_func_0_0(37)) +
           (0.707107 * occ_func_0_0(24) * occ_func_0_0(8) * occ_func_0_1(0) +
@@ -4214,53 +4474,53 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_9_2_at_0() const {
           (0.707107 * occ_func_0_0(22) * occ_func_0_0(0) * occ_func_0_1(5) +
            0.707107 * occ_func_0_0(22) * occ_func_0_1(0) * occ_func_0_0(5)) +
           (0.707107 * occ_func_0_0(39) * occ_func_0_0(0) * occ_func_0_1(11) +
-           0.707107 * occ_func_0_0(39) * occ_func_0_1(0) * occ_func_0_0(11)) +
+           0.707107 * occ_func_0_1(39) * occ_func_0_0(0) * occ_func_0_0(11)) +
           (0.707107 * occ_func_0_0(32) * occ_func_0_0(2) * occ_func_0_1(0) +
-           0.707107 * occ_func_0_0(32) * occ_func_0_1(2) * occ_func_0_0(0)) +
+           0.707107 * occ_func_0_1(32) * occ_func_0_0(2) * occ_func_0_0(0)) +
           (0.707107 * occ_func_0_0(0) * occ_func_0_0(22) * occ_func_0_1(29) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(22) * occ_func_0_0(29)) +
-          (0.707107 * occ_func_0_0(39) * occ_func_0_0(8) * occ_func_0_1(0) +
-           0.707107 * occ_func_0_0(39) * occ_func_0_1(8) * occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_0(37) * occ_func_0_0(0) * occ_func_0_1(5) +
-           0.707107 * occ_func_0_0(37) * occ_func_0_1(0) * occ_func_0_0(5)) +
-          (0.707107 * occ_func_0_0(0) * occ_func_0_0(24) * occ_func_0_1(22) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(24) * occ_func_0_0(22)) +
-          (0.707107 * occ_func_0_0(37) * occ_func_0_0(10) * occ_func_0_1(0) +
-           0.707107 * occ_func_0_0(37) * occ_func_0_1(10) * occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_0(32) * occ_func_0_0(0) * occ_func_0_1(3) +
-           0.707107 * occ_func_0_0(32) * occ_func_0_1(0) * occ_func_0_0(3)) +
-          (0.707107 * occ_func_0_0(0) * occ_func_0_0(29) * occ_func_0_1(24) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(29) * occ_func_0_0(24)) +
-          (0.707107 * occ_func_0_0(38) * occ_func_0_0(12) * occ_func_0_1(0) +
-           0.707107 * occ_func_0_0(38) * occ_func_0_1(12) * occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_0(31) * occ_func_0_0(0) * occ_func_0_1(1) +
-           0.707107 * occ_func_0_0(31) * occ_func_0_1(0) * occ_func_0_0(1)) +
-          (0.707107 * occ_func_0_0(0) * occ_func_0_0(30) * occ_func_0_1(23) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(30) * occ_func_0_0(23)) +
-          (0.707107 * occ_func_0_0(34) * occ_func_0_0(11) * occ_func_0_1(0) +
-           0.707107 * occ_func_0_0(34) * occ_func_0_1(11) * occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_0(0) * occ_func_0_0(33) * occ_func_0_1(27) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(33) * occ_func_0_0(27)) +
-          (0.707107 * occ_func_0_0(28) * occ_func_0_0(0) * occ_func_0_1(2) +
-           0.707107 * occ_func_0_0(28) * occ_func_0_1(0) * occ_func_0_0(2)) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_0(22) * occ_func_0_0(29)) +
+          (0.707107 * occ_func_0_0(39) * occ_func_0_1(8) * occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(39) * occ_func_0_0(8) * occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(37) * occ_func_0_1(0) * occ_func_0_0(5) +
+           0.707107 * occ_func_0_1(37) * occ_func_0_0(0) * occ_func_0_0(5)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_1(24) * occ_func_0_0(22) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_0(24) * occ_func_0_0(22)) +
+          (0.707107 * occ_func_0_0(37) * occ_func_0_1(10) * occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(37) * occ_func_0_0(10) * occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(32) * occ_func_0_1(0) * occ_func_0_0(3) +
+           0.707107 * occ_func_0_1(32) * occ_func_0_0(0) * occ_func_0_0(3)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_1(29) * occ_func_0_0(24) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_0(29) * occ_func_0_0(24)) +
+          (0.707107 * occ_func_0_0(38) * occ_func_0_1(12) * occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(38) * occ_func_0_0(12) * occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(31) * occ_func_0_1(0) * occ_func_0_0(1) +
+           0.707107 * occ_func_0_1(31) * occ_func_0_0(0) * occ_func_0_0(1)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_1(30) * occ_func_0_0(23) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_0(30) * occ_func_0_0(23)) +
+          (0.707107 * occ_func_0_0(34) * occ_func_0_1(11) * occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(34) * occ_func_0_0(11) * occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_1(33) * occ_func_0_0(27) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_0(33) * occ_func_0_0(27)) +
+          (0.707107 * occ_func_0_0(28) * occ_func_0_1(0) * occ_func_0_0(2) +
+           0.707107 * occ_func_0_1(28) * occ_func_0_0(0) * occ_func_0_0(2)) +
           (0.707107 * occ_func_0_0(0) * occ_func_0_0(40) * occ_func_0_1(41) +
            0.707107 * occ_func_0_0(0) * occ_func_0_1(40) * occ_func_0_0(41)) +
           (0.707107 * occ_func_0_0(21) * occ_func_0_0(0) * occ_func_0_1(7) +
            0.707107 * occ_func_0_0(21) * occ_func_0_1(0) * occ_func_0_0(7)) +
           (0.707107 * occ_func_0_0(20) * occ_func_0_0(6) * occ_func_0_1(0) +
            0.707107 * occ_func_0_0(20) * occ_func_0_1(6) * occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_0(42) * occ_func_0_0(9) * occ_func_0_1(0) +
-           0.707107 * occ_func_0_0(42) * occ_func_0_1(9) * occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_0(40) * occ_func_0_0(0) * occ_func_0_1(4) +
-           0.707107 * occ_func_0_0(40) * occ_func_0_1(0) * occ_func_0_0(4)) +
-          (0.707107 * occ_func_0_0(0) * occ_func_0_0(21) * occ_func_0_1(19) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(21) * occ_func_0_0(19)) +
-          (0.707107 * occ_func_0_0(33) * occ_func_0_0(11) * occ_func_0_1(0) +
-           0.707107 * occ_func_0_0(33) * occ_func_0_1(11) * occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_0(0) * occ_func_0_0(34) * occ_func_0_1(28) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(34) * occ_func_0_0(28)) +
-          (0.707107 * occ_func_0_0(27) * occ_func_0_0(0) * occ_func_0_1(2) +
-           0.707107 * occ_func_0_0(27) * occ_func_0_1(0) * occ_func_0_0(2)) +
+          (0.707107 * occ_func_0_0(42) * occ_func_0_1(9) * occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(42) * occ_func_0_0(9) * occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(40) * occ_func_0_1(0) * occ_func_0_0(4) +
+           0.707107 * occ_func_0_1(40) * occ_func_0_0(0) * occ_func_0_0(4)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_1(21) * occ_func_0_0(19) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_0(21) * occ_func_0_0(19)) +
+          (0.707107 * occ_func_0_0(33) * occ_func_0_1(11) * occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(33) * occ_func_0_0(11) * occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_1(34) * occ_func_0_0(28) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_0(34) * occ_func_0_0(28)) +
+          (0.707107 * occ_func_0_0(27) * occ_func_0_1(0) * occ_func_0_0(2) +
+           0.707107 * occ_func_0_1(27) * occ_func_0_0(0) * occ_func_0_0(2)) +
           (0.707107 * occ_func_0_0(0) * occ_func_0_0(36) * occ_func_0_1(38) +
            0.707107 * occ_func_0_0(0) * occ_func_0_1(36) * occ_func_0_0(38)) +
           (0.707107 * occ_func_0_0(25) * occ_func_0_0(0) * occ_func_0_1(9) +
@@ -4277,17 +4537,17 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_9_3_at_0() const {
            0.707107 * occ_func_0_1(29) * occ_func_0_1(0) * occ_func_0_0(11)) +
           (0.707107 * occ_func_0_1(22) * occ_func_0_0(2) * occ_func_0_1(0) +
            0.707107 * occ_func_0_1(22) * occ_func_0_1(2) * occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(35) * occ_func_0_0(7) * occ_func_0_1(0) +
-           0.707107 * occ_func_0_1(35) * occ_func_0_1(7) * occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(34) * occ_func_0_0(0) * occ_func_0_1(6) +
-           0.707107 * occ_func_0_1(34) * occ_func_0_1(0) * occ_func_0_0(6)) +
-          (0.707107 * occ_func_0_1(0) * occ_func_0_0(27) * occ_func_0_1(26) +
-           0.707107 * occ_func_0_1(0) * occ_func_0_1(27) * occ_func_0_0(26)) +
-          (0.707107 * occ_func_0_1(38) * occ_func_0_0(0) * occ_func_0_1(9) +
+          (0.707107 * occ_func_0_0(35) * occ_func_0_1(7) * occ_func_0_1(0) +
+           0.707107 * occ_func_0_1(35) * occ_func_0_0(7) * occ_func_0_1(0)) +
+          (0.707107 * occ_func_0_0(34) * occ_func_0_1(0) * occ_func_0_1(6) +
+           0.707107 * occ_func_0_1(34) * occ_func_0_0(0) * occ_func_0_1(6)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_1(27) * occ_func_0_1(26) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_0(27) * occ_func_0_1(26)) +
+          (0.707107 * occ_func_0_0(38) * occ_func_0_1(0) * occ_func_0_1(9) +
            0.707107 * occ_func_0_1(38) * occ_func_0_1(0) * occ_func_0_0(9)) +
-          (0.707107 * occ_func_0_1(36) * occ_func_0_0(4) * occ_func_0_1(0) +
+          (0.707107 * occ_func_0_0(36) * occ_func_0_1(4) * occ_func_0_1(0) +
            0.707107 * occ_func_0_1(36) * occ_func_0_1(4) * occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(0) * occ_func_0_0(23) * occ_func_0_1(25) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_1(23) * occ_func_0_1(25) +
            0.707107 * occ_func_0_1(0) * occ_func_0_1(23) * occ_func_0_0(25)) +
           (0.707107 * occ_func_0_1(0) * occ_func_0_0(41) * occ_func_0_1(42) +
            0.707107 * occ_func_0_1(0) * occ_func_0_1(41) * occ_func_0_0(42)) +
@@ -4295,11 +4555,11 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_9_3_at_0() const {
            0.707107 * occ_func_0_1(20) * occ_func_0_1(0) * occ_func_0_0(8)) +
           (0.707107 * occ_func_0_1(19) * occ_func_0_0(5) * occ_func_0_1(0) +
            0.707107 * occ_func_0_1(19) * occ_func_0_1(5) * occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(36) * occ_func_0_0(0) * occ_func_0_1(10) +
+          (0.707107 * occ_func_0_0(36) * occ_func_0_1(0) * occ_func_0_1(10) +
            0.707107 * occ_func_0_1(36) * occ_func_0_1(0) * occ_func_0_0(10)) +
-          (0.707107 * occ_func_0_1(31) * occ_func_0_0(3) * occ_func_0_1(0) +
+          (0.707107 * occ_func_0_0(31) * occ_func_0_1(3) * occ_func_0_1(0) +
            0.707107 * occ_func_0_1(31) * occ_func_0_1(3) * occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(0) * occ_func_0_0(25) * occ_func_0_1(30) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_1(25) * occ_func_0_1(30) +
            0.707107 * occ_func_0_1(0) * occ_func_0_1(25) * occ_func_0_0(30)) +
           (0.707107 * occ_func_0_1(0) * occ_func_0_0(42) * occ_func_0_1(40) +
            0.707107 * occ_func_0_1(0) * occ_func_0_1(42) * occ_func_0_0(40)) +
@@ -4307,11 +4567,11 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_9_3_at_0() const {
            0.707107 * occ_func_0_1(21) * occ_func_0_1(9) * occ_func_0_0(0)) +
           (0.707107 * occ_func_0_1(19) * occ_func_0_0(0) * occ_func_0_1(4) +
            0.707107 * occ_func_0_1(19) * occ_func_0_1(0) * occ_func_0_0(4)) +
-          (0.707107 * occ_func_0_1(35) * occ_func_0_0(0) * occ_func_0_1(12) +
+          (0.707107 * occ_func_0_0(35) * occ_func_0_1(0) * occ_func_0_1(12) +
            0.707107 * occ_func_0_1(35) * occ_func_0_1(0) * occ_func_0_0(12)) +
-          (0.707107 * occ_func_0_1(0) * occ_func_0_0(26) * occ_func_0_1(33) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_1(26) * occ_func_0_1(33) +
            0.707107 * occ_func_0_1(0) * occ_func_0_1(26) * occ_func_0_0(33)) +
-          (0.707107 * occ_func_0_1(28) * occ_func_0_0(1) * occ_func_0_1(0) +
+          (0.707107 * occ_func_0_0(28) * occ_func_0_1(1) * occ_func_0_1(0) +
            0.707107 * occ_func_0_1(28) * occ_func_0_1(1) * occ_func_0_0(0)) +
           (0.707107 * occ_func_0_1(0) * occ_func_0_0(31) * occ_func_0_1(36) +
            0.707107 * occ_func_0_1(0) * occ_func_0_1(31) * occ_func_0_0(36)) +
@@ -4319,11 +4579,11 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_9_3_at_0() const {
            0.707107 * occ_func_0_1(30) * occ_func_0_1(0) * occ_func_0_0(10)) +
           (0.707107 * occ_func_0_1(25) * occ_func_0_0(3) * occ_func_0_1(0) +
            0.707107 * occ_func_0_1(25) * occ_func_0_1(3) * occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(42) * occ_func_0_0(0) * occ_func_0_1(8) +
+          (0.707107 * occ_func_0_0(42) * occ_func_0_1(0) * occ_func_0_1(8) +
            0.707107 * occ_func_0_1(42) * occ_func_0_1(0) * occ_func_0_0(8)) +
-          (0.707107 * occ_func_0_1(41) * occ_func_0_0(5) * occ_func_0_1(0) +
+          (0.707107 * occ_func_0_0(41) * occ_func_0_1(5) * occ_func_0_1(0) +
            0.707107 * occ_func_0_1(41) * occ_func_0_1(5) * occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(0) * occ_func_0_0(19) * occ_func_0_1(20) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_1(19) * occ_func_0_1(20) +
            0.707107 * occ_func_0_1(0) * occ_func_0_1(19) * occ_func_0_0(20)) +
           (0.707107 * occ_func_0_1(0) * occ_func_0_0(38) * occ_func_0_1(31) +
            0.707107 * occ_func_0_1(0) * occ_func_0_1(38) * occ_func_0_0(31)) +
@@ -4337,11 +4597,11 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_9_3_at_0() const {
            0.707107 * occ_func_0_1(29) * occ_func_0_1(10) * occ_func_0_0(0)) +
           (0.707107 * occ_func_0_1(24) * occ_func_0_0(0) * occ_func_0_1(3) +
            0.707107 * occ_func_0_1(24) * occ_func_0_1(0) * occ_func_0_0(3)) +
-          (0.707107 * occ_func_0_1(33) * occ_func_0_0(0) * occ_func_0_1(12) +
+          (0.707107 * occ_func_0_0(33) * occ_func_0_1(0) * occ_func_0_1(12) +
            0.707107 * occ_func_0_1(33) * occ_func_0_1(0) * occ_func_0_0(12)) +
-          (0.707107 * occ_func_0_1(0) * occ_func_0_0(28) * occ_func_0_1(35) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_1(28) * occ_func_0_1(35) +
            0.707107 * occ_func_0_1(0) * occ_func_0_1(28) * occ_func_0_0(35)) +
-          (0.707107 * occ_func_0_1(26) * occ_func_0_0(1) * occ_func_0_1(0) +
+          (0.707107 * occ_func_0_0(26) * occ_func_0_1(1) * occ_func_0_1(0) +
            0.707107 * occ_func_0_1(26) * occ_func_0_1(1) * occ_func_0_0(0)) +
           (0.707107 * occ_func_0_1(0) * occ_func_0_0(35) * occ_func_0_1(34) +
            0.707107 * occ_func_0_1(0) * occ_func_0_1(35) * occ_func_0_0(34)) +
@@ -4349,11 +4609,11 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_9_3_at_0() const {
            0.707107 * occ_func_0_1(27) * occ_func_0_1(7) * occ_func_0_0(0)) +
           (0.707107 * occ_func_0_1(26) * occ_func_0_0(0) * occ_func_0_1(6) +
            0.707107 * occ_func_0_1(26) * occ_func_0_1(0) * occ_func_0_0(6)) +
-          (0.707107 * occ_func_0_1(41) * occ_func_0_0(0) * occ_func_0_1(7) +
+          (0.707107 * occ_func_0_0(41) * occ_func_0_1(0) * occ_func_0_1(7) +
            0.707107 * occ_func_0_1(41) * occ_func_0_1(0) * occ_func_0_0(7)) +
-          (0.707107 * occ_func_0_1(40) * occ_func_0_0(6) * occ_func_0_1(0) +
+          (0.707107 * occ_func_0_0(40) * occ_func_0_1(6) * occ_func_0_1(0) +
            0.707107 * occ_func_0_1(40) * occ_func_0_1(6) * occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(0) * occ_func_0_0(20) * occ_func_0_1(21) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_1(20) * occ_func_0_1(21) +
            0.707107 * occ_func_0_1(0) * occ_func_0_1(20) * occ_func_0_0(21)) +
           (0.707107 * occ_func_0_1(0) * occ_func_0_0(39) * occ_func_0_1(37) +
            0.707107 * occ_func_0_1(0) * occ_func_0_1(39) * occ_func_0_0(37)) +
@@ -4361,54 +4621,54 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_9_3_at_0() const {
            0.707107 * occ_func_0_1(24) * occ_func_0_1(8) * occ_func_0_0(0)) +
           (0.707107 * occ_func_0_1(22) * occ_func_0_0(0) * occ_func_0_1(5) +
            0.707107 * occ_func_0_1(22) * occ_func_0_1(0) * occ_func_0_0(5)) +
-          (0.707107 * occ_func_0_1(39) * occ_func_0_0(0) * occ_func_0_1(11) +
+          (0.707107 * occ_func_0_0(39) * occ_func_0_1(0) * occ_func_0_1(11) +
            0.707107 * occ_func_0_1(39) * occ_func_0_1(0) * occ_func_0_0(11)) +
-          (0.707107 * occ_func_0_1(32) * occ_func_0_0(2) * occ_func_0_1(0) +
+          (0.707107 * occ_func_0_0(32) * occ_func_0_1(2) * occ_func_0_1(0) +
            0.707107 * occ_func_0_1(32) * occ_func_0_1(2) * occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(0) * occ_func_0_0(22) * occ_func_0_1(29) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_1(22) * occ_func_0_1(29) +
            0.707107 * occ_func_0_1(0) * occ_func_0_1(22) * occ_func_0_0(29)) +
-          (0.707107 * occ_func_0_1(39) * occ_func_0_0(8) * occ_func_0_1(0) +
-           0.707107 * occ_func_0_1(39) * occ_func_0_1(8) * occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(37) * occ_func_0_0(0) * occ_func_0_1(5) +
-           0.707107 * occ_func_0_1(37) * occ_func_0_1(0) * occ_func_0_0(5)) +
-          (0.707107 * occ_func_0_1(0) * occ_func_0_0(24) * occ_func_0_1(22) +
-           0.707107 * occ_func_0_1(0) * occ_func_0_1(24) * occ_func_0_0(22)) +
-          (0.707107 * occ_func_0_1(37) * occ_func_0_0(10) * occ_func_0_1(0) +
-           0.707107 * occ_func_0_1(37) * occ_func_0_1(10) * occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(32) * occ_func_0_0(0) * occ_func_0_1(3) +
-           0.707107 * occ_func_0_1(32) * occ_func_0_1(0) * occ_func_0_0(3)) +
-          (0.707107 * occ_func_0_1(0) * occ_func_0_0(29) * occ_func_0_1(24) +
-           0.707107 * occ_func_0_1(0) * occ_func_0_1(29) * occ_func_0_0(24)) +
-          (0.707107 * occ_func_0_1(38) * occ_func_0_0(12) * occ_func_0_1(0) +
-           0.707107 * occ_func_0_1(38) * occ_func_0_1(12) * occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(31) * occ_func_0_0(0) * occ_func_0_1(1) +
-           0.707107 * occ_func_0_1(31) * occ_func_0_1(0) * occ_func_0_0(1)) +
-          (0.707107 * occ_func_0_1(0) * occ_func_0_0(30) * occ_func_0_1(23) +
-           0.707107 * occ_func_0_1(0) * occ_func_0_1(30) * occ_func_0_0(23)) +
-          (0.707107 * occ_func_0_1(34) * occ_func_0_0(11) * occ_func_0_1(0) +
-           0.707107 * occ_func_0_1(34) * occ_func_0_1(11) * occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(0) * occ_func_0_0(33) * occ_func_0_1(27) +
-           0.707107 * occ_func_0_1(0) * occ_func_0_1(33) * occ_func_0_0(27)) +
-          (0.707107 * occ_func_0_1(28) * occ_func_0_0(0) * occ_func_0_1(2) +
-           0.707107 * occ_func_0_1(28) * occ_func_0_1(0) * occ_func_0_0(2)) +
+          (0.707107 * occ_func_0_0(39) * occ_func_0_1(8) * occ_func_0_1(0) +
+           0.707107 * occ_func_0_1(39) * occ_func_0_0(8) * occ_func_0_1(0)) +
+          (0.707107 * occ_func_0_0(37) * occ_func_0_1(0) * occ_func_0_1(5) +
+           0.707107 * occ_func_0_1(37) * occ_func_0_0(0) * occ_func_0_1(5)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_1(24) * occ_func_0_1(22) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_0(24) * occ_func_0_1(22)) +
+          (0.707107 * occ_func_0_0(37) * occ_func_0_1(10) * occ_func_0_1(0) +
+           0.707107 * occ_func_0_1(37) * occ_func_0_0(10) * occ_func_0_1(0)) +
+          (0.707107 * occ_func_0_0(32) * occ_func_0_1(0) * occ_func_0_1(3) +
+           0.707107 * occ_func_0_1(32) * occ_func_0_0(0) * occ_func_0_1(3)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_1(29) * occ_func_0_1(24) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_0(29) * occ_func_0_1(24)) +
+          (0.707107 * occ_func_0_0(38) * occ_func_0_1(12) * occ_func_0_1(0) +
+           0.707107 * occ_func_0_1(38) * occ_func_0_0(12) * occ_func_0_1(0)) +
+          (0.707107 * occ_func_0_0(31) * occ_func_0_1(0) * occ_func_0_1(1) +
+           0.707107 * occ_func_0_1(31) * occ_func_0_0(0) * occ_func_0_1(1)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_1(30) * occ_func_0_1(23) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_0(30) * occ_func_0_1(23)) +
+          (0.707107 * occ_func_0_0(34) * occ_func_0_1(11) * occ_func_0_1(0) +
+           0.707107 * occ_func_0_1(34) * occ_func_0_0(11) * occ_func_0_1(0)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_1(33) * occ_func_0_1(27) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_0(33) * occ_func_0_1(27)) +
+          (0.707107 * occ_func_0_0(28) * occ_func_0_1(0) * occ_func_0_1(2) +
+           0.707107 * occ_func_0_1(28) * occ_func_0_0(0) * occ_func_0_1(2)) +
           (0.707107 * occ_func_0_1(0) * occ_func_0_0(40) * occ_func_0_1(41) +
            0.707107 * occ_func_0_1(0) * occ_func_0_1(40) * occ_func_0_0(41)) +
           (0.707107 * occ_func_0_1(21) * occ_func_0_0(0) * occ_func_0_1(7) +
            0.707107 * occ_func_0_1(21) * occ_func_0_1(0) * occ_func_0_0(7)) +
           (0.707107 * occ_func_0_1(20) * occ_func_0_0(6) * occ_func_0_1(0) +
            0.707107 * occ_func_0_1(20) * occ_func_0_1(6) * occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(42) * occ_func_0_0(9) * occ_func_0_1(0) +
-           0.707107 * occ_func_0_1(42) * occ_func_0_1(9) * occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(40) * occ_func_0_0(0) * occ_func_0_1(4) +
-           0.707107 * occ_func_0_1(40) * occ_func_0_1(0) * occ_func_0_0(4)) +
-          (0.707107 * occ_func_0_1(0) * occ_func_0_0(21) * occ_func_0_1(19) +
-           0.707107 * occ_func_0_1(0) * occ_func_0_1(21) * occ_func_0_0(19)) +
-          (0.707107 * occ_func_0_1(33) * occ_func_0_0(11) * occ_func_0_1(0) +
-           0.707107 * occ_func_0_1(33) * occ_func_0_1(11) * occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(0) * occ_func_0_0(34) * occ_func_0_1(28) +
-           0.707107 * occ_func_0_1(0) * occ_func_0_1(34) * occ_func_0_0(28)) +
-          (0.707107 * occ_func_0_1(27) * occ_func_0_0(0) * occ_func_0_1(2) +
-           0.707107 * occ_func_0_1(27) * occ_func_0_1(0) * occ_func_0_0(2)) +
+          (0.707107 * occ_func_0_0(42) * occ_func_0_1(9) * occ_func_0_1(0) +
+           0.707107 * occ_func_0_1(42) * occ_func_0_0(9) * occ_func_0_1(0)) +
+          (0.707107 * occ_func_0_0(40) * occ_func_0_1(0) * occ_func_0_1(4) +
+           0.707107 * occ_func_0_1(40) * occ_func_0_0(0) * occ_func_0_1(4)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_1(21) * occ_func_0_1(19) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_0(21) * occ_func_0_1(19)) +
+          (0.707107 * occ_func_0_0(33) * occ_func_0_1(11) * occ_func_0_1(0) +
+           0.707107 * occ_func_0_1(33) * occ_func_0_0(11) * occ_func_0_1(0)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_1(34) * occ_func_0_1(28) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_0(34) * occ_func_0_1(28)) +
+          (0.707107 * occ_func_0_0(27) * occ_func_0_1(0) * occ_func_0_1(2) +
+           0.707107 * occ_func_0_1(27) * occ_func_0_0(0) * occ_func_0_1(2)) +
           (0.707107 * occ_func_0_1(0) * occ_func_0_0(36) * occ_func_0_1(38) +
            0.707107 * occ_func_0_1(0) * occ_func_0_1(36) * occ_func_0_0(38)) +
           (0.707107 * occ_func_0_1(25) * occ_func_0_0(0) * occ_func_0_1(9) +
@@ -4422,72 +4682,72 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_9_4_at_0() const {
   return (occ_func_0_0(0) * occ_func_0_1(32) * occ_func_0_1(39) +
           occ_func_0_0(29) * occ_func_0_1(0) * occ_func_0_1(11) +
           occ_func_0_0(22) * occ_func_0_1(2) * occ_func_0_1(0) +
-          occ_func_0_0(35) * occ_func_0_1(7) * occ_func_0_1(0) +
-          occ_func_0_0(34) * occ_func_0_1(0) * occ_func_0_1(6) +
-          occ_func_0_0(0) * occ_func_0_1(27) * occ_func_0_1(26) +
-          occ_func_0_0(38) * occ_func_0_1(0) * occ_func_0_1(9) +
-          occ_func_0_0(36) * occ_func_0_1(4) * occ_func_0_1(0) +
-          occ_func_0_0(0) * occ_func_0_1(23) * occ_func_0_1(25) +
+          occ_func_0_1(35) * occ_func_0_1(7) * occ_func_0_0(0) +
+          occ_func_0_1(34) * occ_func_0_1(0) * occ_func_0_0(6) +
+          occ_func_0_1(0) * occ_func_0_1(27) * occ_func_0_0(26) +
+          occ_func_0_1(38) * occ_func_0_0(0) * occ_func_0_1(9) +
+          occ_func_0_1(36) * occ_func_0_0(4) * occ_func_0_1(0) +
+          occ_func_0_1(0) * occ_func_0_0(23) * occ_func_0_1(25) +
           occ_func_0_0(0) * occ_func_0_1(41) * occ_func_0_1(42) +
           occ_func_0_0(20) * occ_func_0_1(0) * occ_func_0_1(8) +
           occ_func_0_0(19) * occ_func_0_1(5) * occ_func_0_1(0) +
-          occ_func_0_0(36) * occ_func_0_1(0) * occ_func_0_1(10) +
-          occ_func_0_0(31) * occ_func_0_1(3) * occ_func_0_1(0) +
-          occ_func_0_0(0) * occ_func_0_1(25) * occ_func_0_1(30) +
+          occ_func_0_1(36) * occ_func_0_0(0) * occ_func_0_1(10) +
+          occ_func_0_1(31) * occ_func_0_0(3) * occ_func_0_1(0) +
+          occ_func_0_1(0) * occ_func_0_0(25) * occ_func_0_1(30) +
           occ_func_0_0(0) * occ_func_0_1(42) * occ_func_0_1(40) +
           occ_func_0_0(21) * occ_func_0_1(9) * occ_func_0_1(0) +
           occ_func_0_0(19) * occ_func_0_1(0) * occ_func_0_1(4) +
-          occ_func_0_0(35) * occ_func_0_1(0) * occ_func_0_1(12) +
-          occ_func_0_0(0) * occ_func_0_1(26) * occ_func_0_1(33) +
-          occ_func_0_0(28) * occ_func_0_1(1) * occ_func_0_1(0) +
+          occ_func_0_1(35) * occ_func_0_0(0) * occ_func_0_1(12) +
+          occ_func_0_1(0) * occ_func_0_0(26) * occ_func_0_1(33) +
+          occ_func_0_1(28) * occ_func_0_0(1) * occ_func_0_1(0) +
           occ_func_0_0(0) * occ_func_0_1(31) * occ_func_0_1(36) +
           occ_func_0_0(30) * occ_func_0_1(0) * occ_func_0_1(10) +
           occ_func_0_0(25) * occ_func_0_1(3) * occ_func_0_1(0) +
-          occ_func_0_0(42) * occ_func_0_1(0) * occ_func_0_1(8) +
-          occ_func_0_0(41) * occ_func_0_1(5) * occ_func_0_1(0) +
-          occ_func_0_0(0) * occ_func_0_1(19) * occ_func_0_1(20) +
+          occ_func_0_1(42) * occ_func_0_0(0) * occ_func_0_1(8) +
+          occ_func_0_1(41) * occ_func_0_0(5) * occ_func_0_1(0) +
+          occ_func_0_1(0) * occ_func_0_0(19) * occ_func_0_1(20) +
           occ_func_0_0(0) * occ_func_0_1(38) * occ_func_0_1(31) +
           occ_func_0_0(30) * occ_func_0_1(12) * occ_func_0_1(0) +
           occ_func_0_0(23) * occ_func_0_1(0) * occ_func_0_1(1) +
           occ_func_0_0(0) * occ_func_0_1(37) * occ_func_0_1(32) +
           occ_func_0_0(29) * occ_func_0_1(10) * occ_func_0_1(0) +
           occ_func_0_0(24) * occ_func_0_1(0) * occ_func_0_1(3) +
-          occ_func_0_0(33) * occ_func_0_1(0) * occ_func_0_1(12) +
-          occ_func_0_0(0) * occ_func_0_1(28) * occ_func_0_1(35) +
-          occ_func_0_0(26) * occ_func_0_1(1) * occ_func_0_1(0) +
+          occ_func_0_1(33) * occ_func_0_0(0) * occ_func_0_1(12) +
+          occ_func_0_1(0) * occ_func_0_0(28) * occ_func_0_1(35) +
+          occ_func_0_1(26) * occ_func_0_0(1) * occ_func_0_1(0) +
           occ_func_0_0(0) * occ_func_0_1(35) * occ_func_0_1(34) +
           occ_func_0_0(27) * occ_func_0_1(7) * occ_func_0_1(0) +
           occ_func_0_0(26) * occ_func_0_1(0) * occ_func_0_1(6) +
-          occ_func_0_0(41) * occ_func_0_1(0) * occ_func_0_1(7) +
-          occ_func_0_0(40) * occ_func_0_1(6) * occ_func_0_1(0) +
-          occ_func_0_0(0) * occ_func_0_1(20) * occ_func_0_1(21) +
+          occ_func_0_1(41) * occ_func_0_0(0) * occ_func_0_1(7) +
+          occ_func_0_1(40) * occ_func_0_0(6) * occ_func_0_1(0) +
+          occ_func_0_1(0) * occ_func_0_0(20) * occ_func_0_1(21) +
           occ_func_0_0(0) * occ_func_0_1(39) * occ_func_0_1(37) +
           occ_func_0_0(24) * occ_func_0_1(8) * occ_func_0_1(0) +
           occ_func_0_0(22) * occ_func_0_1(0) * occ_func_0_1(5) +
-          occ_func_0_0(39) * occ_func_0_1(0) * occ_func_0_1(11) +
-          occ_func_0_0(32) * occ_func_0_1(2) * occ_func_0_1(0) +
-          occ_func_0_0(0) * occ_func_0_1(22) * occ_func_0_1(29) +
-          occ_func_0_0(39) * occ_func_0_1(8) * occ_func_0_1(0) +
-          occ_func_0_0(37) * occ_func_0_1(0) * occ_func_0_1(5) +
-          occ_func_0_0(0) * occ_func_0_1(24) * occ_func_0_1(22) +
-          occ_func_0_0(37) * occ_func_0_1(10) * occ_func_0_1(0) +
-          occ_func_0_0(32) * occ_func_0_1(0) * occ_func_0_1(3) +
-          occ_func_0_0(0) * occ_func_0_1(29) * occ_func_0_1(24) +
-          occ_func_0_0(38) * occ_func_0_1(12) * occ_func_0_1(0) +
-          occ_func_0_0(31) * occ_func_0_1(0) * occ_func_0_1(1) +
-          occ_func_0_0(0) * occ_func_0_1(30) * occ_func_0_1(23) +
-          occ_func_0_0(34) * occ_func_0_1(11) * occ_func_0_1(0) +
-          occ_func_0_0(0) * occ_func_0_1(33) * occ_func_0_1(27) +
-          occ_func_0_0(28) * occ_func_0_1(0) * occ_func_0_1(2) +
+          occ_func_0_1(39) * occ_func_0_0(0) * occ_func_0_1(11) +
+          occ_func_0_1(32) * occ_func_0_0(2) * occ_func_0_1(0) +
+          occ_func_0_1(0) * occ_func_0_0(22) * occ_func_0_1(29) +
+          occ_func_0_1(39) * occ_func_0_1(8) * occ_func_0_0(0) +
+          occ_func_0_1(37) * occ_func_0_1(0) * occ_func_0_0(5) +
+          occ_func_0_1(0) * occ_func_0_1(24) * occ_func_0_0(22) +
+          occ_func_0_1(37) * occ_func_0_1(10) * occ_func_0_0(0) +
+          occ_func_0_1(32) * occ_func_0_1(0) * occ_func_0_0(3) +
+          occ_func_0_1(0) * occ_func_0_1(29) * occ_func_0_0(24) +
+          occ_func_0_1(38) * occ_func_0_1(12) * occ_func_0_0(0) +
+          occ_func_0_1(31) * occ_func_0_1(0) * occ_func_0_0(1) +
+          occ_func_0_1(0) * occ_func_0_1(30) * occ_func_0_0(23) +
+          occ_func_0_1(34) * occ_func_0_1(11) * occ_func_0_0(0) +
+          occ_func_0_1(0) * occ_func_0_1(33) * occ_func_0_0(27) +
+          occ_func_0_1(28) * occ_func_0_1(0) * occ_func_0_0(2) +
           occ_func_0_0(0) * occ_func_0_1(40) * occ_func_0_1(41) +
           occ_func_0_0(21) * occ_func_0_1(0) * occ_func_0_1(7) +
           occ_func_0_0(20) * occ_func_0_1(6) * occ_func_0_1(0) +
-          occ_func_0_0(42) * occ_func_0_1(9) * occ_func_0_1(0) +
-          occ_func_0_0(40) * occ_func_0_1(0) * occ_func_0_1(4) +
-          occ_func_0_0(0) * occ_func_0_1(21) * occ_func_0_1(19) +
-          occ_func_0_0(33) * occ_func_0_1(11) * occ_func_0_1(0) +
-          occ_func_0_0(0) * occ_func_0_1(34) * occ_func_0_1(28) +
-          occ_func_0_0(27) * occ_func_0_1(0) * occ_func_0_1(2) +
+          occ_func_0_1(42) * occ_func_0_1(9) * occ_func_0_0(0) +
+          occ_func_0_1(40) * occ_func_0_1(0) * occ_func_0_0(4) +
+          occ_func_0_1(0) * occ_func_0_1(21) * occ_func_0_0(19) +
+          occ_func_0_1(33) * occ_func_0_1(11) * occ_func_0_0(0) +
+          occ_func_0_1(0) * occ_func_0_1(34) * occ_func_0_0(28) +
+          occ_func_0_1(27) * occ_func_0_1(0) * occ_func_0_0(2) +
           occ_func_0_0(0) * occ_func_0_1(36) * occ_func_0_1(38) +
           occ_func_0_0(25) * occ_func_0_1(0) * occ_func_0_1(9) +
           occ_func_0_0(23) * occ_func_0_1(4) * occ_func_0_1(0)) /
@@ -4654,77 +4914,77 @@ Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_9_1_at_0(
   return (m_occ_func_0_0[occ_f] - m_occ_func_0_0[occ_i]) *
              (occ_func_0_1(29) * occ_func_0_0(11) +
               occ_func_0_1(22) * occ_func_0_0(2) +
-              occ_func_0_1(35) * occ_func_0_0(7) +
-              occ_func_0_1(34) * occ_func_0_0(6) +
-              occ_func_0_1(38) * occ_func_0_0(9) +
-              occ_func_0_1(36) * occ_func_0_0(4) +
+              occ_func_0_0(34) * occ_func_0_1(6) +
+              occ_func_0_0(27) * occ_func_0_1(26) +
+              occ_func_0_0(36) * occ_func_0_1(4) +
+              occ_func_0_1(23) * occ_func_0_0(25) +
               occ_func_0_1(20) * occ_func_0_0(8) +
               occ_func_0_1(19) * occ_func_0_0(5) +
-              occ_func_0_1(36) * occ_func_0_0(10) +
-              occ_func_0_1(31) * occ_func_0_0(3) +
+              occ_func_0_0(31) * occ_func_0_1(3) +
+              occ_func_0_1(25) * occ_func_0_0(30) +
               occ_func_0_1(21) * occ_func_0_0(9) +
               occ_func_0_1(19) * occ_func_0_0(4) +
-              occ_func_0_1(35) * occ_func_0_0(12) +
-              occ_func_0_1(28) * occ_func_0_0(1) +
+              occ_func_0_1(26) * occ_func_0_0(33) +
+              occ_func_0_0(28) * occ_func_0_1(1) +
               occ_func_0_1(30) * occ_func_0_0(10) +
               occ_func_0_1(25) * occ_func_0_0(3) +
-              occ_func_0_1(42) * occ_func_0_0(8) +
-              occ_func_0_1(41) * occ_func_0_0(5) +
+              occ_func_0_0(41) * occ_func_0_1(5) +
+              occ_func_0_1(19) * occ_func_0_0(20) +
               occ_func_0_1(30) * occ_func_0_0(12) +
               occ_func_0_1(23) * occ_func_0_0(1) +
               occ_func_0_1(29) * occ_func_0_0(10) +
               occ_func_0_1(24) * occ_func_0_0(3) +
-              occ_func_0_1(33) * occ_func_0_0(12) +
-              occ_func_0_1(26) * occ_func_0_0(1) +
+              occ_func_0_1(28) * occ_func_0_0(35) +
+              occ_func_0_0(26) * occ_func_0_1(1) +
               occ_func_0_1(27) * occ_func_0_0(7) +
               occ_func_0_1(26) * occ_func_0_0(6) +
-              occ_func_0_1(41) * occ_func_0_0(7) +
-              occ_func_0_1(40) * occ_func_0_0(6) +
+              occ_func_0_0(40) * occ_func_0_1(6) +
+              occ_func_0_1(20) * occ_func_0_0(21) +
               occ_func_0_1(24) * occ_func_0_0(8) +
               occ_func_0_1(22) * occ_func_0_0(5) +
-              occ_func_0_1(39) * occ_func_0_0(11) +
-              occ_func_0_1(32) * occ_func_0_0(2) +
-              occ_func_0_1(39) * occ_func_0_0(8) +
-              occ_func_0_1(37) * occ_func_0_0(5) +
-              occ_func_0_1(37) * occ_func_0_0(10) +
-              occ_func_0_1(32) * occ_func_0_0(3) +
-              occ_func_0_1(38) * occ_func_0_0(12) +
-              occ_func_0_1(31) * occ_func_0_0(1) +
-              occ_func_0_1(34) * occ_func_0_0(11) +
-              occ_func_0_1(28) * occ_func_0_0(2) +
+              occ_func_0_0(32) * occ_func_0_1(2) +
+              occ_func_0_1(22) * occ_func_0_0(29) +
+              occ_func_0_0(37) * occ_func_0_1(5) +
+              occ_func_0_0(24) * occ_func_0_1(22) +
+              occ_func_0_0(32) * occ_func_0_1(3) +
+              occ_func_0_0(29) * occ_func_0_1(24) +
+              occ_func_0_0(31) * occ_func_0_1(1) +
+              occ_func_0_0(30) * occ_func_0_1(23) +
+              occ_func_0_0(33) * occ_func_0_1(27) +
+              occ_func_0_0(28) * occ_func_0_1(2) +
               occ_func_0_1(21) * occ_func_0_0(7) +
               occ_func_0_1(20) * occ_func_0_0(6) +
-              occ_func_0_1(42) * occ_func_0_0(9) +
-              occ_func_0_1(40) * occ_func_0_0(4) +
-              occ_func_0_1(33) * occ_func_0_0(11) +
-              occ_func_0_1(27) * occ_func_0_0(2) +
+              occ_func_0_0(40) * occ_func_0_1(4) +
+              occ_func_0_0(21) * occ_func_0_1(19) +
+              occ_func_0_0(34) * occ_func_0_1(28) +
+              occ_func_0_0(27) * occ_func_0_1(2) +
               occ_func_0_1(25) * occ_func_0_0(9) +
               occ_func_0_1(23) * occ_func_0_0(4)) /
              24. +
          (m_occ_func_0_1[occ_f] - m_occ_func_0_1[occ_i]) *
              (occ_func_0_0(32) * occ_func_0_0(39) +
-              occ_func_0_0(27) * occ_func_0_0(26) +
-              occ_func_0_0(23) * occ_func_0_0(25) +
+              occ_func_0_0(35) * occ_func_0_0(7) +
+              occ_func_0_0(38) * occ_func_0_0(9) +
               occ_func_0_0(41) * occ_func_0_0(42) +
-              occ_func_0_0(25) * occ_func_0_0(30) +
+              occ_func_0_0(36) * occ_func_0_0(10) +
               occ_func_0_0(42) * occ_func_0_0(40) +
-              occ_func_0_0(26) * occ_func_0_0(33) +
+              occ_func_0_0(35) * occ_func_0_0(12) +
               occ_func_0_0(31) * occ_func_0_0(36) +
-              occ_func_0_0(19) * occ_func_0_0(20) +
+              occ_func_0_0(42) * occ_func_0_0(8) +
               occ_func_0_0(38) * occ_func_0_0(31) +
               occ_func_0_0(37) * occ_func_0_0(32) +
-              occ_func_0_0(28) * occ_func_0_0(35) +
+              occ_func_0_0(33) * occ_func_0_0(12) +
               occ_func_0_0(35) * occ_func_0_0(34) +
-              occ_func_0_0(20) * occ_func_0_0(21) +
+              occ_func_0_0(41) * occ_func_0_0(7) +
               occ_func_0_0(39) * occ_func_0_0(37) +
-              occ_func_0_0(22) * occ_func_0_0(29) +
-              occ_func_0_0(24) * occ_func_0_0(22) +
-              occ_func_0_0(29) * occ_func_0_0(24) +
-              occ_func_0_0(30) * occ_func_0_0(23) +
-              occ_func_0_0(33) * occ_func_0_0(27) +
+              occ_func_0_0(39) * occ_func_0_0(11) +
+              occ_func_0_0(39) * occ_func_0_0(8) +
+              occ_func_0_0(37) * occ_func_0_0(10) +
+              occ_func_0_0(38) * occ_func_0_0(12) +
+              occ_func_0_0(34) * occ_func_0_0(11) +
               occ_func_0_0(40) * occ_func_0_0(41) +
-              occ_func_0_0(21) * occ_func_0_0(19) +
-              occ_func_0_0(34) * occ_func_0_0(28) +
+              occ_func_0_0(42) * occ_func_0_0(9) +
+              occ_func_0_0(33) * occ_func_0_0(11) +
               occ_func_0_0(36) * occ_func_0_0(38)) /
              24.;
 }
@@ -4736,38 +4996,38 @@ Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_9_2_at_0(
                0.707107 * occ_func_0_1(32) * occ_func_0_0(39)) +
               0.707107 * occ_func_0_0(29) * occ_func_0_1(11) +
               0.707107 * occ_func_0_0(22) * occ_func_0_1(2) +
-              0.707107 * occ_func_0_0(35) * occ_func_0_1(7) +
-              0.707107 * occ_func_0_0(34) * occ_func_0_1(6) +
-              (0.707107 * occ_func_0_0(27) * occ_func_0_1(26) +
-               0.707107 * occ_func_0_1(27) * occ_func_0_0(26)) +
-              0.707107 * occ_func_0_0(38) * occ_func_0_1(9) +
-              0.707107 * occ_func_0_0(36) * occ_func_0_1(4) +
-              (0.707107 * occ_func_0_0(23) * occ_func_0_1(25) +
-               0.707107 * occ_func_0_1(23) * occ_func_0_0(25)) +
+              (0.707107 * occ_func_0_0(35) * occ_func_0_1(7) +
+               0.707107 * occ_func_0_1(35) * occ_func_0_0(7)) +
+              0.707107 * occ_func_0_1(34) * occ_func_0_0(6) +
+              0.707107 * occ_func_0_1(27) * occ_func_0_0(26) +
+              (0.707107 * occ_func_0_0(38) * occ_func_0_1(9) +
+               0.707107 * occ_func_0_1(38) * occ_func_0_0(9)) +
+              0.707107 * occ_func_0_1(36) * occ_func_0_0(4) +
+              0.707107 * occ_func_0_0(23) * occ_func_0_1(25) +
               (0.707107 * occ_func_0_0(41) * occ_func_0_1(42) +
                0.707107 * occ_func_0_1(41) * occ_func_0_0(42)) +
               0.707107 * occ_func_0_0(20) * occ_func_0_1(8) +
               0.707107 * occ_func_0_0(19) * occ_func_0_1(5) +
-              0.707107 * occ_func_0_0(36) * occ_func_0_1(10) +
-              0.707107 * occ_func_0_0(31) * occ_func_0_1(3) +
-              (0.707107 * occ_func_0_0(25) * occ_func_0_1(30) +
-               0.707107 * occ_func_0_1(25) * occ_func_0_0(30)) +
+              (0.707107 * occ_func_0_0(36) * occ_func_0_1(10) +
+               0.707107 * occ_func_0_1(36) * occ_func_0_0(10)) +
+              0.707107 * occ_func_0_1(31) * occ_func_0_0(3) +
+              0.707107 * occ_func_0_0(25) * occ_func_0_1(30) +
               (0.707107 * occ_func_0_0(42) * occ_func_0_1(40) +
                0.707107 * occ_func_0_1(42) * occ_func_0_0(40)) +
               0.707107 * occ_func_0_0(21) * occ_func_0_1(9) +
               0.707107 * occ_func_0_0(19) * occ_func_0_1(4) +
-              0.707107 * occ_func_0_0(35) * occ_func_0_1(12) +
-              (0.707107 * occ_func_0_0(26) * occ_func_0_1(33) +
-               0.707107 * occ_func_0_1(26) * occ_func_0_0(33)) +
-              0.707107 * occ_func_0_0(28) * occ_func_0_1(1) +
+              (0.707107 * occ_func_0_0(35) * occ_func_0_1(12) +
+               0.707107 * occ_func_0_1(35) * occ_func_0_0(12)) +
+              0.707107 * occ_func_0_0(26) * occ_func_0_1(33) +
+              0.707107 * occ_func_0_1(28) * occ_func_0_0(1) +
               (0.707107 * occ_func_0_0(31) * occ_func_0_1(36) +
                0.707107 * occ_func_0_1(31) * occ_func_0_0(36)) +
               0.707107 * occ_func_0_0(30) * occ_func_0_1(10) +
               0.707107 * occ_func_0_0(25) * occ_func_0_1(3) +
-              0.707107 * occ_func_0_0(42) * occ_func_0_1(8) +
-              0.707107 * occ_func_0_0(41) * occ_func_0_1(5) +
-              (0.707107 * occ_func_0_0(19) * occ_func_0_1(20) +
-               0.707107 * occ_func_0_1(19) * occ_func_0_0(20)) +
+              (0.707107 * occ_func_0_0(42) * occ_func_0_1(8) +
+               0.707107 * occ_func_0_1(42) * occ_func_0_0(8)) +
+              0.707107 * occ_func_0_1(41) * occ_func_0_0(5) +
+              0.707107 * occ_func_0_0(19) * occ_func_0_1(20) +
               (0.707107 * occ_func_0_0(38) * occ_func_0_1(31) +
                0.707107 * occ_func_0_1(38) * occ_func_0_0(31)) +
               0.707107 * occ_func_0_0(30) * occ_func_0_1(12) +
@@ -4776,54 +5036,54 @@ Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_9_2_at_0(
                0.707107 * occ_func_0_1(37) * occ_func_0_0(32)) +
               0.707107 * occ_func_0_0(29) * occ_func_0_1(10) +
               0.707107 * occ_func_0_0(24) * occ_func_0_1(3) +
-              0.707107 * occ_func_0_0(33) * occ_func_0_1(12) +
-              (0.707107 * occ_func_0_0(28) * occ_func_0_1(35) +
-               0.707107 * occ_func_0_1(28) * occ_func_0_0(35)) +
-              0.707107 * occ_func_0_0(26) * occ_func_0_1(1) +
+              (0.707107 * occ_func_0_0(33) * occ_func_0_1(12) +
+               0.707107 * occ_func_0_1(33) * occ_func_0_0(12)) +
+              0.707107 * occ_func_0_0(28) * occ_func_0_1(35) +
+              0.707107 * occ_func_0_1(26) * occ_func_0_0(1) +
               (0.707107 * occ_func_0_0(35) * occ_func_0_1(34) +
                0.707107 * occ_func_0_1(35) * occ_func_0_0(34)) +
               0.707107 * occ_func_0_0(27) * occ_func_0_1(7) +
               0.707107 * occ_func_0_0(26) * occ_func_0_1(6) +
-              0.707107 * occ_func_0_0(41) * occ_func_0_1(7) +
-              0.707107 * occ_func_0_0(40) * occ_func_0_1(6) +
-              (0.707107 * occ_func_0_0(20) * occ_func_0_1(21) +
-               0.707107 * occ_func_0_1(20) * occ_func_0_0(21)) +
+              (0.707107 * occ_func_0_0(41) * occ_func_0_1(7) +
+               0.707107 * occ_func_0_1(41) * occ_func_0_0(7)) +
+              0.707107 * occ_func_0_1(40) * occ_func_0_0(6) +
+              0.707107 * occ_func_0_0(20) * occ_func_0_1(21) +
               (0.707107 * occ_func_0_0(39) * occ_func_0_1(37) +
                0.707107 * occ_func_0_1(39) * occ_func_0_0(37)) +
               0.707107 * occ_func_0_0(24) * occ_func_0_1(8) +
               0.707107 * occ_func_0_0(22) * occ_func_0_1(5) +
-              0.707107 * occ_func_0_0(39) * occ_func_0_1(11) +
-              0.707107 * occ_func_0_0(32) * occ_func_0_1(2) +
-              (0.707107 * occ_func_0_0(22) * occ_func_0_1(29) +
-               0.707107 * occ_func_0_1(22) * occ_func_0_0(29)) +
-              0.707107 * occ_func_0_0(39) * occ_func_0_1(8) +
-              0.707107 * occ_func_0_0(37) * occ_func_0_1(5) +
-              (0.707107 * occ_func_0_0(24) * occ_func_0_1(22) +
-               0.707107 * occ_func_0_1(24) * occ_func_0_0(22)) +
-              0.707107 * occ_func_0_0(37) * occ_func_0_1(10) +
-              0.707107 * occ_func_0_0(32) * occ_func_0_1(3) +
-              (0.707107 * occ_func_0_0(29) * occ_func_0_1(24) +
-               0.707107 * occ_func_0_1(29) * occ_func_0_0(24)) +
-              0.707107 * occ_func_0_0(38) * occ_func_0_1(12) +
-              0.707107 * occ_func_0_0(31) * occ_func_0_1(1) +
-              (0.707107 * occ_func_0_0(30) * occ_func_0_1(23) +
-               0.707107 * occ_func_0_1(30) * occ_func_0_0(23)) +
-              0.707107 * occ_func_0_0(34) * occ_func_0_1(11) +
-              (0.707107 * occ_func_0_0(33) * occ_func_0_1(27) +
-               0.707107 * occ_func_0_1(33) * occ_func_0_0(27)) +
-              0.707107 * occ_func_0_0(28) * occ_func_0_1(2) +
+              (0.707107 * occ_func_0_0(39) * occ_func_0_1(11) +
+               0.707107 * occ_func_0_1(39) * occ_func_0_0(11)) +
+              0.707107 * occ_func_0_1(32) * occ_func_0_0(2) +
+              0.707107 * occ_func_0_0(22) * occ_func_0_1(29) +
+              (0.707107 * occ_func_0_0(39) * occ_func_0_1(8) +
+               0.707107 * occ_func_0_1(39) * occ_func_0_0(8)) +
+              0.707107 * occ_func_0_1(37) * occ_func_0_0(5) +
+              0.707107 * occ_func_0_1(24) * occ_func_0_0(22) +
+              (0.707107 * occ_func_0_0(37) * occ_func_0_1(10) +
+               0.707107 * occ_func_0_1(37) * occ_func_0_0(10)) +
+              0.707107 * occ_func_0_1(32) * occ_func_0_0(3) +
+              0.707107 * occ_func_0_1(29) * occ_func_0_0(24) +
+              (0.707107 * occ_func_0_0(38) * occ_func_0_1(12) +
+               0.707107 * occ_func_0_1(38) * occ_func_0_0(12)) +
+              0.707107 * occ_func_0_1(31) * occ_func_0_0(1) +
+              0.707107 * occ_func_0_1(30) * occ_func_0_0(23) +
+              (0.707107 * occ_func_0_0(34) * occ_func_0_1(11) +
+               0.707107 * occ_func_0_1(34) * occ_func_0_0(11)) +
+              0.707107 * occ_func_0_1(33) * occ_func_0_0(27) +
+              0.707107 * occ_func_0_1(28) * occ_func_0_0(2) +
               (0.707107 * occ_func_0_0(40) * occ_func_0_1(41) +
                0.707107 * occ_func_0_1(40) * occ_func_0_0(41)) +
               0.707107 * occ_func_0_0(21) * occ_func_0_1(7) +
               0.707107 * occ_func_0_0(20) * occ_func_0_1(6) +
-              0.707107 * occ_func_0_0(42) * occ_func_0_1(9) +
-              0.707107 * occ_func_0_0(40) * occ_func_0_1(4) +
-              (0.707107 * occ_func_0_0(21) * occ_func_0_1(19) +
-               0.707107 * occ_func_0_1(21) * occ_func_0_0(19)) +
-              0.707107 * occ_func_0_0(33) * occ_func_0_1(11) +
-              (0.707107 * occ_func_0_0(34) * occ_func_0_1(28) +
-               0.707107 * occ_func_0_1(34) * occ_func_0_0(28)) +
-              0.707107 * occ_func_0_0(27) * occ_func_0_1(2) +
+              (0.707107 * occ_func_0_0(42) * occ_func_0_1(9) +
+               0.707107 * occ_func_0_1(42) * occ_func_0_0(9)) +
+              0.707107 * occ_func_0_1(40) * occ_func_0_0(4) +
+              0.707107 * occ_func_0_1(21) * occ_func_0_0(19) +
+              (0.707107 * occ_func_0_0(33) * occ_func_0_1(11) +
+               0.707107 * occ_func_0_1(33) * occ_func_0_0(11)) +
+              0.707107 * occ_func_0_1(34) * occ_func_0_0(28) +
+              0.707107 * occ_func_0_1(27) * occ_func_0_0(2) +
               (0.707107 * occ_func_0_0(36) * occ_func_0_1(38) +
                0.707107 * occ_func_0_1(36) * occ_func_0_0(38)) +
               0.707107 * occ_func_0_0(25) * occ_func_0_1(9) +
@@ -4832,49 +5092,49 @@ Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_9_2_at_0(
          (m_occ_func_0_1[occ_f] - m_occ_func_0_1[occ_i]) *
              (0.707107 * occ_func_0_0(29) * occ_func_0_0(11) +
               0.707107 * occ_func_0_0(22) * occ_func_0_0(2) +
-              0.707107 * occ_func_0_0(35) * occ_func_0_0(7) +
               0.707107 * occ_func_0_0(34) * occ_func_0_0(6) +
-              0.707107 * occ_func_0_0(38) * occ_func_0_0(9) +
+              0.707107 * occ_func_0_0(27) * occ_func_0_0(26) +
               0.707107 * occ_func_0_0(36) * occ_func_0_0(4) +
+              0.707107 * occ_func_0_0(23) * occ_func_0_0(25) +
               0.707107 * occ_func_0_0(20) * occ_func_0_0(8) +
               0.707107 * occ_func_0_0(19) * occ_func_0_0(5) +
-              0.707107 * occ_func_0_0(36) * occ_func_0_0(10) +
               0.707107 * occ_func_0_0(31) * occ_func_0_0(3) +
+              0.707107 * occ_func_0_0(25) * occ_func_0_0(30) +
               0.707107 * occ_func_0_0(21) * occ_func_0_0(9) +
               0.707107 * occ_func_0_0(19) * occ_func_0_0(4) +
-              0.707107 * occ_func_0_0(35) * occ_func_0_0(12) +
+              0.707107 * occ_func_0_0(26) * occ_func_0_0(33) +
               0.707107 * occ_func_0_0(28) * occ_func_0_0(1) +
               0.707107 * occ_func_0_0(30) * occ_func_0_0(10) +
               0.707107 * occ_func_0_0(25) * occ_func_0_0(3) +
-              0.707107 * occ_func_0_0(42) * occ_func_0_0(8) +
               0.707107 * occ_func_0_0(41) * occ_func_0_0(5) +
+              0.707107 * occ_func_0_0(19) * occ_func_0_0(20) +
               0.707107 * occ_func_0_0(30) * occ_func_0_0(12) +
               0.707107 * occ_func_0_0(23) * occ_func_0_0(1) +
               0.707107 * occ_func_0_0(29) * occ_func_0_0(10) +
               0.707107 * occ_func_0_0(24) * occ_func_0_0(3) +
-              0.707107 * occ_func_0_0(33) * occ_func_0_0(12) +
+              0.707107 * occ_func_0_0(28) * occ_func_0_0(35) +
               0.707107 * occ_func_0_0(26) * occ_func_0_0(1) +
               0.707107 * occ_func_0_0(27) * occ_func_0_0(7) +
               0.707107 * occ_func_0_0(26) * occ_func_0_0(6) +
-              0.707107 * occ_func_0_0(41) * occ_func_0_0(7) +
               0.707107 * occ_func_0_0(40) * occ_func_0_0(6) +
+              0.707107 * occ_func_0_0(20) * occ_func_0_0(21) +
               0.707107 * occ_func_0_0(24) * occ_func_0_0(8) +
               0.707107 * occ_func_0_0(22) * occ_func_0_0(5) +
-              0.707107 * occ_func_0_0(39) * occ_func_0_0(11) +
               0.707107 * occ_func_0_0(32) * occ_func_0_0(2) +
-              0.707107 * occ_func_0_0(39) * occ_func_0_0(8) +
+              0.707107 * occ_func_0_0(22) * occ_func_0_0(29) +
               0.707107 * occ_func_0_0(37) * occ_func_0_0(5) +
-              0.707107 * occ_func_0_0(37) * occ_func_0_0(10) +
+              0.707107 * occ_func_0_0(24) * occ_func_0_0(22) +
               0.707107 * occ_func_0_0(32) * occ_func_0_0(3) +
-              0.707107 * occ_func_0_0(38) * occ_func_0_0(12) +
+              0.707107 * occ_func_0_0(29) * occ_func_0_0(24) +
               0.707107 * occ_func_0_0(31) * occ_func_0_0(1) +
-              0.707107 * occ_func_0_0(34) * occ_func_0_0(11) +
+              0.707107 * occ_func_0_0(30) * occ_func_0_0(23) +
+              0.707107 * occ_func_0_0(33) * occ_func_0_0(27) +
               0.707107 * occ_func_0_0(28) * occ_func_0_0(2) +
               0.707107 * occ_func_0_0(21) * occ_func_0_0(7) +
               0.707107 * occ_func_0_0(20) * occ_func_0_0(6) +
-              0.707107 * occ_func_0_0(42) * occ_func_0_0(9) +
               0.707107 * occ_func_0_0(40) * occ_func_0_0(4) +
-              0.707107 * occ_func_0_0(33) * occ_func_0_0(11) +
+              0.707107 * occ_func_0_0(21) * occ_func_0_0(19) +
+              0.707107 * occ_func_0_0(34) * occ_func_0_0(28) +
               0.707107 * occ_func_0_0(27) * occ_func_0_0(2) +
               0.707107 * occ_func_0_0(25) * occ_func_0_0(9) +
               0.707107 * occ_func_0_0(23) * occ_func_0_0(4)) /
@@ -4886,49 +5146,49 @@ Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_9_3_at_0(
   return (m_occ_func_0_0[occ_f] - m_occ_func_0_0[occ_i]) *
              (0.707107 * occ_func_0_1(29) * occ_func_0_1(11) +
               0.707107 * occ_func_0_1(22) * occ_func_0_1(2) +
-              0.707107 * occ_func_0_1(35) * occ_func_0_1(7) +
               0.707107 * occ_func_0_1(34) * occ_func_0_1(6) +
-              0.707107 * occ_func_0_1(38) * occ_func_0_1(9) +
+              0.707107 * occ_func_0_1(27) * occ_func_0_1(26) +
               0.707107 * occ_func_0_1(36) * occ_func_0_1(4) +
+              0.707107 * occ_func_0_1(23) * occ_func_0_1(25) +
               0.707107 * occ_func_0_1(20) * occ_func_0_1(8) +
               0.707107 * occ_func_0_1(19) * occ_func_0_1(5) +
-              0.707107 * occ_func_0_1(36) * occ_func_0_1(10) +
               0.707107 * occ_func_0_1(31) * occ_func_0_1(3) +
+              0.707107 * occ_func_0_1(25) * occ_func_0_1(30) +
               0.707107 * occ_func_0_1(21) * occ_func_0_1(9) +
               0.707107 * occ_func_0_1(19) * occ_func_0_1(4) +
-              0.707107 * occ_func_0_1(35) * occ_func_0_1(12) +
+              0.707107 * occ_func_0_1(26) * occ_func_0_1(33) +
               0.707107 * occ_func_0_1(28) * occ_func_0_1(1) +
               0.707107 * occ_func_0_1(30) * occ_func_0_1(10) +
               0.707107 * occ_func_0_1(25) * occ_func_0_1(3) +
-              0.707107 * occ_func_0_1(42) * occ_func_0_1(8) +
               0.707107 * occ_func_0_1(41) * occ_func_0_1(5) +
+              0.707107 * occ_func_0_1(19) * occ_func_0_1(20) +
               0.707107 * occ_func_0_1(30) * occ_func_0_1(12) +
               0.707107 * occ_func_0_1(23) * occ_func_0_1(1) +
               0.707107 * occ_func_0_1(29) * occ_func_0_1(10) +
               0.707107 * occ_func_0_1(24) * occ_func_0_1(3) +
-              0.707107 * occ_func_0_1(33) * occ_func_0_1(12) +
+              0.707107 * occ_func_0_1(28) * occ_func_0_1(35) +
               0.707107 * occ_func_0_1(26) * occ_func_0_1(1) +
               0.707107 * occ_func_0_1(27) * occ_func_0_1(7) +
               0.707107 * occ_func_0_1(26) * occ_func_0_1(6) +
-              0.707107 * occ_func_0_1(41) * occ_func_0_1(7) +
               0.707107 * occ_func_0_1(40) * occ_func_0_1(6) +
+              0.707107 * occ_func_0_1(20) * occ_func_0_1(21) +
               0.707107 * occ_func_0_1(24) * occ_func_0_1(8) +
               0.707107 * occ_func_0_1(22) * occ_func_0_1(5) +
-              0.707107 * occ_func_0_1(39) * occ_func_0_1(11) +
               0.707107 * occ_func_0_1(32) * occ_func_0_1(2) +
-              0.707107 * occ_func_0_1(39) * occ_func_0_1(8) +
+              0.707107 * occ_func_0_1(22) * occ_func_0_1(29) +
               0.707107 * occ_func_0_1(37) * occ_func_0_1(5) +
-              0.707107 * occ_func_0_1(37) * occ_func_0_1(10) +
+              0.707107 * occ_func_0_1(24) * occ_func_0_1(22) +
               0.707107 * occ_func_0_1(32) * occ_func_0_1(3) +
-              0.707107 * occ_func_0_1(38) * occ_func_0_1(12) +
+              0.707107 * occ_func_0_1(29) * occ_func_0_1(24) +
               0.707107 * occ_func_0_1(31) * occ_func_0_1(1) +
-              0.707107 * occ_func_0_1(34) * occ_func_0_1(11) +
+              0.707107 * occ_func_0_1(30) * occ_func_0_1(23) +
+              0.707107 * occ_func_0_1(33) * occ_func_0_1(27) +
               0.707107 * occ_func_0_1(28) * occ_func_0_1(2) +
               0.707107 * occ_func_0_1(21) * occ_func_0_1(7) +
               0.707107 * occ_func_0_1(20) * occ_func_0_1(6) +
-              0.707107 * occ_func_0_1(42) * occ_func_0_1(9) +
               0.707107 * occ_func_0_1(40) * occ_func_0_1(4) +
-              0.707107 * occ_func_0_1(33) * occ_func_0_1(11) +
+              0.707107 * occ_func_0_1(21) * occ_func_0_1(19) +
+              0.707107 * occ_func_0_1(34) * occ_func_0_1(28) +
               0.707107 * occ_func_0_1(27) * occ_func_0_1(2) +
               0.707107 * occ_func_0_1(25) * occ_func_0_1(9) +
               0.707107 * occ_func_0_1(23) * occ_func_0_1(4)) /
@@ -4938,38 +5198,38 @@ Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_9_3_at_0(
                0.707107 * occ_func_0_1(32) * occ_func_0_0(39)) +
               0.707107 * occ_func_0_1(29) * occ_func_0_0(11) +
               0.707107 * occ_func_0_1(22) * occ_func_0_0(2) +
-              0.707107 * occ_func_0_1(35) * occ_func_0_0(7) +
-              0.707107 * occ_func_0_1(34) * occ_func_0_0(6) +
-              (0.707107 * occ_func_0_0(27) * occ_func_0_1(26) +
-               0.707107 * occ_func_0_1(27) * occ_func_0_0(26)) +
-              0.707107 * occ_func_0_1(38) * occ_func_0_0(9) +
-              0.707107 * occ_func_0_1(36) * occ_func_0_0(4) +
-              (0.707107 * occ_func_0_0(23) * occ_func_0_1(25) +
-               0.707107 * occ_func_0_1(23) * occ_func_0_0(25)) +
+              (0.707107 * occ_func_0_0(35) * occ_func_0_1(7) +
+               0.707107 * occ_func_0_1(35) * occ_func_0_0(7)) +
+              0.707107 * occ_func_0_0(34) * occ_func_0_1(6) +
+              0.707107 * occ_func_0_0(27) * occ_func_0_1(26) +
+              (0.707107 * occ_func_0_0(38) * occ_func_0_1(9) +
+               0.707107 * occ_func_0_1(38) * occ_func_0_0(9)) +
+              0.707107 * occ_func_0_0(36) * occ_func_0_1(4) +
+              0.707107 * occ_func_0_1(23) * occ_func_0_0(25) +
               (0.707107 * occ_func_0_0(41) * occ_func_0_1(42) +
                0.707107 * occ_func_0_1(41) * occ_func_0_0(42)) +
               0.707107 * occ_func_0_1(20) * occ_func_0_0(8) +
               0.707107 * occ_func_0_1(19) * occ_func_0_0(5) +
-              0.707107 * occ_func_0_1(36) * occ_func_0_0(10) +
-              0.707107 * occ_func_0_1(31) * occ_func_0_0(3) +
-              (0.707107 * occ_func_0_0(25) * occ_func_0_1(30) +
-               0.707107 * occ_func_0_1(25) * occ_func_0_0(30)) +
+              (0.707107 * occ_func_0_0(36) * occ_func_0_1(10) +
+               0.707107 * occ_func_0_1(36) * occ_func_0_0(10)) +
+              0.707107 * occ_func_0_0(31) * occ_func_0_1(3) +
+              0.707107 * occ_func_0_1(25) * occ_func_0_0(30) +
               (0.707107 * occ_func_0_0(42) * occ_func_0_1(40) +
                0.707107 * occ_func_0_1(42) * occ_func_0_0(40)) +
               0.707107 * occ_func_0_1(21) * occ_func_0_0(9) +
               0.707107 * occ_func_0_1(19) * occ_func_0_0(4) +
-              0.707107 * occ_func_0_1(35) * occ_func_0_0(12) +
-              (0.707107 * occ_func_0_0(26) * occ_func_0_1(33) +
-               0.707107 * occ_func_0_1(26) * occ_func_0_0(33)) +
-              0.707107 * occ_func_0_1(28) * occ_func_0_0(1) +
+              (0.707107 * occ_func_0_0(35) * occ_func_0_1(12) +
+               0.707107 * occ_func_0_1(35) * occ_func_0_0(12)) +
+              0.707107 * occ_func_0_1(26) * occ_func_0_0(33) +
+              0.707107 * occ_func_0_0(28) * occ_func_0_1(1) +
               (0.707107 * occ_func_0_0(31) * occ_func_0_1(36) +
                0.707107 * occ_func_0_1(31) * occ_func_0_0(36)) +
               0.707107 * occ_func_0_1(30) * occ_func_0_0(10) +
               0.707107 * occ_func_0_1(25) * occ_func_0_0(3) +
-              0.707107 * occ_func_0_1(42) * occ_func_0_0(8) +
-              0.707107 * occ_func_0_1(41) * occ_func_0_0(5) +
-              (0.707107 * occ_func_0_0(19) * occ_func_0_1(20) +
-               0.707107 * occ_func_0_1(19) * occ_func_0_0(20)) +
+              (0.707107 * occ_func_0_0(42) * occ_func_0_1(8) +
+               0.707107 * occ_func_0_1(42) * occ_func_0_0(8)) +
+              0.707107 * occ_func_0_0(41) * occ_func_0_1(5) +
+              0.707107 * occ_func_0_1(19) * occ_func_0_0(20) +
               (0.707107 * occ_func_0_0(38) * occ_func_0_1(31) +
                0.707107 * occ_func_0_1(38) * occ_func_0_0(31)) +
               0.707107 * occ_func_0_1(30) * occ_func_0_0(12) +
@@ -4978,54 +5238,54 @@ Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_9_3_at_0(
                0.707107 * occ_func_0_1(37) * occ_func_0_0(32)) +
               0.707107 * occ_func_0_1(29) * occ_func_0_0(10) +
               0.707107 * occ_func_0_1(24) * occ_func_0_0(3) +
-              0.707107 * occ_func_0_1(33) * occ_func_0_0(12) +
-              (0.707107 * occ_func_0_0(28) * occ_func_0_1(35) +
-               0.707107 * occ_func_0_1(28) * occ_func_0_0(35)) +
-              0.707107 * occ_func_0_1(26) * occ_func_0_0(1) +
+              (0.707107 * occ_func_0_0(33) * occ_func_0_1(12) +
+               0.707107 * occ_func_0_1(33) * occ_func_0_0(12)) +
+              0.707107 * occ_func_0_1(28) * occ_func_0_0(35) +
+              0.707107 * occ_func_0_0(26) * occ_func_0_1(1) +
               (0.707107 * occ_func_0_0(35) * occ_func_0_1(34) +
                0.707107 * occ_func_0_1(35) * occ_func_0_0(34)) +
               0.707107 * occ_func_0_1(27) * occ_func_0_0(7) +
               0.707107 * occ_func_0_1(26) * occ_func_0_0(6) +
-              0.707107 * occ_func_0_1(41) * occ_func_0_0(7) +
-              0.707107 * occ_func_0_1(40) * occ_func_0_0(6) +
-              (0.707107 * occ_func_0_0(20) * occ_func_0_1(21) +
-               0.707107 * occ_func_0_1(20) * occ_func_0_0(21)) +
+              (0.707107 * occ_func_0_0(41) * occ_func_0_1(7) +
+               0.707107 * occ_func_0_1(41) * occ_func_0_0(7)) +
+              0.707107 * occ_func_0_0(40) * occ_func_0_1(6) +
+              0.707107 * occ_func_0_1(20) * occ_func_0_0(21) +
               (0.707107 * occ_func_0_0(39) * occ_func_0_1(37) +
                0.707107 * occ_func_0_1(39) * occ_func_0_0(37)) +
               0.707107 * occ_func_0_1(24) * occ_func_0_0(8) +
               0.707107 * occ_func_0_1(22) * occ_func_0_0(5) +
-              0.707107 * occ_func_0_1(39) * occ_func_0_0(11) +
-              0.707107 * occ_func_0_1(32) * occ_func_0_0(2) +
-              (0.707107 * occ_func_0_0(22) * occ_func_0_1(29) +
-               0.707107 * occ_func_0_1(22) * occ_func_0_0(29)) +
-              0.707107 * occ_func_0_1(39) * occ_func_0_0(8) +
-              0.707107 * occ_func_0_1(37) * occ_func_0_0(5) +
-              (0.707107 * occ_func_0_0(24) * occ_func_0_1(22) +
-               0.707107 * occ_func_0_1(24) * occ_func_0_0(22)) +
-              0.707107 * occ_func_0_1(37) * occ_func_0_0(10) +
-              0.707107 * occ_func_0_1(32) * occ_func_0_0(3) +
-              (0.707107 * occ_func_0_0(29) * occ_func_0_1(24) +
-               0.707107 * occ_func_0_1(29) * occ_func_0_0(24)) +
-              0.707107 * occ_func_0_1(38) * occ_func_0_0(12) +
-              0.707107 * occ_func_0_1(31) * occ_func_0_0(1) +
-              (0.707107 * occ_func_0_0(30) * occ_func_0_1(23) +
-               0.707107 * occ_func_0_1(30) * occ_func_0_0(23)) +
-              0.707107 * occ_func_0_1(34) * occ_func_0_0(11) +
-              (0.707107 * occ_func_0_0(33) * occ_func_0_1(27) +
-               0.707107 * occ_func_0_1(33) * occ_func_0_0(27)) +
-              0.707107 * occ_func_0_1(28) * occ_func_0_0(2) +
+              (0.707107 * occ_func_0_0(39) * occ_func_0_1(11) +
+               0.707107 * occ_func_0_1(39) * occ_func_0_0(11)) +
+              0.707107 * occ_func_0_0(32) * occ_func_0_1(2) +
+              0.707107 * occ_func_0_1(22) * occ_func_0_0(29) +
+              (0.707107 * occ_func_0_0(39) * occ_func_0_1(8) +
+               0.707107 * occ_func_0_1(39) * occ_func_0_0(8)) +
+              0.707107 * occ_func_0_0(37) * occ_func_0_1(5) +
+              0.707107 * occ_func_0_0(24) * occ_func_0_1(22) +
+              (0.707107 * occ_func_0_0(37) * occ_func_0_1(10) +
+               0.707107 * occ_func_0_1(37) * occ_func_0_0(10)) +
+              0.707107 * occ_func_0_0(32) * occ_func_0_1(3) +
+              0.707107 * occ_func_0_0(29) * occ_func_0_1(24) +
+              (0.707107 * occ_func_0_0(38) * occ_func_0_1(12) +
+               0.707107 * occ_func_0_1(38) * occ_func_0_0(12)) +
+              0.707107 * occ_func_0_0(31) * occ_func_0_1(1) +
+              0.707107 * occ_func_0_0(30) * occ_func_0_1(23) +
+              (0.707107 * occ_func_0_0(34) * occ_func_0_1(11) +
+               0.707107 * occ_func_0_1(34) * occ_func_0_0(11)) +
+              0.707107 * occ_func_0_0(33) * occ_func_0_1(27) +
+              0.707107 * occ_func_0_0(28) * occ_func_0_1(2) +
               (0.707107 * occ_func_0_0(40) * occ_func_0_1(41) +
                0.707107 * occ_func_0_1(40) * occ_func_0_0(41)) +
               0.707107 * occ_func_0_1(21) * occ_func_0_0(7) +
               0.707107 * occ_func_0_1(20) * occ_func_0_0(6) +
-              0.707107 * occ_func_0_1(42) * occ_func_0_0(9) +
-              0.707107 * occ_func_0_1(40) * occ_func_0_0(4) +
-              (0.707107 * occ_func_0_0(21) * occ_func_0_1(19) +
-               0.707107 * occ_func_0_1(21) * occ_func_0_0(19)) +
-              0.707107 * occ_func_0_1(33) * occ_func_0_0(11) +
-              (0.707107 * occ_func_0_0(34) * occ_func_0_1(28) +
-               0.707107 * occ_func_0_1(34) * occ_func_0_0(28)) +
-              0.707107 * occ_func_0_1(27) * occ_func_0_0(2) +
+              (0.707107 * occ_func_0_0(42) * occ_func_0_1(9) +
+               0.707107 * occ_func_0_1(42) * occ_func_0_0(9)) +
+              0.707107 * occ_func_0_0(40) * occ_func_0_1(4) +
+              0.707107 * occ_func_0_0(21) * occ_func_0_1(19) +
+              (0.707107 * occ_func_0_0(33) * occ_func_0_1(11) +
+               0.707107 * occ_func_0_1(33) * occ_func_0_0(11)) +
+              0.707107 * occ_func_0_0(34) * occ_func_0_1(28) +
+              0.707107 * occ_func_0_0(27) * occ_func_0_1(2) +
               (0.707107 * occ_func_0_0(36) * occ_func_0_1(38) +
                0.707107 * occ_func_0_1(36) * occ_func_0_0(38)) +
               0.707107 * occ_func_0_1(25) * occ_func_0_0(9) +
@@ -5037,77 +5297,77 @@ Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_9_4_at_0(
     int occ_i, int occ_f) const {
   return (m_occ_func_0_0[occ_f] - m_occ_func_0_0[occ_i]) *
              (occ_func_0_1(32) * occ_func_0_1(39) +
-              occ_func_0_1(27) * occ_func_0_1(26) +
-              occ_func_0_1(23) * occ_func_0_1(25) +
+              occ_func_0_1(35) * occ_func_0_1(7) +
+              occ_func_0_1(38) * occ_func_0_1(9) +
               occ_func_0_1(41) * occ_func_0_1(42) +
-              occ_func_0_1(25) * occ_func_0_1(30) +
+              occ_func_0_1(36) * occ_func_0_1(10) +
               occ_func_0_1(42) * occ_func_0_1(40) +
-              occ_func_0_1(26) * occ_func_0_1(33) +
+              occ_func_0_1(35) * occ_func_0_1(12) +
               occ_func_0_1(31) * occ_func_0_1(36) +
-              occ_func_0_1(19) * occ_func_0_1(20) +
+              occ_func_0_1(42) * occ_func_0_1(8) +
               occ_func_0_1(38) * occ_func_0_1(31) +
               occ_func_0_1(37) * occ_func_0_1(32) +
-              occ_func_0_1(28) * occ_func_0_1(35) +
+              occ_func_0_1(33) * occ_func_0_1(12) +
               occ_func_0_1(35) * occ_func_0_1(34) +
-              occ_func_0_1(20) * occ_func_0_1(21) +
+              occ_func_0_1(41) * occ_func_0_1(7) +
               occ_func_0_1(39) * occ_func_0_1(37) +
-              occ_func_0_1(22) * occ_func_0_1(29) +
-              occ_func_0_1(24) * occ_func_0_1(22) +
-              occ_func_0_1(29) * occ_func_0_1(24) +
-              occ_func_0_1(30) * occ_func_0_1(23) +
-              occ_func_0_1(33) * occ_func_0_1(27) +
+              occ_func_0_1(39) * occ_func_0_1(11) +
+              occ_func_0_1(39) * occ_func_0_1(8) +
+              occ_func_0_1(37) * occ_func_0_1(10) +
+              occ_func_0_1(38) * occ_func_0_1(12) +
+              occ_func_0_1(34) * occ_func_0_1(11) +
               occ_func_0_1(40) * occ_func_0_1(41) +
-              occ_func_0_1(21) * occ_func_0_1(19) +
-              occ_func_0_1(34) * occ_func_0_1(28) +
+              occ_func_0_1(42) * occ_func_0_1(9) +
+              occ_func_0_1(33) * occ_func_0_1(11) +
               occ_func_0_1(36) * occ_func_0_1(38)) /
              24. +
          (m_occ_func_0_1[occ_f] - m_occ_func_0_1[occ_i]) *
              (occ_func_0_0(29) * occ_func_0_1(11) +
               occ_func_0_0(22) * occ_func_0_1(2) +
-              occ_func_0_0(35) * occ_func_0_1(7) +
-              occ_func_0_0(34) * occ_func_0_1(6) +
-              occ_func_0_0(38) * occ_func_0_1(9) +
-              occ_func_0_0(36) * occ_func_0_1(4) +
+              occ_func_0_1(34) * occ_func_0_0(6) +
+              occ_func_0_1(27) * occ_func_0_0(26) +
+              occ_func_0_1(36) * occ_func_0_0(4) +
+              occ_func_0_0(23) * occ_func_0_1(25) +
               occ_func_0_0(20) * occ_func_0_1(8) +
               occ_func_0_0(19) * occ_func_0_1(5) +
-              occ_func_0_0(36) * occ_func_0_1(10) +
-              occ_func_0_0(31) * occ_func_0_1(3) +
+              occ_func_0_1(31) * occ_func_0_0(3) +
+              occ_func_0_0(25) * occ_func_0_1(30) +
               occ_func_0_0(21) * occ_func_0_1(9) +
               occ_func_0_0(19) * occ_func_0_1(4) +
-              occ_func_0_0(35) * occ_func_0_1(12) +
-              occ_func_0_0(28) * occ_func_0_1(1) +
+              occ_func_0_0(26) * occ_func_0_1(33) +
+              occ_func_0_1(28) * occ_func_0_0(1) +
               occ_func_0_0(30) * occ_func_0_1(10) +
               occ_func_0_0(25) * occ_func_0_1(3) +
-              occ_func_0_0(42) * occ_func_0_1(8) +
-              occ_func_0_0(41) * occ_func_0_1(5) +
+              occ_func_0_1(41) * occ_func_0_0(5) +
+              occ_func_0_0(19) * occ_func_0_1(20) +
               occ_func_0_0(30) * occ_func_0_1(12) +
               occ_func_0_0(23) * occ_func_0_1(1) +
               occ_func_0_0(29) * occ_func_0_1(10) +
               occ_func_0_0(24) * occ_func_0_1(3) +
-              occ_func_0_0(33) * occ_func_0_1(12) +
-              occ_func_0_0(26) * occ_func_0_1(1) +
+              occ_func_0_0(28) * occ_func_0_1(35) +
+              occ_func_0_1(26) * occ_func_0_0(1) +
               occ_func_0_0(27) * occ_func_0_1(7) +
               occ_func_0_0(26) * occ_func_0_1(6) +
-              occ_func_0_0(41) * occ_func_0_1(7) +
-              occ_func_0_0(40) * occ_func_0_1(6) +
+              occ_func_0_1(40) * occ_func_0_0(6) +
+              occ_func_0_0(20) * occ_func_0_1(21) +
               occ_func_0_0(24) * occ_func_0_1(8) +
               occ_func_0_0(22) * occ_func_0_1(5) +
-              occ_func_0_0(39) * occ_func_0_1(11) +
-              occ_func_0_0(32) * occ_func_0_1(2) +
-              occ_func_0_0(39) * occ_func_0_1(8) +
-              occ_func_0_0(37) * occ_func_0_1(5) +
-              occ_func_0_0(37) * occ_func_0_1(10) +
-              occ_func_0_0(32) * occ_func_0_1(3) +
-              occ_func_0_0(38) * occ_func_0_1(12) +
-              occ_func_0_0(31) * occ_func_0_1(1) +
-              occ_func_0_0(34) * occ_func_0_1(11) +
-              occ_func_0_0(28) * occ_func_0_1(2) +
+              occ_func_0_1(32) * occ_func_0_0(2) +
+              occ_func_0_0(22) * occ_func_0_1(29) +
+              occ_func_0_1(37) * occ_func_0_0(5) +
+              occ_func_0_1(24) * occ_func_0_0(22) +
+              occ_func_0_1(32) * occ_func_0_0(3) +
+              occ_func_0_1(29) * occ_func_0_0(24) +
+              occ_func_0_1(31) * occ_func_0_0(1) +
+              occ_func_0_1(30) * occ_func_0_0(23) +
+              occ_func_0_1(33) * occ_func_0_0(27) +
+              occ_func_0_1(28) * occ_func_0_0(2) +
               occ_func_0_0(21) * occ_func_0_1(7) +
               occ_func_0_0(20) * occ_func_0_1(6) +
-              occ_func_0_0(42) * occ_func_0_1(9) +
-              occ_func_0_0(40) * occ_func_0_1(4) +
-              occ_func_0_0(33) * occ_func_0_1(11) +
-              occ_func_0_0(27) * occ_func_0_1(2) +
+              occ_func_0_1(40) * occ_func_0_0(4) +
+              occ_func_0_1(21) * occ_func_0_0(19) +
+              occ_func_0_1(34) * occ_func_0_0(28) +
+              occ_func_0_1(27) * occ_func_0_0(2) +
               occ_func_0_0(25) * occ_func_0_1(9) +
               occ_func_0_0(23) * occ_func_0_1(4)) /
              24.;
@@ -5669,6 +5929,34 @@ Scalar OccClexulatorTest_Clexulator::eval_bfunc_11_0() const {
 template <typename Scalar>
 Scalar OccClexulatorTest_Clexulator::eval_bfunc_11_1() const {
   return (occ_func_0_1(0) * occ_func_0_0(9) * occ_func_0_0(35) +
+          occ_func_0_0(10) * occ_func_0_1(0) * occ_func_0_0(86) +
+          occ_func_0_0(11) * occ_func_0_1(0) * occ_func_0_0(86) +
+          occ_func_0_0(32) * occ_func_0_0(85) * occ_func_0_1(0) +
+          occ_func_0_0(39) * occ_func_0_0(85) * occ_func_0_1(0) +
+          occ_func_0_0(31) * occ_func_0_0(84) * occ_func_0_1(0) +
+          occ_func_0_0(36) * occ_func_0_0(84) * occ_func_0_1(0) +
+          occ_func_0_0(7) * occ_func_0_1(0) * occ_func_0_0(85) +
+          occ_func_0_0(12) * occ_func_0_1(0) * occ_func_0_0(85) +
+          occ_func_0_1(0) * occ_func_0_0(8) * occ_func_0_0(34) +
+          occ_func_0_1(0) * occ_func_0_0(7) * occ_func_0_0(38) +
+          occ_func_0_0(8) * occ_func_0_1(0) * occ_func_0_0(84) +
+          occ_func_0_0(42) * occ_func_0_0(86) * occ_func_0_1(0) +
+          occ_func_0_0(10) * occ_func_0_1(0) * occ_func_0_0(83) +
+          occ_func_0_0(40) * occ_func_0_0(86) * occ_func_0_1(0) +
+          occ_func_0_0(35) * occ_func_0_0(83) * occ_func_0_1(0) +
+          occ_func_0_0(12) * occ_func_0_1(0) * occ_func_0_0(86) +
+          occ_func_0_0(38) * occ_func_0_0(84) * occ_func_0_1(0) +
+          occ_func_0_0(34) * occ_func_0_0(83) * occ_func_0_1(0) +
+          occ_func_0_0(37) * occ_func_0_0(85) * occ_func_0_1(0) +
+          occ_func_0_1(0) * occ_func_0_0(10) * occ_func_0_0(33) +
+          occ_func_0_0(11) * occ_func_0_1(0) * occ_func_0_0(84) +
+          occ_func_0_0(9) * occ_func_0_1(0) * occ_func_0_0(85) +
+          occ_func_0_0(41) * occ_func_0_0(86) * occ_func_0_1(0)) /
+         24.;
+}
+template <typename Scalar>
+Scalar OccClexulatorTest_Clexulator::eval_bfunc_11_2() const {
+  return (occ_func_0_0(0) * occ_func_0_1(9) * occ_func_0_0(35) +
           occ_func_0_1(10) * occ_func_0_0(0) * occ_func_0_0(86) +
           occ_func_0_1(11) * occ_func_0_0(0) * occ_func_0_0(86) +
           occ_func_0_1(32) * occ_func_0_0(85) * occ_func_0_0(0) +
@@ -5677,49 +5965,21 @@ Scalar OccClexulatorTest_Clexulator::eval_bfunc_11_1() const {
           occ_func_0_1(36) * occ_func_0_0(84) * occ_func_0_0(0) +
           occ_func_0_1(7) * occ_func_0_0(0) * occ_func_0_0(85) +
           occ_func_0_1(12) * occ_func_0_0(0) * occ_func_0_0(85) +
-          occ_func_0_1(0) * occ_func_0_0(8) * occ_func_0_0(34) +
-          occ_func_0_1(0) * occ_func_0_0(7) * occ_func_0_0(38) +
+          occ_func_0_0(0) * occ_func_0_1(8) * occ_func_0_0(34) +
+          occ_func_0_0(0) * occ_func_0_1(7) * occ_func_0_0(38) +
           occ_func_0_1(8) * occ_func_0_0(0) * occ_func_0_0(84) +
           occ_func_0_1(42) * occ_func_0_0(86) * occ_func_0_0(0) +
-          occ_func_0_1(10) * occ_func_0_0(0) * occ_func_0_0(83) +
+          occ_func_0_0(10) * occ_func_0_0(0) * occ_func_0_1(83) +
           occ_func_0_1(40) * occ_func_0_0(86) * occ_func_0_0(0) +
-          occ_func_0_1(35) * occ_func_0_0(83) * occ_func_0_0(0) +
+          occ_func_0_0(35) * occ_func_0_1(83) * occ_func_0_0(0) +
           occ_func_0_1(12) * occ_func_0_0(0) * occ_func_0_0(86) +
-          occ_func_0_1(38) * occ_func_0_0(84) * occ_func_0_0(0) +
-          occ_func_0_1(34) * occ_func_0_0(83) * occ_func_0_0(0) +
+          occ_func_0_0(38) * occ_func_0_1(84) * occ_func_0_0(0) +
+          occ_func_0_0(34) * occ_func_0_1(83) * occ_func_0_0(0) +
           occ_func_0_1(37) * occ_func_0_0(85) * occ_func_0_0(0) +
-          occ_func_0_1(0) * occ_func_0_0(10) * occ_func_0_0(33) +
+          occ_func_0_0(0) * occ_func_0_0(10) * occ_func_0_1(33) +
           occ_func_0_1(11) * occ_func_0_0(0) * occ_func_0_0(84) +
           occ_func_0_1(9) * occ_func_0_0(0) * occ_func_0_0(85) +
           occ_func_0_1(41) * occ_func_0_0(86) * occ_func_0_0(0)) /
-         24.;
-}
-template <typename Scalar>
-Scalar OccClexulatorTest_Clexulator::eval_bfunc_11_2() const {
-  return (occ_func_0_0(0) * occ_func_0_1(9) * occ_func_0_0(35) +
-          occ_func_0_0(10) * occ_func_0_1(0) * occ_func_0_0(86) +
-          occ_func_0_0(11) * occ_func_0_1(0) * occ_func_0_0(86) +
-          occ_func_0_0(32) * occ_func_0_1(85) * occ_func_0_0(0) +
-          occ_func_0_0(39) * occ_func_0_1(85) * occ_func_0_0(0) +
-          occ_func_0_0(31) * occ_func_0_1(84) * occ_func_0_0(0) +
-          occ_func_0_0(36) * occ_func_0_1(84) * occ_func_0_0(0) +
-          occ_func_0_0(7) * occ_func_0_1(0) * occ_func_0_0(85) +
-          occ_func_0_0(12) * occ_func_0_1(0) * occ_func_0_0(85) +
-          occ_func_0_0(0) * occ_func_0_1(8) * occ_func_0_0(34) +
-          occ_func_0_0(0) * occ_func_0_1(7) * occ_func_0_0(38) +
-          occ_func_0_0(8) * occ_func_0_1(0) * occ_func_0_0(84) +
-          occ_func_0_0(42) * occ_func_0_1(86) * occ_func_0_0(0) +
-          occ_func_0_0(10) * occ_func_0_1(0) * occ_func_0_0(83) +
-          occ_func_0_0(40) * occ_func_0_1(86) * occ_func_0_0(0) +
-          occ_func_0_0(35) * occ_func_0_1(83) * occ_func_0_0(0) +
-          occ_func_0_0(12) * occ_func_0_1(0) * occ_func_0_0(86) +
-          occ_func_0_0(38) * occ_func_0_1(84) * occ_func_0_0(0) +
-          occ_func_0_0(34) * occ_func_0_1(83) * occ_func_0_0(0) +
-          occ_func_0_0(37) * occ_func_0_1(85) * occ_func_0_0(0) +
-          occ_func_0_0(0) * occ_func_0_1(10) * occ_func_0_0(33) +
-          occ_func_0_0(11) * occ_func_0_1(0) * occ_func_0_0(84) +
-          occ_func_0_0(9) * occ_func_0_1(0) * occ_func_0_0(85) +
-          occ_func_0_0(41) * occ_func_0_1(86) * occ_func_0_0(0)) /
          24.;
 }
 template <typename Scalar>
@@ -5727,27 +5987,27 @@ Scalar OccClexulatorTest_Clexulator::eval_bfunc_11_3() const {
   return (occ_func_0_1(0) * occ_func_0_1(9) * occ_func_0_0(35) +
           occ_func_0_1(10) * occ_func_0_1(0) * occ_func_0_0(86) +
           occ_func_0_1(11) * occ_func_0_1(0) * occ_func_0_0(86) +
-          occ_func_0_1(32) * occ_func_0_1(85) * occ_func_0_0(0) +
-          occ_func_0_1(39) * occ_func_0_1(85) * occ_func_0_0(0) +
-          occ_func_0_1(31) * occ_func_0_1(84) * occ_func_0_0(0) +
-          occ_func_0_1(36) * occ_func_0_1(84) * occ_func_0_0(0) +
+          occ_func_0_1(32) * occ_func_0_0(85) * occ_func_0_1(0) +
+          occ_func_0_1(39) * occ_func_0_0(85) * occ_func_0_1(0) +
+          occ_func_0_1(31) * occ_func_0_0(84) * occ_func_0_1(0) +
+          occ_func_0_1(36) * occ_func_0_0(84) * occ_func_0_1(0) +
           occ_func_0_1(7) * occ_func_0_1(0) * occ_func_0_0(85) +
           occ_func_0_1(12) * occ_func_0_1(0) * occ_func_0_0(85) +
           occ_func_0_1(0) * occ_func_0_1(8) * occ_func_0_0(34) +
           occ_func_0_1(0) * occ_func_0_1(7) * occ_func_0_0(38) +
           occ_func_0_1(8) * occ_func_0_1(0) * occ_func_0_0(84) +
-          occ_func_0_1(42) * occ_func_0_1(86) * occ_func_0_0(0) +
-          occ_func_0_1(10) * occ_func_0_1(0) * occ_func_0_0(83) +
-          occ_func_0_1(40) * occ_func_0_1(86) * occ_func_0_0(0) +
-          occ_func_0_1(35) * occ_func_0_1(83) * occ_func_0_0(0) +
+          occ_func_0_1(42) * occ_func_0_0(86) * occ_func_0_1(0) +
+          occ_func_0_0(10) * occ_func_0_1(0) * occ_func_0_1(83) +
+          occ_func_0_1(40) * occ_func_0_0(86) * occ_func_0_1(0) +
+          occ_func_0_0(35) * occ_func_0_1(83) * occ_func_0_1(0) +
           occ_func_0_1(12) * occ_func_0_1(0) * occ_func_0_0(86) +
-          occ_func_0_1(38) * occ_func_0_1(84) * occ_func_0_0(0) +
-          occ_func_0_1(34) * occ_func_0_1(83) * occ_func_0_0(0) +
-          occ_func_0_1(37) * occ_func_0_1(85) * occ_func_0_0(0) +
-          occ_func_0_1(0) * occ_func_0_1(10) * occ_func_0_0(33) +
+          occ_func_0_0(38) * occ_func_0_1(84) * occ_func_0_1(0) +
+          occ_func_0_0(34) * occ_func_0_1(83) * occ_func_0_1(0) +
+          occ_func_0_1(37) * occ_func_0_0(85) * occ_func_0_1(0) +
+          occ_func_0_1(0) * occ_func_0_0(10) * occ_func_0_1(33) +
           occ_func_0_1(11) * occ_func_0_1(0) * occ_func_0_0(84) +
           occ_func_0_1(9) * occ_func_0_1(0) * occ_func_0_0(85) +
-          occ_func_0_1(41) * occ_func_0_1(86) * occ_func_0_0(0)) /
+          occ_func_0_1(41) * occ_func_0_0(86) * occ_func_0_1(0)) /
          24.;
 }
 template <typename Scalar>
@@ -5755,60 +6015,32 @@ Scalar OccClexulatorTest_Clexulator::eval_bfunc_11_4() const {
   return (occ_func_0_0(0) * occ_func_0_0(9) * occ_func_0_1(35) +
           occ_func_0_0(10) * occ_func_0_0(0) * occ_func_0_1(86) +
           occ_func_0_0(11) * occ_func_0_0(0) * occ_func_0_1(86) +
-          occ_func_0_0(32) * occ_func_0_0(85) * occ_func_0_1(0) +
-          occ_func_0_0(39) * occ_func_0_0(85) * occ_func_0_1(0) +
-          occ_func_0_0(31) * occ_func_0_0(84) * occ_func_0_1(0) +
-          occ_func_0_0(36) * occ_func_0_0(84) * occ_func_0_1(0) +
+          occ_func_0_0(32) * occ_func_0_1(85) * occ_func_0_0(0) +
+          occ_func_0_0(39) * occ_func_0_1(85) * occ_func_0_0(0) +
+          occ_func_0_0(31) * occ_func_0_1(84) * occ_func_0_0(0) +
+          occ_func_0_0(36) * occ_func_0_1(84) * occ_func_0_0(0) +
           occ_func_0_0(7) * occ_func_0_0(0) * occ_func_0_1(85) +
           occ_func_0_0(12) * occ_func_0_0(0) * occ_func_0_1(85) +
           occ_func_0_0(0) * occ_func_0_0(8) * occ_func_0_1(34) +
           occ_func_0_0(0) * occ_func_0_0(7) * occ_func_0_1(38) +
           occ_func_0_0(8) * occ_func_0_0(0) * occ_func_0_1(84) +
-          occ_func_0_0(42) * occ_func_0_0(86) * occ_func_0_1(0) +
-          occ_func_0_0(10) * occ_func_0_0(0) * occ_func_0_1(83) +
-          occ_func_0_0(40) * occ_func_0_0(86) * occ_func_0_1(0) +
-          occ_func_0_0(35) * occ_func_0_0(83) * occ_func_0_1(0) +
+          occ_func_0_0(42) * occ_func_0_1(86) * occ_func_0_0(0) +
+          occ_func_0_1(10) * occ_func_0_0(0) * occ_func_0_0(83) +
+          occ_func_0_0(40) * occ_func_0_1(86) * occ_func_0_0(0) +
+          occ_func_0_1(35) * occ_func_0_0(83) * occ_func_0_0(0) +
           occ_func_0_0(12) * occ_func_0_0(0) * occ_func_0_1(86) +
-          occ_func_0_0(38) * occ_func_0_0(84) * occ_func_0_1(0) +
-          occ_func_0_0(34) * occ_func_0_0(83) * occ_func_0_1(0) +
-          occ_func_0_0(37) * occ_func_0_0(85) * occ_func_0_1(0) +
-          occ_func_0_0(0) * occ_func_0_0(10) * occ_func_0_1(33) +
+          occ_func_0_1(38) * occ_func_0_0(84) * occ_func_0_0(0) +
+          occ_func_0_1(34) * occ_func_0_0(83) * occ_func_0_0(0) +
+          occ_func_0_0(37) * occ_func_0_1(85) * occ_func_0_0(0) +
+          occ_func_0_0(0) * occ_func_0_1(10) * occ_func_0_0(33) +
           occ_func_0_0(11) * occ_func_0_0(0) * occ_func_0_1(84) +
           occ_func_0_0(9) * occ_func_0_0(0) * occ_func_0_1(85) +
-          occ_func_0_0(41) * occ_func_0_0(86) * occ_func_0_1(0)) /
+          occ_func_0_0(41) * occ_func_0_1(86) * occ_func_0_0(0)) /
          24.;
 }
 template <typename Scalar>
 Scalar OccClexulatorTest_Clexulator::eval_bfunc_11_5() const {
   return (occ_func_0_1(0) * occ_func_0_0(9) * occ_func_0_1(35) +
-          occ_func_0_1(10) * occ_func_0_0(0) * occ_func_0_1(86) +
-          occ_func_0_1(11) * occ_func_0_0(0) * occ_func_0_1(86) +
-          occ_func_0_1(32) * occ_func_0_0(85) * occ_func_0_1(0) +
-          occ_func_0_1(39) * occ_func_0_0(85) * occ_func_0_1(0) +
-          occ_func_0_1(31) * occ_func_0_0(84) * occ_func_0_1(0) +
-          occ_func_0_1(36) * occ_func_0_0(84) * occ_func_0_1(0) +
-          occ_func_0_1(7) * occ_func_0_0(0) * occ_func_0_1(85) +
-          occ_func_0_1(12) * occ_func_0_0(0) * occ_func_0_1(85) +
-          occ_func_0_1(0) * occ_func_0_0(8) * occ_func_0_1(34) +
-          occ_func_0_1(0) * occ_func_0_0(7) * occ_func_0_1(38) +
-          occ_func_0_1(8) * occ_func_0_0(0) * occ_func_0_1(84) +
-          occ_func_0_1(42) * occ_func_0_0(86) * occ_func_0_1(0) +
-          occ_func_0_1(10) * occ_func_0_0(0) * occ_func_0_1(83) +
-          occ_func_0_1(40) * occ_func_0_0(86) * occ_func_0_1(0) +
-          occ_func_0_1(35) * occ_func_0_0(83) * occ_func_0_1(0) +
-          occ_func_0_1(12) * occ_func_0_0(0) * occ_func_0_1(86) +
-          occ_func_0_1(38) * occ_func_0_0(84) * occ_func_0_1(0) +
-          occ_func_0_1(34) * occ_func_0_0(83) * occ_func_0_1(0) +
-          occ_func_0_1(37) * occ_func_0_0(85) * occ_func_0_1(0) +
-          occ_func_0_1(0) * occ_func_0_0(10) * occ_func_0_1(33) +
-          occ_func_0_1(11) * occ_func_0_0(0) * occ_func_0_1(84) +
-          occ_func_0_1(9) * occ_func_0_0(0) * occ_func_0_1(85) +
-          occ_func_0_1(41) * occ_func_0_0(86) * occ_func_0_1(0)) /
-         24.;
-}
-template <typename Scalar>
-Scalar OccClexulatorTest_Clexulator::eval_bfunc_11_6() const {
-  return (occ_func_0_0(0) * occ_func_0_1(9) * occ_func_0_1(35) +
           occ_func_0_0(10) * occ_func_0_1(0) * occ_func_0_1(86) +
           occ_func_0_0(11) * occ_func_0_1(0) * occ_func_0_1(86) +
           occ_func_0_0(32) * occ_func_0_1(85) * occ_func_0_1(0) +
@@ -5817,21 +6049,49 @@ Scalar OccClexulatorTest_Clexulator::eval_bfunc_11_6() const {
           occ_func_0_0(36) * occ_func_0_1(84) * occ_func_0_1(0) +
           occ_func_0_0(7) * occ_func_0_1(0) * occ_func_0_1(85) +
           occ_func_0_0(12) * occ_func_0_1(0) * occ_func_0_1(85) +
-          occ_func_0_0(0) * occ_func_0_1(8) * occ_func_0_1(34) +
-          occ_func_0_0(0) * occ_func_0_1(7) * occ_func_0_1(38) +
+          occ_func_0_1(0) * occ_func_0_0(8) * occ_func_0_1(34) +
+          occ_func_0_1(0) * occ_func_0_0(7) * occ_func_0_1(38) +
           occ_func_0_0(8) * occ_func_0_1(0) * occ_func_0_1(84) +
           occ_func_0_0(42) * occ_func_0_1(86) * occ_func_0_1(0) +
-          occ_func_0_0(10) * occ_func_0_1(0) * occ_func_0_1(83) +
+          occ_func_0_1(10) * occ_func_0_1(0) * occ_func_0_0(83) +
           occ_func_0_0(40) * occ_func_0_1(86) * occ_func_0_1(0) +
-          occ_func_0_0(35) * occ_func_0_1(83) * occ_func_0_1(0) +
+          occ_func_0_1(35) * occ_func_0_0(83) * occ_func_0_1(0) +
           occ_func_0_0(12) * occ_func_0_1(0) * occ_func_0_1(86) +
-          occ_func_0_0(38) * occ_func_0_1(84) * occ_func_0_1(0) +
-          occ_func_0_0(34) * occ_func_0_1(83) * occ_func_0_1(0) +
+          occ_func_0_1(38) * occ_func_0_0(84) * occ_func_0_1(0) +
+          occ_func_0_1(34) * occ_func_0_0(83) * occ_func_0_1(0) +
           occ_func_0_0(37) * occ_func_0_1(85) * occ_func_0_1(0) +
-          occ_func_0_0(0) * occ_func_0_1(10) * occ_func_0_1(33) +
+          occ_func_0_1(0) * occ_func_0_1(10) * occ_func_0_0(33) +
           occ_func_0_0(11) * occ_func_0_1(0) * occ_func_0_1(84) +
           occ_func_0_0(9) * occ_func_0_1(0) * occ_func_0_1(85) +
           occ_func_0_0(41) * occ_func_0_1(86) * occ_func_0_1(0)) /
+         24.;
+}
+template <typename Scalar>
+Scalar OccClexulatorTest_Clexulator::eval_bfunc_11_6() const {
+  return (occ_func_0_0(0) * occ_func_0_1(9) * occ_func_0_1(35) +
+          occ_func_0_1(10) * occ_func_0_0(0) * occ_func_0_1(86) +
+          occ_func_0_1(11) * occ_func_0_0(0) * occ_func_0_1(86) +
+          occ_func_0_1(32) * occ_func_0_1(85) * occ_func_0_0(0) +
+          occ_func_0_1(39) * occ_func_0_1(85) * occ_func_0_0(0) +
+          occ_func_0_1(31) * occ_func_0_1(84) * occ_func_0_0(0) +
+          occ_func_0_1(36) * occ_func_0_1(84) * occ_func_0_0(0) +
+          occ_func_0_1(7) * occ_func_0_0(0) * occ_func_0_1(85) +
+          occ_func_0_1(12) * occ_func_0_0(0) * occ_func_0_1(85) +
+          occ_func_0_0(0) * occ_func_0_1(8) * occ_func_0_1(34) +
+          occ_func_0_0(0) * occ_func_0_1(7) * occ_func_0_1(38) +
+          occ_func_0_1(8) * occ_func_0_0(0) * occ_func_0_1(84) +
+          occ_func_0_1(42) * occ_func_0_1(86) * occ_func_0_0(0) +
+          occ_func_0_1(10) * occ_func_0_0(0) * occ_func_0_1(83) +
+          occ_func_0_1(40) * occ_func_0_1(86) * occ_func_0_0(0) +
+          occ_func_0_1(35) * occ_func_0_1(83) * occ_func_0_0(0) +
+          occ_func_0_1(12) * occ_func_0_0(0) * occ_func_0_1(86) +
+          occ_func_0_1(38) * occ_func_0_1(84) * occ_func_0_0(0) +
+          occ_func_0_1(34) * occ_func_0_1(83) * occ_func_0_0(0) +
+          occ_func_0_1(37) * occ_func_0_1(85) * occ_func_0_0(0) +
+          occ_func_0_0(0) * occ_func_0_1(10) * occ_func_0_1(33) +
+          occ_func_0_1(11) * occ_func_0_0(0) * occ_func_0_1(84) +
+          occ_func_0_1(9) * occ_func_0_0(0) * occ_func_0_1(85) +
+          occ_func_0_1(41) * occ_func_0_1(86) * occ_func_0_0(0)) /
          24.;
 }
 template <typename Scalar>
@@ -5944,6 +6204,82 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_11_1_at_0() const {
   return (occ_func_0_1(0) * occ_func_0_0(9) * occ_func_0_0(35) +
           occ_func_0_1(4) * occ_func_0_0(0) * occ_func_0_0(83) +
           occ_func_0_1(26) * occ_func_0_0(82) * occ_func_0_0(0) +
+          occ_func_0_0(10) * occ_func_0_1(0) * occ_func_0_0(86) +
+          occ_func_0_0(0) * occ_func_0_1(3) * occ_func_0_0(42) +
+          occ_func_0_0(19) * occ_func_0_1(79) * occ_func_0_0(0) +
+          occ_func_0_0(11) * occ_func_0_1(0) * occ_func_0_0(86) +
+          occ_func_0_0(0) * occ_func_0_1(2) * occ_func_0_0(41) +
+          occ_func_0_0(20) * occ_func_0_1(79) * occ_func_0_0(0) +
+          occ_func_0_0(32) * occ_func_0_0(85) * occ_func_0_1(0) +
+          occ_func_0_0(0) * occ_func_0_0(12) * occ_func_0_1(29) +
+          occ_func_0_0(1) * occ_func_0_0(0) * occ_func_0_1(80) +
+          occ_func_0_0(39) * occ_func_0_0(85) * occ_func_0_1(0) +
+          occ_func_0_0(0) * occ_func_0_0(7) * occ_func_0_1(22) +
+          occ_func_0_0(6) * occ_func_0_0(0) * occ_func_0_1(80) +
+          occ_func_0_0(31) * occ_func_0_0(84) * occ_func_0_1(0) +
+          occ_func_0_0(0) * occ_func_0_0(11) * occ_func_0_1(30) +
+          occ_func_0_0(2) * occ_func_0_0(0) * occ_func_0_1(81) +
+          occ_func_0_0(36) * occ_func_0_0(84) * occ_func_0_1(0) +
+          occ_func_0_0(0) * occ_func_0_0(8) * occ_func_0_1(25) +
+          occ_func_0_0(5) * occ_func_0_0(0) * occ_func_0_1(81) +
+          occ_func_0_0(7) * occ_func_0_1(0) * occ_func_0_0(85) +
+          occ_func_0_0(0) * occ_func_0_1(6) * occ_func_0_0(39) +
+          occ_func_0_0(22) * occ_func_0_1(80) * occ_func_0_0(0) +
+          occ_func_0_0(12) * occ_func_0_1(0) * occ_func_0_0(85) +
+          occ_func_0_0(0) * occ_func_0_1(1) * occ_func_0_0(32) +
+          occ_func_0_0(29) * occ_func_0_1(80) * occ_func_0_0(0) +
+          occ_func_0_1(0) * occ_func_0_0(8) * occ_func_0_0(34) +
+          occ_func_0_1(5) * occ_func_0_0(0) * occ_func_0_0(83) +
+          occ_func_0_1(27) * occ_func_0_0(82) * occ_func_0_0(0) +
+          occ_func_0_1(0) * occ_func_0_0(7) * occ_func_0_0(38) +
+          occ_func_0_1(6) * occ_func_0_0(0) * occ_func_0_0(84) +
+          occ_func_0_1(23) * occ_func_0_0(81) * occ_func_0_0(0) +
+          occ_func_0_0(8) * occ_func_0_1(0) * occ_func_0_0(84) +
+          occ_func_0_0(0) * occ_func_0_1(5) * occ_func_0_0(36) +
+          occ_func_0_0(25) * occ_func_0_1(81) * occ_func_0_0(0) +
+          occ_func_0_0(42) * occ_func_0_0(86) * occ_func_0_1(0) +
+          occ_func_0_0(0) * occ_func_0_0(10) * occ_func_0_1(19) +
+          occ_func_0_0(3) * occ_func_0_0(0) * occ_func_0_1(79) +
+          occ_func_0_0(10) * occ_func_0_1(0) * occ_func_0_0(83) +
+          occ_func_0_0(33) * occ_func_0_1(82) * occ_func_0_0(0) +
+          occ_func_0_0(0) * occ_func_0_1(3) * occ_func_0_0(28) +
+          occ_func_0_0(40) * occ_func_0_0(86) * occ_func_0_1(0) +
+          occ_func_0_0(0) * occ_func_0_0(12) * occ_func_0_1(21) +
+          occ_func_0_0(1) * occ_func_0_0(0) * occ_func_0_1(79) +
+          occ_func_0_0(35) * occ_func_0_0(83) * occ_func_0_1(0) +
+          occ_func_0_0(9) * occ_func_0_0(0) * occ_func_0_1(82) +
+          occ_func_0_0(0) * occ_func_0_0(4) * occ_func_0_1(26) +
+          occ_func_0_0(12) * occ_func_0_1(0) * occ_func_0_0(86) +
+          occ_func_0_0(0) * occ_func_0_1(1) * occ_func_0_0(40) +
+          occ_func_0_0(21) * occ_func_0_1(79) * occ_func_0_0(0) +
+          occ_func_0_0(38) * occ_func_0_0(84) * occ_func_0_1(0) +
+          occ_func_0_0(7) * occ_func_0_0(0) * occ_func_0_1(81) +
+          occ_func_0_0(0) * occ_func_0_0(6) * occ_func_0_1(23) +
+          occ_func_0_0(34) * occ_func_0_0(83) * occ_func_0_1(0) +
+          occ_func_0_0(8) * occ_func_0_0(0) * occ_func_0_1(82) +
+          occ_func_0_0(0) * occ_func_0_0(5) * occ_func_0_1(27) +
+          occ_func_0_0(37) * occ_func_0_0(85) * occ_func_0_1(0) +
+          occ_func_0_0(0) * occ_func_0_0(9) * occ_func_0_1(24) +
+          occ_func_0_0(4) * occ_func_0_0(0) * occ_func_0_1(80) +
+          occ_func_0_1(0) * occ_func_0_0(10) * occ_func_0_0(33) +
+          occ_func_0_1(28) * occ_func_0_0(83) * occ_func_0_0(0) +
+          occ_func_0_1(3) * occ_func_0_0(0) * occ_func_0_0(82) +
+          occ_func_0_0(11) * occ_func_0_1(0) * occ_func_0_0(84) +
+          occ_func_0_0(0) * occ_func_0_1(2) * occ_func_0_0(31) +
+          occ_func_0_0(30) * occ_func_0_1(81) * occ_func_0_0(0) +
+          occ_func_0_0(9) * occ_func_0_1(0) * occ_func_0_0(85) +
+          occ_func_0_0(0) * occ_func_0_1(4) * occ_func_0_0(37) +
+          occ_func_0_0(24) * occ_func_0_1(80) * occ_func_0_0(0) +
+          occ_func_0_0(41) * occ_func_0_0(86) * occ_func_0_1(0) +
+          occ_func_0_0(0) * occ_func_0_0(11) * occ_func_0_1(20) +
+          occ_func_0_0(2) * occ_func_0_0(0) * occ_func_0_1(79)) /
+         24.;
+}
+template <typename Scalar>
+Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_11_2_at_0() const {
+  return (occ_func_0_0(0) * occ_func_0_1(9) * occ_func_0_0(35) +
+          occ_func_0_0(4) * occ_func_0_1(0) * occ_func_0_0(83) +
+          occ_func_0_0(26) * occ_func_0_1(82) * occ_func_0_0(0) +
           occ_func_0_1(10) * occ_func_0_0(0) * occ_func_0_0(86) +
           occ_func_0_1(0) * occ_func_0_0(3) * occ_func_0_0(42) +
           occ_func_0_1(19) * occ_func_0_0(79) * occ_func_0_0(0) +
@@ -5968,42 +6304,42 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_11_1_at_0() const {
           occ_func_0_1(12) * occ_func_0_0(0) * occ_func_0_0(85) +
           occ_func_0_1(0) * occ_func_0_0(1) * occ_func_0_0(32) +
           occ_func_0_1(29) * occ_func_0_0(80) * occ_func_0_0(0) +
-          occ_func_0_1(0) * occ_func_0_0(8) * occ_func_0_0(34) +
-          occ_func_0_1(5) * occ_func_0_0(0) * occ_func_0_0(83) +
-          occ_func_0_1(27) * occ_func_0_0(82) * occ_func_0_0(0) +
-          occ_func_0_1(0) * occ_func_0_0(7) * occ_func_0_0(38) +
-          occ_func_0_1(6) * occ_func_0_0(0) * occ_func_0_0(84) +
-          occ_func_0_1(23) * occ_func_0_0(81) * occ_func_0_0(0) +
+          occ_func_0_0(0) * occ_func_0_1(8) * occ_func_0_0(34) +
+          occ_func_0_0(5) * occ_func_0_1(0) * occ_func_0_0(83) +
+          occ_func_0_0(27) * occ_func_0_1(82) * occ_func_0_0(0) +
+          occ_func_0_0(0) * occ_func_0_1(7) * occ_func_0_0(38) +
+          occ_func_0_0(6) * occ_func_0_1(0) * occ_func_0_0(84) +
+          occ_func_0_0(23) * occ_func_0_1(81) * occ_func_0_0(0) +
           occ_func_0_1(8) * occ_func_0_0(0) * occ_func_0_0(84) +
           occ_func_0_1(0) * occ_func_0_0(5) * occ_func_0_0(36) +
           occ_func_0_1(25) * occ_func_0_0(81) * occ_func_0_0(0) +
           occ_func_0_1(42) * occ_func_0_0(86) * occ_func_0_0(0) +
           occ_func_0_1(0) * occ_func_0_0(10) * occ_func_0_0(19) +
           occ_func_0_1(3) * occ_func_0_0(0) * occ_func_0_0(79) +
-          occ_func_0_1(10) * occ_func_0_0(0) * occ_func_0_0(83) +
-          occ_func_0_1(33) * occ_func_0_0(82) * occ_func_0_0(0) +
-          occ_func_0_1(0) * occ_func_0_0(3) * occ_func_0_0(28) +
+          occ_func_0_0(10) * occ_func_0_0(0) * occ_func_0_1(83) +
+          occ_func_0_0(33) * occ_func_0_0(82) * occ_func_0_1(0) +
+          occ_func_0_0(0) * occ_func_0_0(3) * occ_func_0_1(28) +
           occ_func_0_1(40) * occ_func_0_0(86) * occ_func_0_0(0) +
           occ_func_0_1(0) * occ_func_0_0(12) * occ_func_0_0(21) +
           occ_func_0_1(1) * occ_func_0_0(0) * occ_func_0_0(79) +
-          occ_func_0_1(35) * occ_func_0_0(83) * occ_func_0_0(0) +
-          occ_func_0_1(9) * occ_func_0_0(0) * occ_func_0_0(82) +
-          occ_func_0_1(0) * occ_func_0_0(4) * occ_func_0_0(26) +
+          occ_func_0_0(35) * occ_func_0_1(83) * occ_func_0_0(0) +
+          occ_func_0_0(9) * occ_func_0_1(0) * occ_func_0_0(82) +
+          occ_func_0_0(0) * occ_func_0_1(4) * occ_func_0_0(26) +
           occ_func_0_1(12) * occ_func_0_0(0) * occ_func_0_0(86) +
           occ_func_0_1(0) * occ_func_0_0(1) * occ_func_0_0(40) +
           occ_func_0_1(21) * occ_func_0_0(79) * occ_func_0_0(0) +
-          occ_func_0_1(38) * occ_func_0_0(84) * occ_func_0_0(0) +
-          occ_func_0_1(7) * occ_func_0_0(0) * occ_func_0_0(81) +
-          occ_func_0_1(0) * occ_func_0_0(6) * occ_func_0_0(23) +
-          occ_func_0_1(34) * occ_func_0_0(83) * occ_func_0_0(0) +
-          occ_func_0_1(8) * occ_func_0_0(0) * occ_func_0_0(82) +
-          occ_func_0_1(0) * occ_func_0_0(5) * occ_func_0_0(27) +
+          occ_func_0_0(38) * occ_func_0_1(84) * occ_func_0_0(0) +
+          occ_func_0_0(7) * occ_func_0_1(0) * occ_func_0_0(81) +
+          occ_func_0_0(0) * occ_func_0_1(6) * occ_func_0_0(23) +
+          occ_func_0_0(34) * occ_func_0_1(83) * occ_func_0_0(0) +
+          occ_func_0_0(8) * occ_func_0_1(0) * occ_func_0_0(82) +
+          occ_func_0_0(0) * occ_func_0_1(5) * occ_func_0_0(27) +
           occ_func_0_1(37) * occ_func_0_0(85) * occ_func_0_0(0) +
           occ_func_0_1(0) * occ_func_0_0(9) * occ_func_0_0(24) +
           occ_func_0_1(4) * occ_func_0_0(0) * occ_func_0_0(80) +
-          occ_func_0_1(0) * occ_func_0_0(10) * occ_func_0_0(33) +
-          occ_func_0_1(28) * occ_func_0_0(83) * occ_func_0_0(0) +
-          occ_func_0_1(3) * occ_func_0_0(0) * occ_func_0_0(82) +
+          occ_func_0_0(0) * occ_func_0_0(10) * occ_func_0_1(33) +
+          occ_func_0_0(28) * occ_func_0_0(83) * occ_func_0_1(0) +
+          occ_func_0_0(3) * occ_func_0_0(0) * occ_func_0_1(82) +
           occ_func_0_1(11) * occ_func_0_0(0) * occ_func_0_0(84) +
           occ_func_0_1(0) * occ_func_0_0(2) * occ_func_0_0(31) +
           occ_func_0_1(30) * occ_func_0_0(81) * occ_func_0_0(0) +
@@ -6013,82 +6349,6 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_11_1_at_0() const {
           occ_func_0_1(41) * occ_func_0_0(86) * occ_func_0_0(0) +
           occ_func_0_1(0) * occ_func_0_0(11) * occ_func_0_0(20) +
           occ_func_0_1(2) * occ_func_0_0(0) * occ_func_0_0(79)) /
-         24.;
-}
-template <typename Scalar>
-Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_11_2_at_0() const {
-  return (occ_func_0_0(0) * occ_func_0_1(9) * occ_func_0_0(35) +
-          occ_func_0_0(4) * occ_func_0_1(0) * occ_func_0_0(83) +
-          occ_func_0_0(26) * occ_func_0_1(82) * occ_func_0_0(0) +
-          occ_func_0_0(10) * occ_func_0_1(0) * occ_func_0_0(86) +
-          occ_func_0_0(0) * occ_func_0_1(3) * occ_func_0_0(42) +
-          occ_func_0_0(19) * occ_func_0_1(79) * occ_func_0_0(0) +
-          occ_func_0_0(11) * occ_func_0_1(0) * occ_func_0_0(86) +
-          occ_func_0_0(0) * occ_func_0_1(2) * occ_func_0_0(41) +
-          occ_func_0_0(20) * occ_func_0_1(79) * occ_func_0_0(0) +
-          occ_func_0_0(32) * occ_func_0_1(85) * occ_func_0_0(0) +
-          occ_func_0_0(0) * occ_func_0_1(12) * occ_func_0_0(29) +
-          occ_func_0_0(1) * occ_func_0_1(0) * occ_func_0_0(80) +
-          occ_func_0_0(39) * occ_func_0_1(85) * occ_func_0_0(0) +
-          occ_func_0_0(0) * occ_func_0_1(7) * occ_func_0_0(22) +
-          occ_func_0_0(6) * occ_func_0_1(0) * occ_func_0_0(80) +
-          occ_func_0_0(31) * occ_func_0_1(84) * occ_func_0_0(0) +
-          occ_func_0_0(0) * occ_func_0_1(11) * occ_func_0_0(30) +
-          occ_func_0_0(2) * occ_func_0_1(0) * occ_func_0_0(81) +
-          occ_func_0_0(36) * occ_func_0_1(84) * occ_func_0_0(0) +
-          occ_func_0_0(0) * occ_func_0_1(8) * occ_func_0_0(25) +
-          occ_func_0_0(5) * occ_func_0_1(0) * occ_func_0_0(81) +
-          occ_func_0_0(7) * occ_func_0_1(0) * occ_func_0_0(85) +
-          occ_func_0_0(0) * occ_func_0_1(6) * occ_func_0_0(39) +
-          occ_func_0_0(22) * occ_func_0_1(80) * occ_func_0_0(0) +
-          occ_func_0_0(12) * occ_func_0_1(0) * occ_func_0_0(85) +
-          occ_func_0_0(0) * occ_func_0_1(1) * occ_func_0_0(32) +
-          occ_func_0_0(29) * occ_func_0_1(80) * occ_func_0_0(0) +
-          occ_func_0_0(0) * occ_func_0_1(8) * occ_func_0_0(34) +
-          occ_func_0_0(5) * occ_func_0_1(0) * occ_func_0_0(83) +
-          occ_func_0_0(27) * occ_func_0_1(82) * occ_func_0_0(0) +
-          occ_func_0_0(0) * occ_func_0_1(7) * occ_func_0_0(38) +
-          occ_func_0_0(6) * occ_func_0_1(0) * occ_func_0_0(84) +
-          occ_func_0_0(23) * occ_func_0_1(81) * occ_func_0_0(0) +
-          occ_func_0_0(8) * occ_func_0_1(0) * occ_func_0_0(84) +
-          occ_func_0_0(0) * occ_func_0_1(5) * occ_func_0_0(36) +
-          occ_func_0_0(25) * occ_func_0_1(81) * occ_func_0_0(0) +
-          occ_func_0_0(42) * occ_func_0_1(86) * occ_func_0_0(0) +
-          occ_func_0_0(0) * occ_func_0_1(10) * occ_func_0_0(19) +
-          occ_func_0_0(3) * occ_func_0_1(0) * occ_func_0_0(79) +
-          occ_func_0_0(10) * occ_func_0_1(0) * occ_func_0_0(83) +
-          occ_func_0_0(33) * occ_func_0_1(82) * occ_func_0_0(0) +
-          occ_func_0_0(0) * occ_func_0_1(3) * occ_func_0_0(28) +
-          occ_func_0_0(40) * occ_func_0_1(86) * occ_func_0_0(0) +
-          occ_func_0_0(0) * occ_func_0_1(12) * occ_func_0_0(21) +
-          occ_func_0_0(1) * occ_func_0_1(0) * occ_func_0_0(79) +
-          occ_func_0_0(35) * occ_func_0_1(83) * occ_func_0_0(0) +
-          occ_func_0_0(9) * occ_func_0_1(0) * occ_func_0_0(82) +
-          occ_func_0_0(0) * occ_func_0_1(4) * occ_func_0_0(26) +
-          occ_func_0_0(12) * occ_func_0_1(0) * occ_func_0_0(86) +
-          occ_func_0_0(0) * occ_func_0_1(1) * occ_func_0_0(40) +
-          occ_func_0_0(21) * occ_func_0_1(79) * occ_func_0_0(0) +
-          occ_func_0_0(38) * occ_func_0_1(84) * occ_func_0_0(0) +
-          occ_func_0_0(7) * occ_func_0_1(0) * occ_func_0_0(81) +
-          occ_func_0_0(0) * occ_func_0_1(6) * occ_func_0_0(23) +
-          occ_func_0_0(34) * occ_func_0_1(83) * occ_func_0_0(0) +
-          occ_func_0_0(8) * occ_func_0_1(0) * occ_func_0_0(82) +
-          occ_func_0_0(0) * occ_func_0_1(5) * occ_func_0_0(27) +
-          occ_func_0_0(37) * occ_func_0_1(85) * occ_func_0_0(0) +
-          occ_func_0_0(0) * occ_func_0_1(9) * occ_func_0_0(24) +
-          occ_func_0_0(4) * occ_func_0_1(0) * occ_func_0_0(80) +
-          occ_func_0_0(0) * occ_func_0_1(10) * occ_func_0_0(33) +
-          occ_func_0_0(28) * occ_func_0_1(83) * occ_func_0_0(0) +
-          occ_func_0_0(3) * occ_func_0_1(0) * occ_func_0_0(82) +
-          occ_func_0_0(11) * occ_func_0_1(0) * occ_func_0_0(84) +
-          occ_func_0_0(0) * occ_func_0_1(2) * occ_func_0_0(31) +
-          occ_func_0_0(30) * occ_func_0_1(81) * occ_func_0_0(0) +
-          occ_func_0_0(9) * occ_func_0_1(0) * occ_func_0_0(85) +
-          occ_func_0_0(0) * occ_func_0_1(4) * occ_func_0_0(37) +
-          occ_func_0_0(24) * occ_func_0_1(80) * occ_func_0_0(0) +
-          occ_func_0_0(41) * occ_func_0_1(86) * occ_func_0_0(0) +
-          occ_func_0_0(0) * occ_func_0_1(11) * occ_func_0_0(20) +
-          occ_func_0_0(2) * occ_func_0_1(0) * occ_func_0_0(79)) /
          24.;
 }
 template <typename Scalar>
@@ -6102,18 +6362,18 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_11_3_at_0() const {
           occ_func_0_1(11) * occ_func_0_1(0) * occ_func_0_0(86) +
           occ_func_0_1(0) * occ_func_0_1(2) * occ_func_0_0(41) +
           occ_func_0_1(20) * occ_func_0_1(79) * occ_func_0_0(0) +
-          occ_func_0_1(32) * occ_func_0_1(85) * occ_func_0_0(0) +
-          occ_func_0_1(0) * occ_func_0_1(12) * occ_func_0_0(29) +
-          occ_func_0_1(1) * occ_func_0_1(0) * occ_func_0_0(80) +
-          occ_func_0_1(39) * occ_func_0_1(85) * occ_func_0_0(0) +
-          occ_func_0_1(0) * occ_func_0_1(7) * occ_func_0_0(22) +
-          occ_func_0_1(6) * occ_func_0_1(0) * occ_func_0_0(80) +
-          occ_func_0_1(31) * occ_func_0_1(84) * occ_func_0_0(0) +
-          occ_func_0_1(0) * occ_func_0_1(11) * occ_func_0_0(30) +
-          occ_func_0_1(2) * occ_func_0_1(0) * occ_func_0_0(81) +
-          occ_func_0_1(36) * occ_func_0_1(84) * occ_func_0_0(0) +
-          occ_func_0_1(0) * occ_func_0_1(8) * occ_func_0_0(25) +
-          occ_func_0_1(5) * occ_func_0_1(0) * occ_func_0_0(81) +
+          occ_func_0_1(32) * occ_func_0_0(85) * occ_func_0_1(0) +
+          occ_func_0_1(0) * occ_func_0_0(12) * occ_func_0_1(29) +
+          occ_func_0_1(1) * occ_func_0_0(0) * occ_func_0_1(80) +
+          occ_func_0_1(39) * occ_func_0_0(85) * occ_func_0_1(0) +
+          occ_func_0_1(0) * occ_func_0_0(7) * occ_func_0_1(22) +
+          occ_func_0_1(6) * occ_func_0_0(0) * occ_func_0_1(80) +
+          occ_func_0_1(31) * occ_func_0_0(84) * occ_func_0_1(0) +
+          occ_func_0_1(0) * occ_func_0_0(11) * occ_func_0_1(30) +
+          occ_func_0_1(2) * occ_func_0_0(0) * occ_func_0_1(81) +
+          occ_func_0_1(36) * occ_func_0_0(84) * occ_func_0_1(0) +
+          occ_func_0_1(0) * occ_func_0_0(8) * occ_func_0_1(25) +
+          occ_func_0_1(5) * occ_func_0_0(0) * occ_func_0_1(81) +
           occ_func_0_1(7) * occ_func_0_1(0) * occ_func_0_0(85) +
           occ_func_0_1(0) * occ_func_0_1(6) * occ_func_0_0(39) +
           occ_func_0_1(22) * occ_func_0_1(80) * occ_func_0_0(0) +
@@ -6129,42 +6389,42 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_11_3_at_0() const {
           occ_func_0_1(8) * occ_func_0_1(0) * occ_func_0_0(84) +
           occ_func_0_1(0) * occ_func_0_1(5) * occ_func_0_0(36) +
           occ_func_0_1(25) * occ_func_0_1(81) * occ_func_0_0(0) +
-          occ_func_0_1(42) * occ_func_0_1(86) * occ_func_0_0(0) +
-          occ_func_0_1(0) * occ_func_0_1(10) * occ_func_0_0(19) +
-          occ_func_0_1(3) * occ_func_0_1(0) * occ_func_0_0(79) +
-          occ_func_0_1(10) * occ_func_0_1(0) * occ_func_0_0(83) +
-          occ_func_0_1(33) * occ_func_0_1(82) * occ_func_0_0(0) +
-          occ_func_0_1(0) * occ_func_0_1(3) * occ_func_0_0(28) +
-          occ_func_0_1(40) * occ_func_0_1(86) * occ_func_0_0(0) +
-          occ_func_0_1(0) * occ_func_0_1(12) * occ_func_0_0(21) +
-          occ_func_0_1(1) * occ_func_0_1(0) * occ_func_0_0(79) +
-          occ_func_0_1(35) * occ_func_0_1(83) * occ_func_0_0(0) +
-          occ_func_0_1(9) * occ_func_0_1(0) * occ_func_0_0(82) +
-          occ_func_0_1(0) * occ_func_0_1(4) * occ_func_0_0(26) +
+          occ_func_0_1(42) * occ_func_0_0(86) * occ_func_0_1(0) +
+          occ_func_0_1(0) * occ_func_0_0(10) * occ_func_0_1(19) +
+          occ_func_0_1(3) * occ_func_0_0(0) * occ_func_0_1(79) +
+          occ_func_0_0(10) * occ_func_0_1(0) * occ_func_0_1(83) +
+          occ_func_0_0(33) * occ_func_0_1(82) * occ_func_0_1(0) +
+          occ_func_0_0(0) * occ_func_0_1(3) * occ_func_0_1(28) +
+          occ_func_0_1(40) * occ_func_0_0(86) * occ_func_0_1(0) +
+          occ_func_0_1(0) * occ_func_0_0(12) * occ_func_0_1(21) +
+          occ_func_0_1(1) * occ_func_0_0(0) * occ_func_0_1(79) +
+          occ_func_0_0(35) * occ_func_0_1(83) * occ_func_0_1(0) +
+          occ_func_0_0(9) * occ_func_0_1(0) * occ_func_0_1(82) +
+          occ_func_0_0(0) * occ_func_0_1(4) * occ_func_0_1(26) +
           occ_func_0_1(12) * occ_func_0_1(0) * occ_func_0_0(86) +
           occ_func_0_1(0) * occ_func_0_1(1) * occ_func_0_0(40) +
           occ_func_0_1(21) * occ_func_0_1(79) * occ_func_0_0(0) +
-          occ_func_0_1(38) * occ_func_0_1(84) * occ_func_0_0(0) +
-          occ_func_0_1(7) * occ_func_0_1(0) * occ_func_0_0(81) +
-          occ_func_0_1(0) * occ_func_0_1(6) * occ_func_0_0(23) +
-          occ_func_0_1(34) * occ_func_0_1(83) * occ_func_0_0(0) +
-          occ_func_0_1(8) * occ_func_0_1(0) * occ_func_0_0(82) +
-          occ_func_0_1(0) * occ_func_0_1(5) * occ_func_0_0(27) +
-          occ_func_0_1(37) * occ_func_0_1(85) * occ_func_0_0(0) +
-          occ_func_0_1(0) * occ_func_0_1(9) * occ_func_0_0(24) +
-          occ_func_0_1(4) * occ_func_0_1(0) * occ_func_0_0(80) +
-          occ_func_0_1(0) * occ_func_0_1(10) * occ_func_0_0(33) +
-          occ_func_0_1(28) * occ_func_0_1(83) * occ_func_0_0(0) +
-          occ_func_0_1(3) * occ_func_0_1(0) * occ_func_0_0(82) +
+          occ_func_0_0(38) * occ_func_0_1(84) * occ_func_0_1(0) +
+          occ_func_0_0(7) * occ_func_0_1(0) * occ_func_0_1(81) +
+          occ_func_0_0(0) * occ_func_0_1(6) * occ_func_0_1(23) +
+          occ_func_0_0(34) * occ_func_0_1(83) * occ_func_0_1(0) +
+          occ_func_0_0(8) * occ_func_0_1(0) * occ_func_0_1(82) +
+          occ_func_0_0(0) * occ_func_0_1(5) * occ_func_0_1(27) +
+          occ_func_0_1(37) * occ_func_0_0(85) * occ_func_0_1(0) +
+          occ_func_0_1(0) * occ_func_0_0(9) * occ_func_0_1(24) +
+          occ_func_0_1(4) * occ_func_0_0(0) * occ_func_0_1(80) +
+          occ_func_0_1(0) * occ_func_0_0(10) * occ_func_0_1(33) +
+          occ_func_0_1(28) * occ_func_0_0(83) * occ_func_0_1(0) +
+          occ_func_0_1(3) * occ_func_0_0(0) * occ_func_0_1(82) +
           occ_func_0_1(11) * occ_func_0_1(0) * occ_func_0_0(84) +
           occ_func_0_1(0) * occ_func_0_1(2) * occ_func_0_0(31) +
           occ_func_0_1(30) * occ_func_0_1(81) * occ_func_0_0(0) +
           occ_func_0_1(9) * occ_func_0_1(0) * occ_func_0_0(85) +
           occ_func_0_1(0) * occ_func_0_1(4) * occ_func_0_0(37) +
           occ_func_0_1(24) * occ_func_0_1(80) * occ_func_0_0(0) +
-          occ_func_0_1(41) * occ_func_0_1(86) * occ_func_0_0(0) +
-          occ_func_0_1(0) * occ_func_0_1(11) * occ_func_0_0(20) +
-          occ_func_0_1(2) * occ_func_0_1(0) * occ_func_0_0(79)) /
+          occ_func_0_1(41) * occ_func_0_0(86) * occ_func_0_1(0) +
+          occ_func_0_1(0) * occ_func_0_0(11) * occ_func_0_1(20) +
+          occ_func_0_1(2) * occ_func_0_0(0) * occ_func_0_1(79)) /
          24.;
 }
 template <typename Scalar>
@@ -6178,18 +6438,18 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_11_4_at_0() const {
           occ_func_0_0(11) * occ_func_0_0(0) * occ_func_0_1(86) +
           occ_func_0_0(0) * occ_func_0_0(2) * occ_func_0_1(41) +
           occ_func_0_0(20) * occ_func_0_0(79) * occ_func_0_1(0) +
-          occ_func_0_0(32) * occ_func_0_0(85) * occ_func_0_1(0) +
-          occ_func_0_0(0) * occ_func_0_0(12) * occ_func_0_1(29) +
-          occ_func_0_0(1) * occ_func_0_0(0) * occ_func_0_1(80) +
-          occ_func_0_0(39) * occ_func_0_0(85) * occ_func_0_1(0) +
-          occ_func_0_0(0) * occ_func_0_0(7) * occ_func_0_1(22) +
-          occ_func_0_0(6) * occ_func_0_0(0) * occ_func_0_1(80) +
-          occ_func_0_0(31) * occ_func_0_0(84) * occ_func_0_1(0) +
-          occ_func_0_0(0) * occ_func_0_0(11) * occ_func_0_1(30) +
-          occ_func_0_0(2) * occ_func_0_0(0) * occ_func_0_1(81) +
-          occ_func_0_0(36) * occ_func_0_0(84) * occ_func_0_1(0) +
-          occ_func_0_0(0) * occ_func_0_0(8) * occ_func_0_1(25) +
-          occ_func_0_0(5) * occ_func_0_0(0) * occ_func_0_1(81) +
+          occ_func_0_0(32) * occ_func_0_1(85) * occ_func_0_0(0) +
+          occ_func_0_0(0) * occ_func_0_1(12) * occ_func_0_0(29) +
+          occ_func_0_0(1) * occ_func_0_1(0) * occ_func_0_0(80) +
+          occ_func_0_0(39) * occ_func_0_1(85) * occ_func_0_0(0) +
+          occ_func_0_0(0) * occ_func_0_1(7) * occ_func_0_0(22) +
+          occ_func_0_0(6) * occ_func_0_1(0) * occ_func_0_0(80) +
+          occ_func_0_0(31) * occ_func_0_1(84) * occ_func_0_0(0) +
+          occ_func_0_0(0) * occ_func_0_1(11) * occ_func_0_0(30) +
+          occ_func_0_0(2) * occ_func_0_1(0) * occ_func_0_0(81) +
+          occ_func_0_0(36) * occ_func_0_1(84) * occ_func_0_0(0) +
+          occ_func_0_0(0) * occ_func_0_1(8) * occ_func_0_0(25) +
+          occ_func_0_0(5) * occ_func_0_1(0) * occ_func_0_0(81) +
           occ_func_0_0(7) * occ_func_0_0(0) * occ_func_0_1(85) +
           occ_func_0_0(0) * occ_func_0_0(6) * occ_func_0_1(39) +
           occ_func_0_0(22) * occ_func_0_0(80) * occ_func_0_1(0) +
@@ -6205,42 +6465,42 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_11_4_at_0() const {
           occ_func_0_0(8) * occ_func_0_0(0) * occ_func_0_1(84) +
           occ_func_0_0(0) * occ_func_0_0(5) * occ_func_0_1(36) +
           occ_func_0_0(25) * occ_func_0_0(81) * occ_func_0_1(0) +
-          occ_func_0_0(42) * occ_func_0_0(86) * occ_func_0_1(0) +
-          occ_func_0_0(0) * occ_func_0_0(10) * occ_func_0_1(19) +
-          occ_func_0_0(3) * occ_func_0_0(0) * occ_func_0_1(79) +
-          occ_func_0_0(10) * occ_func_0_0(0) * occ_func_0_1(83) +
-          occ_func_0_0(33) * occ_func_0_0(82) * occ_func_0_1(0) +
-          occ_func_0_0(0) * occ_func_0_0(3) * occ_func_0_1(28) +
-          occ_func_0_0(40) * occ_func_0_0(86) * occ_func_0_1(0) +
-          occ_func_0_0(0) * occ_func_0_0(12) * occ_func_0_1(21) +
-          occ_func_0_0(1) * occ_func_0_0(0) * occ_func_0_1(79) +
-          occ_func_0_0(35) * occ_func_0_0(83) * occ_func_0_1(0) +
-          occ_func_0_0(9) * occ_func_0_0(0) * occ_func_0_1(82) +
-          occ_func_0_0(0) * occ_func_0_0(4) * occ_func_0_1(26) +
+          occ_func_0_0(42) * occ_func_0_1(86) * occ_func_0_0(0) +
+          occ_func_0_0(0) * occ_func_0_1(10) * occ_func_0_0(19) +
+          occ_func_0_0(3) * occ_func_0_1(0) * occ_func_0_0(79) +
+          occ_func_0_1(10) * occ_func_0_0(0) * occ_func_0_0(83) +
+          occ_func_0_1(33) * occ_func_0_0(82) * occ_func_0_0(0) +
+          occ_func_0_1(0) * occ_func_0_0(3) * occ_func_0_0(28) +
+          occ_func_0_0(40) * occ_func_0_1(86) * occ_func_0_0(0) +
+          occ_func_0_0(0) * occ_func_0_1(12) * occ_func_0_0(21) +
+          occ_func_0_0(1) * occ_func_0_1(0) * occ_func_0_0(79) +
+          occ_func_0_1(35) * occ_func_0_0(83) * occ_func_0_0(0) +
+          occ_func_0_1(9) * occ_func_0_0(0) * occ_func_0_0(82) +
+          occ_func_0_1(0) * occ_func_0_0(4) * occ_func_0_0(26) +
           occ_func_0_0(12) * occ_func_0_0(0) * occ_func_0_1(86) +
           occ_func_0_0(0) * occ_func_0_0(1) * occ_func_0_1(40) +
           occ_func_0_0(21) * occ_func_0_0(79) * occ_func_0_1(0) +
-          occ_func_0_0(38) * occ_func_0_0(84) * occ_func_0_1(0) +
-          occ_func_0_0(7) * occ_func_0_0(0) * occ_func_0_1(81) +
-          occ_func_0_0(0) * occ_func_0_0(6) * occ_func_0_1(23) +
-          occ_func_0_0(34) * occ_func_0_0(83) * occ_func_0_1(0) +
-          occ_func_0_0(8) * occ_func_0_0(0) * occ_func_0_1(82) +
-          occ_func_0_0(0) * occ_func_0_0(5) * occ_func_0_1(27) +
-          occ_func_0_0(37) * occ_func_0_0(85) * occ_func_0_1(0) +
-          occ_func_0_0(0) * occ_func_0_0(9) * occ_func_0_1(24) +
-          occ_func_0_0(4) * occ_func_0_0(0) * occ_func_0_1(80) +
-          occ_func_0_0(0) * occ_func_0_0(10) * occ_func_0_1(33) +
-          occ_func_0_0(28) * occ_func_0_0(83) * occ_func_0_1(0) +
-          occ_func_0_0(3) * occ_func_0_0(0) * occ_func_0_1(82) +
+          occ_func_0_1(38) * occ_func_0_0(84) * occ_func_0_0(0) +
+          occ_func_0_1(7) * occ_func_0_0(0) * occ_func_0_0(81) +
+          occ_func_0_1(0) * occ_func_0_0(6) * occ_func_0_0(23) +
+          occ_func_0_1(34) * occ_func_0_0(83) * occ_func_0_0(0) +
+          occ_func_0_1(8) * occ_func_0_0(0) * occ_func_0_0(82) +
+          occ_func_0_1(0) * occ_func_0_0(5) * occ_func_0_0(27) +
+          occ_func_0_0(37) * occ_func_0_1(85) * occ_func_0_0(0) +
+          occ_func_0_0(0) * occ_func_0_1(9) * occ_func_0_0(24) +
+          occ_func_0_0(4) * occ_func_0_1(0) * occ_func_0_0(80) +
+          occ_func_0_0(0) * occ_func_0_1(10) * occ_func_0_0(33) +
+          occ_func_0_0(28) * occ_func_0_1(83) * occ_func_0_0(0) +
+          occ_func_0_0(3) * occ_func_0_1(0) * occ_func_0_0(82) +
           occ_func_0_0(11) * occ_func_0_0(0) * occ_func_0_1(84) +
           occ_func_0_0(0) * occ_func_0_0(2) * occ_func_0_1(31) +
           occ_func_0_0(30) * occ_func_0_0(81) * occ_func_0_1(0) +
           occ_func_0_0(9) * occ_func_0_0(0) * occ_func_0_1(85) +
           occ_func_0_0(0) * occ_func_0_0(4) * occ_func_0_1(37) +
           occ_func_0_0(24) * occ_func_0_0(80) * occ_func_0_1(0) +
-          occ_func_0_0(41) * occ_func_0_0(86) * occ_func_0_1(0) +
-          occ_func_0_0(0) * occ_func_0_0(11) * occ_func_0_1(20) +
-          occ_func_0_0(2) * occ_func_0_0(0) * occ_func_0_1(79)) /
+          occ_func_0_0(41) * occ_func_0_1(86) * occ_func_0_0(0) +
+          occ_func_0_0(0) * occ_func_0_1(11) * occ_func_0_0(20) +
+          occ_func_0_0(2) * occ_func_0_1(0) * occ_func_0_0(79)) /
          24.;
 }
 template <typename Scalar>
@@ -6248,82 +6508,6 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_11_5_at_0() const {
   return (occ_func_0_1(0) * occ_func_0_0(9) * occ_func_0_1(35) +
           occ_func_0_1(4) * occ_func_0_0(0) * occ_func_0_1(83) +
           occ_func_0_1(26) * occ_func_0_0(82) * occ_func_0_1(0) +
-          occ_func_0_1(10) * occ_func_0_0(0) * occ_func_0_1(86) +
-          occ_func_0_1(0) * occ_func_0_0(3) * occ_func_0_1(42) +
-          occ_func_0_1(19) * occ_func_0_0(79) * occ_func_0_1(0) +
-          occ_func_0_1(11) * occ_func_0_0(0) * occ_func_0_1(86) +
-          occ_func_0_1(0) * occ_func_0_0(2) * occ_func_0_1(41) +
-          occ_func_0_1(20) * occ_func_0_0(79) * occ_func_0_1(0) +
-          occ_func_0_1(32) * occ_func_0_0(85) * occ_func_0_1(0) +
-          occ_func_0_1(0) * occ_func_0_0(12) * occ_func_0_1(29) +
-          occ_func_0_1(1) * occ_func_0_0(0) * occ_func_0_1(80) +
-          occ_func_0_1(39) * occ_func_0_0(85) * occ_func_0_1(0) +
-          occ_func_0_1(0) * occ_func_0_0(7) * occ_func_0_1(22) +
-          occ_func_0_1(6) * occ_func_0_0(0) * occ_func_0_1(80) +
-          occ_func_0_1(31) * occ_func_0_0(84) * occ_func_0_1(0) +
-          occ_func_0_1(0) * occ_func_0_0(11) * occ_func_0_1(30) +
-          occ_func_0_1(2) * occ_func_0_0(0) * occ_func_0_1(81) +
-          occ_func_0_1(36) * occ_func_0_0(84) * occ_func_0_1(0) +
-          occ_func_0_1(0) * occ_func_0_0(8) * occ_func_0_1(25) +
-          occ_func_0_1(5) * occ_func_0_0(0) * occ_func_0_1(81) +
-          occ_func_0_1(7) * occ_func_0_0(0) * occ_func_0_1(85) +
-          occ_func_0_1(0) * occ_func_0_0(6) * occ_func_0_1(39) +
-          occ_func_0_1(22) * occ_func_0_0(80) * occ_func_0_1(0) +
-          occ_func_0_1(12) * occ_func_0_0(0) * occ_func_0_1(85) +
-          occ_func_0_1(0) * occ_func_0_0(1) * occ_func_0_1(32) +
-          occ_func_0_1(29) * occ_func_0_0(80) * occ_func_0_1(0) +
-          occ_func_0_1(0) * occ_func_0_0(8) * occ_func_0_1(34) +
-          occ_func_0_1(5) * occ_func_0_0(0) * occ_func_0_1(83) +
-          occ_func_0_1(27) * occ_func_0_0(82) * occ_func_0_1(0) +
-          occ_func_0_1(0) * occ_func_0_0(7) * occ_func_0_1(38) +
-          occ_func_0_1(6) * occ_func_0_0(0) * occ_func_0_1(84) +
-          occ_func_0_1(23) * occ_func_0_0(81) * occ_func_0_1(0) +
-          occ_func_0_1(8) * occ_func_0_0(0) * occ_func_0_1(84) +
-          occ_func_0_1(0) * occ_func_0_0(5) * occ_func_0_1(36) +
-          occ_func_0_1(25) * occ_func_0_0(81) * occ_func_0_1(0) +
-          occ_func_0_1(42) * occ_func_0_0(86) * occ_func_0_1(0) +
-          occ_func_0_1(0) * occ_func_0_0(10) * occ_func_0_1(19) +
-          occ_func_0_1(3) * occ_func_0_0(0) * occ_func_0_1(79) +
-          occ_func_0_1(10) * occ_func_0_0(0) * occ_func_0_1(83) +
-          occ_func_0_1(33) * occ_func_0_0(82) * occ_func_0_1(0) +
-          occ_func_0_1(0) * occ_func_0_0(3) * occ_func_0_1(28) +
-          occ_func_0_1(40) * occ_func_0_0(86) * occ_func_0_1(0) +
-          occ_func_0_1(0) * occ_func_0_0(12) * occ_func_0_1(21) +
-          occ_func_0_1(1) * occ_func_0_0(0) * occ_func_0_1(79) +
-          occ_func_0_1(35) * occ_func_0_0(83) * occ_func_0_1(0) +
-          occ_func_0_1(9) * occ_func_0_0(0) * occ_func_0_1(82) +
-          occ_func_0_1(0) * occ_func_0_0(4) * occ_func_0_1(26) +
-          occ_func_0_1(12) * occ_func_0_0(0) * occ_func_0_1(86) +
-          occ_func_0_1(0) * occ_func_0_0(1) * occ_func_0_1(40) +
-          occ_func_0_1(21) * occ_func_0_0(79) * occ_func_0_1(0) +
-          occ_func_0_1(38) * occ_func_0_0(84) * occ_func_0_1(0) +
-          occ_func_0_1(7) * occ_func_0_0(0) * occ_func_0_1(81) +
-          occ_func_0_1(0) * occ_func_0_0(6) * occ_func_0_1(23) +
-          occ_func_0_1(34) * occ_func_0_0(83) * occ_func_0_1(0) +
-          occ_func_0_1(8) * occ_func_0_0(0) * occ_func_0_1(82) +
-          occ_func_0_1(0) * occ_func_0_0(5) * occ_func_0_1(27) +
-          occ_func_0_1(37) * occ_func_0_0(85) * occ_func_0_1(0) +
-          occ_func_0_1(0) * occ_func_0_0(9) * occ_func_0_1(24) +
-          occ_func_0_1(4) * occ_func_0_0(0) * occ_func_0_1(80) +
-          occ_func_0_1(0) * occ_func_0_0(10) * occ_func_0_1(33) +
-          occ_func_0_1(28) * occ_func_0_0(83) * occ_func_0_1(0) +
-          occ_func_0_1(3) * occ_func_0_0(0) * occ_func_0_1(82) +
-          occ_func_0_1(11) * occ_func_0_0(0) * occ_func_0_1(84) +
-          occ_func_0_1(0) * occ_func_0_0(2) * occ_func_0_1(31) +
-          occ_func_0_1(30) * occ_func_0_0(81) * occ_func_0_1(0) +
-          occ_func_0_1(9) * occ_func_0_0(0) * occ_func_0_1(85) +
-          occ_func_0_1(0) * occ_func_0_0(4) * occ_func_0_1(37) +
-          occ_func_0_1(24) * occ_func_0_0(80) * occ_func_0_1(0) +
-          occ_func_0_1(41) * occ_func_0_0(86) * occ_func_0_1(0) +
-          occ_func_0_1(0) * occ_func_0_0(11) * occ_func_0_1(20) +
-          occ_func_0_1(2) * occ_func_0_0(0) * occ_func_0_1(79)) /
-         24.;
-}
-template <typename Scalar>
-Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_11_6_at_0() const {
-  return (occ_func_0_0(0) * occ_func_0_1(9) * occ_func_0_1(35) +
-          occ_func_0_0(4) * occ_func_0_1(0) * occ_func_0_1(83) +
-          occ_func_0_0(26) * occ_func_0_1(82) * occ_func_0_1(0) +
           occ_func_0_0(10) * occ_func_0_1(0) * occ_func_0_1(86) +
           occ_func_0_0(0) * occ_func_0_1(3) * occ_func_0_1(42) +
           occ_func_0_0(19) * occ_func_0_1(79) * occ_func_0_1(0) +
@@ -6348,42 +6532,42 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_11_6_at_0() const {
           occ_func_0_0(12) * occ_func_0_1(0) * occ_func_0_1(85) +
           occ_func_0_0(0) * occ_func_0_1(1) * occ_func_0_1(32) +
           occ_func_0_0(29) * occ_func_0_1(80) * occ_func_0_1(0) +
-          occ_func_0_0(0) * occ_func_0_1(8) * occ_func_0_1(34) +
-          occ_func_0_0(5) * occ_func_0_1(0) * occ_func_0_1(83) +
-          occ_func_0_0(27) * occ_func_0_1(82) * occ_func_0_1(0) +
-          occ_func_0_0(0) * occ_func_0_1(7) * occ_func_0_1(38) +
-          occ_func_0_0(6) * occ_func_0_1(0) * occ_func_0_1(84) +
-          occ_func_0_0(23) * occ_func_0_1(81) * occ_func_0_1(0) +
+          occ_func_0_1(0) * occ_func_0_0(8) * occ_func_0_1(34) +
+          occ_func_0_1(5) * occ_func_0_0(0) * occ_func_0_1(83) +
+          occ_func_0_1(27) * occ_func_0_0(82) * occ_func_0_1(0) +
+          occ_func_0_1(0) * occ_func_0_0(7) * occ_func_0_1(38) +
+          occ_func_0_1(6) * occ_func_0_0(0) * occ_func_0_1(84) +
+          occ_func_0_1(23) * occ_func_0_0(81) * occ_func_0_1(0) +
           occ_func_0_0(8) * occ_func_0_1(0) * occ_func_0_1(84) +
           occ_func_0_0(0) * occ_func_0_1(5) * occ_func_0_1(36) +
           occ_func_0_0(25) * occ_func_0_1(81) * occ_func_0_1(0) +
           occ_func_0_0(42) * occ_func_0_1(86) * occ_func_0_1(0) +
           occ_func_0_0(0) * occ_func_0_1(10) * occ_func_0_1(19) +
           occ_func_0_0(3) * occ_func_0_1(0) * occ_func_0_1(79) +
-          occ_func_0_0(10) * occ_func_0_1(0) * occ_func_0_1(83) +
-          occ_func_0_0(33) * occ_func_0_1(82) * occ_func_0_1(0) +
-          occ_func_0_0(0) * occ_func_0_1(3) * occ_func_0_1(28) +
+          occ_func_0_1(10) * occ_func_0_1(0) * occ_func_0_0(83) +
+          occ_func_0_1(33) * occ_func_0_1(82) * occ_func_0_0(0) +
+          occ_func_0_1(0) * occ_func_0_1(3) * occ_func_0_0(28) +
           occ_func_0_0(40) * occ_func_0_1(86) * occ_func_0_1(0) +
           occ_func_0_0(0) * occ_func_0_1(12) * occ_func_0_1(21) +
           occ_func_0_0(1) * occ_func_0_1(0) * occ_func_0_1(79) +
-          occ_func_0_0(35) * occ_func_0_1(83) * occ_func_0_1(0) +
-          occ_func_0_0(9) * occ_func_0_1(0) * occ_func_0_1(82) +
-          occ_func_0_0(0) * occ_func_0_1(4) * occ_func_0_1(26) +
+          occ_func_0_1(35) * occ_func_0_0(83) * occ_func_0_1(0) +
+          occ_func_0_1(9) * occ_func_0_0(0) * occ_func_0_1(82) +
+          occ_func_0_1(0) * occ_func_0_0(4) * occ_func_0_1(26) +
           occ_func_0_0(12) * occ_func_0_1(0) * occ_func_0_1(86) +
           occ_func_0_0(0) * occ_func_0_1(1) * occ_func_0_1(40) +
           occ_func_0_0(21) * occ_func_0_1(79) * occ_func_0_1(0) +
-          occ_func_0_0(38) * occ_func_0_1(84) * occ_func_0_1(0) +
-          occ_func_0_0(7) * occ_func_0_1(0) * occ_func_0_1(81) +
-          occ_func_0_0(0) * occ_func_0_1(6) * occ_func_0_1(23) +
-          occ_func_0_0(34) * occ_func_0_1(83) * occ_func_0_1(0) +
-          occ_func_0_0(8) * occ_func_0_1(0) * occ_func_0_1(82) +
-          occ_func_0_0(0) * occ_func_0_1(5) * occ_func_0_1(27) +
+          occ_func_0_1(38) * occ_func_0_0(84) * occ_func_0_1(0) +
+          occ_func_0_1(7) * occ_func_0_0(0) * occ_func_0_1(81) +
+          occ_func_0_1(0) * occ_func_0_0(6) * occ_func_0_1(23) +
+          occ_func_0_1(34) * occ_func_0_0(83) * occ_func_0_1(0) +
+          occ_func_0_1(8) * occ_func_0_0(0) * occ_func_0_1(82) +
+          occ_func_0_1(0) * occ_func_0_0(5) * occ_func_0_1(27) +
           occ_func_0_0(37) * occ_func_0_1(85) * occ_func_0_1(0) +
           occ_func_0_0(0) * occ_func_0_1(9) * occ_func_0_1(24) +
           occ_func_0_0(4) * occ_func_0_1(0) * occ_func_0_1(80) +
-          occ_func_0_0(0) * occ_func_0_1(10) * occ_func_0_1(33) +
-          occ_func_0_0(28) * occ_func_0_1(83) * occ_func_0_1(0) +
-          occ_func_0_0(3) * occ_func_0_1(0) * occ_func_0_1(82) +
+          occ_func_0_1(0) * occ_func_0_1(10) * occ_func_0_0(33) +
+          occ_func_0_1(28) * occ_func_0_1(83) * occ_func_0_0(0) +
+          occ_func_0_1(3) * occ_func_0_1(0) * occ_func_0_0(82) +
           occ_func_0_0(11) * occ_func_0_1(0) * occ_func_0_1(84) +
           occ_func_0_0(0) * occ_func_0_1(2) * occ_func_0_1(31) +
           occ_func_0_0(30) * occ_func_0_1(81) * occ_func_0_1(0) +
@@ -6393,6 +6577,82 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_11_6_at_0() const {
           occ_func_0_0(41) * occ_func_0_1(86) * occ_func_0_1(0) +
           occ_func_0_0(0) * occ_func_0_1(11) * occ_func_0_1(20) +
           occ_func_0_0(2) * occ_func_0_1(0) * occ_func_0_1(79)) /
+         24.;
+}
+template <typename Scalar>
+Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_11_6_at_0() const {
+  return (occ_func_0_0(0) * occ_func_0_1(9) * occ_func_0_1(35) +
+          occ_func_0_0(4) * occ_func_0_1(0) * occ_func_0_1(83) +
+          occ_func_0_0(26) * occ_func_0_1(82) * occ_func_0_1(0) +
+          occ_func_0_1(10) * occ_func_0_0(0) * occ_func_0_1(86) +
+          occ_func_0_1(0) * occ_func_0_0(3) * occ_func_0_1(42) +
+          occ_func_0_1(19) * occ_func_0_0(79) * occ_func_0_1(0) +
+          occ_func_0_1(11) * occ_func_0_0(0) * occ_func_0_1(86) +
+          occ_func_0_1(0) * occ_func_0_0(2) * occ_func_0_1(41) +
+          occ_func_0_1(20) * occ_func_0_0(79) * occ_func_0_1(0) +
+          occ_func_0_1(32) * occ_func_0_1(85) * occ_func_0_0(0) +
+          occ_func_0_1(0) * occ_func_0_1(12) * occ_func_0_0(29) +
+          occ_func_0_1(1) * occ_func_0_1(0) * occ_func_0_0(80) +
+          occ_func_0_1(39) * occ_func_0_1(85) * occ_func_0_0(0) +
+          occ_func_0_1(0) * occ_func_0_1(7) * occ_func_0_0(22) +
+          occ_func_0_1(6) * occ_func_0_1(0) * occ_func_0_0(80) +
+          occ_func_0_1(31) * occ_func_0_1(84) * occ_func_0_0(0) +
+          occ_func_0_1(0) * occ_func_0_1(11) * occ_func_0_0(30) +
+          occ_func_0_1(2) * occ_func_0_1(0) * occ_func_0_0(81) +
+          occ_func_0_1(36) * occ_func_0_1(84) * occ_func_0_0(0) +
+          occ_func_0_1(0) * occ_func_0_1(8) * occ_func_0_0(25) +
+          occ_func_0_1(5) * occ_func_0_1(0) * occ_func_0_0(81) +
+          occ_func_0_1(7) * occ_func_0_0(0) * occ_func_0_1(85) +
+          occ_func_0_1(0) * occ_func_0_0(6) * occ_func_0_1(39) +
+          occ_func_0_1(22) * occ_func_0_0(80) * occ_func_0_1(0) +
+          occ_func_0_1(12) * occ_func_0_0(0) * occ_func_0_1(85) +
+          occ_func_0_1(0) * occ_func_0_0(1) * occ_func_0_1(32) +
+          occ_func_0_1(29) * occ_func_0_0(80) * occ_func_0_1(0) +
+          occ_func_0_0(0) * occ_func_0_1(8) * occ_func_0_1(34) +
+          occ_func_0_0(5) * occ_func_0_1(0) * occ_func_0_1(83) +
+          occ_func_0_0(27) * occ_func_0_1(82) * occ_func_0_1(0) +
+          occ_func_0_0(0) * occ_func_0_1(7) * occ_func_0_1(38) +
+          occ_func_0_0(6) * occ_func_0_1(0) * occ_func_0_1(84) +
+          occ_func_0_0(23) * occ_func_0_1(81) * occ_func_0_1(0) +
+          occ_func_0_1(8) * occ_func_0_0(0) * occ_func_0_1(84) +
+          occ_func_0_1(0) * occ_func_0_0(5) * occ_func_0_1(36) +
+          occ_func_0_1(25) * occ_func_0_0(81) * occ_func_0_1(0) +
+          occ_func_0_1(42) * occ_func_0_1(86) * occ_func_0_0(0) +
+          occ_func_0_1(0) * occ_func_0_1(10) * occ_func_0_0(19) +
+          occ_func_0_1(3) * occ_func_0_1(0) * occ_func_0_0(79) +
+          occ_func_0_1(10) * occ_func_0_0(0) * occ_func_0_1(83) +
+          occ_func_0_1(33) * occ_func_0_0(82) * occ_func_0_1(0) +
+          occ_func_0_1(0) * occ_func_0_0(3) * occ_func_0_1(28) +
+          occ_func_0_1(40) * occ_func_0_1(86) * occ_func_0_0(0) +
+          occ_func_0_1(0) * occ_func_0_1(12) * occ_func_0_0(21) +
+          occ_func_0_1(1) * occ_func_0_1(0) * occ_func_0_0(79) +
+          occ_func_0_1(35) * occ_func_0_1(83) * occ_func_0_0(0) +
+          occ_func_0_1(9) * occ_func_0_1(0) * occ_func_0_0(82) +
+          occ_func_0_1(0) * occ_func_0_1(4) * occ_func_0_0(26) +
+          occ_func_0_1(12) * occ_func_0_0(0) * occ_func_0_1(86) +
+          occ_func_0_1(0) * occ_func_0_0(1) * occ_func_0_1(40) +
+          occ_func_0_1(21) * occ_func_0_0(79) * occ_func_0_1(0) +
+          occ_func_0_1(38) * occ_func_0_1(84) * occ_func_0_0(0) +
+          occ_func_0_1(7) * occ_func_0_1(0) * occ_func_0_0(81) +
+          occ_func_0_1(0) * occ_func_0_1(6) * occ_func_0_0(23) +
+          occ_func_0_1(34) * occ_func_0_1(83) * occ_func_0_0(0) +
+          occ_func_0_1(8) * occ_func_0_1(0) * occ_func_0_0(82) +
+          occ_func_0_1(0) * occ_func_0_1(5) * occ_func_0_0(27) +
+          occ_func_0_1(37) * occ_func_0_1(85) * occ_func_0_0(0) +
+          occ_func_0_1(0) * occ_func_0_1(9) * occ_func_0_0(24) +
+          occ_func_0_1(4) * occ_func_0_1(0) * occ_func_0_0(80) +
+          occ_func_0_0(0) * occ_func_0_1(10) * occ_func_0_1(33) +
+          occ_func_0_0(28) * occ_func_0_1(83) * occ_func_0_1(0) +
+          occ_func_0_0(3) * occ_func_0_1(0) * occ_func_0_1(82) +
+          occ_func_0_1(11) * occ_func_0_0(0) * occ_func_0_1(84) +
+          occ_func_0_1(0) * occ_func_0_0(2) * occ_func_0_1(31) +
+          occ_func_0_1(30) * occ_func_0_0(81) * occ_func_0_1(0) +
+          occ_func_0_1(9) * occ_func_0_0(0) * occ_func_0_1(85) +
+          occ_func_0_1(0) * occ_func_0_0(4) * occ_func_0_1(37) +
+          occ_func_0_1(24) * occ_func_0_0(80) * occ_func_0_1(0) +
+          occ_func_0_1(41) * occ_func_0_1(86) * occ_func_0_0(0) +
+          occ_func_0_1(0) * occ_func_0_1(11) * occ_func_0_0(20) +
+          occ_func_0_1(2) * occ_func_0_1(0) * occ_func_0_0(79)) /
          24.;
 }
 template <typename Scalar>
@@ -6556,6 +6816,86 @@ Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_11_1_at_0(
   return (m_occ_func_0_0[occ_f] - m_occ_func_0_0[occ_i]) *
              (occ_func_0_1(4) * occ_func_0_0(83) +
               occ_func_0_1(26) * occ_func_0_0(82) +
+              occ_func_0_1(3) * occ_func_0_0(42) +
+              occ_func_0_0(19) * occ_func_0_1(79) +
+              occ_func_0_1(2) * occ_func_0_0(41) +
+              occ_func_0_0(20) * occ_func_0_1(79) +
+              occ_func_0_0(12) * occ_func_0_1(29) +
+              occ_func_0_0(1) * occ_func_0_1(80) +
+              occ_func_0_0(7) * occ_func_0_1(22) +
+              occ_func_0_0(6) * occ_func_0_1(80) +
+              occ_func_0_0(11) * occ_func_0_1(30) +
+              occ_func_0_0(2) * occ_func_0_1(81) +
+              occ_func_0_0(8) * occ_func_0_1(25) +
+              occ_func_0_0(5) * occ_func_0_1(81) +
+              occ_func_0_1(6) * occ_func_0_0(39) +
+              occ_func_0_0(22) * occ_func_0_1(80) +
+              occ_func_0_1(1) * occ_func_0_0(32) +
+              occ_func_0_0(29) * occ_func_0_1(80) +
+              occ_func_0_1(5) * occ_func_0_0(83) +
+              occ_func_0_1(27) * occ_func_0_0(82) +
+              occ_func_0_1(6) * occ_func_0_0(84) +
+              occ_func_0_1(23) * occ_func_0_0(81) +
+              occ_func_0_1(5) * occ_func_0_0(36) +
+              occ_func_0_0(25) * occ_func_0_1(81) +
+              occ_func_0_0(10) * occ_func_0_1(19) +
+              occ_func_0_0(3) * occ_func_0_1(79) +
+              occ_func_0_0(33) * occ_func_0_1(82) +
+              occ_func_0_1(3) * occ_func_0_0(28) +
+              occ_func_0_0(12) * occ_func_0_1(21) +
+              occ_func_0_0(1) * occ_func_0_1(79) +
+              occ_func_0_0(9) * occ_func_0_1(82) +
+              occ_func_0_0(4) * occ_func_0_1(26) +
+              occ_func_0_1(1) * occ_func_0_0(40) +
+              occ_func_0_0(21) * occ_func_0_1(79) +
+              occ_func_0_0(7) * occ_func_0_1(81) +
+              occ_func_0_0(6) * occ_func_0_1(23) +
+              occ_func_0_0(8) * occ_func_0_1(82) +
+              occ_func_0_0(5) * occ_func_0_1(27) +
+              occ_func_0_0(9) * occ_func_0_1(24) +
+              occ_func_0_0(4) * occ_func_0_1(80) +
+              occ_func_0_1(28) * occ_func_0_0(83) +
+              occ_func_0_1(3) * occ_func_0_0(82) +
+              occ_func_0_1(2) * occ_func_0_0(31) +
+              occ_func_0_0(30) * occ_func_0_1(81) +
+              occ_func_0_1(4) * occ_func_0_0(37) +
+              occ_func_0_0(24) * occ_func_0_1(80) +
+              occ_func_0_0(11) * occ_func_0_1(20) +
+              occ_func_0_0(2) * occ_func_0_1(79)) /
+             24. +
+         (m_occ_func_0_1[occ_f] - m_occ_func_0_1[occ_i]) *
+             (occ_func_0_0(9) * occ_func_0_0(35) +
+              occ_func_0_0(10) * occ_func_0_0(86) +
+              occ_func_0_0(11) * occ_func_0_0(86) +
+              occ_func_0_0(32) * occ_func_0_0(85) +
+              occ_func_0_0(39) * occ_func_0_0(85) +
+              occ_func_0_0(31) * occ_func_0_0(84) +
+              occ_func_0_0(36) * occ_func_0_0(84) +
+              occ_func_0_0(7) * occ_func_0_0(85) +
+              occ_func_0_0(12) * occ_func_0_0(85) +
+              occ_func_0_0(8) * occ_func_0_0(34) +
+              occ_func_0_0(7) * occ_func_0_0(38) +
+              occ_func_0_0(8) * occ_func_0_0(84) +
+              occ_func_0_0(42) * occ_func_0_0(86) +
+              occ_func_0_0(10) * occ_func_0_0(83) +
+              occ_func_0_0(40) * occ_func_0_0(86) +
+              occ_func_0_0(35) * occ_func_0_0(83) +
+              occ_func_0_0(12) * occ_func_0_0(86) +
+              occ_func_0_0(38) * occ_func_0_0(84) +
+              occ_func_0_0(34) * occ_func_0_0(83) +
+              occ_func_0_0(37) * occ_func_0_0(85) +
+              occ_func_0_0(10) * occ_func_0_0(33) +
+              occ_func_0_0(11) * occ_func_0_0(84) +
+              occ_func_0_0(9) * occ_func_0_0(85) +
+              occ_func_0_0(41) * occ_func_0_0(86)) /
+             24.;
+}
+template <typename Scalar>
+Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_11_2_at_0(
+    int occ_i, int occ_f) const {
+  return (m_occ_func_0_0[occ_f] - m_occ_func_0_0[occ_i]) *
+             (occ_func_0_1(9) * occ_func_0_0(35) +
+              occ_func_0_0(26) * occ_func_0_1(82) +
               occ_func_0_1(10) * occ_func_0_0(86) +
               occ_func_0_1(19) * occ_func_0_0(79) +
               occ_func_0_1(11) * occ_func_0_0(86) +
@@ -6572,30 +6912,30 @@ Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_11_1_at_0(
               occ_func_0_1(22) * occ_func_0_0(80) +
               occ_func_0_1(12) * occ_func_0_0(85) +
               occ_func_0_1(29) * occ_func_0_0(80) +
-              occ_func_0_1(5) * occ_func_0_0(83) +
-              occ_func_0_1(27) * occ_func_0_0(82) +
-              occ_func_0_1(6) * occ_func_0_0(84) +
-              occ_func_0_1(23) * occ_func_0_0(81) +
+              occ_func_0_1(8) * occ_func_0_0(34) +
+              occ_func_0_0(27) * occ_func_0_1(82) +
+              occ_func_0_1(7) * occ_func_0_0(38) +
+              occ_func_0_0(23) * occ_func_0_1(81) +
               occ_func_0_1(8) * occ_func_0_0(84) +
               occ_func_0_1(25) * occ_func_0_0(81) +
               occ_func_0_1(42) * occ_func_0_0(86) +
               occ_func_0_1(3) * occ_func_0_0(79) +
-              occ_func_0_1(10) * occ_func_0_0(83) +
-              occ_func_0_1(33) * occ_func_0_0(82) +
+              occ_func_0_0(10) * occ_func_0_1(83) +
+              occ_func_0_0(3) * occ_func_0_1(28) +
               occ_func_0_1(40) * occ_func_0_0(86) +
               occ_func_0_1(1) * occ_func_0_0(79) +
-              occ_func_0_1(35) * occ_func_0_0(83) +
-              occ_func_0_1(9) * occ_func_0_0(82) +
+              occ_func_0_0(35) * occ_func_0_1(83) +
+              occ_func_0_1(4) * occ_func_0_0(26) +
               occ_func_0_1(12) * occ_func_0_0(86) +
               occ_func_0_1(21) * occ_func_0_0(79) +
-              occ_func_0_1(38) * occ_func_0_0(84) +
-              occ_func_0_1(7) * occ_func_0_0(81) +
-              occ_func_0_1(34) * occ_func_0_0(83) +
-              occ_func_0_1(8) * occ_func_0_0(82) +
+              occ_func_0_0(38) * occ_func_0_1(84) +
+              occ_func_0_1(6) * occ_func_0_0(23) +
+              occ_func_0_0(34) * occ_func_0_1(83) +
+              occ_func_0_1(5) * occ_func_0_0(27) +
               occ_func_0_1(37) * occ_func_0_0(85) +
               occ_func_0_1(4) * occ_func_0_0(80) +
-              occ_func_0_1(28) * occ_func_0_0(83) +
-              occ_func_0_1(3) * occ_func_0_0(82) +
+              occ_func_0_0(10) * occ_func_0_1(33) +
+              occ_func_0_0(3) * occ_func_0_1(82) +
               occ_func_0_1(11) * occ_func_0_0(84) +
               occ_func_0_1(30) * occ_func_0_0(81) +
               occ_func_0_1(9) * occ_func_0_0(85) +
@@ -6604,7 +6944,7 @@ Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_11_1_at_0(
               occ_func_0_1(2) * occ_func_0_0(79)) /
              24. +
          (m_occ_func_0_1[occ_f] - m_occ_func_0_1[occ_i]) *
-             (occ_func_0_0(9) * occ_func_0_0(35) +
+             (occ_func_0_0(4) * occ_func_0_0(83) +
               occ_func_0_0(3) * occ_func_0_0(42) +
               occ_func_0_0(2) * occ_func_0_0(41) +
               occ_func_0_0(12) * occ_func_0_0(29) +
@@ -6613,101 +6953,21 @@ Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_11_1_at_0(
               occ_func_0_0(8) * occ_func_0_0(25) +
               occ_func_0_0(6) * occ_func_0_0(39) +
               occ_func_0_0(1) * occ_func_0_0(32) +
-              occ_func_0_0(8) * occ_func_0_0(34) +
-              occ_func_0_0(7) * occ_func_0_0(38) +
+              occ_func_0_0(5) * occ_func_0_0(83) +
+              occ_func_0_0(6) * occ_func_0_0(84) +
               occ_func_0_0(5) * occ_func_0_0(36) +
               occ_func_0_0(10) * occ_func_0_0(19) +
-              occ_func_0_0(3) * occ_func_0_0(28) +
+              occ_func_0_0(33) * occ_func_0_0(82) +
               occ_func_0_0(12) * occ_func_0_0(21) +
-              occ_func_0_0(4) * occ_func_0_0(26) +
+              occ_func_0_0(9) * occ_func_0_0(82) +
               occ_func_0_0(1) * occ_func_0_0(40) +
-              occ_func_0_0(6) * occ_func_0_0(23) +
-              occ_func_0_0(5) * occ_func_0_0(27) +
+              occ_func_0_0(7) * occ_func_0_0(81) +
+              occ_func_0_0(8) * occ_func_0_0(82) +
               occ_func_0_0(9) * occ_func_0_0(24) +
-              occ_func_0_0(10) * occ_func_0_0(33) +
+              occ_func_0_0(28) * occ_func_0_0(83) +
               occ_func_0_0(2) * occ_func_0_0(31) +
               occ_func_0_0(4) * occ_func_0_0(37) +
               occ_func_0_0(11) * occ_func_0_0(20)) /
-             24.;
-}
-template <typename Scalar>
-Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_11_2_at_0(
-    int occ_i, int occ_f) const {
-  return (m_occ_func_0_0[occ_f] - m_occ_func_0_0[occ_i]) *
-             (occ_func_0_1(9) * occ_func_0_0(35) +
-              occ_func_0_0(26) * occ_func_0_1(82) +
-              occ_func_0_1(3) * occ_func_0_0(42) +
-              occ_func_0_0(19) * occ_func_0_1(79) +
-              occ_func_0_1(2) * occ_func_0_0(41) +
-              occ_func_0_0(20) * occ_func_0_1(79) +
-              occ_func_0_0(32) * occ_func_0_1(85) +
-              occ_func_0_1(12) * occ_func_0_0(29) +
-              occ_func_0_0(39) * occ_func_0_1(85) +
-              occ_func_0_1(7) * occ_func_0_0(22) +
-              occ_func_0_0(31) * occ_func_0_1(84) +
-              occ_func_0_1(11) * occ_func_0_0(30) +
-              occ_func_0_0(36) * occ_func_0_1(84) +
-              occ_func_0_1(8) * occ_func_0_0(25) +
-              occ_func_0_1(6) * occ_func_0_0(39) +
-              occ_func_0_0(22) * occ_func_0_1(80) +
-              occ_func_0_1(1) * occ_func_0_0(32) +
-              occ_func_0_0(29) * occ_func_0_1(80) +
-              occ_func_0_1(8) * occ_func_0_0(34) +
-              occ_func_0_0(27) * occ_func_0_1(82) +
-              occ_func_0_1(7) * occ_func_0_0(38) +
-              occ_func_0_0(23) * occ_func_0_1(81) +
-              occ_func_0_1(5) * occ_func_0_0(36) +
-              occ_func_0_0(25) * occ_func_0_1(81) +
-              occ_func_0_0(42) * occ_func_0_1(86) +
-              occ_func_0_1(10) * occ_func_0_0(19) +
-              occ_func_0_0(33) * occ_func_0_1(82) +
-              occ_func_0_1(3) * occ_func_0_0(28) +
-              occ_func_0_0(40) * occ_func_0_1(86) +
-              occ_func_0_1(12) * occ_func_0_0(21) +
-              occ_func_0_0(35) * occ_func_0_1(83) +
-              occ_func_0_1(4) * occ_func_0_0(26) +
-              occ_func_0_1(1) * occ_func_0_0(40) +
-              occ_func_0_0(21) * occ_func_0_1(79) +
-              occ_func_0_0(38) * occ_func_0_1(84) +
-              occ_func_0_1(6) * occ_func_0_0(23) +
-              occ_func_0_0(34) * occ_func_0_1(83) +
-              occ_func_0_1(5) * occ_func_0_0(27) +
-              occ_func_0_0(37) * occ_func_0_1(85) +
-              occ_func_0_1(9) * occ_func_0_0(24) +
-              occ_func_0_1(10) * occ_func_0_0(33) +
-              occ_func_0_0(28) * occ_func_0_1(83) +
-              occ_func_0_1(2) * occ_func_0_0(31) +
-              occ_func_0_0(30) * occ_func_0_1(81) +
-              occ_func_0_1(4) * occ_func_0_0(37) +
-              occ_func_0_0(24) * occ_func_0_1(80) +
-              occ_func_0_0(41) * occ_func_0_1(86) +
-              occ_func_0_1(11) * occ_func_0_0(20)) /
-             24. +
-         (m_occ_func_0_1[occ_f] - m_occ_func_0_1[occ_i]) *
-             (occ_func_0_0(4) * occ_func_0_0(83) +
-              occ_func_0_0(10) * occ_func_0_0(86) +
-              occ_func_0_0(11) * occ_func_0_0(86) +
-              occ_func_0_0(1) * occ_func_0_0(80) +
-              occ_func_0_0(6) * occ_func_0_0(80) +
-              occ_func_0_0(2) * occ_func_0_0(81) +
-              occ_func_0_0(5) * occ_func_0_0(81) +
-              occ_func_0_0(7) * occ_func_0_0(85) +
-              occ_func_0_0(12) * occ_func_0_0(85) +
-              occ_func_0_0(5) * occ_func_0_0(83) +
-              occ_func_0_0(6) * occ_func_0_0(84) +
-              occ_func_0_0(8) * occ_func_0_0(84) +
-              occ_func_0_0(3) * occ_func_0_0(79) +
-              occ_func_0_0(10) * occ_func_0_0(83) +
-              occ_func_0_0(1) * occ_func_0_0(79) +
-              occ_func_0_0(9) * occ_func_0_0(82) +
-              occ_func_0_0(12) * occ_func_0_0(86) +
-              occ_func_0_0(7) * occ_func_0_0(81) +
-              occ_func_0_0(8) * occ_func_0_0(82) +
-              occ_func_0_0(4) * occ_func_0_0(80) +
-              occ_func_0_0(3) * occ_func_0_0(82) +
-              occ_func_0_0(11) * occ_func_0_0(84) +
-              occ_func_0_0(9) * occ_func_0_0(85) +
-              occ_func_0_0(2) * occ_func_0_0(79)) /
              24.;
 }
 template <typename Scalar>
@@ -6717,27 +6977,27 @@ Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_11_3_at_0(
              (occ_func_0_1(26) * occ_func_0_1(82) +
               occ_func_0_1(19) * occ_func_0_1(79) +
               occ_func_0_1(20) * occ_func_0_1(79) +
-              occ_func_0_1(32) * occ_func_0_1(85) +
-              occ_func_0_1(39) * occ_func_0_1(85) +
-              occ_func_0_1(31) * occ_func_0_1(84) +
-              occ_func_0_1(36) * occ_func_0_1(84) +
+              occ_func_0_1(1) * occ_func_0_1(80) +
+              occ_func_0_1(6) * occ_func_0_1(80) +
+              occ_func_0_1(2) * occ_func_0_1(81) +
+              occ_func_0_1(5) * occ_func_0_1(81) +
               occ_func_0_1(22) * occ_func_0_1(80) +
               occ_func_0_1(29) * occ_func_0_1(80) +
               occ_func_0_1(27) * occ_func_0_1(82) +
               occ_func_0_1(23) * occ_func_0_1(81) +
               occ_func_0_1(25) * occ_func_0_1(81) +
-              occ_func_0_1(42) * occ_func_0_1(86) +
-              occ_func_0_1(33) * occ_func_0_1(82) +
-              occ_func_0_1(40) * occ_func_0_1(86) +
-              occ_func_0_1(35) * occ_func_0_1(83) +
+              occ_func_0_1(3) * occ_func_0_1(79) +
+              occ_func_0_1(3) * occ_func_0_1(28) +
+              occ_func_0_1(1) * occ_func_0_1(79) +
+              occ_func_0_1(4) * occ_func_0_1(26) +
               occ_func_0_1(21) * occ_func_0_1(79) +
-              occ_func_0_1(38) * occ_func_0_1(84) +
-              occ_func_0_1(34) * occ_func_0_1(83) +
-              occ_func_0_1(37) * occ_func_0_1(85) +
-              occ_func_0_1(28) * occ_func_0_1(83) +
+              occ_func_0_1(6) * occ_func_0_1(23) +
+              occ_func_0_1(5) * occ_func_0_1(27) +
+              occ_func_0_1(4) * occ_func_0_1(80) +
+              occ_func_0_1(3) * occ_func_0_1(82) +
               occ_func_0_1(30) * occ_func_0_1(81) +
               occ_func_0_1(24) * occ_func_0_1(80) +
-              occ_func_0_1(41) * occ_func_0_1(86)) /
+              occ_func_0_1(2) * occ_func_0_1(79)) /
              24. +
          (m_occ_func_0_1[occ_f] - m_occ_func_0_1[occ_i]) *
              (occ_func_0_1(9) * occ_func_0_0(35) +
@@ -6746,14 +7006,14 @@ Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_11_3_at_0(
               occ_func_0_1(3) * occ_func_0_0(42) +
               occ_func_0_1(11) * occ_func_0_0(86) +
               occ_func_0_1(2) * occ_func_0_0(41) +
-              occ_func_0_1(12) * occ_func_0_0(29) +
-              occ_func_0_1(1) * occ_func_0_0(80) +
-              occ_func_0_1(7) * occ_func_0_0(22) +
-              occ_func_0_1(6) * occ_func_0_0(80) +
-              occ_func_0_1(11) * occ_func_0_0(30) +
-              occ_func_0_1(2) * occ_func_0_0(81) +
-              occ_func_0_1(8) * occ_func_0_0(25) +
-              occ_func_0_1(5) * occ_func_0_0(81) +
+              occ_func_0_1(32) * occ_func_0_0(85) +
+              occ_func_0_0(12) * occ_func_0_1(29) +
+              occ_func_0_1(39) * occ_func_0_0(85) +
+              occ_func_0_0(7) * occ_func_0_1(22) +
+              occ_func_0_1(31) * occ_func_0_0(84) +
+              occ_func_0_0(11) * occ_func_0_1(30) +
+              occ_func_0_1(36) * occ_func_0_0(84) +
+              occ_func_0_0(8) * occ_func_0_1(25) +
               occ_func_0_1(7) * occ_func_0_0(85) +
               occ_func_0_1(6) * occ_func_0_0(39) +
               occ_func_0_1(12) * occ_func_0_0(85) +
@@ -6764,30 +7024,30 @@ Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_11_3_at_0(
               occ_func_0_1(6) * occ_func_0_0(84) +
               occ_func_0_1(8) * occ_func_0_0(84) +
               occ_func_0_1(5) * occ_func_0_0(36) +
-              occ_func_0_1(10) * occ_func_0_0(19) +
-              occ_func_0_1(3) * occ_func_0_0(79) +
-              occ_func_0_1(10) * occ_func_0_0(83) +
-              occ_func_0_1(3) * occ_func_0_0(28) +
-              occ_func_0_1(12) * occ_func_0_0(21) +
-              occ_func_0_1(1) * occ_func_0_0(79) +
-              occ_func_0_1(9) * occ_func_0_0(82) +
-              occ_func_0_1(4) * occ_func_0_0(26) +
+              occ_func_0_1(42) * occ_func_0_0(86) +
+              occ_func_0_0(10) * occ_func_0_1(19) +
+              occ_func_0_0(10) * occ_func_0_1(83) +
+              occ_func_0_0(33) * occ_func_0_1(82) +
+              occ_func_0_1(40) * occ_func_0_0(86) +
+              occ_func_0_0(12) * occ_func_0_1(21) +
+              occ_func_0_0(35) * occ_func_0_1(83) +
+              occ_func_0_0(9) * occ_func_0_1(82) +
               occ_func_0_1(12) * occ_func_0_0(86) +
               occ_func_0_1(1) * occ_func_0_0(40) +
-              occ_func_0_1(7) * occ_func_0_0(81) +
-              occ_func_0_1(6) * occ_func_0_0(23) +
-              occ_func_0_1(8) * occ_func_0_0(82) +
-              occ_func_0_1(5) * occ_func_0_0(27) +
-              occ_func_0_1(9) * occ_func_0_0(24) +
-              occ_func_0_1(4) * occ_func_0_0(80) +
-              occ_func_0_1(10) * occ_func_0_0(33) +
-              occ_func_0_1(3) * occ_func_0_0(82) +
+              occ_func_0_0(38) * occ_func_0_1(84) +
+              occ_func_0_0(7) * occ_func_0_1(81) +
+              occ_func_0_0(34) * occ_func_0_1(83) +
+              occ_func_0_0(8) * occ_func_0_1(82) +
+              occ_func_0_1(37) * occ_func_0_0(85) +
+              occ_func_0_0(9) * occ_func_0_1(24) +
+              occ_func_0_0(10) * occ_func_0_1(33) +
+              occ_func_0_1(28) * occ_func_0_0(83) +
               occ_func_0_1(11) * occ_func_0_0(84) +
               occ_func_0_1(2) * occ_func_0_0(31) +
               occ_func_0_1(9) * occ_func_0_0(85) +
               occ_func_0_1(4) * occ_func_0_0(37) +
-              occ_func_0_1(11) * occ_func_0_0(20) +
-              occ_func_0_1(2) * occ_func_0_0(79)) /
+              occ_func_0_1(41) * occ_func_0_0(86) +
+              occ_func_0_0(11) * occ_func_0_1(20)) /
              24.;
 }
 template <typename Scalar>
@@ -6800,14 +7060,14 @@ Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_11_4_at_0(
               occ_func_0_0(3) * occ_func_0_1(42) +
               occ_func_0_0(11) * occ_func_0_1(86) +
               occ_func_0_0(2) * occ_func_0_1(41) +
-              occ_func_0_0(12) * occ_func_0_1(29) +
-              occ_func_0_0(1) * occ_func_0_1(80) +
-              occ_func_0_0(7) * occ_func_0_1(22) +
-              occ_func_0_0(6) * occ_func_0_1(80) +
-              occ_func_0_0(11) * occ_func_0_1(30) +
-              occ_func_0_0(2) * occ_func_0_1(81) +
-              occ_func_0_0(8) * occ_func_0_1(25) +
-              occ_func_0_0(5) * occ_func_0_1(81) +
+              occ_func_0_0(32) * occ_func_0_1(85) +
+              occ_func_0_1(12) * occ_func_0_0(29) +
+              occ_func_0_0(39) * occ_func_0_1(85) +
+              occ_func_0_1(7) * occ_func_0_0(22) +
+              occ_func_0_0(31) * occ_func_0_1(84) +
+              occ_func_0_1(11) * occ_func_0_0(30) +
+              occ_func_0_0(36) * occ_func_0_1(84) +
+              occ_func_0_1(8) * occ_func_0_0(25) +
               occ_func_0_0(7) * occ_func_0_1(85) +
               occ_func_0_0(6) * occ_func_0_1(39) +
               occ_func_0_0(12) * occ_func_0_1(85) +
@@ -6818,56 +7078,56 @@ Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_11_4_at_0(
               occ_func_0_0(6) * occ_func_0_1(84) +
               occ_func_0_0(8) * occ_func_0_1(84) +
               occ_func_0_0(5) * occ_func_0_1(36) +
-              occ_func_0_0(10) * occ_func_0_1(19) +
-              occ_func_0_0(3) * occ_func_0_1(79) +
-              occ_func_0_0(10) * occ_func_0_1(83) +
-              occ_func_0_0(3) * occ_func_0_1(28) +
-              occ_func_0_0(12) * occ_func_0_1(21) +
-              occ_func_0_0(1) * occ_func_0_1(79) +
-              occ_func_0_0(9) * occ_func_0_1(82) +
-              occ_func_0_0(4) * occ_func_0_1(26) +
+              occ_func_0_0(42) * occ_func_0_1(86) +
+              occ_func_0_1(10) * occ_func_0_0(19) +
+              occ_func_0_1(10) * occ_func_0_0(83) +
+              occ_func_0_1(33) * occ_func_0_0(82) +
+              occ_func_0_0(40) * occ_func_0_1(86) +
+              occ_func_0_1(12) * occ_func_0_0(21) +
+              occ_func_0_1(35) * occ_func_0_0(83) +
+              occ_func_0_1(9) * occ_func_0_0(82) +
               occ_func_0_0(12) * occ_func_0_1(86) +
               occ_func_0_0(1) * occ_func_0_1(40) +
-              occ_func_0_0(7) * occ_func_0_1(81) +
-              occ_func_0_0(6) * occ_func_0_1(23) +
-              occ_func_0_0(8) * occ_func_0_1(82) +
-              occ_func_0_0(5) * occ_func_0_1(27) +
-              occ_func_0_0(9) * occ_func_0_1(24) +
-              occ_func_0_0(4) * occ_func_0_1(80) +
-              occ_func_0_0(10) * occ_func_0_1(33) +
-              occ_func_0_0(3) * occ_func_0_1(82) +
+              occ_func_0_1(38) * occ_func_0_0(84) +
+              occ_func_0_1(7) * occ_func_0_0(81) +
+              occ_func_0_1(34) * occ_func_0_0(83) +
+              occ_func_0_1(8) * occ_func_0_0(82) +
+              occ_func_0_0(37) * occ_func_0_1(85) +
+              occ_func_0_1(9) * occ_func_0_0(24) +
+              occ_func_0_1(10) * occ_func_0_0(33) +
+              occ_func_0_0(28) * occ_func_0_1(83) +
               occ_func_0_0(11) * occ_func_0_1(84) +
               occ_func_0_0(2) * occ_func_0_1(31) +
               occ_func_0_0(9) * occ_func_0_1(85) +
               occ_func_0_0(4) * occ_func_0_1(37) +
-              occ_func_0_0(11) * occ_func_0_1(20) +
-              occ_func_0_0(2) * occ_func_0_1(79)) /
+              occ_func_0_0(41) * occ_func_0_1(86) +
+              occ_func_0_1(11) * occ_func_0_0(20)) /
              24. +
          (m_occ_func_0_1[occ_f] - m_occ_func_0_1[occ_i]) *
              (occ_func_0_0(26) * occ_func_0_0(82) +
               occ_func_0_0(19) * occ_func_0_0(79) +
               occ_func_0_0(20) * occ_func_0_0(79) +
-              occ_func_0_0(32) * occ_func_0_0(85) +
-              occ_func_0_0(39) * occ_func_0_0(85) +
-              occ_func_0_0(31) * occ_func_0_0(84) +
-              occ_func_0_0(36) * occ_func_0_0(84) +
+              occ_func_0_0(1) * occ_func_0_0(80) +
+              occ_func_0_0(6) * occ_func_0_0(80) +
+              occ_func_0_0(2) * occ_func_0_0(81) +
+              occ_func_0_0(5) * occ_func_0_0(81) +
               occ_func_0_0(22) * occ_func_0_0(80) +
               occ_func_0_0(29) * occ_func_0_0(80) +
               occ_func_0_0(27) * occ_func_0_0(82) +
               occ_func_0_0(23) * occ_func_0_0(81) +
               occ_func_0_0(25) * occ_func_0_0(81) +
-              occ_func_0_0(42) * occ_func_0_0(86) +
-              occ_func_0_0(33) * occ_func_0_0(82) +
-              occ_func_0_0(40) * occ_func_0_0(86) +
-              occ_func_0_0(35) * occ_func_0_0(83) +
+              occ_func_0_0(3) * occ_func_0_0(79) +
+              occ_func_0_0(3) * occ_func_0_0(28) +
+              occ_func_0_0(1) * occ_func_0_0(79) +
+              occ_func_0_0(4) * occ_func_0_0(26) +
               occ_func_0_0(21) * occ_func_0_0(79) +
-              occ_func_0_0(38) * occ_func_0_0(84) +
-              occ_func_0_0(34) * occ_func_0_0(83) +
-              occ_func_0_0(37) * occ_func_0_0(85) +
-              occ_func_0_0(28) * occ_func_0_0(83) +
+              occ_func_0_0(6) * occ_func_0_0(23) +
+              occ_func_0_0(5) * occ_func_0_0(27) +
+              occ_func_0_0(4) * occ_func_0_0(80) +
+              occ_func_0_0(3) * occ_func_0_0(82) +
               occ_func_0_0(30) * occ_func_0_0(81) +
               occ_func_0_0(24) * occ_func_0_0(80) +
-              occ_func_0_0(41) * occ_func_0_0(86)) /
+              occ_func_0_0(2) * occ_func_0_0(79)) /
              24.;
 }
 template <typename Scalar>
@@ -6875,86 +7135,6 @@ Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_11_5_at_0(
     int occ_i, int occ_f) const {
   return (m_occ_func_0_0[occ_f] - m_occ_func_0_0[occ_i]) *
              (occ_func_0_1(4) * occ_func_0_1(83) +
-              occ_func_0_1(10) * occ_func_0_1(86) +
-              occ_func_0_1(11) * occ_func_0_1(86) +
-              occ_func_0_1(1) * occ_func_0_1(80) +
-              occ_func_0_1(6) * occ_func_0_1(80) +
-              occ_func_0_1(2) * occ_func_0_1(81) +
-              occ_func_0_1(5) * occ_func_0_1(81) +
-              occ_func_0_1(7) * occ_func_0_1(85) +
-              occ_func_0_1(12) * occ_func_0_1(85) +
-              occ_func_0_1(5) * occ_func_0_1(83) +
-              occ_func_0_1(6) * occ_func_0_1(84) +
-              occ_func_0_1(8) * occ_func_0_1(84) +
-              occ_func_0_1(3) * occ_func_0_1(79) +
-              occ_func_0_1(10) * occ_func_0_1(83) +
-              occ_func_0_1(1) * occ_func_0_1(79) +
-              occ_func_0_1(9) * occ_func_0_1(82) +
-              occ_func_0_1(12) * occ_func_0_1(86) +
-              occ_func_0_1(7) * occ_func_0_1(81) +
-              occ_func_0_1(8) * occ_func_0_1(82) +
-              occ_func_0_1(4) * occ_func_0_1(80) +
-              occ_func_0_1(3) * occ_func_0_1(82) +
-              occ_func_0_1(11) * occ_func_0_1(84) +
-              occ_func_0_1(9) * occ_func_0_1(85) +
-              occ_func_0_1(2) * occ_func_0_1(79)) /
-             24. +
-         (m_occ_func_0_1[occ_f] - m_occ_func_0_1[occ_i]) *
-             (occ_func_0_0(9) * occ_func_0_1(35) +
-              occ_func_0_1(26) * occ_func_0_0(82) +
-              occ_func_0_0(3) * occ_func_0_1(42) +
-              occ_func_0_1(19) * occ_func_0_0(79) +
-              occ_func_0_0(2) * occ_func_0_1(41) +
-              occ_func_0_1(20) * occ_func_0_0(79) +
-              occ_func_0_1(32) * occ_func_0_0(85) +
-              occ_func_0_0(12) * occ_func_0_1(29) +
-              occ_func_0_1(39) * occ_func_0_0(85) +
-              occ_func_0_0(7) * occ_func_0_1(22) +
-              occ_func_0_1(31) * occ_func_0_0(84) +
-              occ_func_0_0(11) * occ_func_0_1(30) +
-              occ_func_0_1(36) * occ_func_0_0(84) +
-              occ_func_0_0(8) * occ_func_0_1(25) +
-              occ_func_0_0(6) * occ_func_0_1(39) +
-              occ_func_0_1(22) * occ_func_0_0(80) +
-              occ_func_0_0(1) * occ_func_0_1(32) +
-              occ_func_0_1(29) * occ_func_0_0(80) +
-              occ_func_0_0(8) * occ_func_0_1(34) +
-              occ_func_0_1(27) * occ_func_0_0(82) +
-              occ_func_0_0(7) * occ_func_0_1(38) +
-              occ_func_0_1(23) * occ_func_0_0(81) +
-              occ_func_0_0(5) * occ_func_0_1(36) +
-              occ_func_0_1(25) * occ_func_0_0(81) +
-              occ_func_0_1(42) * occ_func_0_0(86) +
-              occ_func_0_0(10) * occ_func_0_1(19) +
-              occ_func_0_1(33) * occ_func_0_0(82) +
-              occ_func_0_0(3) * occ_func_0_1(28) +
-              occ_func_0_1(40) * occ_func_0_0(86) +
-              occ_func_0_0(12) * occ_func_0_1(21) +
-              occ_func_0_1(35) * occ_func_0_0(83) +
-              occ_func_0_0(4) * occ_func_0_1(26) +
-              occ_func_0_0(1) * occ_func_0_1(40) +
-              occ_func_0_1(21) * occ_func_0_0(79) +
-              occ_func_0_1(38) * occ_func_0_0(84) +
-              occ_func_0_0(6) * occ_func_0_1(23) +
-              occ_func_0_1(34) * occ_func_0_0(83) +
-              occ_func_0_0(5) * occ_func_0_1(27) +
-              occ_func_0_1(37) * occ_func_0_0(85) +
-              occ_func_0_0(9) * occ_func_0_1(24) +
-              occ_func_0_0(10) * occ_func_0_1(33) +
-              occ_func_0_1(28) * occ_func_0_0(83) +
-              occ_func_0_0(2) * occ_func_0_1(31) +
-              occ_func_0_1(30) * occ_func_0_0(81) +
-              occ_func_0_0(4) * occ_func_0_1(37) +
-              occ_func_0_1(24) * occ_func_0_0(80) +
-              occ_func_0_1(41) * occ_func_0_0(86) +
-              occ_func_0_0(11) * occ_func_0_1(20)) /
-             24.;
-}
-template <typename Scalar>
-Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_11_6_at_0(
-    int occ_i, int occ_f) const {
-  return (m_occ_func_0_0[occ_f] - m_occ_func_0_0[occ_i]) *
-             (occ_func_0_1(9) * occ_func_0_1(35) +
               occ_func_0_1(3) * occ_func_0_1(42) +
               occ_func_0_1(2) * occ_func_0_1(41) +
               occ_func_0_1(12) * occ_func_0_1(29) +
@@ -6963,25 +7143,25 @@ Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_11_6_at_0(
               occ_func_0_1(8) * occ_func_0_1(25) +
               occ_func_0_1(6) * occ_func_0_1(39) +
               occ_func_0_1(1) * occ_func_0_1(32) +
-              occ_func_0_1(8) * occ_func_0_1(34) +
-              occ_func_0_1(7) * occ_func_0_1(38) +
+              occ_func_0_1(5) * occ_func_0_1(83) +
+              occ_func_0_1(6) * occ_func_0_1(84) +
               occ_func_0_1(5) * occ_func_0_1(36) +
               occ_func_0_1(10) * occ_func_0_1(19) +
-              occ_func_0_1(3) * occ_func_0_1(28) +
+              occ_func_0_1(33) * occ_func_0_1(82) +
               occ_func_0_1(12) * occ_func_0_1(21) +
-              occ_func_0_1(4) * occ_func_0_1(26) +
+              occ_func_0_1(9) * occ_func_0_1(82) +
               occ_func_0_1(1) * occ_func_0_1(40) +
-              occ_func_0_1(6) * occ_func_0_1(23) +
-              occ_func_0_1(5) * occ_func_0_1(27) +
+              occ_func_0_1(7) * occ_func_0_1(81) +
+              occ_func_0_1(8) * occ_func_0_1(82) +
               occ_func_0_1(9) * occ_func_0_1(24) +
-              occ_func_0_1(10) * occ_func_0_1(33) +
+              occ_func_0_1(28) * occ_func_0_1(83) +
               occ_func_0_1(2) * occ_func_0_1(31) +
               occ_func_0_1(4) * occ_func_0_1(37) +
               occ_func_0_1(11) * occ_func_0_1(20)) /
              24. +
          (m_occ_func_0_1[occ_f] - m_occ_func_0_1[occ_i]) *
-             (occ_func_0_0(4) * occ_func_0_1(83) +
-              occ_func_0_0(26) * occ_func_0_1(82) +
+             (occ_func_0_0(9) * occ_func_0_1(35) +
+              occ_func_0_1(26) * occ_func_0_0(82) +
               occ_func_0_0(10) * occ_func_0_1(86) +
               occ_func_0_0(19) * occ_func_0_1(79) +
               occ_func_0_0(11) * occ_func_0_1(86) +
@@ -6998,36 +7178,116 @@ Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_11_6_at_0(
               occ_func_0_0(22) * occ_func_0_1(80) +
               occ_func_0_0(12) * occ_func_0_1(85) +
               occ_func_0_0(29) * occ_func_0_1(80) +
-              occ_func_0_0(5) * occ_func_0_1(83) +
-              occ_func_0_0(27) * occ_func_0_1(82) +
-              occ_func_0_0(6) * occ_func_0_1(84) +
-              occ_func_0_0(23) * occ_func_0_1(81) +
+              occ_func_0_0(8) * occ_func_0_1(34) +
+              occ_func_0_1(27) * occ_func_0_0(82) +
+              occ_func_0_0(7) * occ_func_0_1(38) +
+              occ_func_0_1(23) * occ_func_0_0(81) +
               occ_func_0_0(8) * occ_func_0_1(84) +
               occ_func_0_0(25) * occ_func_0_1(81) +
               occ_func_0_0(42) * occ_func_0_1(86) +
               occ_func_0_0(3) * occ_func_0_1(79) +
-              occ_func_0_0(10) * occ_func_0_1(83) +
-              occ_func_0_0(33) * occ_func_0_1(82) +
+              occ_func_0_1(10) * occ_func_0_0(83) +
+              occ_func_0_1(3) * occ_func_0_0(28) +
               occ_func_0_0(40) * occ_func_0_1(86) +
               occ_func_0_0(1) * occ_func_0_1(79) +
-              occ_func_0_0(35) * occ_func_0_1(83) +
-              occ_func_0_0(9) * occ_func_0_1(82) +
+              occ_func_0_1(35) * occ_func_0_0(83) +
+              occ_func_0_0(4) * occ_func_0_1(26) +
               occ_func_0_0(12) * occ_func_0_1(86) +
               occ_func_0_0(21) * occ_func_0_1(79) +
-              occ_func_0_0(38) * occ_func_0_1(84) +
-              occ_func_0_0(7) * occ_func_0_1(81) +
-              occ_func_0_0(34) * occ_func_0_1(83) +
-              occ_func_0_0(8) * occ_func_0_1(82) +
+              occ_func_0_1(38) * occ_func_0_0(84) +
+              occ_func_0_0(6) * occ_func_0_1(23) +
+              occ_func_0_1(34) * occ_func_0_0(83) +
+              occ_func_0_0(5) * occ_func_0_1(27) +
               occ_func_0_0(37) * occ_func_0_1(85) +
               occ_func_0_0(4) * occ_func_0_1(80) +
-              occ_func_0_0(28) * occ_func_0_1(83) +
-              occ_func_0_0(3) * occ_func_0_1(82) +
+              occ_func_0_1(10) * occ_func_0_0(33) +
+              occ_func_0_1(3) * occ_func_0_0(82) +
               occ_func_0_0(11) * occ_func_0_1(84) +
               occ_func_0_0(30) * occ_func_0_1(81) +
               occ_func_0_0(9) * occ_func_0_1(85) +
               occ_func_0_0(24) * occ_func_0_1(80) +
               occ_func_0_0(41) * occ_func_0_1(86) +
               occ_func_0_0(2) * occ_func_0_1(79)) /
+             24.;
+}
+template <typename Scalar>
+Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_11_6_at_0(
+    int occ_i, int occ_f) const {
+  return (m_occ_func_0_0[occ_f] - m_occ_func_0_0[occ_i]) *
+             (occ_func_0_1(9) * occ_func_0_1(35) +
+              occ_func_0_1(10) * occ_func_0_1(86) +
+              occ_func_0_1(11) * occ_func_0_1(86) +
+              occ_func_0_1(32) * occ_func_0_1(85) +
+              occ_func_0_1(39) * occ_func_0_1(85) +
+              occ_func_0_1(31) * occ_func_0_1(84) +
+              occ_func_0_1(36) * occ_func_0_1(84) +
+              occ_func_0_1(7) * occ_func_0_1(85) +
+              occ_func_0_1(12) * occ_func_0_1(85) +
+              occ_func_0_1(8) * occ_func_0_1(34) +
+              occ_func_0_1(7) * occ_func_0_1(38) +
+              occ_func_0_1(8) * occ_func_0_1(84) +
+              occ_func_0_1(42) * occ_func_0_1(86) +
+              occ_func_0_1(10) * occ_func_0_1(83) +
+              occ_func_0_1(40) * occ_func_0_1(86) +
+              occ_func_0_1(35) * occ_func_0_1(83) +
+              occ_func_0_1(12) * occ_func_0_1(86) +
+              occ_func_0_1(38) * occ_func_0_1(84) +
+              occ_func_0_1(34) * occ_func_0_1(83) +
+              occ_func_0_1(37) * occ_func_0_1(85) +
+              occ_func_0_1(10) * occ_func_0_1(33) +
+              occ_func_0_1(11) * occ_func_0_1(84) +
+              occ_func_0_1(9) * occ_func_0_1(85) +
+              occ_func_0_1(41) * occ_func_0_1(86)) /
+             24. +
+         (m_occ_func_0_1[occ_f] - m_occ_func_0_1[occ_i]) *
+             (occ_func_0_0(4) * occ_func_0_1(83) +
+              occ_func_0_0(26) * occ_func_0_1(82) +
+              occ_func_0_0(3) * occ_func_0_1(42) +
+              occ_func_0_1(19) * occ_func_0_0(79) +
+              occ_func_0_0(2) * occ_func_0_1(41) +
+              occ_func_0_1(20) * occ_func_0_0(79) +
+              occ_func_0_1(12) * occ_func_0_0(29) +
+              occ_func_0_1(1) * occ_func_0_0(80) +
+              occ_func_0_1(7) * occ_func_0_0(22) +
+              occ_func_0_1(6) * occ_func_0_0(80) +
+              occ_func_0_1(11) * occ_func_0_0(30) +
+              occ_func_0_1(2) * occ_func_0_0(81) +
+              occ_func_0_1(8) * occ_func_0_0(25) +
+              occ_func_0_1(5) * occ_func_0_0(81) +
+              occ_func_0_0(6) * occ_func_0_1(39) +
+              occ_func_0_1(22) * occ_func_0_0(80) +
+              occ_func_0_0(1) * occ_func_0_1(32) +
+              occ_func_0_1(29) * occ_func_0_0(80) +
+              occ_func_0_0(5) * occ_func_0_1(83) +
+              occ_func_0_0(27) * occ_func_0_1(82) +
+              occ_func_0_0(6) * occ_func_0_1(84) +
+              occ_func_0_0(23) * occ_func_0_1(81) +
+              occ_func_0_0(5) * occ_func_0_1(36) +
+              occ_func_0_1(25) * occ_func_0_0(81) +
+              occ_func_0_1(10) * occ_func_0_0(19) +
+              occ_func_0_1(3) * occ_func_0_0(79) +
+              occ_func_0_1(33) * occ_func_0_0(82) +
+              occ_func_0_0(3) * occ_func_0_1(28) +
+              occ_func_0_1(12) * occ_func_0_0(21) +
+              occ_func_0_1(1) * occ_func_0_0(79) +
+              occ_func_0_1(9) * occ_func_0_0(82) +
+              occ_func_0_1(4) * occ_func_0_0(26) +
+              occ_func_0_0(1) * occ_func_0_1(40) +
+              occ_func_0_1(21) * occ_func_0_0(79) +
+              occ_func_0_1(7) * occ_func_0_0(81) +
+              occ_func_0_1(6) * occ_func_0_0(23) +
+              occ_func_0_1(8) * occ_func_0_0(82) +
+              occ_func_0_1(5) * occ_func_0_0(27) +
+              occ_func_0_1(9) * occ_func_0_0(24) +
+              occ_func_0_1(4) * occ_func_0_0(80) +
+              occ_func_0_0(28) * occ_func_0_1(83) +
+              occ_func_0_0(3) * occ_func_0_1(82) +
+              occ_func_0_0(2) * occ_func_0_1(31) +
+              occ_func_0_1(30) * occ_func_0_0(81) +
+              occ_func_0_0(4) * occ_func_0_1(37) +
+              occ_func_0_1(24) * occ_func_0_0(80) +
+              occ_func_0_1(11) * occ_func_0_0(20) +
+              occ_func_0_1(2) * occ_func_0_0(79)) /
              24.;
 }
 template <typename Scalar>
@@ -7136,17 +7396,17 @@ Scalar OccClexulatorTest_Clexulator::eval_bfunc_12_0() const {
 template <typename Scalar>
 Scalar OccClexulatorTest_Clexulator::eval_bfunc_12_1() const {
   return (occ_func_0_1(0) * occ_func_0_0(11) * occ_func_0_0(174) +
-          occ_func_0_1(159) * occ_func_0_0(49) * occ_func_0_0(0) +
+          occ_func_0_0(159) * occ_func_0_0(49) * occ_func_0_1(0) +
           occ_func_0_1(0) * occ_func_0_0(9) * occ_func_0_0(161) +
           occ_func_0_1(0) * occ_func_0_0(8) * occ_func_0_0(160) +
           occ_func_0_1(0) * occ_func_0_0(10) * occ_func_0_0(171) +
-          occ_func_0_1(161) * occ_func_0_0(51) * occ_func_0_0(0) +
+          occ_func_0_0(161) * occ_func_0_0(51) * occ_func_0_1(0) +
           occ_func_0_1(0) * occ_func_0_0(12) * occ_func_0_0(175) +
-          occ_func_0_1(175) * occ_func_0_0(54) * occ_func_0_0(0) +
-          occ_func_0_1(171) * occ_func_0_0(52) * occ_func_0_0(0) +
+          occ_func_0_0(175) * occ_func_0_0(54) * occ_func_0_1(0) +
+          occ_func_0_0(171) * occ_func_0_0(52) * occ_func_0_1(0) +
           occ_func_0_1(0) * occ_func_0_0(7) * occ_func_0_0(159) +
-          occ_func_0_1(160) * occ_func_0_0(50) * occ_func_0_0(0) +
-          occ_func_0_1(174) * occ_func_0_0(53) * occ_func_0_0(0)) /
+          occ_func_0_0(160) * occ_func_0_0(50) * occ_func_0_1(0) +
+          occ_func_0_0(174) * occ_func_0_0(53) * occ_func_0_1(0)) /
          12.;
 }
 template <typename Scalar>
@@ -7168,33 +7428,33 @@ Scalar OccClexulatorTest_Clexulator::eval_bfunc_12_2() const {
 template <typename Scalar>
 Scalar OccClexulatorTest_Clexulator::eval_bfunc_12_3() const {
   return (occ_func_0_1(0) * occ_func_0_1(11) * occ_func_0_0(174) +
-          occ_func_0_1(159) * occ_func_0_1(49) * occ_func_0_0(0) +
+          occ_func_0_0(159) * occ_func_0_1(49) * occ_func_0_1(0) +
           occ_func_0_1(0) * occ_func_0_1(9) * occ_func_0_0(161) +
           occ_func_0_1(0) * occ_func_0_1(8) * occ_func_0_0(160) +
           occ_func_0_1(0) * occ_func_0_1(10) * occ_func_0_0(171) +
-          occ_func_0_1(161) * occ_func_0_1(51) * occ_func_0_0(0) +
+          occ_func_0_0(161) * occ_func_0_1(51) * occ_func_0_1(0) +
           occ_func_0_1(0) * occ_func_0_1(12) * occ_func_0_0(175) +
-          occ_func_0_1(175) * occ_func_0_1(54) * occ_func_0_0(0) +
-          occ_func_0_1(171) * occ_func_0_1(52) * occ_func_0_0(0) +
+          occ_func_0_0(175) * occ_func_0_1(54) * occ_func_0_1(0) +
+          occ_func_0_0(171) * occ_func_0_1(52) * occ_func_0_1(0) +
           occ_func_0_1(0) * occ_func_0_1(7) * occ_func_0_0(159) +
-          occ_func_0_1(160) * occ_func_0_1(50) * occ_func_0_0(0) +
-          occ_func_0_1(174) * occ_func_0_1(53) * occ_func_0_0(0)) /
+          occ_func_0_0(160) * occ_func_0_1(50) * occ_func_0_1(0) +
+          occ_func_0_0(174) * occ_func_0_1(53) * occ_func_0_1(0)) /
          12.;
 }
 template <typename Scalar>
 Scalar OccClexulatorTest_Clexulator::eval_bfunc_12_4() const {
   return (occ_func_0_0(0) * occ_func_0_0(11) * occ_func_0_1(174) +
-          occ_func_0_0(159) * occ_func_0_0(49) * occ_func_0_1(0) +
+          occ_func_0_1(159) * occ_func_0_0(49) * occ_func_0_0(0) +
           occ_func_0_0(0) * occ_func_0_0(9) * occ_func_0_1(161) +
           occ_func_0_0(0) * occ_func_0_0(8) * occ_func_0_1(160) +
           occ_func_0_0(0) * occ_func_0_0(10) * occ_func_0_1(171) +
-          occ_func_0_0(161) * occ_func_0_0(51) * occ_func_0_1(0) +
+          occ_func_0_1(161) * occ_func_0_0(51) * occ_func_0_0(0) +
           occ_func_0_0(0) * occ_func_0_0(12) * occ_func_0_1(175) +
-          occ_func_0_0(175) * occ_func_0_0(54) * occ_func_0_1(0) +
-          occ_func_0_0(171) * occ_func_0_0(52) * occ_func_0_1(0) +
+          occ_func_0_1(175) * occ_func_0_0(54) * occ_func_0_0(0) +
+          occ_func_0_1(171) * occ_func_0_0(52) * occ_func_0_0(0) +
           occ_func_0_0(0) * occ_func_0_0(7) * occ_func_0_1(159) +
-          occ_func_0_0(160) * occ_func_0_0(50) * occ_func_0_1(0) +
-          occ_func_0_0(174) * occ_func_0_0(53) * occ_func_0_1(0)) /
+          occ_func_0_1(160) * occ_func_0_0(50) * occ_func_0_0(0) +
+          occ_func_0_1(174) * occ_func_0_0(53) * occ_func_0_0(0)) /
          12.;
 }
 template <typename Scalar>
@@ -7216,17 +7476,17 @@ Scalar OccClexulatorTest_Clexulator::eval_bfunc_12_5() const {
 template <typename Scalar>
 Scalar OccClexulatorTest_Clexulator::eval_bfunc_12_6() const {
   return (occ_func_0_0(0) * occ_func_0_1(11) * occ_func_0_1(174) +
-          occ_func_0_0(159) * occ_func_0_1(49) * occ_func_0_1(0) +
+          occ_func_0_1(159) * occ_func_0_1(49) * occ_func_0_0(0) +
           occ_func_0_0(0) * occ_func_0_1(9) * occ_func_0_1(161) +
           occ_func_0_0(0) * occ_func_0_1(8) * occ_func_0_1(160) +
           occ_func_0_0(0) * occ_func_0_1(10) * occ_func_0_1(171) +
-          occ_func_0_0(161) * occ_func_0_1(51) * occ_func_0_1(0) +
+          occ_func_0_1(161) * occ_func_0_1(51) * occ_func_0_0(0) +
           occ_func_0_0(0) * occ_func_0_1(12) * occ_func_0_1(175) +
-          occ_func_0_0(175) * occ_func_0_1(54) * occ_func_0_1(0) +
-          occ_func_0_0(171) * occ_func_0_1(52) * occ_func_0_1(0) +
+          occ_func_0_1(175) * occ_func_0_1(54) * occ_func_0_0(0) +
+          occ_func_0_1(171) * occ_func_0_1(52) * occ_func_0_0(0) +
           occ_func_0_0(0) * occ_func_0_1(7) * occ_func_0_1(159) +
-          occ_func_0_0(160) * occ_func_0_1(50) * occ_func_0_1(0) +
-          occ_func_0_0(174) * occ_func_0_1(53) * occ_func_0_1(0)) /
+          occ_func_0_1(160) * occ_func_0_1(50) * occ_func_0_0(0) +
+          occ_func_0_1(174) * occ_func_0_1(53) * occ_func_0_0(0)) /
          12.;
 }
 template <typename Scalar>
@@ -7291,9 +7551,9 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_12_1_at_0() const {
   return (occ_func_0_1(0) * occ_func_0_0(11) * occ_func_0_0(174) +
           occ_func_0_1(2) * occ_func_0_0(0) * occ_func_0_0(53) +
           occ_func_0_1(143) * occ_func_0_0(44) * occ_func_0_0(0) +
-          occ_func_0_1(159) * occ_func_0_0(49) * occ_func_0_0(0) +
-          occ_func_0_1(7) * occ_func_0_0(0) * occ_func_0_0(48) +
-          occ_func_0_1(0) * occ_func_0_0(6) * occ_func_0_0(158) +
+          occ_func_0_0(159) * occ_func_0_0(49) * occ_func_0_1(0) +
+          occ_func_0_0(7) * occ_func_0_0(0) * occ_func_0_1(48) +
+          occ_func_0_0(0) * occ_func_0_0(6) * occ_func_0_1(158) +
           occ_func_0_1(0) * occ_func_0_0(9) * occ_func_0_0(161) +
           occ_func_0_1(4) * occ_func_0_0(0) * occ_func_0_0(51) +
           occ_func_0_1(156) * occ_func_0_0(46) * occ_func_0_0(0) +
@@ -7303,27 +7563,27 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_12_1_at_0() const {
           occ_func_0_1(0) * occ_func_0_0(10) * occ_func_0_0(171) +
           occ_func_0_1(3) * occ_func_0_0(0) * occ_func_0_0(52) +
           occ_func_0_1(146) * occ_func_0_0(45) * occ_func_0_0(0) +
-          occ_func_0_1(161) * occ_func_0_0(51) * occ_func_0_0(0) +
-          occ_func_0_1(9) * occ_func_0_0(0) * occ_func_0_0(46) +
-          occ_func_0_1(0) * occ_func_0_0(4) * occ_func_0_0(156) +
+          occ_func_0_0(161) * occ_func_0_0(51) * occ_func_0_1(0) +
+          occ_func_0_0(9) * occ_func_0_0(0) * occ_func_0_1(46) +
+          occ_func_0_0(0) * occ_func_0_0(4) * occ_func_0_1(156) +
           occ_func_0_1(0) * occ_func_0_0(12) * occ_func_0_0(175) +
           occ_func_0_1(1) * occ_func_0_0(0) * occ_func_0_0(54) +
           occ_func_0_1(142) * occ_func_0_0(43) * occ_func_0_0(0) +
-          occ_func_0_1(175) * occ_func_0_0(54) * occ_func_0_0(0) +
-          occ_func_0_1(12) * occ_func_0_0(0) * occ_func_0_0(43) +
-          occ_func_0_1(0) * occ_func_0_0(1) * occ_func_0_0(142) +
-          occ_func_0_1(171) * occ_func_0_0(52) * occ_func_0_0(0) +
-          occ_func_0_1(10) * occ_func_0_0(0) * occ_func_0_0(45) +
-          occ_func_0_1(0) * occ_func_0_0(3) * occ_func_0_0(146) +
+          occ_func_0_0(175) * occ_func_0_0(54) * occ_func_0_1(0) +
+          occ_func_0_0(12) * occ_func_0_0(0) * occ_func_0_1(43) +
+          occ_func_0_0(0) * occ_func_0_0(1) * occ_func_0_1(142) +
+          occ_func_0_0(171) * occ_func_0_0(52) * occ_func_0_1(0) +
+          occ_func_0_0(10) * occ_func_0_0(0) * occ_func_0_1(45) +
+          occ_func_0_0(0) * occ_func_0_0(3) * occ_func_0_1(146) +
           occ_func_0_1(0) * occ_func_0_0(7) * occ_func_0_0(159) +
           occ_func_0_1(6) * occ_func_0_0(0) * occ_func_0_0(49) +
           occ_func_0_1(158) * occ_func_0_0(48) * occ_func_0_0(0) +
-          occ_func_0_1(160) * occ_func_0_0(50) * occ_func_0_0(0) +
-          occ_func_0_1(8) * occ_func_0_0(0) * occ_func_0_0(47) +
-          occ_func_0_1(0) * occ_func_0_0(5) * occ_func_0_0(157) +
-          occ_func_0_1(174) * occ_func_0_0(53) * occ_func_0_0(0) +
-          occ_func_0_1(11) * occ_func_0_0(0) * occ_func_0_0(44) +
-          occ_func_0_1(0) * occ_func_0_0(2) * occ_func_0_0(143)) /
+          occ_func_0_0(160) * occ_func_0_0(50) * occ_func_0_1(0) +
+          occ_func_0_0(8) * occ_func_0_0(0) * occ_func_0_1(47) +
+          occ_func_0_0(0) * occ_func_0_0(5) * occ_func_0_1(157) +
+          occ_func_0_0(174) * occ_func_0_0(53) * occ_func_0_1(0) +
+          occ_func_0_0(11) * occ_func_0_0(0) * occ_func_0_1(44) +
+          occ_func_0_0(0) * occ_func_0_0(2) * occ_func_0_1(143)) /
          12.;
 }
 template <typename Scalar>
@@ -7371,9 +7631,9 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_12_3_at_0() const {
   return (occ_func_0_1(0) * occ_func_0_1(11) * occ_func_0_0(174) +
           occ_func_0_1(2) * occ_func_0_1(0) * occ_func_0_0(53) +
           occ_func_0_1(143) * occ_func_0_1(44) * occ_func_0_0(0) +
-          occ_func_0_1(159) * occ_func_0_1(49) * occ_func_0_0(0) +
-          occ_func_0_1(7) * occ_func_0_1(0) * occ_func_0_0(48) +
-          occ_func_0_1(0) * occ_func_0_1(6) * occ_func_0_0(158) +
+          occ_func_0_0(159) * occ_func_0_1(49) * occ_func_0_1(0) +
+          occ_func_0_0(7) * occ_func_0_1(0) * occ_func_0_1(48) +
+          occ_func_0_0(0) * occ_func_0_1(6) * occ_func_0_1(158) +
           occ_func_0_1(0) * occ_func_0_1(9) * occ_func_0_0(161) +
           occ_func_0_1(4) * occ_func_0_1(0) * occ_func_0_0(51) +
           occ_func_0_1(156) * occ_func_0_1(46) * occ_func_0_0(0) +
@@ -7383,27 +7643,27 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_12_3_at_0() const {
           occ_func_0_1(0) * occ_func_0_1(10) * occ_func_0_0(171) +
           occ_func_0_1(3) * occ_func_0_1(0) * occ_func_0_0(52) +
           occ_func_0_1(146) * occ_func_0_1(45) * occ_func_0_0(0) +
-          occ_func_0_1(161) * occ_func_0_1(51) * occ_func_0_0(0) +
-          occ_func_0_1(9) * occ_func_0_1(0) * occ_func_0_0(46) +
-          occ_func_0_1(0) * occ_func_0_1(4) * occ_func_0_0(156) +
+          occ_func_0_0(161) * occ_func_0_1(51) * occ_func_0_1(0) +
+          occ_func_0_0(9) * occ_func_0_1(0) * occ_func_0_1(46) +
+          occ_func_0_0(0) * occ_func_0_1(4) * occ_func_0_1(156) +
           occ_func_0_1(0) * occ_func_0_1(12) * occ_func_0_0(175) +
           occ_func_0_1(1) * occ_func_0_1(0) * occ_func_0_0(54) +
           occ_func_0_1(142) * occ_func_0_1(43) * occ_func_0_0(0) +
-          occ_func_0_1(175) * occ_func_0_1(54) * occ_func_0_0(0) +
-          occ_func_0_1(12) * occ_func_0_1(0) * occ_func_0_0(43) +
-          occ_func_0_1(0) * occ_func_0_1(1) * occ_func_0_0(142) +
-          occ_func_0_1(171) * occ_func_0_1(52) * occ_func_0_0(0) +
-          occ_func_0_1(10) * occ_func_0_1(0) * occ_func_0_0(45) +
-          occ_func_0_1(0) * occ_func_0_1(3) * occ_func_0_0(146) +
+          occ_func_0_0(175) * occ_func_0_1(54) * occ_func_0_1(0) +
+          occ_func_0_0(12) * occ_func_0_1(0) * occ_func_0_1(43) +
+          occ_func_0_0(0) * occ_func_0_1(1) * occ_func_0_1(142) +
+          occ_func_0_0(171) * occ_func_0_1(52) * occ_func_0_1(0) +
+          occ_func_0_0(10) * occ_func_0_1(0) * occ_func_0_1(45) +
+          occ_func_0_0(0) * occ_func_0_1(3) * occ_func_0_1(146) +
           occ_func_0_1(0) * occ_func_0_1(7) * occ_func_0_0(159) +
           occ_func_0_1(6) * occ_func_0_1(0) * occ_func_0_0(49) +
           occ_func_0_1(158) * occ_func_0_1(48) * occ_func_0_0(0) +
-          occ_func_0_1(160) * occ_func_0_1(50) * occ_func_0_0(0) +
-          occ_func_0_1(8) * occ_func_0_1(0) * occ_func_0_0(47) +
-          occ_func_0_1(0) * occ_func_0_1(5) * occ_func_0_0(157) +
-          occ_func_0_1(174) * occ_func_0_1(53) * occ_func_0_0(0) +
-          occ_func_0_1(11) * occ_func_0_1(0) * occ_func_0_0(44) +
-          occ_func_0_1(0) * occ_func_0_1(2) * occ_func_0_0(143)) /
+          occ_func_0_0(160) * occ_func_0_1(50) * occ_func_0_1(0) +
+          occ_func_0_0(8) * occ_func_0_1(0) * occ_func_0_1(47) +
+          occ_func_0_0(0) * occ_func_0_1(5) * occ_func_0_1(157) +
+          occ_func_0_0(174) * occ_func_0_1(53) * occ_func_0_1(0) +
+          occ_func_0_0(11) * occ_func_0_1(0) * occ_func_0_1(44) +
+          occ_func_0_0(0) * occ_func_0_1(2) * occ_func_0_1(143)) /
          12.;
 }
 template <typename Scalar>
@@ -7411,9 +7671,9 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_12_4_at_0() const {
   return (occ_func_0_0(0) * occ_func_0_0(11) * occ_func_0_1(174) +
           occ_func_0_0(2) * occ_func_0_0(0) * occ_func_0_1(53) +
           occ_func_0_0(143) * occ_func_0_0(44) * occ_func_0_1(0) +
-          occ_func_0_0(159) * occ_func_0_0(49) * occ_func_0_1(0) +
-          occ_func_0_0(7) * occ_func_0_0(0) * occ_func_0_1(48) +
-          occ_func_0_0(0) * occ_func_0_0(6) * occ_func_0_1(158) +
+          occ_func_0_1(159) * occ_func_0_0(49) * occ_func_0_0(0) +
+          occ_func_0_1(7) * occ_func_0_0(0) * occ_func_0_0(48) +
+          occ_func_0_1(0) * occ_func_0_0(6) * occ_func_0_0(158) +
           occ_func_0_0(0) * occ_func_0_0(9) * occ_func_0_1(161) +
           occ_func_0_0(4) * occ_func_0_0(0) * occ_func_0_1(51) +
           occ_func_0_0(156) * occ_func_0_0(46) * occ_func_0_1(0) +
@@ -7423,27 +7683,27 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_12_4_at_0() const {
           occ_func_0_0(0) * occ_func_0_0(10) * occ_func_0_1(171) +
           occ_func_0_0(3) * occ_func_0_0(0) * occ_func_0_1(52) +
           occ_func_0_0(146) * occ_func_0_0(45) * occ_func_0_1(0) +
-          occ_func_0_0(161) * occ_func_0_0(51) * occ_func_0_1(0) +
-          occ_func_0_0(9) * occ_func_0_0(0) * occ_func_0_1(46) +
-          occ_func_0_0(0) * occ_func_0_0(4) * occ_func_0_1(156) +
+          occ_func_0_1(161) * occ_func_0_0(51) * occ_func_0_0(0) +
+          occ_func_0_1(9) * occ_func_0_0(0) * occ_func_0_0(46) +
+          occ_func_0_1(0) * occ_func_0_0(4) * occ_func_0_0(156) +
           occ_func_0_0(0) * occ_func_0_0(12) * occ_func_0_1(175) +
           occ_func_0_0(1) * occ_func_0_0(0) * occ_func_0_1(54) +
           occ_func_0_0(142) * occ_func_0_0(43) * occ_func_0_1(0) +
-          occ_func_0_0(175) * occ_func_0_0(54) * occ_func_0_1(0) +
-          occ_func_0_0(12) * occ_func_0_0(0) * occ_func_0_1(43) +
-          occ_func_0_0(0) * occ_func_0_0(1) * occ_func_0_1(142) +
-          occ_func_0_0(171) * occ_func_0_0(52) * occ_func_0_1(0) +
-          occ_func_0_0(10) * occ_func_0_0(0) * occ_func_0_1(45) +
-          occ_func_0_0(0) * occ_func_0_0(3) * occ_func_0_1(146) +
+          occ_func_0_1(175) * occ_func_0_0(54) * occ_func_0_0(0) +
+          occ_func_0_1(12) * occ_func_0_0(0) * occ_func_0_0(43) +
+          occ_func_0_1(0) * occ_func_0_0(1) * occ_func_0_0(142) +
+          occ_func_0_1(171) * occ_func_0_0(52) * occ_func_0_0(0) +
+          occ_func_0_1(10) * occ_func_0_0(0) * occ_func_0_0(45) +
+          occ_func_0_1(0) * occ_func_0_0(3) * occ_func_0_0(146) +
           occ_func_0_0(0) * occ_func_0_0(7) * occ_func_0_1(159) +
           occ_func_0_0(6) * occ_func_0_0(0) * occ_func_0_1(49) +
           occ_func_0_0(158) * occ_func_0_0(48) * occ_func_0_1(0) +
-          occ_func_0_0(160) * occ_func_0_0(50) * occ_func_0_1(0) +
-          occ_func_0_0(8) * occ_func_0_0(0) * occ_func_0_1(47) +
-          occ_func_0_0(0) * occ_func_0_0(5) * occ_func_0_1(157) +
-          occ_func_0_0(174) * occ_func_0_0(53) * occ_func_0_1(0) +
-          occ_func_0_0(11) * occ_func_0_0(0) * occ_func_0_1(44) +
-          occ_func_0_0(0) * occ_func_0_0(2) * occ_func_0_1(143)) /
+          occ_func_0_1(160) * occ_func_0_0(50) * occ_func_0_0(0) +
+          occ_func_0_1(8) * occ_func_0_0(0) * occ_func_0_0(47) +
+          occ_func_0_1(0) * occ_func_0_0(5) * occ_func_0_0(157) +
+          occ_func_0_1(174) * occ_func_0_0(53) * occ_func_0_0(0) +
+          occ_func_0_1(11) * occ_func_0_0(0) * occ_func_0_0(44) +
+          occ_func_0_1(0) * occ_func_0_0(2) * occ_func_0_0(143)) /
          12.;
 }
 template <typename Scalar>
@@ -7491,9 +7751,9 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_12_6_at_0() const {
   return (occ_func_0_0(0) * occ_func_0_1(11) * occ_func_0_1(174) +
           occ_func_0_0(2) * occ_func_0_1(0) * occ_func_0_1(53) +
           occ_func_0_0(143) * occ_func_0_1(44) * occ_func_0_1(0) +
-          occ_func_0_0(159) * occ_func_0_1(49) * occ_func_0_1(0) +
-          occ_func_0_0(7) * occ_func_0_1(0) * occ_func_0_1(48) +
-          occ_func_0_0(0) * occ_func_0_1(6) * occ_func_0_1(158) +
+          occ_func_0_1(159) * occ_func_0_1(49) * occ_func_0_0(0) +
+          occ_func_0_1(7) * occ_func_0_1(0) * occ_func_0_0(48) +
+          occ_func_0_1(0) * occ_func_0_1(6) * occ_func_0_0(158) +
           occ_func_0_0(0) * occ_func_0_1(9) * occ_func_0_1(161) +
           occ_func_0_0(4) * occ_func_0_1(0) * occ_func_0_1(51) +
           occ_func_0_0(156) * occ_func_0_1(46) * occ_func_0_1(0) +
@@ -7503,27 +7763,27 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_12_6_at_0() const {
           occ_func_0_0(0) * occ_func_0_1(10) * occ_func_0_1(171) +
           occ_func_0_0(3) * occ_func_0_1(0) * occ_func_0_1(52) +
           occ_func_0_0(146) * occ_func_0_1(45) * occ_func_0_1(0) +
-          occ_func_0_0(161) * occ_func_0_1(51) * occ_func_0_1(0) +
-          occ_func_0_0(9) * occ_func_0_1(0) * occ_func_0_1(46) +
-          occ_func_0_0(0) * occ_func_0_1(4) * occ_func_0_1(156) +
+          occ_func_0_1(161) * occ_func_0_1(51) * occ_func_0_0(0) +
+          occ_func_0_1(9) * occ_func_0_1(0) * occ_func_0_0(46) +
+          occ_func_0_1(0) * occ_func_0_1(4) * occ_func_0_0(156) +
           occ_func_0_0(0) * occ_func_0_1(12) * occ_func_0_1(175) +
           occ_func_0_0(1) * occ_func_0_1(0) * occ_func_0_1(54) +
           occ_func_0_0(142) * occ_func_0_1(43) * occ_func_0_1(0) +
-          occ_func_0_0(175) * occ_func_0_1(54) * occ_func_0_1(0) +
-          occ_func_0_0(12) * occ_func_0_1(0) * occ_func_0_1(43) +
-          occ_func_0_0(0) * occ_func_0_1(1) * occ_func_0_1(142) +
-          occ_func_0_0(171) * occ_func_0_1(52) * occ_func_0_1(0) +
-          occ_func_0_0(10) * occ_func_0_1(0) * occ_func_0_1(45) +
-          occ_func_0_0(0) * occ_func_0_1(3) * occ_func_0_1(146) +
+          occ_func_0_1(175) * occ_func_0_1(54) * occ_func_0_0(0) +
+          occ_func_0_1(12) * occ_func_0_1(0) * occ_func_0_0(43) +
+          occ_func_0_1(0) * occ_func_0_1(1) * occ_func_0_0(142) +
+          occ_func_0_1(171) * occ_func_0_1(52) * occ_func_0_0(0) +
+          occ_func_0_1(10) * occ_func_0_1(0) * occ_func_0_0(45) +
+          occ_func_0_1(0) * occ_func_0_1(3) * occ_func_0_0(146) +
           occ_func_0_0(0) * occ_func_0_1(7) * occ_func_0_1(159) +
           occ_func_0_0(6) * occ_func_0_1(0) * occ_func_0_1(49) +
           occ_func_0_0(158) * occ_func_0_1(48) * occ_func_0_1(0) +
-          occ_func_0_0(160) * occ_func_0_1(50) * occ_func_0_1(0) +
-          occ_func_0_0(8) * occ_func_0_1(0) * occ_func_0_1(47) +
-          occ_func_0_0(0) * occ_func_0_1(5) * occ_func_0_1(157) +
-          occ_func_0_0(174) * occ_func_0_1(53) * occ_func_0_1(0) +
-          occ_func_0_0(11) * occ_func_0_1(0) * occ_func_0_1(44) +
-          occ_func_0_0(0) * occ_func_0_1(2) * occ_func_0_1(143)) /
+          occ_func_0_1(160) * occ_func_0_1(50) * occ_func_0_0(0) +
+          occ_func_0_1(8) * occ_func_0_1(0) * occ_func_0_0(47) +
+          occ_func_0_1(0) * occ_func_0_1(5) * occ_func_0_0(157) +
+          occ_func_0_1(174) * occ_func_0_1(53) * occ_func_0_0(0) +
+          occ_func_0_1(11) * occ_func_0_1(0) * occ_func_0_0(44) +
+          occ_func_0_1(0) * occ_func_0_1(2) * occ_func_0_0(143)) /
          12.;
 }
 template <typename Scalar>
@@ -7615,42 +7875,42 @@ Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_12_1_at_0(
   return (m_occ_func_0_0[occ_f] - m_occ_func_0_0[occ_i]) *
              (occ_func_0_1(2) * occ_func_0_0(53) +
               occ_func_0_1(143) * occ_func_0_0(44) +
-              occ_func_0_1(159) * occ_func_0_0(49) +
-              occ_func_0_1(7) * occ_func_0_0(48) +
+              occ_func_0_0(7) * occ_func_0_1(48) +
+              occ_func_0_0(6) * occ_func_0_1(158) +
               occ_func_0_1(4) * occ_func_0_0(51) +
               occ_func_0_1(156) * occ_func_0_0(46) +
               occ_func_0_1(5) * occ_func_0_0(50) +
               occ_func_0_1(157) * occ_func_0_0(47) +
               occ_func_0_1(3) * occ_func_0_0(52) +
               occ_func_0_1(146) * occ_func_0_0(45) +
-              occ_func_0_1(161) * occ_func_0_0(51) +
-              occ_func_0_1(9) * occ_func_0_0(46) +
+              occ_func_0_0(9) * occ_func_0_1(46) +
+              occ_func_0_0(4) * occ_func_0_1(156) +
               occ_func_0_1(1) * occ_func_0_0(54) +
               occ_func_0_1(142) * occ_func_0_0(43) +
-              occ_func_0_1(175) * occ_func_0_0(54) +
-              occ_func_0_1(12) * occ_func_0_0(43) +
-              occ_func_0_1(171) * occ_func_0_0(52) +
-              occ_func_0_1(10) * occ_func_0_0(45) +
+              occ_func_0_0(12) * occ_func_0_1(43) +
+              occ_func_0_0(1) * occ_func_0_1(142) +
+              occ_func_0_0(10) * occ_func_0_1(45) +
+              occ_func_0_0(3) * occ_func_0_1(146) +
               occ_func_0_1(6) * occ_func_0_0(49) +
               occ_func_0_1(158) * occ_func_0_0(48) +
-              occ_func_0_1(160) * occ_func_0_0(50) +
-              occ_func_0_1(8) * occ_func_0_0(47) +
-              occ_func_0_1(174) * occ_func_0_0(53) +
-              occ_func_0_1(11) * occ_func_0_0(44)) /
+              occ_func_0_0(8) * occ_func_0_1(47) +
+              occ_func_0_0(5) * occ_func_0_1(157) +
+              occ_func_0_0(11) * occ_func_0_1(44) +
+              occ_func_0_0(2) * occ_func_0_1(143)) /
              12. +
          (m_occ_func_0_1[occ_f] - m_occ_func_0_1[occ_i]) *
              (occ_func_0_0(11) * occ_func_0_0(174) +
-              occ_func_0_0(6) * occ_func_0_0(158) +
+              occ_func_0_0(159) * occ_func_0_0(49) +
               occ_func_0_0(9) * occ_func_0_0(161) +
               occ_func_0_0(8) * occ_func_0_0(160) +
               occ_func_0_0(10) * occ_func_0_0(171) +
-              occ_func_0_0(4) * occ_func_0_0(156) +
+              occ_func_0_0(161) * occ_func_0_0(51) +
               occ_func_0_0(12) * occ_func_0_0(175) +
-              occ_func_0_0(1) * occ_func_0_0(142) +
-              occ_func_0_0(3) * occ_func_0_0(146) +
+              occ_func_0_0(175) * occ_func_0_0(54) +
+              occ_func_0_0(171) * occ_func_0_0(52) +
               occ_func_0_0(7) * occ_func_0_0(159) +
-              occ_func_0_0(5) * occ_func_0_0(157) +
-              occ_func_0_0(2) * occ_func_0_0(143)) /
+              occ_func_0_0(160) * occ_func_0_0(50) +
+              occ_func_0_0(174) * occ_func_0_0(53)) /
              12.;
 }
 template <typename Scalar>
@@ -7702,43 +7962,43 @@ Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_12_3_at_0(
     int occ_i, int occ_f) const {
   return (m_occ_func_0_0[occ_f] - m_occ_func_0_0[occ_i]) *
              (occ_func_0_1(143) * occ_func_0_1(44) +
-              occ_func_0_1(159) * occ_func_0_1(49) +
+              occ_func_0_1(6) * occ_func_0_1(158) +
               occ_func_0_1(156) * occ_func_0_1(46) +
               occ_func_0_1(157) * occ_func_0_1(47) +
               occ_func_0_1(146) * occ_func_0_1(45) +
-              occ_func_0_1(161) * occ_func_0_1(51) +
+              occ_func_0_1(4) * occ_func_0_1(156) +
               occ_func_0_1(142) * occ_func_0_1(43) +
-              occ_func_0_1(175) * occ_func_0_1(54) +
-              occ_func_0_1(171) * occ_func_0_1(52) +
+              occ_func_0_1(1) * occ_func_0_1(142) +
+              occ_func_0_1(3) * occ_func_0_1(146) +
               occ_func_0_1(158) * occ_func_0_1(48) +
-              occ_func_0_1(160) * occ_func_0_1(50) +
-              occ_func_0_1(174) * occ_func_0_1(53)) /
+              occ_func_0_1(5) * occ_func_0_1(157) +
+              occ_func_0_1(2) * occ_func_0_1(143)) /
              12. +
          (m_occ_func_0_1[occ_f] - m_occ_func_0_1[occ_i]) *
              (occ_func_0_1(11) * occ_func_0_0(174) +
               occ_func_0_1(2) * occ_func_0_0(53) +
-              occ_func_0_1(7) * occ_func_0_0(48) +
-              occ_func_0_1(6) * occ_func_0_0(158) +
+              occ_func_0_0(159) * occ_func_0_1(49) +
+              occ_func_0_0(7) * occ_func_0_1(48) +
               occ_func_0_1(9) * occ_func_0_0(161) +
               occ_func_0_1(4) * occ_func_0_0(51) +
               occ_func_0_1(8) * occ_func_0_0(160) +
               occ_func_0_1(5) * occ_func_0_0(50) +
               occ_func_0_1(10) * occ_func_0_0(171) +
               occ_func_0_1(3) * occ_func_0_0(52) +
-              occ_func_0_1(9) * occ_func_0_0(46) +
-              occ_func_0_1(4) * occ_func_0_0(156) +
+              occ_func_0_0(161) * occ_func_0_1(51) +
+              occ_func_0_0(9) * occ_func_0_1(46) +
               occ_func_0_1(12) * occ_func_0_0(175) +
               occ_func_0_1(1) * occ_func_0_0(54) +
-              occ_func_0_1(12) * occ_func_0_0(43) +
-              occ_func_0_1(1) * occ_func_0_0(142) +
-              occ_func_0_1(10) * occ_func_0_0(45) +
-              occ_func_0_1(3) * occ_func_0_0(146) +
+              occ_func_0_0(175) * occ_func_0_1(54) +
+              occ_func_0_0(12) * occ_func_0_1(43) +
+              occ_func_0_0(171) * occ_func_0_1(52) +
+              occ_func_0_0(10) * occ_func_0_1(45) +
               occ_func_0_1(7) * occ_func_0_0(159) +
               occ_func_0_1(6) * occ_func_0_0(49) +
-              occ_func_0_1(8) * occ_func_0_0(47) +
-              occ_func_0_1(5) * occ_func_0_0(157) +
-              occ_func_0_1(11) * occ_func_0_0(44) +
-              occ_func_0_1(2) * occ_func_0_0(143)) /
+              occ_func_0_0(160) * occ_func_0_1(50) +
+              occ_func_0_0(8) * occ_func_0_1(47) +
+              occ_func_0_0(174) * occ_func_0_1(53) +
+              occ_func_0_0(11) * occ_func_0_1(44)) /
              12.;
 }
 template <typename Scalar>
@@ -7747,42 +8007,42 @@ Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_12_4_at_0(
   return (m_occ_func_0_0[occ_f] - m_occ_func_0_0[occ_i]) *
              (occ_func_0_0(11) * occ_func_0_1(174) +
               occ_func_0_0(2) * occ_func_0_1(53) +
-              occ_func_0_0(7) * occ_func_0_1(48) +
-              occ_func_0_0(6) * occ_func_0_1(158) +
+              occ_func_0_1(159) * occ_func_0_0(49) +
+              occ_func_0_1(7) * occ_func_0_0(48) +
               occ_func_0_0(9) * occ_func_0_1(161) +
               occ_func_0_0(4) * occ_func_0_1(51) +
               occ_func_0_0(8) * occ_func_0_1(160) +
               occ_func_0_0(5) * occ_func_0_1(50) +
               occ_func_0_0(10) * occ_func_0_1(171) +
               occ_func_0_0(3) * occ_func_0_1(52) +
-              occ_func_0_0(9) * occ_func_0_1(46) +
-              occ_func_0_0(4) * occ_func_0_1(156) +
+              occ_func_0_1(161) * occ_func_0_0(51) +
+              occ_func_0_1(9) * occ_func_0_0(46) +
               occ_func_0_0(12) * occ_func_0_1(175) +
               occ_func_0_0(1) * occ_func_0_1(54) +
-              occ_func_0_0(12) * occ_func_0_1(43) +
-              occ_func_0_0(1) * occ_func_0_1(142) +
-              occ_func_0_0(10) * occ_func_0_1(45) +
-              occ_func_0_0(3) * occ_func_0_1(146) +
+              occ_func_0_1(175) * occ_func_0_0(54) +
+              occ_func_0_1(12) * occ_func_0_0(43) +
+              occ_func_0_1(171) * occ_func_0_0(52) +
+              occ_func_0_1(10) * occ_func_0_0(45) +
               occ_func_0_0(7) * occ_func_0_1(159) +
               occ_func_0_0(6) * occ_func_0_1(49) +
-              occ_func_0_0(8) * occ_func_0_1(47) +
-              occ_func_0_0(5) * occ_func_0_1(157) +
-              occ_func_0_0(11) * occ_func_0_1(44) +
-              occ_func_0_0(2) * occ_func_0_1(143)) /
+              occ_func_0_1(160) * occ_func_0_0(50) +
+              occ_func_0_1(8) * occ_func_0_0(47) +
+              occ_func_0_1(174) * occ_func_0_0(53) +
+              occ_func_0_1(11) * occ_func_0_0(44)) /
              12. +
          (m_occ_func_0_1[occ_f] - m_occ_func_0_1[occ_i]) *
              (occ_func_0_0(143) * occ_func_0_0(44) +
-              occ_func_0_0(159) * occ_func_0_0(49) +
+              occ_func_0_0(6) * occ_func_0_0(158) +
               occ_func_0_0(156) * occ_func_0_0(46) +
               occ_func_0_0(157) * occ_func_0_0(47) +
               occ_func_0_0(146) * occ_func_0_0(45) +
-              occ_func_0_0(161) * occ_func_0_0(51) +
+              occ_func_0_0(4) * occ_func_0_0(156) +
               occ_func_0_0(142) * occ_func_0_0(43) +
-              occ_func_0_0(175) * occ_func_0_0(54) +
-              occ_func_0_0(171) * occ_func_0_0(52) +
+              occ_func_0_0(1) * occ_func_0_0(142) +
+              occ_func_0_0(3) * occ_func_0_0(146) +
               occ_func_0_0(158) * occ_func_0_0(48) +
-              occ_func_0_0(160) * occ_func_0_0(50) +
-              occ_func_0_0(174) * occ_func_0_0(53)) /
+              occ_func_0_0(5) * occ_func_0_0(157) +
+              occ_func_0_0(2) * occ_func_0_0(143)) /
              12.;
 }
 template <typename Scalar>
@@ -7834,43 +8094,43 @@ Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_12_6_at_0(
     int occ_i, int occ_f) const {
   return (m_occ_func_0_0[occ_f] - m_occ_func_0_0[occ_i]) *
              (occ_func_0_1(11) * occ_func_0_1(174) +
-              occ_func_0_1(6) * occ_func_0_1(158) +
+              occ_func_0_1(159) * occ_func_0_1(49) +
               occ_func_0_1(9) * occ_func_0_1(161) +
               occ_func_0_1(8) * occ_func_0_1(160) +
               occ_func_0_1(10) * occ_func_0_1(171) +
-              occ_func_0_1(4) * occ_func_0_1(156) +
+              occ_func_0_1(161) * occ_func_0_1(51) +
               occ_func_0_1(12) * occ_func_0_1(175) +
-              occ_func_0_1(1) * occ_func_0_1(142) +
-              occ_func_0_1(3) * occ_func_0_1(146) +
+              occ_func_0_1(175) * occ_func_0_1(54) +
+              occ_func_0_1(171) * occ_func_0_1(52) +
               occ_func_0_1(7) * occ_func_0_1(159) +
-              occ_func_0_1(5) * occ_func_0_1(157) +
-              occ_func_0_1(2) * occ_func_0_1(143)) /
+              occ_func_0_1(160) * occ_func_0_1(50) +
+              occ_func_0_1(174) * occ_func_0_1(53)) /
              12. +
          (m_occ_func_0_1[occ_f] - m_occ_func_0_1[occ_i]) *
              (occ_func_0_0(2) * occ_func_0_1(53) +
               occ_func_0_0(143) * occ_func_0_1(44) +
-              occ_func_0_0(159) * occ_func_0_1(49) +
-              occ_func_0_0(7) * occ_func_0_1(48) +
+              occ_func_0_1(7) * occ_func_0_0(48) +
+              occ_func_0_1(6) * occ_func_0_0(158) +
               occ_func_0_0(4) * occ_func_0_1(51) +
               occ_func_0_0(156) * occ_func_0_1(46) +
               occ_func_0_0(5) * occ_func_0_1(50) +
               occ_func_0_0(157) * occ_func_0_1(47) +
               occ_func_0_0(3) * occ_func_0_1(52) +
               occ_func_0_0(146) * occ_func_0_1(45) +
-              occ_func_0_0(161) * occ_func_0_1(51) +
-              occ_func_0_0(9) * occ_func_0_1(46) +
+              occ_func_0_1(9) * occ_func_0_0(46) +
+              occ_func_0_1(4) * occ_func_0_0(156) +
               occ_func_0_0(1) * occ_func_0_1(54) +
               occ_func_0_0(142) * occ_func_0_1(43) +
-              occ_func_0_0(175) * occ_func_0_1(54) +
-              occ_func_0_0(12) * occ_func_0_1(43) +
-              occ_func_0_0(171) * occ_func_0_1(52) +
-              occ_func_0_0(10) * occ_func_0_1(45) +
+              occ_func_0_1(12) * occ_func_0_0(43) +
+              occ_func_0_1(1) * occ_func_0_0(142) +
+              occ_func_0_1(10) * occ_func_0_0(45) +
+              occ_func_0_1(3) * occ_func_0_0(146) +
               occ_func_0_0(6) * occ_func_0_1(49) +
               occ_func_0_0(158) * occ_func_0_1(48) +
-              occ_func_0_0(160) * occ_func_0_1(50) +
-              occ_func_0_0(8) * occ_func_0_1(47) +
-              occ_func_0_0(174) * occ_func_0_1(53) +
-              occ_func_0_0(11) * occ_func_0_1(44)) /
+              occ_func_0_1(8) * occ_func_0_0(47) +
+              occ_func_0_1(5) * occ_func_0_0(157) +
+              occ_func_0_1(11) * occ_func_0_0(44) +
+              occ_func_0_1(2) * occ_func_0_0(143)) /
              12.;
 }
 template <typename Scalar>
@@ -7982,51 +8242,51 @@ template <typename Scalar>
 Scalar OccClexulatorTest_Clexulator::eval_bfunc_13_1() const {
   return (occ_func_0_1(0) * occ_func_0_0(7) * occ_func_0_0(12) *
               occ_func_0_0(85) +
-          occ_func_0_1(83) * occ_func_0_0(35) * occ_func_0_0(34) *
-              occ_func_0_0(0) +
-          occ_func_0_1(84) * occ_func_0_0(36) * occ_func_0_0(38) *
-              occ_func_0_0(0) +
+          occ_func_0_0(83) * occ_func_0_0(35) * occ_func_0_0(34) *
+              occ_func_0_1(0) +
+          occ_func_0_0(84) * occ_func_0_0(36) * occ_func_0_0(38) *
+              occ_func_0_1(0) +
           occ_func_0_1(0) * occ_func_0_0(10) * occ_func_0_0(11) *
               occ_func_0_0(86) +
-          occ_func_0_1(84) * occ_func_0_0(31) * occ_func_0_0(36) *
-              occ_func_0_0(0) +
+          occ_func_0_0(84) * occ_func_0_0(31) * occ_func_0_0(36) *
+              occ_func_0_1(0) +
           occ_func_0_1(0) * occ_func_0_0(12) * occ_func_0_0(10) *
               occ_func_0_0(86) +
-          occ_func_0_1(10) * occ_func_0_0(0) * occ_func_0_0(12) *
+          occ_func_0_0(10) * occ_func_0_1(0) * occ_func_0_0(12) *
               occ_func_0_0(33) +
           occ_func_0_1(0) * occ_func_0_0(8) * occ_func_0_0(11) *
               occ_func_0_0(84) +
-          occ_func_0_1(86) * occ_func_0_0(41) * occ_func_0_0(42) *
-              occ_func_0_0(0) +
-          occ_func_0_1(7) * occ_func_0_0(12) * occ_func_0_0(0) *
+          occ_func_0_0(86) * occ_func_0_0(41) * occ_func_0_0(42) *
+              occ_func_0_1(0) +
+          occ_func_0_0(7) * occ_func_0_0(12) * occ_func_0_1(0) *
               occ_func_0_0(38) +
           occ_func_0_1(0) * occ_func_0_0(12) * occ_func_0_0(9) *
               occ_func_0_0(85) +
-          occ_func_0_1(9) * occ_func_0_0(0) * occ_func_0_0(12) *
+          occ_func_0_0(9) * occ_func_0_1(0) * occ_func_0_0(12) *
               occ_func_0_0(35) +
-          occ_func_0_1(9) * occ_func_0_0(7) * occ_func_0_0(0) *
+          occ_func_0_0(9) * occ_func_0_0(7) * occ_func_0_1(0) *
               occ_func_0_0(35) +
-          occ_func_0_1(86) * occ_func_0_0(40) * occ_func_0_0(41) *
-              occ_func_0_0(0) +
+          occ_func_0_0(86) * occ_func_0_0(40) * occ_func_0_0(41) *
+              occ_func_0_1(0) +
           occ_func_0_1(0) * occ_func_0_0(9) * occ_func_0_0(7) *
               occ_func_0_0(85) +
-          occ_func_0_1(85) * occ_func_0_0(32) * occ_func_0_0(39) *
-              occ_func_0_0(0) +
-          occ_func_0_1(85) * occ_func_0_0(39) * occ_func_0_0(37) *
-              occ_func_0_0(0) +
-          occ_func_0_1(85) * occ_func_0_0(37) * occ_func_0_0(32) *
-              occ_func_0_0(0) +
-          occ_func_0_1(84) * occ_func_0_0(38) * occ_func_0_0(31) *
-              occ_func_0_0(0) +
-          occ_func_0_1(10) * occ_func_0_0(11) * occ_func_0_0(0) *
+          occ_func_0_0(85) * occ_func_0_0(32) * occ_func_0_0(39) *
+              occ_func_0_1(0) +
+          occ_func_0_0(85) * occ_func_0_0(39) * occ_func_0_0(37) *
+              occ_func_0_1(0) +
+          occ_func_0_0(85) * occ_func_0_0(37) * occ_func_0_0(32) *
+              occ_func_0_1(0) +
+          occ_func_0_0(84) * occ_func_0_0(38) * occ_func_0_0(31) *
+              occ_func_0_1(0) +
+          occ_func_0_0(10) * occ_func_0_0(11) * occ_func_0_1(0) *
               occ_func_0_0(33) +
           occ_func_0_1(0) * occ_func_0_0(11) * occ_func_0_0(12) *
               occ_func_0_0(86) +
-          occ_func_0_1(86) * occ_func_0_0(42) * occ_func_0_0(40) *
-              occ_func_0_0(0) +
-          occ_func_0_1(8) * occ_func_0_0(11) * occ_func_0_0(0) *
+          occ_func_0_0(86) * occ_func_0_0(42) * occ_func_0_0(40) *
+              occ_func_0_1(0) +
+          occ_func_0_0(8) * occ_func_0_0(11) * occ_func_0_1(0) *
               occ_func_0_0(34) +
-          occ_func_0_1(7) * occ_func_0_0(0) * occ_func_0_0(9) *
+          occ_func_0_0(7) * occ_func_0_1(0) * occ_func_0_0(9) *
               occ_func_0_0(38)) /
          24.;
 }
@@ -8038,11 +8298,11 @@ Scalar OccClexulatorTest_Clexulator::eval_bfunc_13_2() const {
                occ_func_0_0(85)) +
           (0.707107 * occ_func_0_0(83) * occ_func_0_0(35) * occ_func_0_1(34) *
                occ_func_0_0(0) +
-           0.707107 * occ_func_0_0(83) * occ_func_0_1(35) * occ_func_0_0(34) *
+           0.707107 * occ_func_0_1(83) * occ_func_0_0(35) * occ_func_0_0(34) *
                occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_0(84) * occ_func_0_0(36) * occ_func_0_1(38) *
+          (0.707107 * occ_func_0_0(84) * occ_func_0_1(36) * occ_func_0_0(38) *
                occ_func_0_0(0) +
-           0.707107 * occ_func_0_0(84) * occ_func_0_1(36) * occ_func_0_0(38) *
+           0.707107 * occ_func_0_1(84) * occ_func_0_0(36) * occ_func_0_0(38) *
                occ_func_0_0(0)) +
           (0.707107 * occ_func_0_0(0) * occ_func_0_0(10) * occ_func_0_1(11) *
                occ_func_0_0(86) +
@@ -8056,9 +8316,9 @@ Scalar OccClexulatorTest_Clexulator::eval_bfunc_13_2() const {
                occ_func_0_0(86) +
            0.707107 * occ_func_0_0(0) * occ_func_0_1(12) * occ_func_0_0(10) *
                occ_func_0_0(86)) +
-          (0.707107 * occ_func_0_0(10) * occ_func_0_0(0) * occ_func_0_1(12) *
-               occ_func_0_0(33) +
-           0.707107 * occ_func_0_0(10) * occ_func_0_1(0) * occ_func_0_0(12) *
+          (0.707107 * occ_func_0_0(10) * occ_func_0_0(0) * occ_func_0_0(12) *
+               occ_func_0_1(33) +
+           0.707107 * occ_func_0_1(10) * occ_func_0_0(0) * occ_func_0_0(12) *
                occ_func_0_0(33)) +
           (0.707107 * occ_func_0_0(0) * occ_func_0_0(8) * occ_func_0_1(11) *
                occ_func_0_0(84) +
@@ -8068,21 +8328,21 @@ Scalar OccClexulatorTest_Clexulator::eval_bfunc_13_2() const {
                occ_func_0_0(0) +
            0.707107 * occ_func_0_0(86) * occ_func_0_1(41) * occ_func_0_0(42) *
                occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_0(7) * occ_func_0_0(12) * occ_func_0_1(0) *
+          (0.707107 * occ_func_0_0(7) * occ_func_0_1(12) * occ_func_0_0(0) *
                occ_func_0_0(38) +
-           0.707107 * occ_func_0_0(7) * occ_func_0_1(12) * occ_func_0_0(0) *
+           0.707107 * occ_func_0_1(7) * occ_func_0_0(12) * occ_func_0_0(0) *
                occ_func_0_0(38)) +
           (0.707107 * occ_func_0_0(0) * occ_func_0_0(12) * occ_func_0_1(9) *
                occ_func_0_0(85) +
            0.707107 * occ_func_0_0(0) * occ_func_0_1(12) * occ_func_0_0(9) *
                occ_func_0_0(85)) +
-          (0.707107 * occ_func_0_0(9) * occ_func_0_0(0) * occ_func_0_1(12) *
-               occ_func_0_0(35) +
-           0.707107 * occ_func_0_0(9) * occ_func_0_1(0) * occ_func_0_0(12) *
+          (0.707107 * occ_func_0_0(9) * occ_func_0_0(0) * occ_func_0_0(12) *
+               occ_func_0_1(35) +
+           0.707107 * occ_func_0_1(9) * occ_func_0_0(0) * occ_func_0_0(12) *
                occ_func_0_0(35)) +
-          (0.707107 * occ_func_0_0(9) * occ_func_0_0(7) * occ_func_0_1(0) *
+          (0.707107 * occ_func_0_0(9) * occ_func_0_1(7) * occ_func_0_0(0) *
                occ_func_0_0(35) +
-           0.707107 * occ_func_0_0(9) * occ_func_0_1(7) * occ_func_0_0(0) *
+           0.707107 * occ_func_0_1(9) * occ_func_0_0(7) * occ_func_0_0(0) *
                occ_func_0_0(35)) +
           (0.707107 * occ_func_0_0(86) * occ_func_0_0(40) * occ_func_0_1(41) *
                occ_func_0_0(0) +
@@ -8106,11 +8366,11 @@ Scalar OccClexulatorTest_Clexulator::eval_bfunc_13_2() const {
                occ_func_0_0(0)) +
           (0.707107 * occ_func_0_0(84) * occ_func_0_0(38) * occ_func_0_1(31) *
                occ_func_0_0(0) +
-           0.707107 * occ_func_0_0(84) * occ_func_0_1(38) * occ_func_0_0(31) *
+           0.707107 * occ_func_0_1(84) * occ_func_0_0(38) * occ_func_0_0(31) *
                occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_0(10) * occ_func_0_0(11) * occ_func_0_1(0) *
-               occ_func_0_0(33) +
-           0.707107 * occ_func_0_0(10) * occ_func_0_1(11) * occ_func_0_0(0) *
+          (0.707107 * occ_func_0_0(10) * occ_func_0_0(11) * occ_func_0_0(0) *
+               occ_func_0_1(33) +
+           0.707107 * occ_func_0_1(10) * occ_func_0_0(11) * occ_func_0_0(0) *
                occ_func_0_0(33)) +
           (0.707107 * occ_func_0_0(0) * occ_func_0_0(11) * occ_func_0_1(12) *
                occ_func_0_0(86) +
@@ -8120,13 +8380,13 @@ Scalar OccClexulatorTest_Clexulator::eval_bfunc_13_2() const {
                occ_func_0_0(0) +
            0.707107 * occ_func_0_0(86) * occ_func_0_1(42) * occ_func_0_0(40) *
                occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_0(8) * occ_func_0_0(11) * occ_func_0_1(0) *
-               occ_func_0_0(34) +
-           0.707107 * occ_func_0_0(8) * occ_func_0_1(11) * occ_func_0_0(0) *
+          (0.707107 * occ_func_0_0(8) * occ_func_0_0(11) * occ_func_0_0(0) *
+               occ_func_0_1(34) +
+           0.707107 * occ_func_0_1(8) * occ_func_0_0(11) * occ_func_0_0(0) *
                occ_func_0_0(34)) +
           (0.707107 * occ_func_0_0(7) * occ_func_0_0(0) * occ_func_0_1(9) *
                occ_func_0_0(38) +
-           0.707107 * occ_func_0_0(7) * occ_func_0_1(0) * occ_func_0_0(9) *
+           0.707107 * occ_func_0_1(7) * occ_func_0_0(0) * occ_func_0_0(9) *
                occ_func_0_0(38))) /
          24.;
 }
@@ -8136,95 +8396,95 @@ Scalar OccClexulatorTest_Clexulator::eval_bfunc_13_3() const {
                occ_func_0_0(85) +
            0.707107 * occ_func_0_1(0) * occ_func_0_1(7) * occ_func_0_0(12) *
                occ_func_0_0(85)) +
-          (0.707107 * occ_func_0_1(83) * occ_func_0_0(35) * occ_func_0_1(34) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_1(83) * occ_func_0_1(35) * occ_func_0_0(34) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(84) * occ_func_0_0(36) * occ_func_0_1(38) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_1(84) * occ_func_0_1(36) * occ_func_0_0(38) *
-               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(83) * occ_func_0_0(35) * occ_func_0_1(34) *
+               occ_func_0_1(0) +
+           0.707107 * occ_func_0_1(83) * occ_func_0_0(35) * occ_func_0_0(34) *
+               occ_func_0_1(0)) +
+          (0.707107 * occ_func_0_0(84) * occ_func_0_1(36) * occ_func_0_0(38) *
+               occ_func_0_1(0) +
+           0.707107 * occ_func_0_1(84) * occ_func_0_0(36) * occ_func_0_0(38) *
+               occ_func_0_1(0)) +
           (0.707107 * occ_func_0_1(0) * occ_func_0_0(10) * occ_func_0_1(11) *
                occ_func_0_0(86) +
            0.707107 * occ_func_0_1(0) * occ_func_0_1(10) * occ_func_0_0(11) *
                occ_func_0_0(86)) +
-          (0.707107 * occ_func_0_1(84) * occ_func_0_0(31) * occ_func_0_1(36) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_1(84) * occ_func_0_1(31) * occ_func_0_0(36) *
-               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(84) * occ_func_0_0(31) * occ_func_0_1(36) *
+               occ_func_0_1(0) +
+           0.707107 * occ_func_0_0(84) * occ_func_0_1(31) * occ_func_0_0(36) *
+               occ_func_0_1(0)) +
           (0.707107 * occ_func_0_1(0) * occ_func_0_0(12) * occ_func_0_1(10) *
                occ_func_0_0(86) +
            0.707107 * occ_func_0_1(0) * occ_func_0_1(12) * occ_func_0_0(10) *
                occ_func_0_0(86)) +
-          (0.707107 * occ_func_0_1(10) * occ_func_0_0(0) * occ_func_0_1(12) *
-               occ_func_0_0(33) +
+          (0.707107 * occ_func_0_0(10) * occ_func_0_1(0) * occ_func_0_0(12) *
+               occ_func_0_1(33) +
            0.707107 * occ_func_0_1(10) * occ_func_0_1(0) * occ_func_0_0(12) *
                occ_func_0_0(33)) +
           (0.707107 * occ_func_0_1(0) * occ_func_0_0(8) * occ_func_0_1(11) *
                occ_func_0_0(84) +
            0.707107 * occ_func_0_1(0) * occ_func_0_1(8) * occ_func_0_0(11) *
                occ_func_0_0(84)) +
-          (0.707107 * occ_func_0_1(86) * occ_func_0_0(41) * occ_func_0_1(42) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_1(86) * occ_func_0_1(41) * occ_func_0_0(42) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(7) * occ_func_0_0(12) * occ_func_0_1(0) *
+          (0.707107 * occ_func_0_0(86) * occ_func_0_0(41) * occ_func_0_1(42) *
+               occ_func_0_1(0) +
+           0.707107 * occ_func_0_0(86) * occ_func_0_1(41) * occ_func_0_0(42) *
+               occ_func_0_1(0)) +
+          (0.707107 * occ_func_0_0(7) * occ_func_0_1(12) * occ_func_0_1(0) *
                occ_func_0_0(38) +
-           0.707107 * occ_func_0_1(7) * occ_func_0_1(12) * occ_func_0_0(0) *
+           0.707107 * occ_func_0_1(7) * occ_func_0_0(12) * occ_func_0_1(0) *
                occ_func_0_0(38)) +
           (0.707107 * occ_func_0_1(0) * occ_func_0_0(12) * occ_func_0_1(9) *
                occ_func_0_0(85) +
            0.707107 * occ_func_0_1(0) * occ_func_0_1(12) * occ_func_0_0(9) *
                occ_func_0_0(85)) +
-          (0.707107 * occ_func_0_1(9) * occ_func_0_0(0) * occ_func_0_1(12) *
-               occ_func_0_0(35) +
+          (0.707107 * occ_func_0_0(9) * occ_func_0_1(0) * occ_func_0_0(12) *
+               occ_func_0_1(35) +
            0.707107 * occ_func_0_1(9) * occ_func_0_1(0) * occ_func_0_0(12) *
                occ_func_0_0(35)) +
-          (0.707107 * occ_func_0_1(9) * occ_func_0_0(7) * occ_func_0_1(0) *
+          (0.707107 * occ_func_0_0(9) * occ_func_0_1(7) * occ_func_0_1(0) *
                occ_func_0_0(35) +
-           0.707107 * occ_func_0_1(9) * occ_func_0_1(7) * occ_func_0_0(0) *
+           0.707107 * occ_func_0_1(9) * occ_func_0_0(7) * occ_func_0_1(0) *
                occ_func_0_0(35)) +
-          (0.707107 * occ_func_0_1(86) * occ_func_0_0(40) * occ_func_0_1(41) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_1(86) * occ_func_0_1(40) * occ_func_0_0(41) *
-               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(86) * occ_func_0_0(40) * occ_func_0_1(41) *
+               occ_func_0_1(0) +
+           0.707107 * occ_func_0_0(86) * occ_func_0_1(40) * occ_func_0_0(41) *
+               occ_func_0_1(0)) +
           (0.707107 * occ_func_0_1(0) * occ_func_0_0(9) * occ_func_0_1(7) *
                occ_func_0_0(85) +
            0.707107 * occ_func_0_1(0) * occ_func_0_1(9) * occ_func_0_0(7) *
                occ_func_0_0(85)) +
-          (0.707107 * occ_func_0_1(85) * occ_func_0_0(32) * occ_func_0_1(39) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_1(85) * occ_func_0_1(32) * occ_func_0_0(39) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(85) * occ_func_0_0(39) * occ_func_0_1(37) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_1(85) * occ_func_0_1(39) * occ_func_0_0(37) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(85) * occ_func_0_0(37) * occ_func_0_1(32) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_1(85) * occ_func_0_1(37) * occ_func_0_0(32) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(84) * occ_func_0_0(38) * occ_func_0_1(31) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_1(84) * occ_func_0_1(38) * occ_func_0_0(31) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(10) * occ_func_0_0(11) * occ_func_0_1(0) *
-               occ_func_0_0(33) +
-           0.707107 * occ_func_0_1(10) * occ_func_0_1(11) * occ_func_0_0(0) *
+          (0.707107 * occ_func_0_0(85) * occ_func_0_0(32) * occ_func_0_1(39) *
+               occ_func_0_1(0) +
+           0.707107 * occ_func_0_0(85) * occ_func_0_1(32) * occ_func_0_0(39) *
+               occ_func_0_1(0)) +
+          (0.707107 * occ_func_0_0(85) * occ_func_0_0(39) * occ_func_0_1(37) *
+               occ_func_0_1(0) +
+           0.707107 * occ_func_0_0(85) * occ_func_0_1(39) * occ_func_0_0(37) *
+               occ_func_0_1(0)) +
+          (0.707107 * occ_func_0_0(85) * occ_func_0_0(37) * occ_func_0_1(32) *
+               occ_func_0_1(0) +
+           0.707107 * occ_func_0_0(85) * occ_func_0_1(37) * occ_func_0_0(32) *
+               occ_func_0_1(0)) +
+          (0.707107 * occ_func_0_0(84) * occ_func_0_0(38) * occ_func_0_1(31) *
+               occ_func_0_1(0) +
+           0.707107 * occ_func_0_1(84) * occ_func_0_0(38) * occ_func_0_0(31) *
+               occ_func_0_1(0)) +
+          (0.707107 * occ_func_0_0(10) * occ_func_0_0(11) * occ_func_0_1(0) *
+               occ_func_0_1(33) +
+           0.707107 * occ_func_0_1(10) * occ_func_0_0(11) * occ_func_0_1(0) *
                occ_func_0_0(33)) +
           (0.707107 * occ_func_0_1(0) * occ_func_0_0(11) * occ_func_0_1(12) *
                occ_func_0_0(86) +
            0.707107 * occ_func_0_1(0) * occ_func_0_1(11) * occ_func_0_0(12) *
                occ_func_0_0(86)) +
-          (0.707107 * occ_func_0_1(86) * occ_func_0_0(42) * occ_func_0_1(40) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_1(86) * occ_func_0_1(42) * occ_func_0_0(40) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(8) * occ_func_0_0(11) * occ_func_0_1(0) *
-               occ_func_0_0(34) +
-           0.707107 * occ_func_0_1(8) * occ_func_0_1(11) * occ_func_0_0(0) *
+          (0.707107 * occ_func_0_0(86) * occ_func_0_0(42) * occ_func_0_1(40) *
+               occ_func_0_1(0) +
+           0.707107 * occ_func_0_0(86) * occ_func_0_1(42) * occ_func_0_0(40) *
+               occ_func_0_1(0)) +
+          (0.707107 * occ_func_0_0(8) * occ_func_0_0(11) * occ_func_0_1(0) *
+               occ_func_0_1(34) +
+           0.707107 * occ_func_0_1(8) * occ_func_0_0(11) * occ_func_0_1(0) *
                occ_func_0_0(34)) +
-          (0.707107 * occ_func_0_1(7) * occ_func_0_0(0) * occ_func_0_1(9) *
+          (0.707107 * occ_func_0_0(7) * occ_func_0_1(0) * occ_func_0_1(9) *
                occ_func_0_0(38) +
            0.707107 * occ_func_0_1(7) * occ_func_0_1(0) * occ_func_0_0(9) *
                occ_func_0_0(38))) /
@@ -8234,9 +8494,9 @@ template <typename Scalar>
 Scalar OccClexulatorTest_Clexulator::eval_bfunc_13_4() const {
   return (occ_func_0_0(0) * occ_func_0_1(7) * occ_func_0_1(12) *
               occ_func_0_0(85) +
-          occ_func_0_0(83) * occ_func_0_1(35) * occ_func_0_1(34) *
+          occ_func_0_1(83) * occ_func_0_0(35) * occ_func_0_1(34) *
               occ_func_0_0(0) +
-          occ_func_0_0(84) * occ_func_0_1(36) * occ_func_0_1(38) *
+          occ_func_0_1(84) * occ_func_0_1(36) * occ_func_0_0(38) *
               occ_func_0_0(0) +
           occ_func_0_0(0) * occ_func_0_1(10) * occ_func_0_1(11) *
               occ_func_0_0(86) +
@@ -8244,19 +8504,19 @@ Scalar OccClexulatorTest_Clexulator::eval_bfunc_13_4() const {
               occ_func_0_0(0) +
           occ_func_0_0(0) * occ_func_0_1(12) * occ_func_0_1(10) *
               occ_func_0_0(86) +
-          occ_func_0_0(10) * occ_func_0_1(0) * occ_func_0_1(12) *
-              occ_func_0_0(33) +
+          occ_func_0_1(10) * occ_func_0_0(0) * occ_func_0_0(12) *
+              occ_func_0_1(33) +
           occ_func_0_0(0) * occ_func_0_1(8) * occ_func_0_1(11) *
               occ_func_0_0(84) +
           occ_func_0_0(86) * occ_func_0_1(41) * occ_func_0_1(42) *
               occ_func_0_0(0) +
-          occ_func_0_0(7) * occ_func_0_1(12) * occ_func_0_1(0) *
+          occ_func_0_1(7) * occ_func_0_1(12) * occ_func_0_0(0) *
               occ_func_0_0(38) +
           occ_func_0_0(0) * occ_func_0_1(12) * occ_func_0_1(9) *
               occ_func_0_0(85) +
-          occ_func_0_0(9) * occ_func_0_1(0) * occ_func_0_1(12) *
-              occ_func_0_0(35) +
-          occ_func_0_0(9) * occ_func_0_1(7) * occ_func_0_1(0) *
+          occ_func_0_1(9) * occ_func_0_0(0) * occ_func_0_0(12) *
+              occ_func_0_1(35) +
+          occ_func_0_1(9) * occ_func_0_1(7) * occ_func_0_0(0) *
               occ_func_0_0(35) +
           occ_func_0_0(86) * occ_func_0_1(40) * occ_func_0_1(41) *
               occ_func_0_0(0) +
@@ -8268,17 +8528,17 @@ Scalar OccClexulatorTest_Clexulator::eval_bfunc_13_4() const {
               occ_func_0_0(0) +
           occ_func_0_0(85) * occ_func_0_1(37) * occ_func_0_1(32) *
               occ_func_0_0(0) +
-          occ_func_0_0(84) * occ_func_0_1(38) * occ_func_0_1(31) *
+          occ_func_0_1(84) * occ_func_0_0(38) * occ_func_0_1(31) *
               occ_func_0_0(0) +
-          occ_func_0_0(10) * occ_func_0_1(11) * occ_func_0_1(0) *
-              occ_func_0_0(33) +
+          occ_func_0_1(10) * occ_func_0_0(11) * occ_func_0_0(0) *
+              occ_func_0_1(33) +
           occ_func_0_0(0) * occ_func_0_1(11) * occ_func_0_1(12) *
               occ_func_0_0(86) +
           occ_func_0_0(86) * occ_func_0_1(42) * occ_func_0_1(40) *
               occ_func_0_0(0) +
-          occ_func_0_0(8) * occ_func_0_1(11) * occ_func_0_1(0) *
-              occ_func_0_0(34) +
-          occ_func_0_0(7) * occ_func_0_1(0) * occ_func_0_1(9) *
+          occ_func_0_1(8) * occ_func_0_0(11) * occ_func_0_0(0) *
+              occ_func_0_1(34) +
+          occ_func_0_1(7) * occ_func_0_0(0) * occ_func_0_1(9) *
               occ_func_0_0(38)) /
          24.;
 }
@@ -8286,50 +8546,50 @@ template <typename Scalar>
 Scalar OccClexulatorTest_Clexulator::eval_bfunc_13_5() const {
   return (occ_func_0_1(0) * occ_func_0_1(7) * occ_func_0_1(12) *
               occ_func_0_0(85) +
-          occ_func_0_1(83) * occ_func_0_1(35) * occ_func_0_1(34) *
-              occ_func_0_0(0) +
-          occ_func_0_1(84) * occ_func_0_1(36) * occ_func_0_1(38) *
-              occ_func_0_0(0) +
+          occ_func_0_1(83) * occ_func_0_0(35) * occ_func_0_1(34) *
+              occ_func_0_1(0) +
+          occ_func_0_1(84) * occ_func_0_1(36) * occ_func_0_0(38) *
+              occ_func_0_1(0) +
           occ_func_0_1(0) * occ_func_0_1(10) * occ_func_0_1(11) *
               occ_func_0_0(86) +
-          occ_func_0_1(84) * occ_func_0_1(31) * occ_func_0_1(36) *
-              occ_func_0_0(0) +
+          occ_func_0_0(84) * occ_func_0_1(31) * occ_func_0_1(36) *
+              occ_func_0_1(0) +
           occ_func_0_1(0) * occ_func_0_1(12) * occ_func_0_1(10) *
               occ_func_0_0(86) +
-          occ_func_0_1(10) * occ_func_0_1(0) * occ_func_0_1(12) *
-              occ_func_0_0(33) +
+          occ_func_0_1(10) * occ_func_0_1(0) * occ_func_0_0(12) *
+              occ_func_0_1(33) +
           occ_func_0_1(0) * occ_func_0_1(8) * occ_func_0_1(11) *
               occ_func_0_0(84) +
-          occ_func_0_1(86) * occ_func_0_1(41) * occ_func_0_1(42) *
-              occ_func_0_0(0) +
+          occ_func_0_0(86) * occ_func_0_1(41) * occ_func_0_1(42) *
+              occ_func_0_1(0) +
           occ_func_0_1(7) * occ_func_0_1(12) * occ_func_0_1(0) *
               occ_func_0_0(38) +
           occ_func_0_1(0) * occ_func_0_1(12) * occ_func_0_1(9) *
               occ_func_0_0(85) +
-          occ_func_0_1(9) * occ_func_0_1(0) * occ_func_0_1(12) *
-              occ_func_0_0(35) +
+          occ_func_0_1(9) * occ_func_0_1(0) * occ_func_0_0(12) *
+              occ_func_0_1(35) +
           occ_func_0_1(9) * occ_func_0_1(7) * occ_func_0_1(0) *
               occ_func_0_0(35) +
-          occ_func_0_1(86) * occ_func_0_1(40) * occ_func_0_1(41) *
-              occ_func_0_0(0) +
+          occ_func_0_0(86) * occ_func_0_1(40) * occ_func_0_1(41) *
+              occ_func_0_1(0) +
           occ_func_0_1(0) * occ_func_0_1(9) * occ_func_0_1(7) *
               occ_func_0_0(85) +
-          occ_func_0_1(85) * occ_func_0_1(32) * occ_func_0_1(39) *
-              occ_func_0_0(0) +
-          occ_func_0_1(85) * occ_func_0_1(39) * occ_func_0_1(37) *
-              occ_func_0_0(0) +
-          occ_func_0_1(85) * occ_func_0_1(37) * occ_func_0_1(32) *
-              occ_func_0_0(0) +
-          occ_func_0_1(84) * occ_func_0_1(38) * occ_func_0_1(31) *
-              occ_func_0_0(0) +
-          occ_func_0_1(10) * occ_func_0_1(11) * occ_func_0_1(0) *
-              occ_func_0_0(33) +
+          occ_func_0_0(85) * occ_func_0_1(32) * occ_func_0_1(39) *
+              occ_func_0_1(0) +
+          occ_func_0_0(85) * occ_func_0_1(39) * occ_func_0_1(37) *
+              occ_func_0_1(0) +
+          occ_func_0_0(85) * occ_func_0_1(37) * occ_func_0_1(32) *
+              occ_func_0_1(0) +
+          occ_func_0_1(84) * occ_func_0_0(38) * occ_func_0_1(31) *
+              occ_func_0_1(0) +
+          occ_func_0_1(10) * occ_func_0_0(11) * occ_func_0_1(0) *
+              occ_func_0_1(33) +
           occ_func_0_1(0) * occ_func_0_1(11) * occ_func_0_1(12) *
               occ_func_0_0(86) +
-          occ_func_0_1(86) * occ_func_0_1(42) * occ_func_0_1(40) *
-              occ_func_0_0(0) +
-          occ_func_0_1(8) * occ_func_0_1(11) * occ_func_0_1(0) *
-              occ_func_0_0(34) +
+          occ_func_0_0(86) * occ_func_0_1(42) * occ_func_0_1(40) *
+              occ_func_0_1(0) +
+          occ_func_0_1(8) * occ_func_0_0(11) * occ_func_0_1(0) *
+              occ_func_0_1(34) +
           occ_func_0_1(7) * occ_func_0_1(0) * occ_func_0_1(9) *
               occ_func_0_0(38)) /
          24.;
@@ -8338,50 +8598,50 @@ template <typename Scalar>
 Scalar OccClexulatorTest_Clexulator::eval_bfunc_13_6() const {
   return (occ_func_0_0(0) * occ_func_0_0(7) * occ_func_0_0(12) *
               occ_func_0_1(85) +
-          occ_func_0_0(83) * occ_func_0_0(35) * occ_func_0_0(34) *
-              occ_func_0_1(0) +
-          occ_func_0_0(84) * occ_func_0_0(36) * occ_func_0_0(38) *
-              occ_func_0_1(0) +
+          occ_func_0_0(83) * occ_func_0_1(35) * occ_func_0_0(34) *
+              occ_func_0_0(0) +
+          occ_func_0_0(84) * occ_func_0_0(36) * occ_func_0_1(38) *
+              occ_func_0_0(0) +
           occ_func_0_0(0) * occ_func_0_0(10) * occ_func_0_0(11) *
               occ_func_0_1(86) +
-          occ_func_0_0(84) * occ_func_0_0(31) * occ_func_0_0(36) *
-              occ_func_0_1(0) +
+          occ_func_0_1(84) * occ_func_0_0(31) * occ_func_0_0(36) *
+              occ_func_0_0(0) +
           occ_func_0_0(0) * occ_func_0_0(12) * occ_func_0_0(10) *
               occ_func_0_1(86) +
-          occ_func_0_0(10) * occ_func_0_0(0) * occ_func_0_0(12) *
-              occ_func_0_1(33) +
+          occ_func_0_0(10) * occ_func_0_0(0) * occ_func_0_1(12) *
+              occ_func_0_0(33) +
           occ_func_0_0(0) * occ_func_0_0(8) * occ_func_0_0(11) *
               occ_func_0_1(84) +
-          occ_func_0_0(86) * occ_func_0_0(41) * occ_func_0_0(42) *
-              occ_func_0_1(0) +
+          occ_func_0_1(86) * occ_func_0_0(41) * occ_func_0_0(42) *
+              occ_func_0_0(0) +
           occ_func_0_0(7) * occ_func_0_0(12) * occ_func_0_0(0) *
               occ_func_0_1(38) +
           occ_func_0_0(0) * occ_func_0_0(12) * occ_func_0_0(9) *
               occ_func_0_1(85) +
-          occ_func_0_0(9) * occ_func_0_0(0) * occ_func_0_0(12) *
-              occ_func_0_1(35) +
+          occ_func_0_0(9) * occ_func_0_0(0) * occ_func_0_1(12) *
+              occ_func_0_0(35) +
           occ_func_0_0(9) * occ_func_0_0(7) * occ_func_0_0(0) *
               occ_func_0_1(35) +
-          occ_func_0_0(86) * occ_func_0_0(40) * occ_func_0_0(41) *
-              occ_func_0_1(0) +
+          occ_func_0_1(86) * occ_func_0_0(40) * occ_func_0_0(41) *
+              occ_func_0_0(0) +
           occ_func_0_0(0) * occ_func_0_0(9) * occ_func_0_0(7) *
               occ_func_0_1(85) +
-          occ_func_0_0(85) * occ_func_0_0(32) * occ_func_0_0(39) *
-              occ_func_0_1(0) +
-          occ_func_0_0(85) * occ_func_0_0(39) * occ_func_0_0(37) *
-              occ_func_0_1(0) +
-          occ_func_0_0(85) * occ_func_0_0(37) * occ_func_0_0(32) *
-              occ_func_0_1(0) +
-          occ_func_0_0(84) * occ_func_0_0(38) * occ_func_0_0(31) *
-              occ_func_0_1(0) +
-          occ_func_0_0(10) * occ_func_0_0(11) * occ_func_0_0(0) *
-              occ_func_0_1(33) +
+          occ_func_0_1(85) * occ_func_0_0(32) * occ_func_0_0(39) *
+              occ_func_0_0(0) +
+          occ_func_0_1(85) * occ_func_0_0(39) * occ_func_0_0(37) *
+              occ_func_0_0(0) +
+          occ_func_0_1(85) * occ_func_0_0(37) * occ_func_0_0(32) *
+              occ_func_0_0(0) +
+          occ_func_0_0(84) * occ_func_0_1(38) * occ_func_0_0(31) *
+              occ_func_0_0(0) +
+          occ_func_0_0(10) * occ_func_0_1(11) * occ_func_0_0(0) *
+              occ_func_0_0(33) +
           occ_func_0_0(0) * occ_func_0_0(11) * occ_func_0_0(12) *
               occ_func_0_1(86) +
-          occ_func_0_0(86) * occ_func_0_0(42) * occ_func_0_0(40) *
-              occ_func_0_1(0) +
-          occ_func_0_0(8) * occ_func_0_0(11) * occ_func_0_0(0) *
-              occ_func_0_1(34) +
+          occ_func_0_1(86) * occ_func_0_0(42) * occ_func_0_0(40) *
+              occ_func_0_0(0) +
+          occ_func_0_0(8) * occ_func_0_1(11) * occ_func_0_0(0) *
+              occ_func_0_0(34) +
           occ_func_0_0(7) * occ_func_0_0(0) * occ_func_0_0(9) *
               occ_func_0_1(38)) /
          24.;
@@ -8390,9 +8650,9 @@ template <typename Scalar>
 Scalar OccClexulatorTest_Clexulator::eval_bfunc_13_7() const {
   return (occ_func_0_1(0) * occ_func_0_0(7) * occ_func_0_0(12) *
               occ_func_0_1(85) +
-          occ_func_0_1(83) * occ_func_0_0(35) * occ_func_0_0(34) *
+          occ_func_0_0(83) * occ_func_0_1(35) * occ_func_0_0(34) *
               occ_func_0_1(0) +
-          occ_func_0_1(84) * occ_func_0_0(36) * occ_func_0_0(38) *
+          occ_func_0_0(84) * occ_func_0_0(36) * occ_func_0_1(38) *
               occ_func_0_1(0) +
           occ_func_0_1(0) * occ_func_0_0(10) * occ_func_0_0(11) *
               occ_func_0_1(86) +
@@ -8400,19 +8660,19 @@ Scalar OccClexulatorTest_Clexulator::eval_bfunc_13_7() const {
               occ_func_0_1(0) +
           occ_func_0_1(0) * occ_func_0_0(12) * occ_func_0_0(10) *
               occ_func_0_1(86) +
-          occ_func_0_1(10) * occ_func_0_0(0) * occ_func_0_0(12) *
-              occ_func_0_1(33) +
+          occ_func_0_0(10) * occ_func_0_1(0) * occ_func_0_1(12) *
+              occ_func_0_0(33) +
           occ_func_0_1(0) * occ_func_0_0(8) * occ_func_0_0(11) *
               occ_func_0_1(84) +
           occ_func_0_1(86) * occ_func_0_0(41) * occ_func_0_0(42) *
               occ_func_0_1(0) +
-          occ_func_0_1(7) * occ_func_0_0(12) * occ_func_0_0(0) *
+          occ_func_0_0(7) * occ_func_0_0(12) * occ_func_0_1(0) *
               occ_func_0_1(38) +
           occ_func_0_1(0) * occ_func_0_0(12) * occ_func_0_0(9) *
               occ_func_0_1(85) +
-          occ_func_0_1(9) * occ_func_0_0(0) * occ_func_0_0(12) *
-              occ_func_0_1(35) +
-          occ_func_0_1(9) * occ_func_0_0(7) * occ_func_0_0(0) *
+          occ_func_0_0(9) * occ_func_0_1(0) * occ_func_0_1(12) *
+              occ_func_0_0(35) +
+          occ_func_0_0(9) * occ_func_0_0(7) * occ_func_0_1(0) *
               occ_func_0_1(35) +
           occ_func_0_1(86) * occ_func_0_0(40) * occ_func_0_0(41) *
               occ_func_0_1(0) +
@@ -8424,17 +8684,17 @@ Scalar OccClexulatorTest_Clexulator::eval_bfunc_13_7() const {
               occ_func_0_1(0) +
           occ_func_0_1(85) * occ_func_0_0(37) * occ_func_0_0(32) *
               occ_func_0_1(0) +
-          occ_func_0_1(84) * occ_func_0_0(38) * occ_func_0_0(31) *
+          occ_func_0_0(84) * occ_func_0_1(38) * occ_func_0_0(31) *
               occ_func_0_1(0) +
-          occ_func_0_1(10) * occ_func_0_0(11) * occ_func_0_0(0) *
-              occ_func_0_1(33) +
+          occ_func_0_0(10) * occ_func_0_1(11) * occ_func_0_1(0) *
+              occ_func_0_0(33) +
           occ_func_0_1(0) * occ_func_0_0(11) * occ_func_0_0(12) *
               occ_func_0_1(86) +
           occ_func_0_1(86) * occ_func_0_0(42) * occ_func_0_0(40) *
               occ_func_0_1(0) +
-          occ_func_0_1(8) * occ_func_0_0(11) * occ_func_0_0(0) *
-              occ_func_0_1(34) +
-          occ_func_0_1(7) * occ_func_0_0(0) * occ_func_0_0(9) *
+          occ_func_0_0(8) * occ_func_0_1(11) * occ_func_0_1(0) *
+              occ_func_0_0(34) +
+          occ_func_0_0(7) * occ_func_0_1(0) * occ_func_0_0(9) *
               occ_func_0_1(38)) /
          24.;
 }
@@ -8444,41 +8704,41 @@ Scalar OccClexulatorTest_Clexulator::eval_bfunc_13_8() const {
                occ_func_0_1(85) +
            0.707107 * occ_func_0_0(0) * occ_func_0_1(7) * occ_func_0_0(12) *
                occ_func_0_1(85)) +
-          (0.707107 * occ_func_0_0(83) * occ_func_0_0(35) * occ_func_0_1(34) *
-               occ_func_0_1(0) +
-           0.707107 * occ_func_0_0(83) * occ_func_0_1(35) * occ_func_0_0(34) *
-               occ_func_0_1(0)) +
-          (0.707107 * occ_func_0_0(84) * occ_func_0_0(36) * occ_func_0_1(38) *
-               occ_func_0_1(0) +
-           0.707107 * occ_func_0_0(84) * occ_func_0_1(36) * occ_func_0_0(38) *
-               occ_func_0_1(0)) +
+          (0.707107 * occ_func_0_0(83) * occ_func_0_1(35) * occ_func_0_1(34) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(83) * occ_func_0_1(35) * occ_func_0_0(34) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(84) * occ_func_0_1(36) * occ_func_0_1(38) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(84) * occ_func_0_0(36) * occ_func_0_1(38) *
+               occ_func_0_0(0)) +
           (0.707107 * occ_func_0_0(0) * occ_func_0_0(10) * occ_func_0_1(11) *
                occ_func_0_1(86) +
            0.707107 * occ_func_0_0(0) * occ_func_0_1(10) * occ_func_0_0(11) *
                occ_func_0_1(86)) +
-          (0.707107 * occ_func_0_0(84) * occ_func_0_0(31) * occ_func_0_1(36) *
-               occ_func_0_1(0) +
-           0.707107 * occ_func_0_0(84) * occ_func_0_1(31) * occ_func_0_0(36) *
-               occ_func_0_1(0)) +
+          (0.707107 * occ_func_0_1(84) * occ_func_0_0(31) * occ_func_0_1(36) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(84) * occ_func_0_1(31) * occ_func_0_0(36) *
+               occ_func_0_0(0)) +
           (0.707107 * occ_func_0_0(0) * occ_func_0_0(12) * occ_func_0_1(10) *
                occ_func_0_1(86) +
            0.707107 * occ_func_0_0(0) * occ_func_0_1(12) * occ_func_0_0(10) *
                occ_func_0_1(86)) +
           (0.707107 * occ_func_0_0(10) * occ_func_0_0(0) * occ_func_0_1(12) *
                occ_func_0_1(33) +
-           0.707107 * occ_func_0_0(10) * occ_func_0_1(0) * occ_func_0_0(12) *
-               occ_func_0_1(33)) +
+           0.707107 * occ_func_0_1(10) * occ_func_0_0(0) * occ_func_0_1(12) *
+               occ_func_0_0(33)) +
           (0.707107 * occ_func_0_0(0) * occ_func_0_0(8) * occ_func_0_1(11) *
                occ_func_0_1(84) +
            0.707107 * occ_func_0_0(0) * occ_func_0_1(8) * occ_func_0_0(11) *
                occ_func_0_1(84)) +
-          (0.707107 * occ_func_0_0(86) * occ_func_0_0(41) * occ_func_0_1(42) *
-               occ_func_0_1(0) +
-           0.707107 * occ_func_0_0(86) * occ_func_0_1(41) * occ_func_0_0(42) *
-               occ_func_0_1(0)) +
-          (0.707107 * occ_func_0_0(7) * occ_func_0_0(12) * occ_func_0_1(0) *
+          (0.707107 * occ_func_0_1(86) * occ_func_0_0(41) * occ_func_0_1(42) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(86) * occ_func_0_1(41) * occ_func_0_0(42) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(7) * occ_func_0_1(12) * occ_func_0_0(0) *
                occ_func_0_1(38) +
-           0.707107 * occ_func_0_0(7) * occ_func_0_1(12) * occ_func_0_0(0) *
+           0.707107 * occ_func_0_1(7) * occ_func_0_0(12) * occ_func_0_0(0) *
                occ_func_0_1(38)) +
           (0.707107 * occ_func_0_0(0) * occ_func_0_0(12) * occ_func_0_1(9) *
                occ_func_0_1(85) +
@@ -8486,55 +8746,55 @@ Scalar OccClexulatorTest_Clexulator::eval_bfunc_13_8() const {
                occ_func_0_1(85)) +
           (0.707107 * occ_func_0_0(9) * occ_func_0_0(0) * occ_func_0_1(12) *
                occ_func_0_1(35) +
-           0.707107 * occ_func_0_0(9) * occ_func_0_1(0) * occ_func_0_0(12) *
-               occ_func_0_1(35)) +
-          (0.707107 * occ_func_0_0(9) * occ_func_0_0(7) * occ_func_0_1(0) *
+           0.707107 * occ_func_0_1(9) * occ_func_0_0(0) * occ_func_0_1(12) *
+               occ_func_0_0(35)) +
+          (0.707107 * occ_func_0_0(9) * occ_func_0_1(7) * occ_func_0_0(0) *
                occ_func_0_1(35) +
-           0.707107 * occ_func_0_0(9) * occ_func_0_1(7) * occ_func_0_0(0) *
+           0.707107 * occ_func_0_1(9) * occ_func_0_0(7) * occ_func_0_0(0) *
                occ_func_0_1(35)) +
-          (0.707107 * occ_func_0_0(86) * occ_func_0_0(40) * occ_func_0_1(41) *
-               occ_func_0_1(0) +
-           0.707107 * occ_func_0_0(86) * occ_func_0_1(40) * occ_func_0_0(41) *
-               occ_func_0_1(0)) +
+          (0.707107 * occ_func_0_1(86) * occ_func_0_0(40) * occ_func_0_1(41) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(86) * occ_func_0_1(40) * occ_func_0_0(41) *
+               occ_func_0_0(0)) +
           (0.707107 * occ_func_0_0(0) * occ_func_0_0(9) * occ_func_0_1(7) *
                occ_func_0_1(85) +
            0.707107 * occ_func_0_0(0) * occ_func_0_1(9) * occ_func_0_0(7) *
                occ_func_0_1(85)) +
-          (0.707107 * occ_func_0_0(85) * occ_func_0_0(32) * occ_func_0_1(39) *
-               occ_func_0_1(0) +
-           0.707107 * occ_func_0_0(85) * occ_func_0_1(32) * occ_func_0_0(39) *
-               occ_func_0_1(0)) +
-          (0.707107 * occ_func_0_0(85) * occ_func_0_0(39) * occ_func_0_1(37) *
-               occ_func_0_1(0) +
-           0.707107 * occ_func_0_0(85) * occ_func_0_1(39) * occ_func_0_0(37) *
-               occ_func_0_1(0)) +
-          (0.707107 * occ_func_0_0(85) * occ_func_0_0(37) * occ_func_0_1(32) *
-               occ_func_0_1(0) +
-           0.707107 * occ_func_0_0(85) * occ_func_0_1(37) * occ_func_0_0(32) *
-               occ_func_0_1(0)) +
-          (0.707107 * occ_func_0_0(84) * occ_func_0_0(38) * occ_func_0_1(31) *
-               occ_func_0_1(0) +
-           0.707107 * occ_func_0_0(84) * occ_func_0_1(38) * occ_func_0_0(31) *
-               occ_func_0_1(0)) +
-          (0.707107 * occ_func_0_0(10) * occ_func_0_0(11) * occ_func_0_1(0) *
+          (0.707107 * occ_func_0_1(85) * occ_func_0_0(32) * occ_func_0_1(39) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(85) * occ_func_0_1(32) * occ_func_0_0(39) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_1(85) * occ_func_0_0(39) * occ_func_0_1(37) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(85) * occ_func_0_1(39) * occ_func_0_0(37) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_1(85) * occ_func_0_0(37) * occ_func_0_1(32) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(85) * occ_func_0_1(37) * occ_func_0_0(32) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(84) * occ_func_0_1(38) * occ_func_0_1(31) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(84) * occ_func_0_1(38) * occ_func_0_0(31) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(10) * occ_func_0_1(11) * occ_func_0_0(0) *
                occ_func_0_1(33) +
-           0.707107 * occ_func_0_0(10) * occ_func_0_1(11) * occ_func_0_0(0) *
-               occ_func_0_1(33)) +
+           0.707107 * occ_func_0_1(10) * occ_func_0_1(11) * occ_func_0_0(0) *
+               occ_func_0_0(33)) +
           (0.707107 * occ_func_0_0(0) * occ_func_0_0(11) * occ_func_0_1(12) *
                occ_func_0_1(86) +
            0.707107 * occ_func_0_0(0) * occ_func_0_1(11) * occ_func_0_0(12) *
                occ_func_0_1(86)) +
-          (0.707107 * occ_func_0_0(86) * occ_func_0_0(42) * occ_func_0_1(40) *
-               occ_func_0_1(0) +
-           0.707107 * occ_func_0_0(86) * occ_func_0_1(42) * occ_func_0_0(40) *
-               occ_func_0_1(0)) +
-          (0.707107 * occ_func_0_0(8) * occ_func_0_0(11) * occ_func_0_1(0) *
+          (0.707107 * occ_func_0_1(86) * occ_func_0_0(42) * occ_func_0_1(40) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(86) * occ_func_0_1(42) * occ_func_0_0(40) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(8) * occ_func_0_1(11) * occ_func_0_0(0) *
                occ_func_0_1(34) +
-           0.707107 * occ_func_0_0(8) * occ_func_0_1(11) * occ_func_0_0(0) *
-               occ_func_0_1(34)) +
+           0.707107 * occ_func_0_1(8) * occ_func_0_1(11) * occ_func_0_0(0) *
+               occ_func_0_0(34)) +
           (0.707107 * occ_func_0_0(7) * occ_func_0_0(0) * occ_func_0_1(9) *
                occ_func_0_1(38) +
-           0.707107 * occ_func_0_0(7) * occ_func_0_1(0) * occ_func_0_0(9) *
+           0.707107 * occ_func_0_1(7) * occ_func_0_0(0) * occ_func_0_0(9) *
                occ_func_0_1(38))) /
          24.;
 }
@@ -8544,13 +8804,13 @@ Scalar OccClexulatorTest_Clexulator::eval_bfunc_13_9() const {
                occ_func_0_1(85) +
            0.707107 * occ_func_0_1(0) * occ_func_0_1(7) * occ_func_0_0(12) *
                occ_func_0_1(85)) +
-          (0.707107 * occ_func_0_1(83) * occ_func_0_0(35) * occ_func_0_1(34) *
+          (0.707107 * occ_func_0_0(83) * occ_func_0_1(35) * occ_func_0_1(34) *
                occ_func_0_1(0) +
            0.707107 * occ_func_0_1(83) * occ_func_0_1(35) * occ_func_0_0(34) *
                occ_func_0_1(0)) +
-          (0.707107 * occ_func_0_1(84) * occ_func_0_0(36) * occ_func_0_1(38) *
+          (0.707107 * occ_func_0_0(84) * occ_func_0_1(36) * occ_func_0_1(38) *
                occ_func_0_1(0) +
-           0.707107 * occ_func_0_1(84) * occ_func_0_1(36) * occ_func_0_0(38) *
+           0.707107 * occ_func_0_1(84) * occ_func_0_0(36) * occ_func_0_1(38) *
                occ_func_0_1(0)) +
           (0.707107 * occ_func_0_1(0) * occ_func_0_0(10) * occ_func_0_1(11) *
                occ_func_0_1(86) +
@@ -8564,10 +8824,10 @@ Scalar OccClexulatorTest_Clexulator::eval_bfunc_13_9() const {
                occ_func_0_1(86) +
            0.707107 * occ_func_0_1(0) * occ_func_0_1(12) * occ_func_0_0(10) *
                occ_func_0_1(86)) +
-          (0.707107 * occ_func_0_1(10) * occ_func_0_0(0) * occ_func_0_1(12) *
+          (0.707107 * occ_func_0_0(10) * occ_func_0_1(0) * occ_func_0_1(12) *
                occ_func_0_1(33) +
-           0.707107 * occ_func_0_1(10) * occ_func_0_1(0) * occ_func_0_0(12) *
-               occ_func_0_1(33)) +
+           0.707107 * occ_func_0_1(10) * occ_func_0_1(0) * occ_func_0_1(12) *
+               occ_func_0_0(33)) +
           (0.707107 * occ_func_0_1(0) * occ_func_0_0(8) * occ_func_0_1(11) *
                occ_func_0_1(84) +
            0.707107 * occ_func_0_1(0) * occ_func_0_1(8) * occ_func_0_0(11) *
@@ -8576,21 +8836,21 @@ Scalar OccClexulatorTest_Clexulator::eval_bfunc_13_9() const {
                occ_func_0_1(0) +
            0.707107 * occ_func_0_1(86) * occ_func_0_1(41) * occ_func_0_0(42) *
                occ_func_0_1(0)) +
-          (0.707107 * occ_func_0_1(7) * occ_func_0_0(12) * occ_func_0_1(0) *
+          (0.707107 * occ_func_0_0(7) * occ_func_0_1(12) * occ_func_0_1(0) *
                occ_func_0_1(38) +
-           0.707107 * occ_func_0_1(7) * occ_func_0_1(12) * occ_func_0_0(0) *
+           0.707107 * occ_func_0_1(7) * occ_func_0_0(12) * occ_func_0_1(0) *
                occ_func_0_1(38)) +
           (0.707107 * occ_func_0_1(0) * occ_func_0_0(12) * occ_func_0_1(9) *
                occ_func_0_1(85) +
            0.707107 * occ_func_0_1(0) * occ_func_0_1(12) * occ_func_0_0(9) *
                occ_func_0_1(85)) +
-          (0.707107 * occ_func_0_1(9) * occ_func_0_0(0) * occ_func_0_1(12) *
+          (0.707107 * occ_func_0_0(9) * occ_func_0_1(0) * occ_func_0_1(12) *
                occ_func_0_1(35) +
-           0.707107 * occ_func_0_1(9) * occ_func_0_1(0) * occ_func_0_0(12) *
-               occ_func_0_1(35)) +
-          (0.707107 * occ_func_0_1(9) * occ_func_0_0(7) * occ_func_0_1(0) *
+           0.707107 * occ_func_0_1(9) * occ_func_0_1(0) * occ_func_0_1(12) *
+               occ_func_0_0(35)) +
+          (0.707107 * occ_func_0_0(9) * occ_func_0_1(7) * occ_func_0_1(0) *
                occ_func_0_1(35) +
-           0.707107 * occ_func_0_1(9) * occ_func_0_1(7) * occ_func_0_0(0) *
+           0.707107 * occ_func_0_1(9) * occ_func_0_0(7) * occ_func_0_1(0) *
                occ_func_0_1(35)) +
           (0.707107 * occ_func_0_1(86) * occ_func_0_0(40) * occ_func_0_1(41) *
                occ_func_0_1(0) +
@@ -8612,14 +8872,14 @@ Scalar OccClexulatorTest_Clexulator::eval_bfunc_13_9() const {
                occ_func_0_1(0) +
            0.707107 * occ_func_0_1(85) * occ_func_0_1(37) * occ_func_0_0(32) *
                occ_func_0_1(0)) +
-          (0.707107 * occ_func_0_1(84) * occ_func_0_0(38) * occ_func_0_1(31) *
+          (0.707107 * occ_func_0_0(84) * occ_func_0_1(38) * occ_func_0_1(31) *
                occ_func_0_1(0) +
            0.707107 * occ_func_0_1(84) * occ_func_0_1(38) * occ_func_0_0(31) *
                occ_func_0_1(0)) +
-          (0.707107 * occ_func_0_1(10) * occ_func_0_0(11) * occ_func_0_1(0) *
+          (0.707107 * occ_func_0_0(10) * occ_func_0_1(11) * occ_func_0_1(0) *
                occ_func_0_1(33) +
-           0.707107 * occ_func_0_1(10) * occ_func_0_1(11) * occ_func_0_0(0) *
-               occ_func_0_1(33)) +
+           0.707107 * occ_func_0_1(10) * occ_func_0_1(11) * occ_func_0_1(0) *
+               occ_func_0_0(33)) +
           (0.707107 * occ_func_0_1(0) * occ_func_0_0(11) * occ_func_0_1(12) *
                occ_func_0_1(86) +
            0.707107 * occ_func_0_1(0) * occ_func_0_1(11) * occ_func_0_0(12) *
@@ -8628,11 +8888,11 @@ Scalar OccClexulatorTest_Clexulator::eval_bfunc_13_9() const {
                occ_func_0_1(0) +
            0.707107 * occ_func_0_1(86) * occ_func_0_1(42) * occ_func_0_0(40) *
                occ_func_0_1(0)) +
-          (0.707107 * occ_func_0_1(8) * occ_func_0_0(11) * occ_func_0_1(0) *
+          (0.707107 * occ_func_0_0(8) * occ_func_0_1(11) * occ_func_0_1(0) *
                occ_func_0_1(34) +
-           0.707107 * occ_func_0_1(8) * occ_func_0_1(11) * occ_func_0_0(0) *
-               occ_func_0_1(34)) +
-          (0.707107 * occ_func_0_1(7) * occ_func_0_0(0) * occ_func_0_1(9) *
+           0.707107 * occ_func_0_1(8) * occ_func_0_1(11) * occ_func_0_1(0) *
+               occ_func_0_0(34)) +
+          (0.707107 * occ_func_0_0(7) * occ_func_0_1(0) * occ_func_0_1(9) *
                occ_func_0_1(38) +
            0.707107 * occ_func_0_1(7) * occ_func_0_1(0) * occ_func_0_0(9) *
                occ_func_0_1(38))) /
@@ -8642,51 +8902,51 @@ template <typename Scalar>
 Scalar OccClexulatorTest_Clexulator::eval_bfunc_13_10() const {
   return (occ_func_0_0(0) * occ_func_0_1(7) * occ_func_0_1(12) *
               occ_func_0_1(85) +
-          occ_func_0_0(83) * occ_func_0_1(35) * occ_func_0_1(34) *
-              occ_func_0_1(0) +
-          occ_func_0_0(84) * occ_func_0_1(36) * occ_func_0_1(38) *
-              occ_func_0_1(0) +
+          occ_func_0_1(83) * occ_func_0_1(35) * occ_func_0_1(34) *
+              occ_func_0_0(0) +
+          occ_func_0_1(84) * occ_func_0_1(36) * occ_func_0_1(38) *
+              occ_func_0_0(0) +
           occ_func_0_0(0) * occ_func_0_1(10) * occ_func_0_1(11) *
               occ_func_0_1(86) +
-          occ_func_0_0(84) * occ_func_0_1(31) * occ_func_0_1(36) *
-              occ_func_0_1(0) +
+          occ_func_0_1(84) * occ_func_0_1(31) * occ_func_0_1(36) *
+              occ_func_0_0(0) +
           occ_func_0_0(0) * occ_func_0_1(12) * occ_func_0_1(10) *
               occ_func_0_1(86) +
-          occ_func_0_0(10) * occ_func_0_1(0) * occ_func_0_1(12) *
+          occ_func_0_1(10) * occ_func_0_0(0) * occ_func_0_1(12) *
               occ_func_0_1(33) +
           occ_func_0_0(0) * occ_func_0_1(8) * occ_func_0_1(11) *
               occ_func_0_1(84) +
-          occ_func_0_0(86) * occ_func_0_1(41) * occ_func_0_1(42) *
-              occ_func_0_1(0) +
-          occ_func_0_0(7) * occ_func_0_1(12) * occ_func_0_1(0) *
+          occ_func_0_1(86) * occ_func_0_1(41) * occ_func_0_1(42) *
+              occ_func_0_0(0) +
+          occ_func_0_1(7) * occ_func_0_1(12) * occ_func_0_0(0) *
               occ_func_0_1(38) +
           occ_func_0_0(0) * occ_func_0_1(12) * occ_func_0_1(9) *
               occ_func_0_1(85) +
-          occ_func_0_0(9) * occ_func_0_1(0) * occ_func_0_1(12) *
+          occ_func_0_1(9) * occ_func_0_0(0) * occ_func_0_1(12) *
               occ_func_0_1(35) +
-          occ_func_0_0(9) * occ_func_0_1(7) * occ_func_0_1(0) *
+          occ_func_0_1(9) * occ_func_0_1(7) * occ_func_0_0(0) *
               occ_func_0_1(35) +
-          occ_func_0_0(86) * occ_func_0_1(40) * occ_func_0_1(41) *
-              occ_func_0_1(0) +
+          occ_func_0_1(86) * occ_func_0_1(40) * occ_func_0_1(41) *
+              occ_func_0_0(0) +
           occ_func_0_0(0) * occ_func_0_1(9) * occ_func_0_1(7) *
               occ_func_0_1(85) +
-          occ_func_0_0(85) * occ_func_0_1(32) * occ_func_0_1(39) *
-              occ_func_0_1(0) +
-          occ_func_0_0(85) * occ_func_0_1(39) * occ_func_0_1(37) *
-              occ_func_0_1(0) +
-          occ_func_0_0(85) * occ_func_0_1(37) * occ_func_0_1(32) *
-              occ_func_0_1(0) +
-          occ_func_0_0(84) * occ_func_0_1(38) * occ_func_0_1(31) *
-              occ_func_0_1(0) +
-          occ_func_0_0(10) * occ_func_0_1(11) * occ_func_0_1(0) *
+          occ_func_0_1(85) * occ_func_0_1(32) * occ_func_0_1(39) *
+              occ_func_0_0(0) +
+          occ_func_0_1(85) * occ_func_0_1(39) * occ_func_0_1(37) *
+              occ_func_0_0(0) +
+          occ_func_0_1(85) * occ_func_0_1(37) * occ_func_0_1(32) *
+              occ_func_0_0(0) +
+          occ_func_0_1(84) * occ_func_0_1(38) * occ_func_0_1(31) *
+              occ_func_0_0(0) +
+          occ_func_0_1(10) * occ_func_0_1(11) * occ_func_0_0(0) *
               occ_func_0_1(33) +
           occ_func_0_0(0) * occ_func_0_1(11) * occ_func_0_1(12) *
               occ_func_0_1(86) +
-          occ_func_0_0(86) * occ_func_0_1(42) * occ_func_0_1(40) *
-              occ_func_0_1(0) +
-          occ_func_0_0(8) * occ_func_0_1(11) * occ_func_0_1(0) *
+          occ_func_0_1(86) * occ_func_0_1(42) * occ_func_0_1(40) *
+              occ_func_0_0(0) +
+          occ_func_0_1(8) * occ_func_0_1(11) * occ_func_0_0(0) *
               occ_func_0_1(34) +
-          occ_func_0_0(7) * occ_func_0_1(0) * occ_func_0_1(9) *
+          occ_func_0_1(7) * occ_func_0_0(0) * occ_func_0_1(9) *
               occ_func_0_1(38)) /
          24.;
 }
@@ -8949,1370 +9209,6 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_13_1_at_0() const {
               occ_func_0_0(32) +
           occ_func_0_1(80) * occ_func_0_0(22) * occ_func_0_0(29) *
               occ_func_0_0(0) +
-          occ_func_0_1(83) * occ_func_0_0(35) * occ_func_0_0(34) *
-              occ_func_0_0(0) +
-          occ_func_0_1(0) * occ_func_0_0(9) * occ_func_0_0(8) *
-              occ_func_0_0(82) +
-          occ_func_0_1(5) * occ_func_0_0(7) * occ_func_0_0(0) *
-              occ_func_0_0(27) +
-          occ_func_0_1(4) * occ_func_0_0(0) * occ_func_0_0(6) *
-              occ_func_0_0(26) +
-          occ_func_0_1(84) * occ_func_0_0(36) * occ_func_0_0(38) *
-              occ_func_0_0(0) +
-          occ_func_0_1(8) * occ_func_0_0(0) * occ_func_0_0(9) *
-              occ_func_0_0(25) +
-          occ_func_0_1(0) * occ_func_0_0(5) * occ_func_0_0(7) *
-              occ_func_0_0(81) +
-          occ_func_0_1(6) * occ_func_0_0(4) * occ_func_0_0(0) *
-              occ_func_0_0(23) +
-          occ_func_0_1(0) * occ_func_0_0(10) * occ_func_0_0(11) *
-              occ_func_0_0(86) +
-          occ_func_0_1(3) * occ_func_0_0(0) * occ_func_0_0(8) *
-              occ_func_0_0(42) +
-          occ_func_0_1(2) * occ_func_0_0(5) * occ_func_0_0(0) *
-              occ_func_0_0(41) +
-          occ_func_0_1(79) * occ_func_0_0(19) * occ_func_0_0(20) *
-              occ_func_0_0(0) +
-          occ_func_0_1(84) * occ_func_0_0(31) * occ_func_0_0(36) *
-              occ_func_0_0(0) +
-          occ_func_0_1(11) * occ_func_0_0(0) * occ_func_0_0(10) *
-              occ_func_0_0(30) +
-          occ_func_0_1(8) * occ_func_0_0(3) * occ_func_0_0(0) *
-              occ_func_0_0(25) +
-          occ_func_0_1(0) * occ_func_0_0(2) * occ_func_0_0(5) *
-              occ_func_0_0(81) +
-          occ_func_0_1(0) * occ_func_0_0(12) * occ_func_0_0(10) *
-              occ_func_0_0(86) +
-          occ_func_0_1(3) * occ_func_0_0(9) * occ_func_0_0(0) *
-              occ_func_0_0(42) +
-          occ_func_0_1(1) * occ_func_0_0(0) * occ_func_0_0(4) *
-              occ_func_0_0(40) +
-          occ_func_0_1(79) * occ_func_0_0(21) * occ_func_0_0(19) *
-              occ_func_0_0(0) +
-          occ_func_0_1(10) * occ_func_0_0(0) * occ_func_0_0(12) *
-              occ_func_0_0(33) +
-          occ_func_0_1(83) * occ_func_0_0(28) * occ_func_0_0(35) *
-              occ_func_0_0(0) +
-          occ_func_0_1(0) * occ_func_0_0(3) * occ_func_0_0(9) *
-              occ_func_0_0(82) +
-          occ_func_0_1(4) * occ_func_0_0(1) * occ_func_0_0(0) *
-              occ_func_0_0(26) +
-          occ_func_0_1(0) * occ_func_0_0(8) * occ_func_0_0(11) *
-              occ_func_0_0(84) +
-          occ_func_0_1(5) * occ_func_0_0(0) * occ_func_0_0(10) *
-              occ_func_0_0(36) +
-          occ_func_0_1(2) * occ_func_0_0(3) * occ_func_0_0(0) *
-              occ_func_0_0(31) +
-          occ_func_0_1(81) * occ_func_0_0(25) * occ_func_0_0(30) *
-              occ_func_0_0(0) +
-          occ_func_0_1(86) * occ_func_0_0(41) * occ_func_0_0(42) *
-              occ_func_0_0(0) +
-          occ_func_0_1(11) * occ_func_0_0(0) * occ_func_0_0(8) *
-              occ_func_0_0(20) +
-          occ_func_0_1(10) * occ_func_0_0(5) * occ_func_0_0(0) *
-              occ_func_0_0(19) +
-          occ_func_0_1(0) * occ_func_0_0(2) * occ_func_0_0(3) *
-              occ_func_0_0(79) +
-          occ_func_0_1(7) * occ_func_0_0(12) * occ_func_0_0(0) *
-              occ_func_0_0(38) +
-          occ_func_0_1(0) * occ_func_0_0(11) * occ_func_0_0(6) *
-              occ_func_0_0(84) +
-          occ_func_0_1(2) * occ_func_0_0(0) * occ_func_0_0(1) *
-              occ_func_0_0(31) +
-          occ_func_0_1(81) * occ_func_0_0(30) * occ_func_0_0(23) *
-              occ_func_0_0(0) +
-          occ_func_0_1(0) * occ_func_0_0(12) * occ_func_0_0(9) *
-              occ_func_0_0(85) +
-          occ_func_0_1(4) * occ_func_0_0(10) * occ_func_0_0(0) *
-              occ_func_0_0(37) +
-          occ_func_0_1(1) * occ_func_0_0(0) * occ_func_0_0(3) *
-              occ_func_0_0(32) +
-          occ_func_0_1(80) * occ_func_0_0(29) * occ_func_0_0(24) *
-              occ_func_0_0(0) +
-          occ_func_0_1(9) * occ_func_0_0(0) * occ_func_0_0(12) *
-              occ_func_0_0(35) +
-          occ_func_0_1(0) * occ_func_0_0(4) * occ_func_0_0(10) *
-              occ_func_0_0(83) +
-          occ_func_0_1(82) * occ_func_0_0(26) * occ_func_0_0(33) *
-              occ_func_0_0(0) +
-          occ_func_0_1(3) * occ_func_0_0(1) * occ_func_0_0(0) *
-              occ_func_0_0(28) +
-          occ_func_0_1(9) * occ_func_0_0(7) * occ_func_0_0(0) *
-              occ_func_0_0(35) +
-          occ_func_0_1(8) * occ_func_0_0(0) * occ_func_0_0(6) *
-              occ_func_0_0(34) +
-          occ_func_0_1(0) * occ_func_0_0(5) * occ_func_0_0(4) *
-              occ_func_0_0(83) +
-          occ_func_0_1(82) * occ_func_0_0(27) * occ_func_0_0(26) *
-              occ_func_0_0(0) +
-          occ_func_0_1(86) * occ_func_0_0(40) * occ_func_0_0(41) *
-              occ_func_0_0(0) +
-          occ_func_0_1(12) * occ_func_0_0(0) * occ_func_0_0(7) *
-              occ_func_0_0(21) +
-          occ_func_0_1(11) * occ_func_0_0(6) * occ_func_0_0(0) *
-              occ_func_0_0(20) +
-          occ_func_0_1(0) * occ_func_0_0(1) * occ_func_0_0(2) *
-              occ_func_0_0(79) +
-          occ_func_0_1(0) * occ_func_0_0(9) * occ_func_0_0(7) *
-              occ_func_0_0(85) +
-          occ_func_0_1(6) * occ_func_0_0(8) * occ_func_0_0(0) *
-              occ_func_0_0(39) +
-          occ_func_0_1(4) * occ_func_0_0(0) * occ_func_0_0(5) *
-              occ_func_0_0(37) +
-          occ_func_0_1(80) * occ_func_0_0(24) * occ_func_0_0(22) *
-              occ_func_0_0(0) +
-          occ_func_0_1(85) * occ_func_0_0(32) * occ_func_0_0(39) *
-              occ_func_0_0(0) +
-          occ_func_0_1(12) * occ_func_0_0(0) * occ_func_0_0(11) *
-              occ_func_0_0(29) +
-          occ_func_0_1(7) * occ_func_0_0(2) * occ_func_0_0(0) *
-              occ_func_0_0(22) +
-          occ_func_0_1(0) * occ_func_0_0(1) * occ_func_0_0(6) *
-              occ_func_0_0(80) +
-          occ_func_0_1(85) * occ_func_0_0(39) * occ_func_0_0(37) *
-              occ_func_0_0(0) +
-          occ_func_0_1(9) * occ_func_0_0(8) * occ_func_0_0(0) *
-              occ_func_0_0(24) +
-          occ_func_0_1(7) * occ_func_0_0(0) * occ_func_0_0(5) *
-              occ_func_0_0(22) +
-          occ_func_0_1(0) * occ_func_0_0(6) * occ_func_0_0(4) *
-              occ_func_0_0(80) +
-          occ_func_0_1(85) * occ_func_0_0(37) * occ_func_0_0(32) *
-              occ_func_0_0(0) +
-          occ_func_0_1(12) * occ_func_0_0(10) * occ_func_0_0(0) *
-              occ_func_0_0(29) +
-          occ_func_0_1(9) * occ_func_0_0(0) * occ_func_0_0(3) *
-              occ_func_0_0(24) +
-          occ_func_0_1(0) * occ_func_0_0(4) * occ_func_0_0(1) *
-              occ_func_0_0(80) +
-          occ_func_0_1(84) * occ_func_0_0(38) * occ_func_0_0(31) *
-              occ_func_0_0(0) +
-          occ_func_0_1(11) * occ_func_0_0(12) * occ_func_0_0(0) *
-              occ_func_0_0(30) +
-          occ_func_0_1(0) * occ_func_0_0(7) * occ_func_0_0(2) *
-              occ_func_0_0(81) +
-          occ_func_0_1(6) * occ_func_0_0(0) * occ_func_0_0(1) *
-              occ_func_0_0(23) +
-          occ_func_0_1(10) * occ_func_0_0(11) * occ_func_0_0(0) *
-              occ_func_0_0(33) +
-          occ_func_0_1(83) * occ_func_0_0(34) * occ_func_0_0(28) *
-              occ_func_0_0(0) +
-          occ_func_0_1(0) * occ_func_0_0(8) * occ_func_0_0(3) *
-              occ_func_0_0(82) +
-          occ_func_0_1(5) * occ_func_0_0(0) * occ_func_0_0(2) *
-              occ_func_0_0(27) +
-          occ_func_0_1(0) * occ_func_0_0(11) * occ_func_0_0(12) *
-              occ_func_0_0(86) +
-          occ_func_0_1(2) * occ_func_0_0(0) * occ_func_0_0(7) *
-              occ_func_0_0(41) +
-          occ_func_0_1(1) * occ_func_0_0(6) * occ_func_0_0(0) *
-              occ_func_0_0(40) +
-          occ_func_0_1(79) * occ_func_0_0(20) * occ_func_0_0(21) *
-              occ_func_0_0(0) +
-          occ_func_0_1(86) * occ_func_0_0(42) * occ_func_0_0(40) *
-              occ_func_0_0(0) +
-          occ_func_0_1(12) * occ_func_0_0(9) * occ_func_0_0(0) *
-              occ_func_0_0(21) +
-          occ_func_0_1(10) * occ_func_0_0(0) * occ_func_0_0(4) *
-              occ_func_0_0(19) +
-          occ_func_0_1(0) * occ_func_0_0(3) * occ_func_0_0(1) *
-              occ_func_0_0(79) +
-          occ_func_0_1(8) * occ_func_0_0(11) * occ_func_0_0(0) *
-              occ_func_0_0(34) +
-          occ_func_0_1(0) * occ_func_0_0(10) * occ_func_0_0(5) *
-              occ_func_0_0(83) +
-          occ_func_0_1(82) * occ_func_0_0(33) * occ_func_0_0(27) *
-              occ_func_0_0(0) +
-          occ_func_0_1(3) * occ_func_0_0(0) * occ_func_0_0(2) *
-              occ_func_0_0(28) +
-          occ_func_0_1(7) * occ_func_0_0(0) * occ_func_0_0(9) *
-              occ_func_0_0(38) +
-          occ_func_0_1(0) * occ_func_0_0(6) * occ_func_0_0(8) *
-              occ_func_0_0(84) +
-          occ_func_0_1(5) * occ_func_0_0(4) * occ_func_0_0(0) *
-              occ_func_0_0(36) +
-          occ_func_0_1(81) * occ_func_0_0(23) * occ_func_0_0(25) *
-              occ_func_0_0(0)) /
-         24.;
-}
-template <typename Scalar>
-Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_13_2_at_0() const {
-  return ((0.707107 * occ_func_0_0(0) * occ_func_0_0(7) * occ_func_0_1(12) *
-               occ_func_0_0(85) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(7) * occ_func_0_0(12) *
-               occ_func_0_0(85)) +
-          (0.707107 * occ_func_0_0(6) * occ_func_0_0(0) * occ_func_0_1(11) *
-               occ_func_0_0(39) +
-           0.707107 * occ_func_0_0(6) * occ_func_0_1(0) * occ_func_0_0(11) *
-               occ_func_0_0(39)) +
-          (0.707107 * occ_func_0_0(1) * occ_func_0_0(2) * occ_func_0_1(0) *
-               occ_func_0_0(32) +
-           0.707107 * occ_func_0_0(1) * occ_func_0_1(2) * occ_func_0_0(0) *
-               occ_func_0_0(32)) +
-          (0.707107 * occ_func_0_0(80) * occ_func_0_0(22) * occ_func_0_1(29) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_0(80) * occ_func_0_1(22) * occ_func_0_0(29) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_0(83) * occ_func_0_0(35) * occ_func_0_1(34) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_0(83) * occ_func_0_1(35) * occ_func_0_0(34) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_0(0) * occ_func_0_0(9) * occ_func_0_1(8) *
-               occ_func_0_0(82) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(9) * occ_func_0_0(8) *
-               occ_func_0_0(82)) +
-          (0.707107 * occ_func_0_0(5) * occ_func_0_0(7) * occ_func_0_1(0) *
-               occ_func_0_0(27) +
-           0.707107 * occ_func_0_0(5) * occ_func_0_1(7) * occ_func_0_0(0) *
-               occ_func_0_0(27)) +
-          (0.707107 * occ_func_0_0(4) * occ_func_0_0(0) * occ_func_0_1(6) *
-               occ_func_0_0(26) +
-           0.707107 * occ_func_0_0(4) * occ_func_0_1(0) * occ_func_0_0(6) *
-               occ_func_0_0(26)) +
-          (0.707107 * occ_func_0_0(84) * occ_func_0_0(36) * occ_func_0_1(38) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_0(84) * occ_func_0_1(36) * occ_func_0_0(38) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_0(8) * occ_func_0_0(0) * occ_func_0_1(9) *
-               occ_func_0_0(25) +
-           0.707107 * occ_func_0_0(8) * occ_func_0_1(0) * occ_func_0_0(9) *
-               occ_func_0_0(25)) +
-          (0.707107 * occ_func_0_0(0) * occ_func_0_0(5) * occ_func_0_1(7) *
-               occ_func_0_0(81) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(5) * occ_func_0_0(7) *
-               occ_func_0_0(81)) +
-          (0.707107 * occ_func_0_0(6) * occ_func_0_0(4) * occ_func_0_1(0) *
-               occ_func_0_0(23) +
-           0.707107 * occ_func_0_0(6) * occ_func_0_1(4) * occ_func_0_0(0) *
-               occ_func_0_0(23)) +
-          (0.707107 * occ_func_0_0(0) * occ_func_0_0(10) * occ_func_0_1(11) *
-               occ_func_0_0(86) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(10) * occ_func_0_0(11) *
-               occ_func_0_0(86)) +
-          (0.707107 * occ_func_0_0(3) * occ_func_0_0(0) * occ_func_0_1(8) *
-               occ_func_0_0(42) +
-           0.707107 * occ_func_0_0(3) * occ_func_0_1(0) * occ_func_0_0(8) *
-               occ_func_0_0(42)) +
-          (0.707107 * occ_func_0_0(2) * occ_func_0_0(5) * occ_func_0_1(0) *
-               occ_func_0_0(41) +
-           0.707107 * occ_func_0_0(2) * occ_func_0_1(5) * occ_func_0_0(0) *
-               occ_func_0_0(41)) +
-          (0.707107 * occ_func_0_0(79) * occ_func_0_0(19) * occ_func_0_1(20) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_0(79) * occ_func_0_1(19) * occ_func_0_0(20) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_0(84) * occ_func_0_0(31) * occ_func_0_1(36) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_0(84) * occ_func_0_1(31) * occ_func_0_0(36) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_0(11) * occ_func_0_0(0) * occ_func_0_1(10) *
-               occ_func_0_0(30) +
-           0.707107 * occ_func_0_0(11) * occ_func_0_1(0) * occ_func_0_0(10) *
-               occ_func_0_0(30)) +
-          (0.707107 * occ_func_0_0(8) * occ_func_0_0(3) * occ_func_0_1(0) *
-               occ_func_0_0(25) +
-           0.707107 * occ_func_0_0(8) * occ_func_0_1(3) * occ_func_0_0(0) *
-               occ_func_0_0(25)) +
-          (0.707107 * occ_func_0_0(0) * occ_func_0_0(2) * occ_func_0_1(5) *
-               occ_func_0_0(81) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(2) * occ_func_0_0(5) *
-               occ_func_0_0(81)) +
-          (0.707107 * occ_func_0_0(0) * occ_func_0_0(12) * occ_func_0_1(10) *
-               occ_func_0_0(86) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(12) * occ_func_0_0(10) *
-               occ_func_0_0(86)) +
-          (0.707107 * occ_func_0_0(3) * occ_func_0_0(9) * occ_func_0_1(0) *
-               occ_func_0_0(42) +
-           0.707107 * occ_func_0_0(3) * occ_func_0_1(9) * occ_func_0_0(0) *
-               occ_func_0_0(42)) +
-          (0.707107 * occ_func_0_0(1) * occ_func_0_0(0) * occ_func_0_1(4) *
-               occ_func_0_0(40) +
-           0.707107 * occ_func_0_0(1) * occ_func_0_1(0) * occ_func_0_0(4) *
-               occ_func_0_0(40)) +
-          (0.707107 * occ_func_0_0(79) * occ_func_0_0(21) * occ_func_0_1(19) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_0(79) * occ_func_0_1(21) * occ_func_0_0(19) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_0(10) * occ_func_0_0(0) * occ_func_0_1(12) *
-               occ_func_0_0(33) +
-           0.707107 * occ_func_0_0(10) * occ_func_0_1(0) * occ_func_0_0(12) *
-               occ_func_0_0(33)) +
-          (0.707107 * occ_func_0_0(83) * occ_func_0_0(28) * occ_func_0_1(35) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_0(83) * occ_func_0_1(28) * occ_func_0_0(35) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_0(0) * occ_func_0_0(3) * occ_func_0_1(9) *
-               occ_func_0_0(82) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(3) * occ_func_0_0(9) *
-               occ_func_0_0(82)) +
-          (0.707107 * occ_func_0_0(4) * occ_func_0_0(1) * occ_func_0_1(0) *
-               occ_func_0_0(26) +
-           0.707107 * occ_func_0_0(4) * occ_func_0_1(1) * occ_func_0_0(0) *
-               occ_func_0_0(26)) +
-          (0.707107 * occ_func_0_0(0) * occ_func_0_0(8) * occ_func_0_1(11) *
-               occ_func_0_0(84) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(8) * occ_func_0_0(11) *
-               occ_func_0_0(84)) +
-          (0.707107 * occ_func_0_0(5) * occ_func_0_0(0) * occ_func_0_1(10) *
-               occ_func_0_0(36) +
-           0.707107 * occ_func_0_0(5) * occ_func_0_1(0) * occ_func_0_0(10) *
-               occ_func_0_0(36)) +
-          (0.707107 * occ_func_0_0(2) * occ_func_0_0(3) * occ_func_0_1(0) *
-               occ_func_0_0(31) +
-           0.707107 * occ_func_0_0(2) * occ_func_0_1(3) * occ_func_0_0(0) *
-               occ_func_0_0(31)) +
-          (0.707107 * occ_func_0_0(81) * occ_func_0_0(25) * occ_func_0_1(30) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_0(81) * occ_func_0_1(25) * occ_func_0_0(30) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_0(86) * occ_func_0_0(41) * occ_func_0_1(42) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_0(86) * occ_func_0_1(41) * occ_func_0_0(42) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_0(11) * occ_func_0_0(0) * occ_func_0_1(8) *
-               occ_func_0_0(20) +
-           0.707107 * occ_func_0_0(11) * occ_func_0_1(0) * occ_func_0_0(8) *
-               occ_func_0_0(20)) +
-          (0.707107 * occ_func_0_0(10) * occ_func_0_0(5) * occ_func_0_1(0) *
-               occ_func_0_0(19) +
-           0.707107 * occ_func_0_0(10) * occ_func_0_1(5) * occ_func_0_0(0) *
-               occ_func_0_0(19)) +
-          (0.707107 * occ_func_0_0(0) * occ_func_0_0(2) * occ_func_0_1(3) *
-               occ_func_0_0(79) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(2) * occ_func_0_0(3) *
-               occ_func_0_0(79)) +
-          (0.707107 * occ_func_0_0(7) * occ_func_0_0(12) * occ_func_0_1(0) *
-               occ_func_0_0(38) +
-           0.707107 * occ_func_0_0(7) * occ_func_0_1(12) * occ_func_0_0(0) *
-               occ_func_0_0(38)) +
-          (0.707107 * occ_func_0_0(0) * occ_func_0_0(11) * occ_func_0_1(6) *
-               occ_func_0_0(84) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(11) * occ_func_0_0(6) *
-               occ_func_0_0(84)) +
-          (0.707107 * occ_func_0_0(2) * occ_func_0_0(0) * occ_func_0_1(1) *
-               occ_func_0_0(31) +
-           0.707107 * occ_func_0_0(2) * occ_func_0_1(0) * occ_func_0_0(1) *
-               occ_func_0_0(31)) +
-          (0.707107 * occ_func_0_0(81) * occ_func_0_0(30) * occ_func_0_1(23) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_0(81) * occ_func_0_1(30) * occ_func_0_0(23) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_0(0) * occ_func_0_0(12) * occ_func_0_1(9) *
-               occ_func_0_0(85) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(12) * occ_func_0_0(9) *
-               occ_func_0_0(85)) +
-          (0.707107 * occ_func_0_0(4) * occ_func_0_0(10) * occ_func_0_1(0) *
-               occ_func_0_0(37) +
-           0.707107 * occ_func_0_0(4) * occ_func_0_1(10) * occ_func_0_0(0) *
-               occ_func_0_0(37)) +
-          (0.707107 * occ_func_0_0(1) * occ_func_0_0(0) * occ_func_0_1(3) *
-               occ_func_0_0(32) +
-           0.707107 * occ_func_0_0(1) * occ_func_0_1(0) * occ_func_0_0(3) *
-               occ_func_0_0(32)) +
-          (0.707107 * occ_func_0_0(80) * occ_func_0_0(29) * occ_func_0_1(24) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_0(80) * occ_func_0_1(29) * occ_func_0_0(24) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_0(9) * occ_func_0_0(0) * occ_func_0_1(12) *
-               occ_func_0_0(35) +
-           0.707107 * occ_func_0_0(9) * occ_func_0_1(0) * occ_func_0_0(12) *
-               occ_func_0_0(35)) +
-          (0.707107 * occ_func_0_0(0) * occ_func_0_0(4) * occ_func_0_1(10) *
-               occ_func_0_0(83) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(4) * occ_func_0_0(10) *
-               occ_func_0_0(83)) +
-          (0.707107 * occ_func_0_0(82) * occ_func_0_0(26) * occ_func_0_1(33) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_0(82) * occ_func_0_1(26) * occ_func_0_0(33) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_0(3) * occ_func_0_0(1) * occ_func_0_1(0) *
-               occ_func_0_0(28) +
-           0.707107 * occ_func_0_0(3) * occ_func_0_1(1) * occ_func_0_0(0) *
-               occ_func_0_0(28)) +
-          (0.707107 * occ_func_0_0(9) * occ_func_0_0(7) * occ_func_0_1(0) *
-               occ_func_0_0(35) +
-           0.707107 * occ_func_0_0(9) * occ_func_0_1(7) * occ_func_0_0(0) *
-               occ_func_0_0(35)) +
-          (0.707107 * occ_func_0_0(8) * occ_func_0_0(0) * occ_func_0_1(6) *
-               occ_func_0_0(34) +
-           0.707107 * occ_func_0_0(8) * occ_func_0_1(0) * occ_func_0_0(6) *
-               occ_func_0_0(34)) +
-          (0.707107 * occ_func_0_0(0) * occ_func_0_0(5) * occ_func_0_1(4) *
-               occ_func_0_0(83) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(5) * occ_func_0_0(4) *
-               occ_func_0_0(83)) +
-          (0.707107 * occ_func_0_0(82) * occ_func_0_0(27) * occ_func_0_1(26) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_0(82) * occ_func_0_1(27) * occ_func_0_0(26) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_0(86) * occ_func_0_0(40) * occ_func_0_1(41) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_0(86) * occ_func_0_1(40) * occ_func_0_0(41) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_0(12) * occ_func_0_0(0) * occ_func_0_1(7) *
-               occ_func_0_0(21) +
-           0.707107 * occ_func_0_0(12) * occ_func_0_1(0) * occ_func_0_0(7) *
-               occ_func_0_0(21)) +
-          (0.707107 * occ_func_0_0(11) * occ_func_0_0(6) * occ_func_0_1(0) *
-               occ_func_0_0(20) +
-           0.707107 * occ_func_0_0(11) * occ_func_0_1(6) * occ_func_0_0(0) *
-               occ_func_0_0(20)) +
-          (0.707107 * occ_func_0_0(0) * occ_func_0_0(1) * occ_func_0_1(2) *
-               occ_func_0_0(79) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(1) * occ_func_0_0(2) *
-               occ_func_0_0(79)) +
-          (0.707107 * occ_func_0_0(0) * occ_func_0_0(9) * occ_func_0_1(7) *
-               occ_func_0_0(85) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(9) * occ_func_0_0(7) *
-               occ_func_0_0(85)) +
-          (0.707107 * occ_func_0_0(6) * occ_func_0_0(8) * occ_func_0_1(0) *
-               occ_func_0_0(39) +
-           0.707107 * occ_func_0_0(6) * occ_func_0_1(8) * occ_func_0_0(0) *
-               occ_func_0_0(39)) +
-          (0.707107 * occ_func_0_0(4) * occ_func_0_0(0) * occ_func_0_1(5) *
-               occ_func_0_0(37) +
-           0.707107 * occ_func_0_0(4) * occ_func_0_1(0) * occ_func_0_0(5) *
-               occ_func_0_0(37)) +
-          (0.707107 * occ_func_0_0(80) * occ_func_0_0(24) * occ_func_0_1(22) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_0(80) * occ_func_0_1(24) * occ_func_0_0(22) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_0(85) * occ_func_0_0(32) * occ_func_0_1(39) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_0(85) * occ_func_0_1(32) * occ_func_0_0(39) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_0(12) * occ_func_0_0(0) * occ_func_0_1(11) *
-               occ_func_0_0(29) +
-           0.707107 * occ_func_0_0(12) * occ_func_0_1(0) * occ_func_0_0(11) *
-               occ_func_0_0(29)) +
-          (0.707107 * occ_func_0_0(7) * occ_func_0_0(2) * occ_func_0_1(0) *
-               occ_func_0_0(22) +
-           0.707107 * occ_func_0_0(7) * occ_func_0_1(2) * occ_func_0_0(0) *
-               occ_func_0_0(22)) +
-          (0.707107 * occ_func_0_0(0) * occ_func_0_0(1) * occ_func_0_1(6) *
-               occ_func_0_0(80) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(1) * occ_func_0_0(6) *
-               occ_func_0_0(80)) +
-          (0.707107 * occ_func_0_0(85) * occ_func_0_0(39) * occ_func_0_1(37) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_0(85) * occ_func_0_1(39) * occ_func_0_0(37) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_0(9) * occ_func_0_0(8) * occ_func_0_1(0) *
-               occ_func_0_0(24) +
-           0.707107 * occ_func_0_0(9) * occ_func_0_1(8) * occ_func_0_0(0) *
-               occ_func_0_0(24)) +
-          (0.707107 * occ_func_0_0(7) * occ_func_0_0(0) * occ_func_0_1(5) *
-               occ_func_0_0(22) +
-           0.707107 * occ_func_0_0(7) * occ_func_0_1(0) * occ_func_0_0(5) *
-               occ_func_0_0(22)) +
-          (0.707107 * occ_func_0_0(0) * occ_func_0_0(6) * occ_func_0_1(4) *
-               occ_func_0_0(80) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(6) * occ_func_0_0(4) *
-               occ_func_0_0(80)) +
-          (0.707107 * occ_func_0_0(85) * occ_func_0_0(37) * occ_func_0_1(32) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_0(85) * occ_func_0_1(37) * occ_func_0_0(32) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_0(12) * occ_func_0_0(10) * occ_func_0_1(0) *
-               occ_func_0_0(29) +
-           0.707107 * occ_func_0_0(12) * occ_func_0_1(10) * occ_func_0_0(0) *
-               occ_func_0_0(29)) +
-          (0.707107 * occ_func_0_0(9) * occ_func_0_0(0) * occ_func_0_1(3) *
-               occ_func_0_0(24) +
-           0.707107 * occ_func_0_0(9) * occ_func_0_1(0) * occ_func_0_0(3) *
-               occ_func_0_0(24)) +
-          (0.707107 * occ_func_0_0(0) * occ_func_0_0(4) * occ_func_0_1(1) *
-               occ_func_0_0(80) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(4) * occ_func_0_0(1) *
-               occ_func_0_0(80)) +
-          (0.707107 * occ_func_0_0(84) * occ_func_0_0(38) * occ_func_0_1(31) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_0(84) * occ_func_0_1(38) * occ_func_0_0(31) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_0(11) * occ_func_0_0(12) * occ_func_0_1(0) *
-               occ_func_0_0(30) +
-           0.707107 * occ_func_0_0(11) * occ_func_0_1(12) * occ_func_0_0(0) *
-               occ_func_0_0(30)) +
-          (0.707107 * occ_func_0_0(0) * occ_func_0_0(7) * occ_func_0_1(2) *
-               occ_func_0_0(81) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(7) * occ_func_0_0(2) *
-               occ_func_0_0(81)) +
-          (0.707107 * occ_func_0_0(6) * occ_func_0_0(0) * occ_func_0_1(1) *
-               occ_func_0_0(23) +
-           0.707107 * occ_func_0_0(6) * occ_func_0_1(0) * occ_func_0_0(1) *
-               occ_func_0_0(23)) +
-          (0.707107 * occ_func_0_0(10) * occ_func_0_0(11) * occ_func_0_1(0) *
-               occ_func_0_0(33) +
-           0.707107 * occ_func_0_0(10) * occ_func_0_1(11) * occ_func_0_0(0) *
-               occ_func_0_0(33)) +
-          (0.707107 * occ_func_0_0(83) * occ_func_0_0(34) * occ_func_0_1(28) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_0(83) * occ_func_0_1(34) * occ_func_0_0(28) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_0(0) * occ_func_0_0(8) * occ_func_0_1(3) *
-               occ_func_0_0(82) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(8) * occ_func_0_0(3) *
-               occ_func_0_0(82)) +
-          (0.707107 * occ_func_0_0(5) * occ_func_0_0(0) * occ_func_0_1(2) *
-               occ_func_0_0(27) +
-           0.707107 * occ_func_0_0(5) * occ_func_0_1(0) * occ_func_0_0(2) *
-               occ_func_0_0(27)) +
-          (0.707107 * occ_func_0_0(0) * occ_func_0_0(11) * occ_func_0_1(12) *
-               occ_func_0_0(86) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(11) * occ_func_0_0(12) *
-               occ_func_0_0(86)) +
-          (0.707107 * occ_func_0_0(2) * occ_func_0_0(0) * occ_func_0_1(7) *
-               occ_func_0_0(41) +
-           0.707107 * occ_func_0_0(2) * occ_func_0_1(0) * occ_func_0_0(7) *
-               occ_func_0_0(41)) +
-          (0.707107 * occ_func_0_0(1) * occ_func_0_0(6) * occ_func_0_1(0) *
-               occ_func_0_0(40) +
-           0.707107 * occ_func_0_0(1) * occ_func_0_1(6) * occ_func_0_0(0) *
-               occ_func_0_0(40)) +
-          (0.707107 * occ_func_0_0(79) * occ_func_0_0(20) * occ_func_0_1(21) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_0(79) * occ_func_0_1(20) * occ_func_0_0(21) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_0(86) * occ_func_0_0(42) * occ_func_0_1(40) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_0(86) * occ_func_0_1(42) * occ_func_0_0(40) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_0(12) * occ_func_0_0(9) * occ_func_0_1(0) *
-               occ_func_0_0(21) +
-           0.707107 * occ_func_0_0(12) * occ_func_0_1(9) * occ_func_0_0(0) *
-               occ_func_0_0(21)) +
-          (0.707107 * occ_func_0_0(10) * occ_func_0_0(0) * occ_func_0_1(4) *
-               occ_func_0_0(19) +
-           0.707107 * occ_func_0_0(10) * occ_func_0_1(0) * occ_func_0_0(4) *
-               occ_func_0_0(19)) +
-          (0.707107 * occ_func_0_0(0) * occ_func_0_0(3) * occ_func_0_1(1) *
-               occ_func_0_0(79) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(3) * occ_func_0_0(1) *
-               occ_func_0_0(79)) +
-          (0.707107 * occ_func_0_0(8) * occ_func_0_0(11) * occ_func_0_1(0) *
-               occ_func_0_0(34) +
-           0.707107 * occ_func_0_0(8) * occ_func_0_1(11) * occ_func_0_0(0) *
-               occ_func_0_0(34)) +
-          (0.707107 * occ_func_0_0(0) * occ_func_0_0(10) * occ_func_0_1(5) *
-               occ_func_0_0(83) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(10) * occ_func_0_0(5) *
-               occ_func_0_0(83)) +
-          (0.707107 * occ_func_0_0(82) * occ_func_0_0(33) * occ_func_0_1(27) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_0(82) * occ_func_0_1(33) * occ_func_0_0(27) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_0(3) * occ_func_0_0(0) * occ_func_0_1(2) *
-               occ_func_0_0(28) +
-           0.707107 * occ_func_0_0(3) * occ_func_0_1(0) * occ_func_0_0(2) *
-               occ_func_0_0(28)) +
-          (0.707107 * occ_func_0_0(7) * occ_func_0_0(0) * occ_func_0_1(9) *
-               occ_func_0_0(38) +
-           0.707107 * occ_func_0_0(7) * occ_func_0_1(0) * occ_func_0_0(9) *
-               occ_func_0_0(38)) +
-          (0.707107 * occ_func_0_0(0) * occ_func_0_0(6) * occ_func_0_1(8) *
-               occ_func_0_0(84) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(6) * occ_func_0_0(8) *
-               occ_func_0_0(84)) +
-          (0.707107 * occ_func_0_0(5) * occ_func_0_0(4) * occ_func_0_1(0) *
-               occ_func_0_0(36) +
-           0.707107 * occ_func_0_0(5) * occ_func_0_1(4) * occ_func_0_0(0) *
-               occ_func_0_0(36)) +
-          (0.707107 * occ_func_0_0(81) * occ_func_0_0(23) * occ_func_0_1(25) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_0(81) * occ_func_0_1(23) * occ_func_0_0(25) *
-               occ_func_0_0(0))) /
-         24.;
-}
-template <typename Scalar>
-Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_13_3_at_0() const {
-  return ((0.707107 * occ_func_0_1(0) * occ_func_0_0(7) * occ_func_0_1(12) *
-               occ_func_0_0(85) +
-           0.707107 * occ_func_0_1(0) * occ_func_0_1(7) * occ_func_0_0(12) *
-               occ_func_0_0(85)) +
-          (0.707107 * occ_func_0_1(6) * occ_func_0_0(0) * occ_func_0_1(11) *
-               occ_func_0_0(39) +
-           0.707107 * occ_func_0_1(6) * occ_func_0_1(0) * occ_func_0_0(11) *
-               occ_func_0_0(39)) +
-          (0.707107 * occ_func_0_1(1) * occ_func_0_0(2) * occ_func_0_1(0) *
-               occ_func_0_0(32) +
-           0.707107 * occ_func_0_1(1) * occ_func_0_1(2) * occ_func_0_0(0) *
-               occ_func_0_0(32)) +
-          (0.707107 * occ_func_0_1(80) * occ_func_0_0(22) * occ_func_0_1(29) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_1(80) * occ_func_0_1(22) * occ_func_0_0(29) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(83) * occ_func_0_0(35) * occ_func_0_1(34) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_1(83) * occ_func_0_1(35) * occ_func_0_0(34) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(0) * occ_func_0_0(9) * occ_func_0_1(8) *
-               occ_func_0_0(82) +
-           0.707107 * occ_func_0_1(0) * occ_func_0_1(9) * occ_func_0_0(8) *
-               occ_func_0_0(82)) +
-          (0.707107 * occ_func_0_1(5) * occ_func_0_0(7) * occ_func_0_1(0) *
-               occ_func_0_0(27) +
-           0.707107 * occ_func_0_1(5) * occ_func_0_1(7) * occ_func_0_0(0) *
-               occ_func_0_0(27)) +
-          (0.707107 * occ_func_0_1(4) * occ_func_0_0(0) * occ_func_0_1(6) *
-               occ_func_0_0(26) +
-           0.707107 * occ_func_0_1(4) * occ_func_0_1(0) * occ_func_0_0(6) *
-               occ_func_0_0(26)) +
-          (0.707107 * occ_func_0_1(84) * occ_func_0_0(36) * occ_func_0_1(38) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_1(84) * occ_func_0_1(36) * occ_func_0_0(38) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(8) * occ_func_0_0(0) * occ_func_0_1(9) *
-               occ_func_0_0(25) +
-           0.707107 * occ_func_0_1(8) * occ_func_0_1(0) * occ_func_0_0(9) *
-               occ_func_0_0(25)) +
-          (0.707107 * occ_func_0_1(0) * occ_func_0_0(5) * occ_func_0_1(7) *
-               occ_func_0_0(81) +
-           0.707107 * occ_func_0_1(0) * occ_func_0_1(5) * occ_func_0_0(7) *
-               occ_func_0_0(81)) +
-          (0.707107 * occ_func_0_1(6) * occ_func_0_0(4) * occ_func_0_1(0) *
-               occ_func_0_0(23) +
-           0.707107 * occ_func_0_1(6) * occ_func_0_1(4) * occ_func_0_0(0) *
-               occ_func_0_0(23)) +
-          (0.707107 * occ_func_0_1(0) * occ_func_0_0(10) * occ_func_0_1(11) *
-               occ_func_0_0(86) +
-           0.707107 * occ_func_0_1(0) * occ_func_0_1(10) * occ_func_0_0(11) *
-               occ_func_0_0(86)) +
-          (0.707107 * occ_func_0_1(3) * occ_func_0_0(0) * occ_func_0_1(8) *
-               occ_func_0_0(42) +
-           0.707107 * occ_func_0_1(3) * occ_func_0_1(0) * occ_func_0_0(8) *
-               occ_func_0_0(42)) +
-          (0.707107 * occ_func_0_1(2) * occ_func_0_0(5) * occ_func_0_1(0) *
-               occ_func_0_0(41) +
-           0.707107 * occ_func_0_1(2) * occ_func_0_1(5) * occ_func_0_0(0) *
-               occ_func_0_0(41)) +
-          (0.707107 * occ_func_0_1(79) * occ_func_0_0(19) * occ_func_0_1(20) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_1(79) * occ_func_0_1(19) * occ_func_0_0(20) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(84) * occ_func_0_0(31) * occ_func_0_1(36) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_1(84) * occ_func_0_1(31) * occ_func_0_0(36) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(11) * occ_func_0_0(0) * occ_func_0_1(10) *
-               occ_func_0_0(30) +
-           0.707107 * occ_func_0_1(11) * occ_func_0_1(0) * occ_func_0_0(10) *
-               occ_func_0_0(30)) +
-          (0.707107 * occ_func_0_1(8) * occ_func_0_0(3) * occ_func_0_1(0) *
-               occ_func_0_0(25) +
-           0.707107 * occ_func_0_1(8) * occ_func_0_1(3) * occ_func_0_0(0) *
-               occ_func_0_0(25)) +
-          (0.707107 * occ_func_0_1(0) * occ_func_0_0(2) * occ_func_0_1(5) *
-               occ_func_0_0(81) +
-           0.707107 * occ_func_0_1(0) * occ_func_0_1(2) * occ_func_0_0(5) *
-               occ_func_0_0(81)) +
-          (0.707107 * occ_func_0_1(0) * occ_func_0_0(12) * occ_func_0_1(10) *
-               occ_func_0_0(86) +
-           0.707107 * occ_func_0_1(0) * occ_func_0_1(12) * occ_func_0_0(10) *
-               occ_func_0_0(86)) +
-          (0.707107 * occ_func_0_1(3) * occ_func_0_0(9) * occ_func_0_1(0) *
-               occ_func_0_0(42) +
-           0.707107 * occ_func_0_1(3) * occ_func_0_1(9) * occ_func_0_0(0) *
-               occ_func_0_0(42)) +
-          (0.707107 * occ_func_0_1(1) * occ_func_0_0(0) * occ_func_0_1(4) *
-               occ_func_0_0(40) +
-           0.707107 * occ_func_0_1(1) * occ_func_0_1(0) * occ_func_0_0(4) *
-               occ_func_0_0(40)) +
-          (0.707107 * occ_func_0_1(79) * occ_func_0_0(21) * occ_func_0_1(19) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_1(79) * occ_func_0_1(21) * occ_func_0_0(19) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(10) * occ_func_0_0(0) * occ_func_0_1(12) *
-               occ_func_0_0(33) +
-           0.707107 * occ_func_0_1(10) * occ_func_0_1(0) * occ_func_0_0(12) *
-               occ_func_0_0(33)) +
-          (0.707107 * occ_func_0_1(83) * occ_func_0_0(28) * occ_func_0_1(35) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_1(83) * occ_func_0_1(28) * occ_func_0_0(35) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(0) * occ_func_0_0(3) * occ_func_0_1(9) *
-               occ_func_0_0(82) +
-           0.707107 * occ_func_0_1(0) * occ_func_0_1(3) * occ_func_0_0(9) *
-               occ_func_0_0(82)) +
-          (0.707107 * occ_func_0_1(4) * occ_func_0_0(1) * occ_func_0_1(0) *
-               occ_func_0_0(26) +
-           0.707107 * occ_func_0_1(4) * occ_func_0_1(1) * occ_func_0_0(0) *
-               occ_func_0_0(26)) +
-          (0.707107 * occ_func_0_1(0) * occ_func_0_0(8) * occ_func_0_1(11) *
-               occ_func_0_0(84) +
-           0.707107 * occ_func_0_1(0) * occ_func_0_1(8) * occ_func_0_0(11) *
-               occ_func_0_0(84)) +
-          (0.707107 * occ_func_0_1(5) * occ_func_0_0(0) * occ_func_0_1(10) *
-               occ_func_0_0(36) +
-           0.707107 * occ_func_0_1(5) * occ_func_0_1(0) * occ_func_0_0(10) *
-               occ_func_0_0(36)) +
-          (0.707107 * occ_func_0_1(2) * occ_func_0_0(3) * occ_func_0_1(0) *
-               occ_func_0_0(31) +
-           0.707107 * occ_func_0_1(2) * occ_func_0_1(3) * occ_func_0_0(0) *
-               occ_func_0_0(31)) +
-          (0.707107 * occ_func_0_1(81) * occ_func_0_0(25) * occ_func_0_1(30) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_1(81) * occ_func_0_1(25) * occ_func_0_0(30) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(86) * occ_func_0_0(41) * occ_func_0_1(42) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_1(86) * occ_func_0_1(41) * occ_func_0_0(42) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(11) * occ_func_0_0(0) * occ_func_0_1(8) *
-               occ_func_0_0(20) +
-           0.707107 * occ_func_0_1(11) * occ_func_0_1(0) * occ_func_0_0(8) *
-               occ_func_0_0(20)) +
-          (0.707107 * occ_func_0_1(10) * occ_func_0_0(5) * occ_func_0_1(0) *
-               occ_func_0_0(19) +
-           0.707107 * occ_func_0_1(10) * occ_func_0_1(5) * occ_func_0_0(0) *
-               occ_func_0_0(19)) +
-          (0.707107 * occ_func_0_1(0) * occ_func_0_0(2) * occ_func_0_1(3) *
-               occ_func_0_0(79) +
-           0.707107 * occ_func_0_1(0) * occ_func_0_1(2) * occ_func_0_0(3) *
-               occ_func_0_0(79)) +
-          (0.707107 * occ_func_0_1(7) * occ_func_0_0(12) * occ_func_0_1(0) *
-               occ_func_0_0(38) +
-           0.707107 * occ_func_0_1(7) * occ_func_0_1(12) * occ_func_0_0(0) *
-               occ_func_0_0(38)) +
-          (0.707107 * occ_func_0_1(0) * occ_func_0_0(11) * occ_func_0_1(6) *
-               occ_func_0_0(84) +
-           0.707107 * occ_func_0_1(0) * occ_func_0_1(11) * occ_func_0_0(6) *
-               occ_func_0_0(84)) +
-          (0.707107 * occ_func_0_1(2) * occ_func_0_0(0) * occ_func_0_1(1) *
-               occ_func_0_0(31) +
-           0.707107 * occ_func_0_1(2) * occ_func_0_1(0) * occ_func_0_0(1) *
-               occ_func_0_0(31)) +
-          (0.707107 * occ_func_0_1(81) * occ_func_0_0(30) * occ_func_0_1(23) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_1(81) * occ_func_0_1(30) * occ_func_0_0(23) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(0) * occ_func_0_0(12) * occ_func_0_1(9) *
-               occ_func_0_0(85) +
-           0.707107 * occ_func_0_1(0) * occ_func_0_1(12) * occ_func_0_0(9) *
-               occ_func_0_0(85)) +
-          (0.707107 * occ_func_0_1(4) * occ_func_0_0(10) * occ_func_0_1(0) *
-               occ_func_0_0(37) +
-           0.707107 * occ_func_0_1(4) * occ_func_0_1(10) * occ_func_0_0(0) *
-               occ_func_0_0(37)) +
-          (0.707107 * occ_func_0_1(1) * occ_func_0_0(0) * occ_func_0_1(3) *
-               occ_func_0_0(32) +
-           0.707107 * occ_func_0_1(1) * occ_func_0_1(0) * occ_func_0_0(3) *
-               occ_func_0_0(32)) +
-          (0.707107 * occ_func_0_1(80) * occ_func_0_0(29) * occ_func_0_1(24) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_1(80) * occ_func_0_1(29) * occ_func_0_0(24) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(9) * occ_func_0_0(0) * occ_func_0_1(12) *
-               occ_func_0_0(35) +
-           0.707107 * occ_func_0_1(9) * occ_func_0_1(0) * occ_func_0_0(12) *
-               occ_func_0_0(35)) +
-          (0.707107 * occ_func_0_1(0) * occ_func_0_0(4) * occ_func_0_1(10) *
-               occ_func_0_0(83) +
-           0.707107 * occ_func_0_1(0) * occ_func_0_1(4) * occ_func_0_0(10) *
-               occ_func_0_0(83)) +
-          (0.707107 * occ_func_0_1(82) * occ_func_0_0(26) * occ_func_0_1(33) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_1(82) * occ_func_0_1(26) * occ_func_0_0(33) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(3) * occ_func_0_0(1) * occ_func_0_1(0) *
-               occ_func_0_0(28) +
-           0.707107 * occ_func_0_1(3) * occ_func_0_1(1) * occ_func_0_0(0) *
-               occ_func_0_0(28)) +
-          (0.707107 * occ_func_0_1(9) * occ_func_0_0(7) * occ_func_0_1(0) *
-               occ_func_0_0(35) +
-           0.707107 * occ_func_0_1(9) * occ_func_0_1(7) * occ_func_0_0(0) *
-               occ_func_0_0(35)) +
-          (0.707107 * occ_func_0_1(8) * occ_func_0_0(0) * occ_func_0_1(6) *
-               occ_func_0_0(34) +
-           0.707107 * occ_func_0_1(8) * occ_func_0_1(0) * occ_func_0_0(6) *
-               occ_func_0_0(34)) +
-          (0.707107 * occ_func_0_1(0) * occ_func_0_0(5) * occ_func_0_1(4) *
-               occ_func_0_0(83) +
-           0.707107 * occ_func_0_1(0) * occ_func_0_1(5) * occ_func_0_0(4) *
-               occ_func_0_0(83)) +
-          (0.707107 * occ_func_0_1(82) * occ_func_0_0(27) * occ_func_0_1(26) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_1(82) * occ_func_0_1(27) * occ_func_0_0(26) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(86) * occ_func_0_0(40) * occ_func_0_1(41) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_1(86) * occ_func_0_1(40) * occ_func_0_0(41) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(12) * occ_func_0_0(0) * occ_func_0_1(7) *
-               occ_func_0_0(21) +
-           0.707107 * occ_func_0_1(12) * occ_func_0_1(0) * occ_func_0_0(7) *
-               occ_func_0_0(21)) +
-          (0.707107 * occ_func_0_1(11) * occ_func_0_0(6) * occ_func_0_1(0) *
-               occ_func_0_0(20) +
-           0.707107 * occ_func_0_1(11) * occ_func_0_1(6) * occ_func_0_0(0) *
-               occ_func_0_0(20)) +
-          (0.707107 * occ_func_0_1(0) * occ_func_0_0(1) * occ_func_0_1(2) *
-               occ_func_0_0(79) +
-           0.707107 * occ_func_0_1(0) * occ_func_0_1(1) * occ_func_0_0(2) *
-               occ_func_0_0(79)) +
-          (0.707107 * occ_func_0_1(0) * occ_func_0_0(9) * occ_func_0_1(7) *
-               occ_func_0_0(85) +
-           0.707107 * occ_func_0_1(0) * occ_func_0_1(9) * occ_func_0_0(7) *
-               occ_func_0_0(85)) +
-          (0.707107 * occ_func_0_1(6) * occ_func_0_0(8) * occ_func_0_1(0) *
-               occ_func_0_0(39) +
-           0.707107 * occ_func_0_1(6) * occ_func_0_1(8) * occ_func_0_0(0) *
-               occ_func_0_0(39)) +
-          (0.707107 * occ_func_0_1(4) * occ_func_0_0(0) * occ_func_0_1(5) *
-               occ_func_0_0(37) +
-           0.707107 * occ_func_0_1(4) * occ_func_0_1(0) * occ_func_0_0(5) *
-               occ_func_0_0(37)) +
-          (0.707107 * occ_func_0_1(80) * occ_func_0_0(24) * occ_func_0_1(22) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_1(80) * occ_func_0_1(24) * occ_func_0_0(22) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(85) * occ_func_0_0(32) * occ_func_0_1(39) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_1(85) * occ_func_0_1(32) * occ_func_0_0(39) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(12) * occ_func_0_0(0) * occ_func_0_1(11) *
-               occ_func_0_0(29) +
-           0.707107 * occ_func_0_1(12) * occ_func_0_1(0) * occ_func_0_0(11) *
-               occ_func_0_0(29)) +
-          (0.707107 * occ_func_0_1(7) * occ_func_0_0(2) * occ_func_0_1(0) *
-               occ_func_0_0(22) +
-           0.707107 * occ_func_0_1(7) * occ_func_0_1(2) * occ_func_0_0(0) *
-               occ_func_0_0(22)) +
-          (0.707107 * occ_func_0_1(0) * occ_func_0_0(1) * occ_func_0_1(6) *
-               occ_func_0_0(80) +
-           0.707107 * occ_func_0_1(0) * occ_func_0_1(1) * occ_func_0_0(6) *
-               occ_func_0_0(80)) +
-          (0.707107 * occ_func_0_1(85) * occ_func_0_0(39) * occ_func_0_1(37) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_1(85) * occ_func_0_1(39) * occ_func_0_0(37) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(9) * occ_func_0_0(8) * occ_func_0_1(0) *
-               occ_func_0_0(24) +
-           0.707107 * occ_func_0_1(9) * occ_func_0_1(8) * occ_func_0_0(0) *
-               occ_func_0_0(24)) +
-          (0.707107 * occ_func_0_1(7) * occ_func_0_0(0) * occ_func_0_1(5) *
-               occ_func_0_0(22) +
-           0.707107 * occ_func_0_1(7) * occ_func_0_1(0) * occ_func_0_0(5) *
-               occ_func_0_0(22)) +
-          (0.707107 * occ_func_0_1(0) * occ_func_0_0(6) * occ_func_0_1(4) *
-               occ_func_0_0(80) +
-           0.707107 * occ_func_0_1(0) * occ_func_0_1(6) * occ_func_0_0(4) *
-               occ_func_0_0(80)) +
-          (0.707107 * occ_func_0_1(85) * occ_func_0_0(37) * occ_func_0_1(32) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_1(85) * occ_func_0_1(37) * occ_func_0_0(32) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(12) * occ_func_0_0(10) * occ_func_0_1(0) *
-               occ_func_0_0(29) +
-           0.707107 * occ_func_0_1(12) * occ_func_0_1(10) * occ_func_0_0(0) *
-               occ_func_0_0(29)) +
-          (0.707107 * occ_func_0_1(9) * occ_func_0_0(0) * occ_func_0_1(3) *
-               occ_func_0_0(24) +
-           0.707107 * occ_func_0_1(9) * occ_func_0_1(0) * occ_func_0_0(3) *
-               occ_func_0_0(24)) +
-          (0.707107 * occ_func_0_1(0) * occ_func_0_0(4) * occ_func_0_1(1) *
-               occ_func_0_0(80) +
-           0.707107 * occ_func_0_1(0) * occ_func_0_1(4) * occ_func_0_0(1) *
-               occ_func_0_0(80)) +
-          (0.707107 * occ_func_0_1(84) * occ_func_0_0(38) * occ_func_0_1(31) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_1(84) * occ_func_0_1(38) * occ_func_0_0(31) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(11) * occ_func_0_0(12) * occ_func_0_1(0) *
-               occ_func_0_0(30) +
-           0.707107 * occ_func_0_1(11) * occ_func_0_1(12) * occ_func_0_0(0) *
-               occ_func_0_0(30)) +
-          (0.707107 * occ_func_0_1(0) * occ_func_0_0(7) * occ_func_0_1(2) *
-               occ_func_0_0(81) +
-           0.707107 * occ_func_0_1(0) * occ_func_0_1(7) * occ_func_0_0(2) *
-               occ_func_0_0(81)) +
-          (0.707107 * occ_func_0_1(6) * occ_func_0_0(0) * occ_func_0_1(1) *
-               occ_func_0_0(23) +
-           0.707107 * occ_func_0_1(6) * occ_func_0_1(0) * occ_func_0_0(1) *
-               occ_func_0_0(23)) +
-          (0.707107 * occ_func_0_1(10) * occ_func_0_0(11) * occ_func_0_1(0) *
-               occ_func_0_0(33) +
-           0.707107 * occ_func_0_1(10) * occ_func_0_1(11) * occ_func_0_0(0) *
-               occ_func_0_0(33)) +
-          (0.707107 * occ_func_0_1(83) * occ_func_0_0(34) * occ_func_0_1(28) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_1(83) * occ_func_0_1(34) * occ_func_0_0(28) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(0) * occ_func_0_0(8) * occ_func_0_1(3) *
-               occ_func_0_0(82) +
-           0.707107 * occ_func_0_1(0) * occ_func_0_1(8) * occ_func_0_0(3) *
-               occ_func_0_0(82)) +
-          (0.707107 * occ_func_0_1(5) * occ_func_0_0(0) * occ_func_0_1(2) *
-               occ_func_0_0(27) +
-           0.707107 * occ_func_0_1(5) * occ_func_0_1(0) * occ_func_0_0(2) *
-               occ_func_0_0(27)) +
-          (0.707107 * occ_func_0_1(0) * occ_func_0_0(11) * occ_func_0_1(12) *
-               occ_func_0_0(86) +
-           0.707107 * occ_func_0_1(0) * occ_func_0_1(11) * occ_func_0_0(12) *
-               occ_func_0_0(86)) +
-          (0.707107 * occ_func_0_1(2) * occ_func_0_0(0) * occ_func_0_1(7) *
-               occ_func_0_0(41) +
-           0.707107 * occ_func_0_1(2) * occ_func_0_1(0) * occ_func_0_0(7) *
-               occ_func_0_0(41)) +
-          (0.707107 * occ_func_0_1(1) * occ_func_0_0(6) * occ_func_0_1(0) *
-               occ_func_0_0(40) +
-           0.707107 * occ_func_0_1(1) * occ_func_0_1(6) * occ_func_0_0(0) *
-               occ_func_0_0(40)) +
-          (0.707107 * occ_func_0_1(79) * occ_func_0_0(20) * occ_func_0_1(21) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_1(79) * occ_func_0_1(20) * occ_func_0_0(21) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(86) * occ_func_0_0(42) * occ_func_0_1(40) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_1(86) * occ_func_0_1(42) * occ_func_0_0(40) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(12) * occ_func_0_0(9) * occ_func_0_1(0) *
-               occ_func_0_0(21) +
-           0.707107 * occ_func_0_1(12) * occ_func_0_1(9) * occ_func_0_0(0) *
-               occ_func_0_0(21)) +
-          (0.707107 * occ_func_0_1(10) * occ_func_0_0(0) * occ_func_0_1(4) *
-               occ_func_0_0(19) +
-           0.707107 * occ_func_0_1(10) * occ_func_0_1(0) * occ_func_0_0(4) *
-               occ_func_0_0(19)) +
-          (0.707107 * occ_func_0_1(0) * occ_func_0_0(3) * occ_func_0_1(1) *
-               occ_func_0_0(79) +
-           0.707107 * occ_func_0_1(0) * occ_func_0_1(3) * occ_func_0_0(1) *
-               occ_func_0_0(79)) +
-          (0.707107 * occ_func_0_1(8) * occ_func_0_0(11) * occ_func_0_1(0) *
-               occ_func_0_0(34) +
-           0.707107 * occ_func_0_1(8) * occ_func_0_1(11) * occ_func_0_0(0) *
-               occ_func_0_0(34)) +
-          (0.707107 * occ_func_0_1(0) * occ_func_0_0(10) * occ_func_0_1(5) *
-               occ_func_0_0(83) +
-           0.707107 * occ_func_0_1(0) * occ_func_0_1(10) * occ_func_0_0(5) *
-               occ_func_0_0(83)) +
-          (0.707107 * occ_func_0_1(82) * occ_func_0_0(33) * occ_func_0_1(27) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_1(82) * occ_func_0_1(33) * occ_func_0_0(27) *
-               occ_func_0_0(0)) +
-          (0.707107 * occ_func_0_1(3) * occ_func_0_0(0) * occ_func_0_1(2) *
-               occ_func_0_0(28) +
-           0.707107 * occ_func_0_1(3) * occ_func_0_1(0) * occ_func_0_0(2) *
-               occ_func_0_0(28)) +
-          (0.707107 * occ_func_0_1(7) * occ_func_0_0(0) * occ_func_0_1(9) *
-               occ_func_0_0(38) +
-           0.707107 * occ_func_0_1(7) * occ_func_0_1(0) * occ_func_0_0(9) *
-               occ_func_0_0(38)) +
-          (0.707107 * occ_func_0_1(0) * occ_func_0_0(6) * occ_func_0_1(8) *
-               occ_func_0_0(84) +
-           0.707107 * occ_func_0_1(0) * occ_func_0_1(6) * occ_func_0_0(8) *
-               occ_func_0_0(84)) +
-          (0.707107 * occ_func_0_1(5) * occ_func_0_0(4) * occ_func_0_1(0) *
-               occ_func_0_0(36) +
-           0.707107 * occ_func_0_1(5) * occ_func_0_1(4) * occ_func_0_0(0) *
-               occ_func_0_0(36)) +
-          (0.707107 * occ_func_0_1(81) * occ_func_0_0(23) * occ_func_0_1(25) *
-               occ_func_0_0(0) +
-           0.707107 * occ_func_0_1(81) * occ_func_0_1(23) * occ_func_0_0(25) *
-               occ_func_0_0(0))) /
-         24.;
-}
-template <typename Scalar>
-Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_13_4_at_0() const {
-  return (occ_func_0_0(0) * occ_func_0_1(7) * occ_func_0_1(12) *
-              occ_func_0_0(85) +
-          occ_func_0_0(6) * occ_func_0_1(0) * occ_func_0_1(11) *
-              occ_func_0_0(39) +
-          occ_func_0_0(1) * occ_func_0_1(2) * occ_func_0_1(0) *
-              occ_func_0_0(32) +
-          occ_func_0_0(80) * occ_func_0_1(22) * occ_func_0_1(29) *
-              occ_func_0_0(0) +
-          occ_func_0_0(83) * occ_func_0_1(35) * occ_func_0_1(34) *
-              occ_func_0_0(0) +
-          occ_func_0_0(0) * occ_func_0_1(9) * occ_func_0_1(8) *
-              occ_func_0_0(82) +
-          occ_func_0_0(5) * occ_func_0_1(7) * occ_func_0_1(0) *
-              occ_func_0_0(27) +
-          occ_func_0_0(4) * occ_func_0_1(0) * occ_func_0_1(6) *
-              occ_func_0_0(26) +
-          occ_func_0_0(84) * occ_func_0_1(36) * occ_func_0_1(38) *
-              occ_func_0_0(0) +
-          occ_func_0_0(8) * occ_func_0_1(0) * occ_func_0_1(9) *
-              occ_func_0_0(25) +
-          occ_func_0_0(0) * occ_func_0_1(5) * occ_func_0_1(7) *
-              occ_func_0_0(81) +
-          occ_func_0_0(6) * occ_func_0_1(4) * occ_func_0_1(0) *
-              occ_func_0_0(23) +
-          occ_func_0_0(0) * occ_func_0_1(10) * occ_func_0_1(11) *
-              occ_func_0_0(86) +
-          occ_func_0_0(3) * occ_func_0_1(0) * occ_func_0_1(8) *
-              occ_func_0_0(42) +
-          occ_func_0_0(2) * occ_func_0_1(5) * occ_func_0_1(0) *
-              occ_func_0_0(41) +
-          occ_func_0_0(79) * occ_func_0_1(19) * occ_func_0_1(20) *
-              occ_func_0_0(0) +
-          occ_func_0_0(84) * occ_func_0_1(31) * occ_func_0_1(36) *
-              occ_func_0_0(0) +
-          occ_func_0_0(11) * occ_func_0_1(0) * occ_func_0_1(10) *
-              occ_func_0_0(30) +
-          occ_func_0_0(8) * occ_func_0_1(3) * occ_func_0_1(0) *
-              occ_func_0_0(25) +
-          occ_func_0_0(0) * occ_func_0_1(2) * occ_func_0_1(5) *
-              occ_func_0_0(81) +
-          occ_func_0_0(0) * occ_func_0_1(12) * occ_func_0_1(10) *
-              occ_func_0_0(86) +
-          occ_func_0_0(3) * occ_func_0_1(9) * occ_func_0_1(0) *
-              occ_func_0_0(42) +
-          occ_func_0_0(1) * occ_func_0_1(0) * occ_func_0_1(4) *
-              occ_func_0_0(40) +
-          occ_func_0_0(79) * occ_func_0_1(21) * occ_func_0_1(19) *
-              occ_func_0_0(0) +
-          occ_func_0_0(10) * occ_func_0_1(0) * occ_func_0_1(12) *
-              occ_func_0_0(33) +
-          occ_func_0_0(83) * occ_func_0_1(28) * occ_func_0_1(35) *
-              occ_func_0_0(0) +
-          occ_func_0_0(0) * occ_func_0_1(3) * occ_func_0_1(9) *
-              occ_func_0_0(82) +
-          occ_func_0_0(4) * occ_func_0_1(1) * occ_func_0_1(0) *
-              occ_func_0_0(26) +
-          occ_func_0_0(0) * occ_func_0_1(8) * occ_func_0_1(11) *
-              occ_func_0_0(84) +
-          occ_func_0_0(5) * occ_func_0_1(0) * occ_func_0_1(10) *
-              occ_func_0_0(36) +
-          occ_func_0_0(2) * occ_func_0_1(3) * occ_func_0_1(0) *
-              occ_func_0_0(31) +
-          occ_func_0_0(81) * occ_func_0_1(25) * occ_func_0_1(30) *
-              occ_func_0_0(0) +
-          occ_func_0_0(86) * occ_func_0_1(41) * occ_func_0_1(42) *
-              occ_func_0_0(0) +
-          occ_func_0_0(11) * occ_func_0_1(0) * occ_func_0_1(8) *
-              occ_func_0_0(20) +
-          occ_func_0_0(10) * occ_func_0_1(5) * occ_func_0_1(0) *
-              occ_func_0_0(19) +
-          occ_func_0_0(0) * occ_func_0_1(2) * occ_func_0_1(3) *
-              occ_func_0_0(79) +
-          occ_func_0_0(7) * occ_func_0_1(12) * occ_func_0_1(0) *
-              occ_func_0_0(38) +
-          occ_func_0_0(0) * occ_func_0_1(11) * occ_func_0_1(6) *
-              occ_func_0_0(84) +
-          occ_func_0_0(2) * occ_func_0_1(0) * occ_func_0_1(1) *
-              occ_func_0_0(31) +
-          occ_func_0_0(81) * occ_func_0_1(30) * occ_func_0_1(23) *
-              occ_func_0_0(0) +
-          occ_func_0_0(0) * occ_func_0_1(12) * occ_func_0_1(9) *
-              occ_func_0_0(85) +
-          occ_func_0_0(4) * occ_func_0_1(10) * occ_func_0_1(0) *
-              occ_func_0_0(37) +
-          occ_func_0_0(1) * occ_func_0_1(0) * occ_func_0_1(3) *
-              occ_func_0_0(32) +
-          occ_func_0_0(80) * occ_func_0_1(29) * occ_func_0_1(24) *
-              occ_func_0_0(0) +
-          occ_func_0_0(9) * occ_func_0_1(0) * occ_func_0_1(12) *
-              occ_func_0_0(35) +
-          occ_func_0_0(0) * occ_func_0_1(4) * occ_func_0_1(10) *
-              occ_func_0_0(83) +
-          occ_func_0_0(82) * occ_func_0_1(26) * occ_func_0_1(33) *
-              occ_func_0_0(0) +
-          occ_func_0_0(3) * occ_func_0_1(1) * occ_func_0_1(0) *
-              occ_func_0_0(28) +
-          occ_func_0_0(9) * occ_func_0_1(7) * occ_func_0_1(0) *
-              occ_func_0_0(35) +
-          occ_func_0_0(8) * occ_func_0_1(0) * occ_func_0_1(6) *
-              occ_func_0_0(34) +
-          occ_func_0_0(0) * occ_func_0_1(5) * occ_func_0_1(4) *
-              occ_func_0_0(83) +
-          occ_func_0_0(82) * occ_func_0_1(27) * occ_func_0_1(26) *
-              occ_func_0_0(0) +
-          occ_func_0_0(86) * occ_func_0_1(40) * occ_func_0_1(41) *
-              occ_func_0_0(0) +
-          occ_func_0_0(12) * occ_func_0_1(0) * occ_func_0_1(7) *
-              occ_func_0_0(21) +
-          occ_func_0_0(11) * occ_func_0_1(6) * occ_func_0_1(0) *
-              occ_func_0_0(20) +
-          occ_func_0_0(0) * occ_func_0_1(1) * occ_func_0_1(2) *
-              occ_func_0_0(79) +
-          occ_func_0_0(0) * occ_func_0_1(9) * occ_func_0_1(7) *
-              occ_func_0_0(85) +
-          occ_func_0_0(6) * occ_func_0_1(8) * occ_func_0_1(0) *
-              occ_func_0_0(39) +
-          occ_func_0_0(4) * occ_func_0_1(0) * occ_func_0_1(5) *
-              occ_func_0_0(37) +
-          occ_func_0_0(80) * occ_func_0_1(24) * occ_func_0_1(22) *
-              occ_func_0_0(0) +
-          occ_func_0_0(85) * occ_func_0_1(32) * occ_func_0_1(39) *
-              occ_func_0_0(0) +
-          occ_func_0_0(12) * occ_func_0_1(0) * occ_func_0_1(11) *
-              occ_func_0_0(29) +
-          occ_func_0_0(7) * occ_func_0_1(2) * occ_func_0_1(0) *
-              occ_func_0_0(22) +
-          occ_func_0_0(0) * occ_func_0_1(1) * occ_func_0_1(6) *
-              occ_func_0_0(80) +
-          occ_func_0_0(85) * occ_func_0_1(39) * occ_func_0_1(37) *
-              occ_func_0_0(0) +
-          occ_func_0_0(9) * occ_func_0_1(8) * occ_func_0_1(0) *
-              occ_func_0_0(24) +
-          occ_func_0_0(7) * occ_func_0_1(0) * occ_func_0_1(5) *
-              occ_func_0_0(22) +
-          occ_func_0_0(0) * occ_func_0_1(6) * occ_func_0_1(4) *
-              occ_func_0_0(80) +
-          occ_func_0_0(85) * occ_func_0_1(37) * occ_func_0_1(32) *
-              occ_func_0_0(0) +
-          occ_func_0_0(12) * occ_func_0_1(10) * occ_func_0_1(0) *
-              occ_func_0_0(29) +
-          occ_func_0_0(9) * occ_func_0_1(0) * occ_func_0_1(3) *
-              occ_func_0_0(24) +
-          occ_func_0_0(0) * occ_func_0_1(4) * occ_func_0_1(1) *
-              occ_func_0_0(80) +
-          occ_func_0_0(84) * occ_func_0_1(38) * occ_func_0_1(31) *
-              occ_func_0_0(0) +
-          occ_func_0_0(11) * occ_func_0_1(12) * occ_func_0_1(0) *
-              occ_func_0_0(30) +
-          occ_func_0_0(0) * occ_func_0_1(7) * occ_func_0_1(2) *
-              occ_func_0_0(81) +
-          occ_func_0_0(6) * occ_func_0_1(0) * occ_func_0_1(1) *
-              occ_func_0_0(23) +
-          occ_func_0_0(10) * occ_func_0_1(11) * occ_func_0_1(0) *
-              occ_func_0_0(33) +
-          occ_func_0_0(83) * occ_func_0_1(34) * occ_func_0_1(28) *
-              occ_func_0_0(0) +
-          occ_func_0_0(0) * occ_func_0_1(8) * occ_func_0_1(3) *
-              occ_func_0_0(82) +
-          occ_func_0_0(5) * occ_func_0_1(0) * occ_func_0_1(2) *
-              occ_func_0_0(27) +
-          occ_func_0_0(0) * occ_func_0_1(11) * occ_func_0_1(12) *
-              occ_func_0_0(86) +
-          occ_func_0_0(2) * occ_func_0_1(0) * occ_func_0_1(7) *
-              occ_func_0_0(41) +
-          occ_func_0_0(1) * occ_func_0_1(6) * occ_func_0_1(0) *
-              occ_func_0_0(40) +
-          occ_func_0_0(79) * occ_func_0_1(20) * occ_func_0_1(21) *
-              occ_func_0_0(0) +
-          occ_func_0_0(86) * occ_func_0_1(42) * occ_func_0_1(40) *
-              occ_func_0_0(0) +
-          occ_func_0_0(12) * occ_func_0_1(9) * occ_func_0_1(0) *
-              occ_func_0_0(21) +
-          occ_func_0_0(10) * occ_func_0_1(0) * occ_func_0_1(4) *
-              occ_func_0_0(19) +
-          occ_func_0_0(0) * occ_func_0_1(3) * occ_func_0_1(1) *
-              occ_func_0_0(79) +
-          occ_func_0_0(8) * occ_func_0_1(11) * occ_func_0_1(0) *
-              occ_func_0_0(34) +
-          occ_func_0_0(0) * occ_func_0_1(10) * occ_func_0_1(5) *
-              occ_func_0_0(83) +
-          occ_func_0_0(82) * occ_func_0_1(33) * occ_func_0_1(27) *
-              occ_func_0_0(0) +
-          occ_func_0_0(3) * occ_func_0_1(0) * occ_func_0_1(2) *
-              occ_func_0_0(28) +
-          occ_func_0_0(7) * occ_func_0_1(0) * occ_func_0_1(9) *
-              occ_func_0_0(38) +
-          occ_func_0_0(0) * occ_func_0_1(6) * occ_func_0_1(8) *
-              occ_func_0_0(84) +
-          occ_func_0_0(5) * occ_func_0_1(4) * occ_func_0_1(0) *
-              occ_func_0_0(36) +
-          occ_func_0_0(81) * occ_func_0_1(23) * occ_func_0_1(25) *
-              occ_func_0_0(0)) /
-         24.;
-}
-template <typename Scalar>
-Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_13_5_at_0() const {
-  return (occ_func_0_1(0) * occ_func_0_1(7) * occ_func_0_1(12) *
-              occ_func_0_0(85) +
-          occ_func_0_1(6) * occ_func_0_1(0) * occ_func_0_1(11) *
-              occ_func_0_0(39) +
-          occ_func_0_1(1) * occ_func_0_1(2) * occ_func_0_1(0) *
-              occ_func_0_0(32) +
-          occ_func_0_1(80) * occ_func_0_1(22) * occ_func_0_1(29) *
-              occ_func_0_0(0) +
-          occ_func_0_1(83) * occ_func_0_1(35) * occ_func_0_1(34) *
-              occ_func_0_0(0) +
-          occ_func_0_1(0) * occ_func_0_1(9) * occ_func_0_1(8) *
-              occ_func_0_0(82) +
-          occ_func_0_1(5) * occ_func_0_1(7) * occ_func_0_1(0) *
-              occ_func_0_0(27) +
-          occ_func_0_1(4) * occ_func_0_1(0) * occ_func_0_1(6) *
-              occ_func_0_0(26) +
-          occ_func_0_1(84) * occ_func_0_1(36) * occ_func_0_1(38) *
-              occ_func_0_0(0) +
-          occ_func_0_1(8) * occ_func_0_1(0) * occ_func_0_1(9) *
-              occ_func_0_0(25) +
-          occ_func_0_1(0) * occ_func_0_1(5) * occ_func_0_1(7) *
-              occ_func_0_0(81) +
-          occ_func_0_1(6) * occ_func_0_1(4) * occ_func_0_1(0) *
-              occ_func_0_0(23) +
-          occ_func_0_1(0) * occ_func_0_1(10) * occ_func_0_1(11) *
-              occ_func_0_0(86) +
-          occ_func_0_1(3) * occ_func_0_1(0) * occ_func_0_1(8) *
-              occ_func_0_0(42) +
-          occ_func_0_1(2) * occ_func_0_1(5) * occ_func_0_1(0) *
-              occ_func_0_0(41) +
-          occ_func_0_1(79) * occ_func_0_1(19) * occ_func_0_1(20) *
-              occ_func_0_0(0) +
-          occ_func_0_1(84) * occ_func_0_1(31) * occ_func_0_1(36) *
-              occ_func_0_0(0) +
-          occ_func_0_1(11) * occ_func_0_1(0) * occ_func_0_1(10) *
-              occ_func_0_0(30) +
-          occ_func_0_1(8) * occ_func_0_1(3) * occ_func_0_1(0) *
-              occ_func_0_0(25) +
-          occ_func_0_1(0) * occ_func_0_1(2) * occ_func_0_1(5) *
-              occ_func_0_0(81) +
-          occ_func_0_1(0) * occ_func_0_1(12) * occ_func_0_1(10) *
-              occ_func_0_0(86) +
-          occ_func_0_1(3) * occ_func_0_1(9) * occ_func_0_1(0) *
-              occ_func_0_0(42) +
-          occ_func_0_1(1) * occ_func_0_1(0) * occ_func_0_1(4) *
-              occ_func_0_0(40) +
-          occ_func_0_1(79) * occ_func_0_1(21) * occ_func_0_1(19) *
-              occ_func_0_0(0) +
-          occ_func_0_1(10) * occ_func_0_1(0) * occ_func_0_1(12) *
-              occ_func_0_0(33) +
-          occ_func_0_1(83) * occ_func_0_1(28) * occ_func_0_1(35) *
-              occ_func_0_0(0) +
-          occ_func_0_1(0) * occ_func_0_1(3) * occ_func_0_1(9) *
-              occ_func_0_0(82) +
-          occ_func_0_1(4) * occ_func_0_1(1) * occ_func_0_1(0) *
-              occ_func_0_0(26) +
-          occ_func_0_1(0) * occ_func_0_1(8) * occ_func_0_1(11) *
-              occ_func_0_0(84) +
-          occ_func_0_1(5) * occ_func_0_1(0) * occ_func_0_1(10) *
-              occ_func_0_0(36) +
-          occ_func_0_1(2) * occ_func_0_1(3) * occ_func_0_1(0) *
-              occ_func_0_0(31) +
-          occ_func_0_1(81) * occ_func_0_1(25) * occ_func_0_1(30) *
-              occ_func_0_0(0) +
-          occ_func_0_1(86) * occ_func_0_1(41) * occ_func_0_1(42) *
-              occ_func_0_0(0) +
-          occ_func_0_1(11) * occ_func_0_1(0) * occ_func_0_1(8) *
-              occ_func_0_0(20) +
-          occ_func_0_1(10) * occ_func_0_1(5) * occ_func_0_1(0) *
-              occ_func_0_0(19) +
-          occ_func_0_1(0) * occ_func_0_1(2) * occ_func_0_1(3) *
-              occ_func_0_0(79) +
-          occ_func_0_1(7) * occ_func_0_1(12) * occ_func_0_1(0) *
-              occ_func_0_0(38) +
-          occ_func_0_1(0) * occ_func_0_1(11) * occ_func_0_1(6) *
-              occ_func_0_0(84) +
-          occ_func_0_1(2) * occ_func_0_1(0) * occ_func_0_1(1) *
-              occ_func_0_0(31) +
-          occ_func_0_1(81) * occ_func_0_1(30) * occ_func_0_1(23) *
-              occ_func_0_0(0) +
-          occ_func_0_1(0) * occ_func_0_1(12) * occ_func_0_1(9) *
-              occ_func_0_0(85) +
-          occ_func_0_1(4) * occ_func_0_1(10) * occ_func_0_1(0) *
-              occ_func_0_0(37) +
-          occ_func_0_1(1) * occ_func_0_1(0) * occ_func_0_1(3) *
-              occ_func_0_0(32) +
-          occ_func_0_1(80) * occ_func_0_1(29) * occ_func_0_1(24) *
-              occ_func_0_0(0) +
-          occ_func_0_1(9) * occ_func_0_1(0) * occ_func_0_1(12) *
-              occ_func_0_0(35) +
-          occ_func_0_1(0) * occ_func_0_1(4) * occ_func_0_1(10) *
-              occ_func_0_0(83) +
-          occ_func_0_1(82) * occ_func_0_1(26) * occ_func_0_1(33) *
-              occ_func_0_0(0) +
-          occ_func_0_1(3) * occ_func_0_1(1) * occ_func_0_1(0) *
-              occ_func_0_0(28) +
-          occ_func_0_1(9) * occ_func_0_1(7) * occ_func_0_1(0) *
-              occ_func_0_0(35) +
-          occ_func_0_1(8) * occ_func_0_1(0) * occ_func_0_1(6) *
-              occ_func_0_0(34) +
-          occ_func_0_1(0) * occ_func_0_1(5) * occ_func_0_1(4) *
-              occ_func_0_0(83) +
-          occ_func_0_1(82) * occ_func_0_1(27) * occ_func_0_1(26) *
-              occ_func_0_0(0) +
-          occ_func_0_1(86) * occ_func_0_1(40) * occ_func_0_1(41) *
-              occ_func_0_0(0) +
-          occ_func_0_1(12) * occ_func_0_1(0) * occ_func_0_1(7) *
-              occ_func_0_0(21) +
-          occ_func_0_1(11) * occ_func_0_1(6) * occ_func_0_1(0) *
-              occ_func_0_0(20) +
-          occ_func_0_1(0) * occ_func_0_1(1) * occ_func_0_1(2) *
-              occ_func_0_0(79) +
-          occ_func_0_1(0) * occ_func_0_1(9) * occ_func_0_1(7) *
-              occ_func_0_0(85) +
-          occ_func_0_1(6) * occ_func_0_1(8) * occ_func_0_1(0) *
-              occ_func_0_0(39) +
-          occ_func_0_1(4) * occ_func_0_1(0) * occ_func_0_1(5) *
-              occ_func_0_0(37) +
-          occ_func_0_1(80) * occ_func_0_1(24) * occ_func_0_1(22) *
-              occ_func_0_0(0) +
-          occ_func_0_1(85) * occ_func_0_1(32) * occ_func_0_1(39) *
-              occ_func_0_0(0) +
-          occ_func_0_1(12) * occ_func_0_1(0) * occ_func_0_1(11) *
-              occ_func_0_0(29) +
-          occ_func_0_1(7) * occ_func_0_1(2) * occ_func_0_1(0) *
-              occ_func_0_0(22) +
-          occ_func_0_1(0) * occ_func_0_1(1) * occ_func_0_1(6) *
-              occ_func_0_0(80) +
-          occ_func_0_1(85) * occ_func_0_1(39) * occ_func_0_1(37) *
-              occ_func_0_0(0) +
-          occ_func_0_1(9) * occ_func_0_1(8) * occ_func_0_1(0) *
-              occ_func_0_0(24) +
-          occ_func_0_1(7) * occ_func_0_1(0) * occ_func_0_1(5) *
-              occ_func_0_0(22) +
-          occ_func_0_1(0) * occ_func_0_1(6) * occ_func_0_1(4) *
-              occ_func_0_0(80) +
-          occ_func_0_1(85) * occ_func_0_1(37) * occ_func_0_1(32) *
-              occ_func_0_0(0) +
-          occ_func_0_1(12) * occ_func_0_1(10) * occ_func_0_1(0) *
-              occ_func_0_0(29) +
-          occ_func_0_1(9) * occ_func_0_1(0) * occ_func_0_1(3) *
-              occ_func_0_0(24) +
-          occ_func_0_1(0) * occ_func_0_1(4) * occ_func_0_1(1) *
-              occ_func_0_0(80) +
-          occ_func_0_1(84) * occ_func_0_1(38) * occ_func_0_1(31) *
-              occ_func_0_0(0) +
-          occ_func_0_1(11) * occ_func_0_1(12) * occ_func_0_1(0) *
-              occ_func_0_0(30) +
-          occ_func_0_1(0) * occ_func_0_1(7) * occ_func_0_1(2) *
-              occ_func_0_0(81) +
-          occ_func_0_1(6) * occ_func_0_1(0) * occ_func_0_1(1) *
-              occ_func_0_0(23) +
-          occ_func_0_1(10) * occ_func_0_1(11) * occ_func_0_1(0) *
-              occ_func_0_0(33) +
-          occ_func_0_1(83) * occ_func_0_1(34) * occ_func_0_1(28) *
-              occ_func_0_0(0) +
-          occ_func_0_1(0) * occ_func_0_1(8) * occ_func_0_1(3) *
-              occ_func_0_0(82) +
-          occ_func_0_1(5) * occ_func_0_1(0) * occ_func_0_1(2) *
-              occ_func_0_0(27) +
-          occ_func_0_1(0) * occ_func_0_1(11) * occ_func_0_1(12) *
-              occ_func_0_0(86) +
-          occ_func_0_1(2) * occ_func_0_1(0) * occ_func_0_1(7) *
-              occ_func_0_0(41) +
-          occ_func_0_1(1) * occ_func_0_1(6) * occ_func_0_1(0) *
-              occ_func_0_0(40) +
-          occ_func_0_1(79) * occ_func_0_1(20) * occ_func_0_1(21) *
-              occ_func_0_0(0) +
-          occ_func_0_1(86) * occ_func_0_1(42) * occ_func_0_1(40) *
-              occ_func_0_0(0) +
-          occ_func_0_1(12) * occ_func_0_1(9) * occ_func_0_1(0) *
-              occ_func_0_0(21) +
-          occ_func_0_1(10) * occ_func_0_1(0) * occ_func_0_1(4) *
-              occ_func_0_0(19) +
-          occ_func_0_1(0) * occ_func_0_1(3) * occ_func_0_1(1) *
-              occ_func_0_0(79) +
-          occ_func_0_1(8) * occ_func_0_1(11) * occ_func_0_1(0) *
-              occ_func_0_0(34) +
-          occ_func_0_1(0) * occ_func_0_1(10) * occ_func_0_1(5) *
-              occ_func_0_0(83) +
-          occ_func_0_1(82) * occ_func_0_1(33) * occ_func_0_1(27) *
-              occ_func_0_0(0) +
-          occ_func_0_1(3) * occ_func_0_1(0) * occ_func_0_1(2) *
-              occ_func_0_0(28) +
-          occ_func_0_1(7) * occ_func_0_1(0) * occ_func_0_1(9) *
-              occ_func_0_0(38) +
-          occ_func_0_1(0) * occ_func_0_1(6) * occ_func_0_1(8) *
-              occ_func_0_0(84) +
-          occ_func_0_1(5) * occ_func_0_1(4) * occ_func_0_1(0) *
-              occ_func_0_0(36) +
-          occ_func_0_1(81) * occ_func_0_1(23) * occ_func_0_1(25) *
-              occ_func_0_0(0)) /
-         24.;
-}
-template <typename Scalar>
-Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_13_6_at_0() const {
-  return (occ_func_0_0(0) * occ_func_0_0(7) * occ_func_0_0(12) *
-              occ_func_0_1(85) +
-          occ_func_0_0(6) * occ_func_0_0(0) * occ_func_0_0(11) *
-              occ_func_0_1(39) +
-          occ_func_0_0(1) * occ_func_0_0(2) * occ_func_0_0(0) *
-              occ_func_0_1(32) +
-          occ_func_0_0(80) * occ_func_0_0(22) * occ_func_0_0(29) *
-              occ_func_0_1(0) +
           occ_func_0_0(83) * occ_func_0_0(35) * occ_func_0_0(34) *
               occ_func_0_1(0) +
           occ_func_0_0(0) * occ_func_0_0(9) * occ_func_0_0(8) *
@@ -10329,14 +9225,14 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_13_6_at_0() const {
               occ_func_0_1(81) +
           occ_func_0_0(6) * occ_func_0_0(4) * occ_func_0_0(0) *
               occ_func_0_1(23) +
-          occ_func_0_0(0) * occ_func_0_0(10) * occ_func_0_0(11) *
-              occ_func_0_1(86) +
-          occ_func_0_0(3) * occ_func_0_0(0) * occ_func_0_0(8) *
-              occ_func_0_1(42) +
-          occ_func_0_0(2) * occ_func_0_0(5) * occ_func_0_0(0) *
-              occ_func_0_1(41) +
-          occ_func_0_0(79) * occ_func_0_0(19) * occ_func_0_0(20) *
-              occ_func_0_1(0) +
+          occ_func_0_1(0) * occ_func_0_0(10) * occ_func_0_0(11) *
+              occ_func_0_0(86) +
+          occ_func_0_1(3) * occ_func_0_0(0) * occ_func_0_0(8) *
+              occ_func_0_0(42) +
+          occ_func_0_1(2) * occ_func_0_0(5) * occ_func_0_0(0) *
+              occ_func_0_0(41) +
+          occ_func_0_1(79) * occ_func_0_0(19) * occ_func_0_0(20) *
+              occ_func_0_0(0) +
           occ_func_0_0(84) * occ_func_0_0(31) * occ_func_0_0(36) *
               occ_func_0_1(0) +
           occ_func_0_0(11) * occ_func_0_0(0) * occ_func_0_0(10) *
@@ -10345,30 +9241,30 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_13_6_at_0() const {
               occ_func_0_1(25) +
           occ_func_0_0(0) * occ_func_0_0(2) * occ_func_0_0(5) *
               occ_func_0_1(81) +
-          occ_func_0_0(0) * occ_func_0_0(12) * occ_func_0_0(10) *
-              occ_func_0_1(86) +
-          occ_func_0_0(3) * occ_func_0_0(9) * occ_func_0_0(0) *
-              occ_func_0_1(42) +
-          occ_func_0_0(1) * occ_func_0_0(0) * occ_func_0_0(4) *
-              occ_func_0_1(40) +
-          occ_func_0_0(79) * occ_func_0_0(21) * occ_func_0_0(19) *
-              occ_func_0_1(0) +
-          occ_func_0_0(10) * occ_func_0_0(0) * occ_func_0_0(12) *
-              occ_func_0_1(33) +
-          occ_func_0_0(83) * occ_func_0_0(28) * occ_func_0_0(35) *
-              occ_func_0_1(0) +
-          occ_func_0_0(0) * occ_func_0_0(3) * occ_func_0_0(9) *
-              occ_func_0_1(82) +
-          occ_func_0_0(4) * occ_func_0_0(1) * occ_func_0_0(0) *
-              occ_func_0_1(26) +
-          occ_func_0_0(0) * occ_func_0_0(8) * occ_func_0_0(11) *
-              occ_func_0_1(84) +
-          occ_func_0_0(5) * occ_func_0_0(0) * occ_func_0_0(10) *
-              occ_func_0_1(36) +
-          occ_func_0_0(2) * occ_func_0_0(3) * occ_func_0_0(0) *
-              occ_func_0_1(31) +
-          occ_func_0_0(81) * occ_func_0_0(25) * occ_func_0_0(30) *
-              occ_func_0_1(0) +
+          occ_func_0_1(0) * occ_func_0_0(12) * occ_func_0_0(10) *
+              occ_func_0_0(86) +
+          occ_func_0_1(3) * occ_func_0_0(9) * occ_func_0_0(0) *
+              occ_func_0_0(42) +
+          occ_func_0_1(1) * occ_func_0_0(0) * occ_func_0_0(4) *
+              occ_func_0_0(40) +
+          occ_func_0_1(79) * occ_func_0_0(21) * occ_func_0_0(19) *
+              occ_func_0_0(0) +
+          occ_func_0_0(10) * occ_func_0_1(0) * occ_func_0_0(12) *
+              occ_func_0_0(33) +
+          occ_func_0_0(83) * occ_func_0_1(28) * occ_func_0_0(35) *
+              occ_func_0_0(0) +
+          occ_func_0_0(0) * occ_func_0_1(3) * occ_func_0_0(9) *
+              occ_func_0_0(82) +
+          occ_func_0_0(4) * occ_func_0_1(1) * occ_func_0_0(0) *
+              occ_func_0_0(26) +
+          occ_func_0_1(0) * occ_func_0_0(8) * occ_func_0_0(11) *
+              occ_func_0_0(84) +
+          occ_func_0_1(5) * occ_func_0_0(0) * occ_func_0_0(10) *
+              occ_func_0_0(36) +
+          occ_func_0_1(2) * occ_func_0_0(3) * occ_func_0_0(0) *
+              occ_func_0_0(31) +
+          occ_func_0_1(81) * occ_func_0_0(25) * occ_func_0_0(30) *
+              occ_func_0_0(0) +
           occ_func_0_0(86) * occ_func_0_0(41) * occ_func_0_0(42) *
               occ_func_0_1(0) +
           occ_func_0_0(11) * occ_func_0_0(0) * occ_func_0_0(8) *
@@ -10377,38 +9273,38 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_13_6_at_0() const {
               occ_func_0_1(19) +
           occ_func_0_0(0) * occ_func_0_0(2) * occ_func_0_0(3) *
               occ_func_0_1(79) +
-          occ_func_0_0(7) * occ_func_0_0(12) * occ_func_0_0(0) *
-              occ_func_0_1(38) +
-          occ_func_0_0(0) * occ_func_0_0(11) * occ_func_0_0(6) *
-              occ_func_0_1(84) +
-          occ_func_0_0(2) * occ_func_0_0(0) * occ_func_0_0(1) *
-              occ_func_0_1(31) +
-          occ_func_0_0(81) * occ_func_0_0(30) * occ_func_0_0(23) *
-              occ_func_0_1(0) +
-          occ_func_0_0(0) * occ_func_0_0(12) * occ_func_0_0(9) *
-              occ_func_0_1(85) +
-          occ_func_0_0(4) * occ_func_0_0(10) * occ_func_0_0(0) *
-              occ_func_0_1(37) +
-          occ_func_0_0(1) * occ_func_0_0(0) * occ_func_0_0(3) *
-              occ_func_0_1(32) +
-          occ_func_0_0(80) * occ_func_0_0(29) * occ_func_0_0(24) *
-              occ_func_0_1(0) +
-          occ_func_0_0(9) * occ_func_0_0(0) * occ_func_0_0(12) *
-              occ_func_0_1(35) +
-          occ_func_0_0(0) * occ_func_0_0(4) * occ_func_0_0(10) *
-              occ_func_0_1(83) +
-          occ_func_0_0(82) * occ_func_0_0(26) * occ_func_0_0(33) *
-              occ_func_0_1(0) +
-          occ_func_0_0(3) * occ_func_0_0(1) * occ_func_0_0(0) *
-              occ_func_0_1(28) +
-          occ_func_0_0(9) * occ_func_0_0(7) * occ_func_0_0(0) *
-              occ_func_0_1(35) +
-          occ_func_0_0(8) * occ_func_0_0(0) * occ_func_0_0(6) *
-              occ_func_0_1(34) +
-          occ_func_0_0(0) * occ_func_0_0(5) * occ_func_0_0(4) *
-              occ_func_0_1(83) +
-          occ_func_0_0(82) * occ_func_0_0(27) * occ_func_0_0(26) *
-              occ_func_0_1(0) +
+          occ_func_0_0(7) * occ_func_0_0(12) * occ_func_0_1(0) *
+              occ_func_0_0(38) +
+          occ_func_0_0(0) * occ_func_0_0(11) * occ_func_0_1(6) *
+              occ_func_0_0(84) +
+          occ_func_0_0(2) * occ_func_0_0(0) * occ_func_0_1(1) *
+              occ_func_0_0(31) +
+          occ_func_0_0(81) * occ_func_0_0(30) * occ_func_0_1(23) *
+              occ_func_0_0(0) +
+          occ_func_0_1(0) * occ_func_0_0(12) * occ_func_0_0(9) *
+              occ_func_0_0(85) +
+          occ_func_0_1(4) * occ_func_0_0(10) * occ_func_0_0(0) *
+              occ_func_0_0(37) +
+          occ_func_0_1(1) * occ_func_0_0(0) * occ_func_0_0(3) *
+              occ_func_0_0(32) +
+          occ_func_0_1(80) * occ_func_0_0(29) * occ_func_0_0(24) *
+              occ_func_0_0(0) +
+          occ_func_0_0(9) * occ_func_0_1(0) * occ_func_0_0(12) *
+              occ_func_0_0(35) +
+          occ_func_0_0(0) * occ_func_0_1(4) * occ_func_0_0(10) *
+              occ_func_0_0(83) +
+          occ_func_0_0(82) * occ_func_0_1(26) * occ_func_0_0(33) *
+              occ_func_0_0(0) +
+          occ_func_0_0(3) * occ_func_0_1(1) * occ_func_0_0(0) *
+              occ_func_0_0(28) +
+          occ_func_0_0(9) * occ_func_0_0(7) * occ_func_0_1(0) *
+              occ_func_0_0(35) +
+          occ_func_0_0(8) * occ_func_0_0(0) * occ_func_0_1(6) *
+              occ_func_0_0(34) +
+          occ_func_0_0(0) * occ_func_0_0(5) * occ_func_0_1(4) *
+              occ_func_0_0(83) +
+          occ_func_0_0(82) * occ_func_0_0(27) * occ_func_0_1(26) *
+              occ_func_0_0(0) +
           occ_func_0_0(86) * occ_func_0_0(40) * occ_func_0_0(41) *
               occ_func_0_1(0) +
           occ_func_0_0(12) * occ_func_0_0(0) * occ_func_0_0(7) *
@@ -10417,14 +9313,14 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_13_6_at_0() const {
               occ_func_0_1(20) +
           occ_func_0_0(0) * occ_func_0_0(1) * occ_func_0_0(2) *
               occ_func_0_1(79) +
-          occ_func_0_0(0) * occ_func_0_0(9) * occ_func_0_0(7) *
-              occ_func_0_1(85) +
-          occ_func_0_0(6) * occ_func_0_0(8) * occ_func_0_0(0) *
-              occ_func_0_1(39) +
-          occ_func_0_0(4) * occ_func_0_0(0) * occ_func_0_0(5) *
-              occ_func_0_1(37) +
-          occ_func_0_0(80) * occ_func_0_0(24) * occ_func_0_0(22) *
-              occ_func_0_1(0) +
+          occ_func_0_1(0) * occ_func_0_0(9) * occ_func_0_0(7) *
+              occ_func_0_0(85) +
+          occ_func_0_1(6) * occ_func_0_0(8) * occ_func_0_0(0) *
+              occ_func_0_0(39) +
+          occ_func_0_1(4) * occ_func_0_0(0) * occ_func_0_0(5) *
+              occ_func_0_0(37) +
+          occ_func_0_1(80) * occ_func_0_0(24) * occ_func_0_0(22) *
+              occ_func_0_0(0) +
           occ_func_0_0(85) * occ_func_0_0(32) * occ_func_0_0(39) *
               occ_func_0_1(0) +
           occ_func_0_0(12) * occ_func_0_0(0) * occ_func_0_0(11) *
@@ -10457,22 +9353,22 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_13_6_at_0() const {
               occ_func_0_1(81) +
           occ_func_0_0(6) * occ_func_0_0(0) * occ_func_0_0(1) *
               occ_func_0_1(23) +
-          occ_func_0_0(10) * occ_func_0_0(11) * occ_func_0_0(0) *
-              occ_func_0_1(33) +
-          occ_func_0_0(83) * occ_func_0_0(34) * occ_func_0_0(28) *
-              occ_func_0_1(0) +
-          occ_func_0_0(0) * occ_func_0_0(8) * occ_func_0_0(3) *
-              occ_func_0_1(82) +
-          occ_func_0_0(5) * occ_func_0_0(0) * occ_func_0_0(2) *
-              occ_func_0_1(27) +
-          occ_func_0_0(0) * occ_func_0_0(11) * occ_func_0_0(12) *
-              occ_func_0_1(86) +
-          occ_func_0_0(2) * occ_func_0_0(0) * occ_func_0_0(7) *
-              occ_func_0_1(41) +
-          occ_func_0_0(1) * occ_func_0_0(6) * occ_func_0_0(0) *
-              occ_func_0_1(40) +
-          occ_func_0_0(79) * occ_func_0_0(20) * occ_func_0_0(21) *
-              occ_func_0_1(0) +
+          occ_func_0_0(10) * occ_func_0_0(11) * occ_func_0_1(0) *
+              occ_func_0_0(33) +
+          occ_func_0_0(83) * occ_func_0_0(34) * occ_func_0_1(28) *
+              occ_func_0_0(0) +
+          occ_func_0_0(0) * occ_func_0_0(8) * occ_func_0_1(3) *
+              occ_func_0_0(82) +
+          occ_func_0_0(5) * occ_func_0_0(0) * occ_func_0_1(2) *
+              occ_func_0_0(27) +
+          occ_func_0_1(0) * occ_func_0_0(11) * occ_func_0_0(12) *
+              occ_func_0_0(86) +
+          occ_func_0_1(2) * occ_func_0_0(0) * occ_func_0_0(7) *
+              occ_func_0_0(41) +
+          occ_func_0_1(1) * occ_func_0_0(6) * occ_func_0_0(0) *
+              occ_func_0_0(40) +
+          occ_func_0_1(79) * occ_func_0_0(20) * occ_func_0_0(21) *
+              occ_func_0_0(0) +
           occ_func_0_0(86) * occ_func_0_0(42) * occ_func_0_0(40) *
               occ_func_0_1(0) +
           occ_func_0_0(12) * occ_func_0_0(9) * occ_func_0_0(0) *
@@ -10481,286 +9377,478 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_13_6_at_0() const {
               occ_func_0_1(19) +
           occ_func_0_0(0) * occ_func_0_0(3) * occ_func_0_0(1) *
               occ_func_0_1(79) +
-          occ_func_0_0(8) * occ_func_0_0(11) * occ_func_0_0(0) *
-              occ_func_0_1(34) +
-          occ_func_0_0(0) * occ_func_0_0(10) * occ_func_0_0(5) *
-              occ_func_0_1(83) +
-          occ_func_0_0(82) * occ_func_0_0(33) * occ_func_0_0(27) *
-              occ_func_0_1(0) +
-          occ_func_0_0(3) * occ_func_0_0(0) * occ_func_0_0(2) *
-              occ_func_0_1(28) +
-          occ_func_0_0(7) * occ_func_0_0(0) * occ_func_0_0(9) *
-              occ_func_0_1(38) +
-          occ_func_0_0(0) * occ_func_0_0(6) * occ_func_0_0(8) *
-              occ_func_0_1(84) +
-          occ_func_0_0(5) * occ_func_0_0(4) * occ_func_0_0(0) *
-              occ_func_0_1(36) +
-          occ_func_0_0(81) * occ_func_0_0(23) * occ_func_0_0(25) *
-              occ_func_0_1(0)) /
+          occ_func_0_0(8) * occ_func_0_0(11) * occ_func_0_1(0) *
+              occ_func_0_0(34) +
+          occ_func_0_0(0) * occ_func_0_0(10) * occ_func_0_1(5) *
+              occ_func_0_0(83) +
+          occ_func_0_0(82) * occ_func_0_0(33) * occ_func_0_1(27) *
+              occ_func_0_0(0) +
+          occ_func_0_0(3) * occ_func_0_0(0) * occ_func_0_1(2) *
+              occ_func_0_0(28) +
+          occ_func_0_0(7) * occ_func_0_1(0) * occ_func_0_0(9) *
+              occ_func_0_0(38) +
+          occ_func_0_0(0) * occ_func_0_1(6) * occ_func_0_0(8) *
+              occ_func_0_0(84) +
+          occ_func_0_0(5) * occ_func_0_1(4) * occ_func_0_0(0) *
+              occ_func_0_0(36) +
+          occ_func_0_0(81) * occ_func_0_1(23) * occ_func_0_0(25) *
+              occ_func_0_0(0)) /
          24.;
 }
 template <typename Scalar>
-Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_13_7_at_0() const {
-  return (occ_func_0_1(0) * occ_func_0_0(7) * occ_func_0_0(12) *
-              occ_func_0_1(85) +
-          occ_func_0_1(6) * occ_func_0_0(0) * occ_func_0_0(11) *
-              occ_func_0_1(39) +
-          occ_func_0_1(1) * occ_func_0_0(2) * occ_func_0_0(0) *
-              occ_func_0_1(32) +
-          occ_func_0_1(80) * occ_func_0_0(22) * occ_func_0_0(29) *
-              occ_func_0_1(0) +
-          occ_func_0_1(83) * occ_func_0_0(35) * occ_func_0_0(34) *
-              occ_func_0_1(0) +
-          occ_func_0_1(0) * occ_func_0_0(9) * occ_func_0_0(8) *
-              occ_func_0_1(82) +
-          occ_func_0_1(5) * occ_func_0_0(7) * occ_func_0_0(0) *
-              occ_func_0_1(27) +
-          occ_func_0_1(4) * occ_func_0_0(0) * occ_func_0_0(6) *
-              occ_func_0_1(26) +
-          occ_func_0_1(84) * occ_func_0_0(36) * occ_func_0_0(38) *
-              occ_func_0_1(0) +
-          occ_func_0_1(8) * occ_func_0_0(0) * occ_func_0_0(9) *
-              occ_func_0_1(25) +
-          occ_func_0_1(0) * occ_func_0_0(5) * occ_func_0_0(7) *
-              occ_func_0_1(81) +
-          occ_func_0_1(6) * occ_func_0_0(4) * occ_func_0_0(0) *
-              occ_func_0_1(23) +
-          occ_func_0_1(0) * occ_func_0_0(10) * occ_func_0_0(11) *
-              occ_func_0_1(86) +
-          occ_func_0_1(3) * occ_func_0_0(0) * occ_func_0_0(8) *
-              occ_func_0_1(42) +
-          occ_func_0_1(2) * occ_func_0_0(5) * occ_func_0_0(0) *
-              occ_func_0_1(41) +
-          occ_func_0_1(79) * occ_func_0_0(19) * occ_func_0_0(20) *
-              occ_func_0_1(0) +
-          occ_func_0_1(84) * occ_func_0_0(31) * occ_func_0_0(36) *
-              occ_func_0_1(0) +
-          occ_func_0_1(11) * occ_func_0_0(0) * occ_func_0_0(10) *
-              occ_func_0_1(30) +
-          occ_func_0_1(8) * occ_func_0_0(3) * occ_func_0_0(0) *
-              occ_func_0_1(25) +
-          occ_func_0_1(0) * occ_func_0_0(2) * occ_func_0_0(5) *
-              occ_func_0_1(81) +
-          occ_func_0_1(0) * occ_func_0_0(12) * occ_func_0_0(10) *
-              occ_func_0_1(86) +
-          occ_func_0_1(3) * occ_func_0_0(9) * occ_func_0_0(0) *
-              occ_func_0_1(42) +
-          occ_func_0_1(1) * occ_func_0_0(0) * occ_func_0_0(4) *
-              occ_func_0_1(40) +
-          occ_func_0_1(79) * occ_func_0_0(21) * occ_func_0_0(19) *
-              occ_func_0_1(0) +
-          occ_func_0_1(10) * occ_func_0_0(0) * occ_func_0_0(12) *
-              occ_func_0_1(33) +
-          occ_func_0_1(83) * occ_func_0_0(28) * occ_func_0_0(35) *
-              occ_func_0_1(0) +
-          occ_func_0_1(0) * occ_func_0_0(3) * occ_func_0_0(9) *
-              occ_func_0_1(82) +
-          occ_func_0_1(4) * occ_func_0_0(1) * occ_func_0_0(0) *
-              occ_func_0_1(26) +
-          occ_func_0_1(0) * occ_func_0_0(8) * occ_func_0_0(11) *
-              occ_func_0_1(84) +
-          occ_func_0_1(5) * occ_func_0_0(0) * occ_func_0_0(10) *
-              occ_func_0_1(36) +
-          occ_func_0_1(2) * occ_func_0_0(3) * occ_func_0_0(0) *
-              occ_func_0_1(31) +
-          occ_func_0_1(81) * occ_func_0_0(25) * occ_func_0_0(30) *
-              occ_func_0_1(0) +
-          occ_func_0_1(86) * occ_func_0_0(41) * occ_func_0_0(42) *
-              occ_func_0_1(0) +
-          occ_func_0_1(11) * occ_func_0_0(0) * occ_func_0_0(8) *
-              occ_func_0_1(20) +
-          occ_func_0_1(10) * occ_func_0_0(5) * occ_func_0_0(0) *
-              occ_func_0_1(19) +
-          occ_func_0_1(0) * occ_func_0_0(2) * occ_func_0_0(3) *
-              occ_func_0_1(79) +
-          occ_func_0_1(7) * occ_func_0_0(12) * occ_func_0_0(0) *
-              occ_func_0_1(38) +
-          occ_func_0_1(0) * occ_func_0_0(11) * occ_func_0_0(6) *
-              occ_func_0_1(84) +
-          occ_func_0_1(2) * occ_func_0_0(0) * occ_func_0_0(1) *
-              occ_func_0_1(31) +
-          occ_func_0_1(81) * occ_func_0_0(30) * occ_func_0_0(23) *
-              occ_func_0_1(0) +
-          occ_func_0_1(0) * occ_func_0_0(12) * occ_func_0_0(9) *
-              occ_func_0_1(85) +
-          occ_func_0_1(4) * occ_func_0_0(10) * occ_func_0_0(0) *
-              occ_func_0_1(37) +
-          occ_func_0_1(1) * occ_func_0_0(0) * occ_func_0_0(3) *
-              occ_func_0_1(32) +
-          occ_func_0_1(80) * occ_func_0_0(29) * occ_func_0_0(24) *
-              occ_func_0_1(0) +
-          occ_func_0_1(9) * occ_func_0_0(0) * occ_func_0_0(12) *
-              occ_func_0_1(35) +
-          occ_func_0_1(0) * occ_func_0_0(4) * occ_func_0_0(10) *
-              occ_func_0_1(83) +
-          occ_func_0_1(82) * occ_func_0_0(26) * occ_func_0_0(33) *
-              occ_func_0_1(0) +
-          occ_func_0_1(3) * occ_func_0_0(1) * occ_func_0_0(0) *
-              occ_func_0_1(28) +
-          occ_func_0_1(9) * occ_func_0_0(7) * occ_func_0_0(0) *
-              occ_func_0_1(35) +
-          occ_func_0_1(8) * occ_func_0_0(0) * occ_func_0_0(6) *
-              occ_func_0_1(34) +
-          occ_func_0_1(0) * occ_func_0_0(5) * occ_func_0_0(4) *
-              occ_func_0_1(83) +
-          occ_func_0_1(82) * occ_func_0_0(27) * occ_func_0_0(26) *
-              occ_func_0_1(0) +
-          occ_func_0_1(86) * occ_func_0_0(40) * occ_func_0_0(41) *
-              occ_func_0_1(0) +
-          occ_func_0_1(12) * occ_func_0_0(0) * occ_func_0_0(7) *
-              occ_func_0_1(21) +
-          occ_func_0_1(11) * occ_func_0_0(6) * occ_func_0_0(0) *
-              occ_func_0_1(20) +
-          occ_func_0_1(0) * occ_func_0_0(1) * occ_func_0_0(2) *
-              occ_func_0_1(79) +
-          occ_func_0_1(0) * occ_func_0_0(9) * occ_func_0_0(7) *
-              occ_func_0_1(85) +
-          occ_func_0_1(6) * occ_func_0_0(8) * occ_func_0_0(0) *
-              occ_func_0_1(39) +
-          occ_func_0_1(4) * occ_func_0_0(0) * occ_func_0_0(5) *
-              occ_func_0_1(37) +
-          occ_func_0_1(80) * occ_func_0_0(24) * occ_func_0_0(22) *
-              occ_func_0_1(0) +
-          occ_func_0_1(85) * occ_func_0_0(32) * occ_func_0_0(39) *
-              occ_func_0_1(0) +
-          occ_func_0_1(12) * occ_func_0_0(0) * occ_func_0_0(11) *
-              occ_func_0_1(29) +
-          occ_func_0_1(7) * occ_func_0_0(2) * occ_func_0_0(0) *
-              occ_func_0_1(22) +
-          occ_func_0_1(0) * occ_func_0_0(1) * occ_func_0_0(6) *
-              occ_func_0_1(80) +
-          occ_func_0_1(85) * occ_func_0_0(39) * occ_func_0_0(37) *
-              occ_func_0_1(0) +
-          occ_func_0_1(9) * occ_func_0_0(8) * occ_func_0_0(0) *
-              occ_func_0_1(24) +
-          occ_func_0_1(7) * occ_func_0_0(0) * occ_func_0_0(5) *
-              occ_func_0_1(22) +
-          occ_func_0_1(0) * occ_func_0_0(6) * occ_func_0_0(4) *
-              occ_func_0_1(80) +
-          occ_func_0_1(85) * occ_func_0_0(37) * occ_func_0_0(32) *
-              occ_func_0_1(0) +
-          occ_func_0_1(12) * occ_func_0_0(10) * occ_func_0_0(0) *
-              occ_func_0_1(29) +
-          occ_func_0_1(9) * occ_func_0_0(0) * occ_func_0_0(3) *
-              occ_func_0_1(24) +
-          occ_func_0_1(0) * occ_func_0_0(4) * occ_func_0_0(1) *
-              occ_func_0_1(80) +
-          occ_func_0_1(84) * occ_func_0_0(38) * occ_func_0_0(31) *
-              occ_func_0_1(0) +
-          occ_func_0_1(11) * occ_func_0_0(12) * occ_func_0_0(0) *
-              occ_func_0_1(30) +
-          occ_func_0_1(0) * occ_func_0_0(7) * occ_func_0_0(2) *
-              occ_func_0_1(81) +
-          occ_func_0_1(6) * occ_func_0_0(0) * occ_func_0_0(1) *
-              occ_func_0_1(23) +
-          occ_func_0_1(10) * occ_func_0_0(11) * occ_func_0_0(0) *
-              occ_func_0_1(33) +
-          occ_func_0_1(83) * occ_func_0_0(34) * occ_func_0_0(28) *
-              occ_func_0_1(0) +
-          occ_func_0_1(0) * occ_func_0_0(8) * occ_func_0_0(3) *
-              occ_func_0_1(82) +
-          occ_func_0_1(5) * occ_func_0_0(0) * occ_func_0_0(2) *
-              occ_func_0_1(27) +
-          occ_func_0_1(0) * occ_func_0_0(11) * occ_func_0_0(12) *
-              occ_func_0_1(86) +
-          occ_func_0_1(2) * occ_func_0_0(0) * occ_func_0_0(7) *
-              occ_func_0_1(41) +
-          occ_func_0_1(1) * occ_func_0_0(6) * occ_func_0_0(0) *
-              occ_func_0_1(40) +
-          occ_func_0_1(79) * occ_func_0_0(20) * occ_func_0_0(21) *
-              occ_func_0_1(0) +
-          occ_func_0_1(86) * occ_func_0_0(42) * occ_func_0_0(40) *
-              occ_func_0_1(0) +
-          occ_func_0_1(12) * occ_func_0_0(9) * occ_func_0_0(0) *
-              occ_func_0_1(21) +
-          occ_func_0_1(10) * occ_func_0_0(0) * occ_func_0_0(4) *
-              occ_func_0_1(19) +
-          occ_func_0_1(0) * occ_func_0_0(3) * occ_func_0_0(1) *
-              occ_func_0_1(79) +
-          occ_func_0_1(8) * occ_func_0_0(11) * occ_func_0_0(0) *
-              occ_func_0_1(34) +
-          occ_func_0_1(0) * occ_func_0_0(10) * occ_func_0_0(5) *
-              occ_func_0_1(83) +
-          occ_func_0_1(82) * occ_func_0_0(33) * occ_func_0_0(27) *
-              occ_func_0_1(0) +
-          occ_func_0_1(3) * occ_func_0_0(0) * occ_func_0_0(2) *
-              occ_func_0_1(28) +
-          occ_func_0_1(7) * occ_func_0_0(0) * occ_func_0_0(9) *
-              occ_func_0_1(38) +
-          occ_func_0_1(0) * occ_func_0_0(6) * occ_func_0_0(8) *
-              occ_func_0_1(84) +
-          occ_func_0_1(5) * occ_func_0_0(4) * occ_func_0_0(0) *
-              occ_func_0_1(36) +
-          occ_func_0_1(81) * occ_func_0_0(23) * occ_func_0_0(25) *
-              occ_func_0_1(0)) /
-         24.;
-}
-template <typename Scalar>
-Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_13_8_at_0() const {
+Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_13_2_at_0() const {
   return ((0.707107 * occ_func_0_0(0) * occ_func_0_0(7) * occ_func_0_1(12) *
-               occ_func_0_1(85) +
+               occ_func_0_0(85) +
            0.707107 * occ_func_0_0(0) * occ_func_0_1(7) * occ_func_0_0(12) *
-               occ_func_0_1(85)) +
+               occ_func_0_0(85)) +
           (0.707107 * occ_func_0_0(6) * occ_func_0_0(0) * occ_func_0_1(11) *
-               occ_func_0_1(39) +
+               occ_func_0_0(39) +
            0.707107 * occ_func_0_0(6) * occ_func_0_1(0) * occ_func_0_0(11) *
-               occ_func_0_1(39)) +
+               occ_func_0_0(39)) +
           (0.707107 * occ_func_0_0(1) * occ_func_0_0(2) * occ_func_0_1(0) *
-               occ_func_0_1(32) +
+               occ_func_0_0(32) +
            0.707107 * occ_func_0_0(1) * occ_func_0_1(2) * occ_func_0_0(0) *
-               occ_func_0_1(32)) +
+               occ_func_0_0(32)) +
           (0.707107 * occ_func_0_0(80) * occ_func_0_0(22) * occ_func_0_1(29) *
-               occ_func_0_1(0) +
+               occ_func_0_0(0) +
            0.707107 * occ_func_0_0(80) * occ_func_0_1(22) * occ_func_0_0(29) *
-               occ_func_0_1(0)) +
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(83) * occ_func_0_0(35) * occ_func_0_1(34) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(83) * occ_func_0_0(35) * occ_func_0_0(34) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_0(9) * occ_func_0_1(8) *
+               occ_func_0_0(82) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_0(9) * occ_func_0_0(8) *
+               occ_func_0_0(82)) +
+          (0.707107 * occ_func_0_0(5) * occ_func_0_0(7) * occ_func_0_1(0) *
+               occ_func_0_0(27) +
+           0.707107 * occ_func_0_1(5) * occ_func_0_0(7) * occ_func_0_0(0) *
+               occ_func_0_0(27)) +
+          (0.707107 * occ_func_0_0(4) * occ_func_0_0(0) * occ_func_0_1(6) *
+               occ_func_0_0(26) +
+           0.707107 * occ_func_0_1(4) * occ_func_0_0(0) * occ_func_0_0(6) *
+               occ_func_0_0(26)) +
+          (0.707107 * occ_func_0_0(84) * occ_func_0_1(36) * occ_func_0_0(38) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(84) * occ_func_0_0(36) * occ_func_0_0(38) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(8) * occ_func_0_1(0) * occ_func_0_0(9) *
+               occ_func_0_0(25) +
+           0.707107 * occ_func_0_1(8) * occ_func_0_0(0) * occ_func_0_0(9) *
+               occ_func_0_0(25)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_1(5) * occ_func_0_0(7) *
+               occ_func_0_0(81) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_0(5) * occ_func_0_0(7) *
+               occ_func_0_0(81)) +
+          (0.707107 * occ_func_0_0(6) * occ_func_0_1(4) * occ_func_0_0(0) *
+               occ_func_0_0(23) +
+           0.707107 * occ_func_0_1(6) * occ_func_0_0(4) * occ_func_0_0(0) *
+               occ_func_0_0(23)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_0(10) * occ_func_0_1(11) *
+               occ_func_0_0(86) +
+           0.707107 * occ_func_0_0(0) * occ_func_0_1(10) * occ_func_0_0(11) *
+               occ_func_0_0(86)) +
+          (0.707107 * occ_func_0_0(3) * occ_func_0_0(0) * occ_func_0_1(8) *
+               occ_func_0_0(42) +
+           0.707107 * occ_func_0_0(3) * occ_func_0_1(0) * occ_func_0_0(8) *
+               occ_func_0_0(42)) +
+          (0.707107 * occ_func_0_0(2) * occ_func_0_0(5) * occ_func_0_1(0) *
+               occ_func_0_0(41) +
+           0.707107 * occ_func_0_0(2) * occ_func_0_1(5) * occ_func_0_0(0) *
+               occ_func_0_0(41)) +
+          (0.707107 * occ_func_0_0(79) * occ_func_0_0(19) * occ_func_0_1(20) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_0(79) * occ_func_0_1(19) * occ_func_0_0(20) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(84) * occ_func_0_0(31) * occ_func_0_1(36) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_0(84) * occ_func_0_1(31) * occ_func_0_0(36) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(11) * occ_func_0_0(0) * occ_func_0_1(10) *
+               occ_func_0_0(30) +
+           0.707107 * occ_func_0_0(11) * occ_func_0_1(0) * occ_func_0_0(10) *
+               occ_func_0_0(30)) +
+          (0.707107 * occ_func_0_0(8) * occ_func_0_0(3) * occ_func_0_1(0) *
+               occ_func_0_0(25) +
+           0.707107 * occ_func_0_0(8) * occ_func_0_1(3) * occ_func_0_0(0) *
+               occ_func_0_0(25)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_0(2) * occ_func_0_1(5) *
+               occ_func_0_0(81) +
+           0.707107 * occ_func_0_0(0) * occ_func_0_1(2) * occ_func_0_0(5) *
+               occ_func_0_0(81)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_0(12) * occ_func_0_1(10) *
+               occ_func_0_0(86) +
+           0.707107 * occ_func_0_0(0) * occ_func_0_1(12) * occ_func_0_0(10) *
+               occ_func_0_0(86)) +
+          (0.707107 * occ_func_0_0(3) * occ_func_0_0(9) * occ_func_0_1(0) *
+               occ_func_0_0(42) +
+           0.707107 * occ_func_0_0(3) * occ_func_0_1(9) * occ_func_0_0(0) *
+               occ_func_0_0(42)) +
+          (0.707107 * occ_func_0_0(1) * occ_func_0_0(0) * occ_func_0_1(4) *
+               occ_func_0_0(40) +
+           0.707107 * occ_func_0_0(1) * occ_func_0_1(0) * occ_func_0_0(4) *
+               occ_func_0_0(40)) +
+          (0.707107 * occ_func_0_0(79) * occ_func_0_0(21) * occ_func_0_1(19) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_0(79) * occ_func_0_1(21) * occ_func_0_0(19) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(10) * occ_func_0_0(0) * occ_func_0_0(12) *
+               occ_func_0_1(33) +
+           0.707107 * occ_func_0_1(10) * occ_func_0_0(0) * occ_func_0_0(12) *
+               occ_func_0_0(33)) +
+          (0.707107 * occ_func_0_0(83) * occ_func_0_0(28) * occ_func_0_0(35) *
+               occ_func_0_1(0) +
+           0.707107 * occ_func_0_1(83) * occ_func_0_0(28) * occ_func_0_0(35) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_0(3) * occ_func_0_0(9) *
+               occ_func_0_1(82) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_0(3) * occ_func_0_0(9) *
+               occ_func_0_0(82)) +
+          (0.707107 * occ_func_0_0(4) * occ_func_0_0(1) * occ_func_0_0(0) *
+               occ_func_0_1(26) +
+           0.707107 * occ_func_0_1(4) * occ_func_0_0(1) * occ_func_0_0(0) *
+               occ_func_0_0(26)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_0(8) * occ_func_0_1(11) *
+               occ_func_0_0(84) +
+           0.707107 * occ_func_0_0(0) * occ_func_0_1(8) * occ_func_0_0(11) *
+               occ_func_0_0(84)) +
+          (0.707107 * occ_func_0_0(5) * occ_func_0_0(0) * occ_func_0_1(10) *
+               occ_func_0_0(36) +
+           0.707107 * occ_func_0_0(5) * occ_func_0_1(0) * occ_func_0_0(10) *
+               occ_func_0_0(36)) +
+          (0.707107 * occ_func_0_0(2) * occ_func_0_0(3) * occ_func_0_1(0) *
+               occ_func_0_0(31) +
+           0.707107 * occ_func_0_0(2) * occ_func_0_1(3) * occ_func_0_0(0) *
+               occ_func_0_0(31)) +
+          (0.707107 * occ_func_0_0(81) * occ_func_0_0(25) * occ_func_0_1(30) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_0(81) * occ_func_0_1(25) * occ_func_0_0(30) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(86) * occ_func_0_0(41) * occ_func_0_1(42) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_0(86) * occ_func_0_1(41) * occ_func_0_0(42) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(11) * occ_func_0_0(0) * occ_func_0_1(8) *
+               occ_func_0_0(20) +
+           0.707107 * occ_func_0_0(11) * occ_func_0_1(0) * occ_func_0_0(8) *
+               occ_func_0_0(20)) +
+          (0.707107 * occ_func_0_0(10) * occ_func_0_0(5) * occ_func_0_1(0) *
+               occ_func_0_0(19) +
+           0.707107 * occ_func_0_0(10) * occ_func_0_1(5) * occ_func_0_0(0) *
+               occ_func_0_0(19)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_0(2) * occ_func_0_1(3) *
+               occ_func_0_0(79) +
+           0.707107 * occ_func_0_0(0) * occ_func_0_1(2) * occ_func_0_0(3) *
+               occ_func_0_0(79)) +
+          (0.707107 * occ_func_0_0(7) * occ_func_0_1(12) * occ_func_0_0(0) *
+               occ_func_0_0(38) +
+           0.707107 * occ_func_0_1(7) * occ_func_0_0(12) * occ_func_0_0(0) *
+               occ_func_0_0(38)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_1(11) * occ_func_0_0(6) *
+               occ_func_0_0(84) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_0(11) * occ_func_0_0(6) *
+               occ_func_0_0(84)) +
+          (0.707107 * occ_func_0_0(2) * occ_func_0_1(0) * occ_func_0_0(1) *
+               occ_func_0_0(31) +
+           0.707107 * occ_func_0_1(2) * occ_func_0_0(0) * occ_func_0_0(1) *
+               occ_func_0_0(31)) +
+          (0.707107 * occ_func_0_0(81) * occ_func_0_1(30) * occ_func_0_0(23) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(81) * occ_func_0_0(30) * occ_func_0_0(23) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_0(12) * occ_func_0_1(9) *
+               occ_func_0_0(85) +
+           0.707107 * occ_func_0_0(0) * occ_func_0_1(12) * occ_func_0_0(9) *
+               occ_func_0_0(85)) +
+          (0.707107 * occ_func_0_0(4) * occ_func_0_0(10) * occ_func_0_1(0) *
+               occ_func_0_0(37) +
+           0.707107 * occ_func_0_0(4) * occ_func_0_1(10) * occ_func_0_0(0) *
+               occ_func_0_0(37)) +
+          (0.707107 * occ_func_0_0(1) * occ_func_0_0(0) * occ_func_0_1(3) *
+               occ_func_0_0(32) +
+           0.707107 * occ_func_0_0(1) * occ_func_0_1(0) * occ_func_0_0(3) *
+               occ_func_0_0(32)) +
+          (0.707107 * occ_func_0_0(80) * occ_func_0_0(29) * occ_func_0_1(24) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_0(80) * occ_func_0_1(29) * occ_func_0_0(24) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(9) * occ_func_0_0(0) * occ_func_0_0(12) *
+               occ_func_0_1(35) +
+           0.707107 * occ_func_0_1(9) * occ_func_0_0(0) * occ_func_0_0(12) *
+               occ_func_0_0(35)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_0(4) * occ_func_0_0(10) *
+               occ_func_0_1(83) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_0(4) * occ_func_0_0(10) *
+               occ_func_0_0(83)) +
+          (0.707107 * occ_func_0_0(82) * occ_func_0_0(26) * occ_func_0_0(33) *
+               occ_func_0_1(0) +
+           0.707107 * occ_func_0_1(82) * occ_func_0_0(26) * occ_func_0_0(33) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(3) * occ_func_0_0(1) * occ_func_0_0(0) *
+               occ_func_0_1(28) +
+           0.707107 * occ_func_0_1(3) * occ_func_0_0(1) * occ_func_0_0(0) *
+               occ_func_0_0(28)) +
+          (0.707107 * occ_func_0_0(9) * occ_func_0_1(7) * occ_func_0_0(0) *
+               occ_func_0_0(35) +
+           0.707107 * occ_func_0_1(9) * occ_func_0_0(7) * occ_func_0_0(0) *
+               occ_func_0_0(35)) +
+          (0.707107 * occ_func_0_0(8) * occ_func_0_1(0) * occ_func_0_0(6) *
+               occ_func_0_0(34) +
+           0.707107 * occ_func_0_1(8) * occ_func_0_0(0) * occ_func_0_0(6) *
+               occ_func_0_0(34)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_1(5) * occ_func_0_0(4) *
+               occ_func_0_0(83) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_0(5) * occ_func_0_0(4) *
+               occ_func_0_0(83)) +
+          (0.707107 * occ_func_0_0(82) * occ_func_0_1(27) * occ_func_0_0(26) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(82) * occ_func_0_0(27) * occ_func_0_0(26) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(86) * occ_func_0_0(40) * occ_func_0_1(41) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_0(86) * occ_func_0_1(40) * occ_func_0_0(41) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(12) * occ_func_0_0(0) * occ_func_0_1(7) *
+               occ_func_0_0(21) +
+           0.707107 * occ_func_0_0(12) * occ_func_0_1(0) * occ_func_0_0(7) *
+               occ_func_0_0(21)) +
+          (0.707107 * occ_func_0_0(11) * occ_func_0_0(6) * occ_func_0_1(0) *
+               occ_func_0_0(20) +
+           0.707107 * occ_func_0_0(11) * occ_func_0_1(6) * occ_func_0_0(0) *
+               occ_func_0_0(20)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_0(1) * occ_func_0_1(2) *
+               occ_func_0_0(79) +
+           0.707107 * occ_func_0_0(0) * occ_func_0_1(1) * occ_func_0_0(2) *
+               occ_func_0_0(79)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_0(9) * occ_func_0_1(7) *
+               occ_func_0_0(85) +
+           0.707107 * occ_func_0_0(0) * occ_func_0_1(9) * occ_func_0_0(7) *
+               occ_func_0_0(85)) +
+          (0.707107 * occ_func_0_0(6) * occ_func_0_0(8) * occ_func_0_1(0) *
+               occ_func_0_0(39) +
+           0.707107 * occ_func_0_0(6) * occ_func_0_1(8) * occ_func_0_0(0) *
+               occ_func_0_0(39)) +
+          (0.707107 * occ_func_0_0(4) * occ_func_0_0(0) * occ_func_0_1(5) *
+               occ_func_0_0(37) +
+           0.707107 * occ_func_0_0(4) * occ_func_0_1(0) * occ_func_0_0(5) *
+               occ_func_0_0(37)) +
+          (0.707107 * occ_func_0_0(80) * occ_func_0_0(24) * occ_func_0_1(22) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_0(80) * occ_func_0_1(24) * occ_func_0_0(22) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(85) * occ_func_0_0(32) * occ_func_0_1(39) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_0(85) * occ_func_0_1(32) * occ_func_0_0(39) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(12) * occ_func_0_0(0) * occ_func_0_1(11) *
+               occ_func_0_0(29) +
+           0.707107 * occ_func_0_0(12) * occ_func_0_1(0) * occ_func_0_0(11) *
+               occ_func_0_0(29)) +
+          (0.707107 * occ_func_0_0(7) * occ_func_0_0(2) * occ_func_0_1(0) *
+               occ_func_0_0(22) +
+           0.707107 * occ_func_0_0(7) * occ_func_0_1(2) * occ_func_0_0(0) *
+               occ_func_0_0(22)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_0(1) * occ_func_0_1(6) *
+               occ_func_0_0(80) +
+           0.707107 * occ_func_0_0(0) * occ_func_0_1(1) * occ_func_0_0(6) *
+               occ_func_0_0(80)) +
+          (0.707107 * occ_func_0_0(85) * occ_func_0_0(39) * occ_func_0_1(37) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_0(85) * occ_func_0_1(39) * occ_func_0_0(37) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(9) * occ_func_0_0(8) * occ_func_0_1(0) *
+               occ_func_0_0(24) +
+           0.707107 * occ_func_0_0(9) * occ_func_0_1(8) * occ_func_0_0(0) *
+               occ_func_0_0(24)) +
+          (0.707107 * occ_func_0_0(7) * occ_func_0_0(0) * occ_func_0_1(5) *
+               occ_func_0_0(22) +
+           0.707107 * occ_func_0_0(7) * occ_func_0_1(0) * occ_func_0_0(5) *
+               occ_func_0_0(22)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_0(6) * occ_func_0_1(4) *
+               occ_func_0_0(80) +
+           0.707107 * occ_func_0_0(0) * occ_func_0_1(6) * occ_func_0_0(4) *
+               occ_func_0_0(80)) +
+          (0.707107 * occ_func_0_0(85) * occ_func_0_0(37) * occ_func_0_1(32) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_0(85) * occ_func_0_1(37) * occ_func_0_0(32) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(12) * occ_func_0_0(10) * occ_func_0_1(0) *
+               occ_func_0_0(29) +
+           0.707107 * occ_func_0_0(12) * occ_func_0_1(10) * occ_func_0_0(0) *
+               occ_func_0_0(29)) +
+          (0.707107 * occ_func_0_0(9) * occ_func_0_0(0) * occ_func_0_1(3) *
+               occ_func_0_0(24) +
+           0.707107 * occ_func_0_0(9) * occ_func_0_1(0) * occ_func_0_0(3) *
+               occ_func_0_0(24)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_0(4) * occ_func_0_1(1) *
+               occ_func_0_0(80) +
+           0.707107 * occ_func_0_0(0) * occ_func_0_1(4) * occ_func_0_0(1) *
+               occ_func_0_0(80)) +
+          (0.707107 * occ_func_0_0(84) * occ_func_0_0(38) * occ_func_0_1(31) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(84) * occ_func_0_0(38) * occ_func_0_0(31) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(11) * occ_func_0_0(12) * occ_func_0_1(0) *
+               occ_func_0_0(30) +
+           0.707107 * occ_func_0_1(11) * occ_func_0_0(12) * occ_func_0_0(0) *
+               occ_func_0_0(30)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_0(7) * occ_func_0_1(2) *
+               occ_func_0_0(81) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_0(7) * occ_func_0_0(2) *
+               occ_func_0_0(81)) +
+          (0.707107 * occ_func_0_0(6) * occ_func_0_0(0) * occ_func_0_1(1) *
+               occ_func_0_0(23) +
+           0.707107 * occ_func_0_1(6) * occ_func_0_0(0) * occ_func_0_0(1) *
+               occ_func_0_0(23)) +
+          (0.707107 * occ_func_0_0(10) * occ_func_0_0(11) * occ_func_0_0(0) *
+               occ_func_0_1(33) +
+           0.707107 * occ_func_0_1(10) * occ_func_0_0(11) * occ_func_0_0(0) *
+               occ_func_0_0(33)) +
+          (0.707107 * occ_func_0_0(83) * occ_func_0_0(34) * occ_func_0_0(28) *
+               occ_func_0_1(0) +
+           0.707107 * occ_func_0_1(83) * occ_func_0_0(34) * occ_func_0_0(28) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_0(8) * occ_func_0_0(3) *
+               occ_func_0_1(82) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_0(8) * occ_func_0_0(3) *
+               occ_func_0_0(82)) +
+          (0.707107 * occ_func_0_0(5) * occ_func_0_0(0) * occ_func_0_0(2) *
+               occ_func_0_1(27) +
+           0.707107 * occ_func_0_1(5) * occ_func_0_0(0) * occ_func_0_0(2) *
+               occ_func_0_0(27)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_0(11) * occ_func_0_1(12) *
+               occ_func_0_0(86) +
+           0.707107 * occ_func_0_0(0) * occ_func_0_1(11) * occ_func_0_0(12) *
+               occ_func_0_0(86)) +
+          (0.707107 * occ_func_0_0(2) * occ_func_0_0(0) * occ_func_0_1(7) *
+               occ_func_0_0(41) +
+           0.707107 * occ_func_0_0(2) * occ_func_0_1(0) * occ_func_0_0(7) *
+               occ_func_0_0(41)) +
+          (0.707107 * occ_func_0_0(1) * occ_func_0_0(6) * occ_func_0_1(0) *
+               occ_func_0_0(40) +
+           0.707107 * occ_func_0_0(1) * occ_func_0_1(6) * occ_func_0_0(0) *
+               occ_func_0_0(40)) +
+          (0.707107 * occ_func_0_0(79) * occ_func_0_0(20) * occ_func_0_1(21) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_0(79) * occ_func_0_1(20) * occ_func_0_0(21) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(86) * occ_func_0_0(42) * occ_func_0_1(40) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_0(86) * occ_func_0_1(42) * occ_func_0_0(40) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(12) * occ_func_0_0(9) * occ_func_0_1(0) *
+               occ_func_0_0(21) +
+           0.707107 * occ_func_0_0(12) * occ_func_0_1(9) * occ_func_0_0(0) *
+               occ_func_0_0(21)) +
+          (0.707107 * occ_func_0_0(10) * occ_func_0_0(0) * occ_func_0_1(4) *
+               occ_func_0_0(19) +
+           0.707107 * occ_func_0_0(10) * occ_func_0_1(0) * occ_func_0_0(4) *
+               occ_func_0_0(19)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_0(3) * occ_func_0_1(1) *
+               occ_func_0_0(79) +
+           0.707107 * occ_func_0_0(0) * occ_func_0_1(3) * occ_func_0_0(1) *
+               occ_func_0_0(79)) +
+          (0.707107 * occ_func_0_0(8) * occ_func_0_0(11) * occ_func_0_0(0) *
+               occ_func_0_1(34) +
+           0.707107 * occ_func_0_1(8) * occ_func_0_0(11) * occ_func_0_0(0) *
+               occ_func_0_0(34)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_0(10) * occ_func_0_0(5) *
+               occ_func_0_1(83) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_0(10) * occ_func_0_0(5) *
+               occ_func_0_0(83)) +
+          (0.707107 * occ_func_0_0(82) * occ_func_0_0(33) * occ_func_0_0(27) *
+               occ_func_0_1(0) +
+           0.707107 * occ_func_0_1(82) * occ_func_0_0(33) * occ_func_0_0(27) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(3) * occ_func_0_0(0) * occ_func_0_0(2) *
+               occ_func_0_1(28) +
+           0.707107 * occ_func_0_1(3) * occ_func_0_0(0) * occ_func_0_0(2) *
+               occ_func_0_0(28)) +
+          (0.707107 * occ_func_0_0(7) * occ_func_0_0(0) * occ_func_0_1(9) *
+               occ_func_0_0(38) +
+           0.707107 * occ_func_0_1(7) * occ_func_0_0(0) * occ_func_0_0(9) *
+               occ_func_0_0(38)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_0(6) * occ_func_0_1(8) *
+               occ_func_0_0(84) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_0(6) * occ_func_0_0(8) *
+               occ_func_0_0(84)) +
+          (0.707107 * occ_func_0_0(5) * occ_func_0_0(4) * occ_func_0_1(0) *
+               occ_func_0_0(36) +
+           0.707107 * occ_func_0_1(5) * occ_func_0_0(4) * occ_func_0_0(0) *
+               occ_func_0_0(36)) +
+          (0.707107 * occ_func_0_0(81) * occ_func_0_0(23) * occ_func_0_1(25) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(81) * occ_func_0_0(23) * occ_func_0_0(25) *
+               occ_func_0_0(0))) /
+         24.;
+}
+template <typename Scalar>
+Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_13_3_at_0() const {
+  return ((0.707107 * occ_func_0_1(0) * occ_func_0_0(7) * occ_func_0_1(12) *
+               occ_func_0_0(85) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_1(7) * occ_func_0_0(12) *
+               occ_func_0_0(85)) +
+          (0.707107 * occ_func_0_1(6) * occ_func_0_0(0) * occ_func_0_1(11) *
+               occ_func_0_0(39) +
+           0.707107 * occ_func_0_1(6) * occ_func_0_1(0) * occ_func_0_0(11) *
+               occ_func_0_0(39)) +
+          (0.707107 * occ_func_0_1(1) * occ_func_0_0(2) * occ_func_0_1(0) *
+               occ_func_0_0(32) +
+           0.707107 * occ_func_0_1(1) * occ_func_0_1(2) * occ_func_0_0(0) *
+               occ_func_0_0(32)) +
+          (0.707107 * occ_func_0_1(80) * occ_func_0_0(22) * occ_func_0_1(29) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(80) * occ_func_0_1(22) * occ_func_0_0(29) *
+               occ_func_0_0(0)) +
           (0.707107 * occ_func_0_0(83) * occ_func_0_0(35) * occ_func_0_1(34) *
                occ_func_0_1(0) +
-           0.707107 * occ_func_0_0(83) * occ_func_0_1(35) * occ_func_0_0(34) *
+           0.707107 * occ_func_0_1(83) * occ_func_0_0(35) * occ_func_0_0(34) *
                occ_func_0_1(0)) +
           (0.707107 * occ_func_0_0(0) * occ_func_0_0(9) * occ_func_0_1(8) *
                occ_func_0_1(82) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(9) * occ_func_0_0(8) *
+           0.707107 * occ_func_0_1(0) * occ_func_0_0(9) * occ_func_0_0(8) *
                occ_func_0_1(82)) +
           (0.707107 * occ_func_0_0(5) * occ_func_0_0(7) * occ_func_0_1(0) *
                occ_func_0_1(27) +
-           0.707107 * occ_func_0_0(5) * occ_func_0_1(7) * occ_func_0_0(0) *
+           0.707107 * occ_func_0_1(5) * occ_func_0_0(7) * occ_func_0_0(0) *
                occ_func_0_1(27)) +
           (0.707107 * occ_func_0_0(4) * occ_func_0_0(0) * occ_func_0_1(6) *
                occ_func_0_1(26) +
-           0.707107 * occ_func_0_0(4) * occ_func_0_1(0) * occ_func_0_0(6) *
+           0.707107 * occ_func_0_1(4) * occ_func_0_0(0) * occ_func_0_0(6) *
                occ_func_0_1(26)) +
-          (0.707107 * occ_func_0_0(84) * occ_func_0_0(36) * occ_func_0_1(38) *
+          (0.707107 * occ_func_0_0(84) * occ_func_0_1(36) * occ_func_0_0(38) *
                occ_func_0_1(0) +
-           0.707107 * occ_func_0_0(84) * occ_func_0_1(36) * occ_func_0_0(38) *
+           0.707107 * occ_func_0_1(84) * occ_func_0_0(36) * occ_func_0_0(38) *
                occ_func_0_1(0)) +
-          (0.707107 * occ_func_0_0(8) * occ_func_0_0(0) * occ_func_0_1(9) *
+          (0.707107 * occ_func_0_0(8) * occ_func_0_1(0) * occ_func_0_0(9) *
                occ_func_0_1(25) +
-           0.707107 * occ_func_0_0(8) * occ_func_0_1(0) * occ_func_0_0(9) *
+           0.707107 * occ_func_0_1(8) * occ_func_0_0(0) * occ_func_0_0(9) *
                occ_func_0_1(25)) +
-          (0.707107 * occ_func_0_0(0) * occ_func_0_0(5) * occ_func_0_1(7) *
+          (0.707107 * occ_func_0_0(0) * occ_func_0_1(5) * occ_func_0_0(7) *
                occ_func_0_1(81) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(5) * occ_func_0_0(7) *
+           0.707107 * occ_func_0_1(0) * occ_func_0_0(5) * occ_func_0_0(7) *
                occ_func_0_1(81)) +
-          (0.707107 * occ_func_0_0(6) * occ_func_0_0(4) * occ_func_0_1(0) *
+          (0.707107 * occ_func_0_0(6) * occ_func_0_1(4) * occ_func_0_0(0) *
                occ_func_0_1(23) +
-           0.707107 * occ_func_0_0(6) * occ_func_0_1(4) * occ_func_0_0(0) *
+           0.707107 * occ_func_0_1(6) * occ_func_0_0(4) * occ_func_0_0(0) *
                occ_func_0_1(23)) +
-          (0.707107 * occ_func_0_0(0) * occ_func_0_0(10) * occ_func_0_1(11) *
-               occ_func_0_1(86) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(10) * occ_func_0_0(11) *
-               occ_func_0_1(86)) +
-          (0.707107 * occ_func_0_0(3) * occ_func_0_0(0) * occ_func_0_1(8) *
-               occ_func_0_1(42) +
-           0.707107 * occ_func_0_0(3) * occ_func_0_1(0) * occ_func_0_0(8) *
-               occ_func_0_1(42)) +
-          (0.707107 * occ_func_0_0(2) * occ_func_0_0(5) * occ_func_0_1(0) *
-               occ_func_0_1(41) +
-           0.707107 * occ_func_0_0(2) * occ_func_0_1(5) * occ_func_0_0(0) *
-               occ_func_0_1(41)) +
-          (0.707107 * occ_func_0_0(79) * occ_func_0_0(19) * occ_func_0_1(20) *
-               occ_func_0_1(0) +
-           0.707107 * occ_func_0_0(79) * occ_func_0_1(19) * occ_func_0_0(20) *
-               occ_func_0_1(0)) +
+          (0.707107 * occ_func_0_1(0) * occ_func_0_0(10) * occ_func_0_1(11) *
+               occ_func_0_0(86) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_1(10) * occ_func_0_0(11) *
+               occ_func_0_0(86)) +
+          (0.707107 * occ_func_0_1(3) * occ_func_0_0(0) * occ_func_0_1(8) *
+               occ_func_0_0(42) +
+           0.707107 * occ_func_0_1(3) * occ_func_0_1(0) * occ_func_0_0(8) *
+               occ_func_0_0(42)) +
+          (0.707107 * occ_func_0_1(2) * occ_func_0_0(5) * occ_func_0_1(0) *
+               occ_func_0_0(41) +
+           0.707107 * occ_func_0_1(2) * occ_func_0_1(5) * occ_func_0_0(0) *
+               occ_func_0_0(41)) +
+          (0.707107 * occ_func_0_1(79) * occ_func_0_0(19) * occ_func_0_1(20) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(79) * occ_func_0_1(19) * occ_func_0_0(20) *
+               occ_func_0_0(0)) +
           (0.707107 * occ_func_0_0(84) * occ_func_0_0(31) * occ_func_0_1(36) *
                occ_func_0_1(0) +
            0.707107 * occ_func_0_0(84) * occ_func_0_1(31) * occ_func_0_0(36) *
@@ -10777,54 +9865,54 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_13_8_at_0() const {
                occ_func_0_1(81) +
            0.707107 * occ_func_0_0(0) * occ_func_0_1(2) * occ_func_0_0(5) *
                occ_func_0_1(81)) +
-          (0.707107 * occ_func_0_0(0) * occ_func_0_0(12) * occ_func_0_1(10) *
-               occ_func_0_1(86) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(12) * occ_func_0_0(10) *
-               occ_func_0_1(86)) +
-          (0.707107 * occ_func_0_0(3) * occ_func_0_0(9) * occ_func_0_1(0) *
-               occ_func_0_1(42) +
-           0.707107 * occ_func_0_0(3) * occ_func_0_1(9) * occ_func_0_0(0) *
-               occ_func_0_1(42)) +
-          (0.707107 * occ_func_0_0(1) * occ_func_0_0(0) * occ_func_0_1(4) *
-               occ_func_0_1(40) +
-           0.707107 * occ_func_0_0(1) * occ_func_0_1(0) * occ_func_0_0(4) *
-               occ_func_0_1(40)) +
-          (0.707107 * occ_func_0_0(79) * occ_func_0_0(21) * occ_func_0_1(19) *
-               occ_func_0_1(0) +
-           0.707107 * occ_func_0_0(79) * occ_func_0_1(21) * occ_func_0_0(19) *
-               occ_func_0_1(0)) +
-          (0.707107 * occ_func_0_0(10) * occ_func_0_0(0) * occ_func_0_1(12) *
+          (0.707107 * occ_func_0_1(0) * occ_func_0_0(12) * occ_func_0_1(10) *
+               occ_func_0_0(86) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_1(12) * occ_func_0_0(10) *
+               occ_func_0_0(86)) +
+          (0.707107 * occ_func_0_1(3) * occ_func_0_0(9) * occ_func_0_1(0) *
+               occ_func_0_0(42) +
+           0.707107 * occ_func_0_1(3) * occ_func_0_1(9) * occ_func_0_0(0) *
+               occ_func_0_0(42)) +
+          (0.707107 * occ_func_0_1(1) * occ_func_0_0(0) * occ_func_0_1(4) *
+               occ_func_0_0(40) +
+           0.707107 * occ_func_0_1(1) * occ_func_0_1(0) * occ_func_0_0(4) *
+               occ_func_0_0(40)) +
+          (0.707107 * occ_func_0_1(79) * occ_func_0_0(21) * occ_func_0_1(19) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(79) * occ_func_0_1(21) * occ_func_0_0(19) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(10) * occ_func_0_1(0) * occ_func_0_0(12) *
                occ_func_0_1(33) +
-           0.707107 * occ_func_0_0(10) * occ_func_0_1(0) * occ_func_0_0(12) *
-               occ_func_0_1(33)) +
-          (0.707107 * occ_func_0_0(83) * occ_func_0_0(28) * occ_func_0_1(35) *
+           0.707107 * occ_func_0_1(10) * occ_func_0_1(0) * occ_func_0_0(12) *
+               occ_func_0_0(33)) +
+          (0.707107 * occ_func_0_0(83) * occ_func_0_1(28) * occ_func_0_0(35) *
                occ_func_0_1(0) +
-           0.707107 * occ_func_0_0(83) * occ_func_0_1(28) * occ_func_0_0(35) *
-               occ_func_0_1(0)) +
-          (0.707107 * occ_func_0_0(0) * occ_func_0_0(3) * occ_func_0_1(9) *
+           0.707107 * occ_func_0_1(83) * occ_func_0_1(28) * occ_func_0_0(35) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_1(3) * occ_func_0_0(9) *
                occ_func_0_1(82) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(3) * occ_func_0_0(9) *
-               occ_func_0_1(82)) +
-          (0.707107 * occ_func_0_0(4) * occ_func_0_0(1) * occ_func_0_1(0) *
+           0.707107 * occ_func_0_1(0) * occ_func_0_1(3) * occ_func_0_0(9) *
+               occ_func_0_0(82)) +
+          (0.707107 * occ_func_0_0(4) * occ_func_0_1(1) * occ_func_0_0(0) *
                occ_func_0_1(26) +
-           0.707107 * occ_func_0_0(4) * occ_func_0_1(1) * occ_func_0_0(0) *
-               occ_func_0_1(26)) +
-          (0.707107 * occ_func_0_0(0) * occ_func_0_0(8) * occ_func_0_1(11) *
-               occ_func_0_1(84) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(8) * occ_func_0_0(11) *
-               occ_func_0_1(84)) +
-          (0.707107 * occ_func_0_0(5) * occ_func_0_0(0) * occ_func_0_1(10) *
-               occ_func_0_1(36) +
-           0.707107 * occ_func_0_0(5) * occ_func_0_1(0) * occ_func_0_0(10) *
-               occ_func_0_1(36)) +
-          (0.707107 * occ_func_0_0(2) * occ_func_0_0(3) * occ_func_0_1(0) *
-               occ_func_0_1(31) +
-           0.707107 * occ_func_0_0(2) * occ_func_0_1(3) * occ_func_0_0(0) *
-               occ_func_0_1(31)) +
-          (0.707107 * occ_func_0_0(81) * occ_func_0_0(25) * occ_func_0_1(30) *
-               occ_func_0_1(0) +
-           0.707107 * occ_func_0_0(81) * occ_func_0_1(25) * occ_func_0_0(30) *
-               occ_func_0_1(0)) +
+           0.707107 * occ_func_0_1(4) * occ_func_0_1(1) * occ_func_0_0(0) *
+               occ_func_0_0(26)) +
+          (0.707107 * occ_func_0_1(0) * occ_func_0_0(8) * occ_func_0_1(11) *
+               occ_func_0_0(84) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_1(8) * occ_func_0_0(11) *
+               occ_func_0_0(84)) +
+          (0.707107 * occ_func_0_1(5) * occ_func_0_0(0) * occ_func_0_1(10) *
+               occ_func_0_0(36) +
+           0.707107 * occ_func_0_1(5) * occ_func_0_1(0) * occ_func_0_0(10) *
+               occ_func_0_0(36)) +
+          (0.707107 * occ_func_0_1(2) * occ_func_0_0(3) * occ_func_0_1(0) *
+               occ_func_0_0(31) +
+           0.707107 * occ_func_0_1(2) * occ_func_0_1(3) * occ_func_0_0(0) *
+               occ_func_0_0(31)) +
+          (0.707107 * occ_func_0_1(81) * occ_func_0_0(25) * occ_func_0_1(30) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(81) * occ_func_0_1(25) * occ_func_0_0(30) *
+               occ_func_0_0(0)) +
           (0.707107 * occ_func_0_0(86) * occ_func_0_0(41) * occ_func_0_1(42) *
                occ_func_0_1(0) +
            0.707107 * occ_func_0_0(86) * occ_func_0_1(41) * occ_func_0_0(42) *
@@ -10841,70 +9929,70 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_13_8_at_0() const {
                occ_func_0_1(79) +
            0.707107 * occ_func_0_0(0) * occ_func_0_1(2) * occ_func_0_0(3) *
                occ_func_0_1(79)) +
-          (0.707107 * occ_func_0_0(7) * occ_func_0_0(12) * occ_func_0_1(0) *
-               occ_func_0_1(38) +
-           0.707107 * occ_func_0_0(7) * occ_func_0_1(12) * occ_func_0_0(0) *
-               occ_func_0_1(38)) +
-          (0.707107 * occ_func_0_0(0) * occ_func_0_0(11) * occ_func_0_1(6) *
-               occ_func_0_1(84) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(11) * occ_func_0_0(6) *
-               occ_func_0_1(84)) +
-          (0.707107 * occ_func_0_0(2) * occ_func_0_0(0) * occ_func_0_1(1) *
-               occ_func_0_1(31) +
-           0.707107 * occ_func_0_0(2) * occ_func_0_1(0) * occ_func_0_0(1) *
-               occ_func_0_1(31)) +
-          (0.707107 * occ_func_0_0(81) * occ_func_0_0(30) * occ_func_0_1(23) *
-               occ_func_0_1(0) +
-           0.707107 * occ_func_0_0(81) * occ_func_0_1(30) * occ_func_0_0(23) *
-               occ_func_0_1(0)) +
-          (0.707107 * occ_func_0_0(0) * occ_func_0_0(12) * occ_func_0_1(9) *
-               occ_func_0_1(85) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(12) * occ_func_0_0(9) *
-               occ_func_0_1(85)) +
-          (0.707107 * occ_func_0_0(4) * occ_func_0_0(10) * occ_func_0_1(0) *
-               occ_func_0_1(37) +
-           0.707107 * occ_func_0_0(4) * occ_func_0_1(10) * occ_func_0_0(0) *
-               occ_func_0_1(37)) +
-          (0.707107 * occ_func_0_0(1) * occ_func_0_0(0) * occ_func_0_1(3) *
-               occ_func_0_1(32) +
-           0.707107 * occ_func_0_0(1) * occ_func_0_1(0) * occ_func_0_0(3) *
-               occ_func_0_1(32)) +
-          (0.707107 * occ_func_0_0(80) * occ_func_0_0(29) * occ_func_0_1(24) *
-               occ_func_0_1(0) +
-           0.707107 * occ_func_0_0(80) * occ_func_0_1(29) * occ_func_0_0(24) *
-               occ_func_0_1(0)) +
-          (0.707107 * occ_func_0_0(9) * occ_func_0_0(0) * occ_func_0_1(12) *
+          (0.707107 * occ_func_0_0(7) * occ_func_0_1(12) * occ_func_0_1(0) *
+               occ_func_0_0(38) +
+           0.707107 * occ_func_0_1(7) * occ_func_0_0(12) * occ_func_0_1(0) *
+               occ_func_0_0(38)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_1(11) * occ_func_0_1(6) *
+               occ_func_0_0(84) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_0(11) * occ_func_0_1(6) *
+               occ_func_0_0(84)) +
+          (0.707107 * occ_func_0_0(2) * occ_func_0_1(0) * occ_func_0_1(1) *
+               occ_func_0_0(31) +
+           0.707107 * occ_func_0_1(2) * occ_func_0_0(0) * occ_func_0_1(1) *
+               occ_func_0_0(31)) +
+          (0.707107 * occ_func_0_0(81) * occ_func_0_1(30) * occ_func_0_1(23) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(81) * occ_func_0_0(30) * occ_func_0_1(23) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_1(0) * occ_func_0_0(12) * occ_func_0_1(9) *
+               occ_func_0_0(85) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_1(12) * occ_func_0_0(9) *
+               occ_func_0_0(85)) +
+          (0.707107 * occ_func_0_1(4) * occ_func_0_0(10) * occ_func_0_1(0) *
+               occ_func_0_0(37) +
+           0.707107 * occ_func_0_1(4) * occ_func_0_1(10) * occ_func_0_0(0) *
+               occ_func_0_0(37)) +
+          (0.707107 * occ_func_0_1(1) * occ_func_0_0(0) * occ_func_0_1(3) *
+               occ_func_0_0(32) +
+           0.707107 * occ_func_0_1(1) * occ_func_0_1(0) * occ_func_0_0(3) *
+               occ_func_0_0(32)) +
+          (0.707107 * occ_func_0_1(80) * occ_func_0_0(29) * occ_func_0_1(24) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(80) * occ_func_0_1(29) * occ_func_0_0(24) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(9) * occ_func_0_1(0) * occ_func_0_0(12) *
                occ_func_0_1(35) +
-           0.707107 * occ_func_0_0(9) * occ_func_0_1(0) * occ_func_0_0(12) *
-               occ_func_0_1(35)) +
-          (0.707107 * occ_func_0_0(0) * occ_func_0_0(4) * occ_func_0_1(10) *
+           0.707107 * occ_func_0_1(9) * occ_func_0_1(0) * occ_func_0_0(12) *
+               occ_func_0_0(35)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_1(4) * occ_func_0_0(10) *
                occ_func_0_1(83) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(4) * occ_func_0_0(10) *
-               occ_func_0_1(83)) +
-          (0.707107 * occ_func_0_0(82) * occ_func_0_0(26) * occ_func_0_1(33) *
+           0.707107 * occ_func_0_1(0) * occ_func_0_1(4) * occ_func_0_0(10) *
+               occ_func_0_0(83)) +
+          (0.707107 * occ_func_0_0(82) * occ_func_0_1(26) * occ_func_0_0(33) *
                occ_func_0_1(0) +
-           0.707107 * occ_func_0_0(82) * occ_func_0_1(26) * occ_func_0_0(33) *
-               occ_func_0_1(0)) +
-          (0.707107 * occ_func_0_0(3) * occ_func_0_0(1) * occ_func_0_1(0) *
+           0.707107 * occ_func_0_1(82) * occ_func_0_1(26) * occ_func_0_0(33) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(3) * occ_func_0_1(1) * occ_func_0_0(0) *
                occ_func_0_1(28) +
-           0.707107 * occ_func_0_0(3) * occ_func_0_1(1) * occ_func_0_0(0) *
-               occ_func_0_1(28)) +
-          (0.707107 * occ_func_0_0(9) * occ_func_0_0(7) * occ_func_0_1(0) *
-               occ_func_0_1(35) +
-           0.707107 * occ_func_0_0(9) * occ_func_0_1(7) * occ_func_0_0(0) *
-               occ_func_0_1(35)) +
-          (0.707107 * occ_func_0_0(8) * occ_func_0_0(0) * occ_func_0_1(6) *
-               occ_func_0_1(34) +
-           0.707107 * occ_func_0_0(8) * occ_func_0_1(0) * occ_func_0_0(6) *
-               occ_func_0_1(34)) +
-          (0.707107 * occ_func_0_0(0) * occ_func_0_0(5) * occ_func_0_1(4) *
-               occ_func_0_1(83) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(5) * occ_func_0_0(4) *
-               occ_func_0_1(83)) +
-          (0.707107 * occ_func_0_0(82) * occ_func_0_0(27) * occ_func_0_1(26) *
-               occ_func_0_1(0) +
-           0.707107 * occ_func_0_0(82) * occ_func_0_1(27) * occ_func_0_0(26) *
-               occ_func_0_1(0)) +
+           0.707107 * occ_func_0_1(3) * occ_func_0_1(1) * occ_func_0_0(0) *
+               occ_func_0_0(28)) +
+          (0.707107 * occ_func_0_0(9) * occ_func_0_1(7) * occ_func_0_1(0) *
+               occ_func_0_0(35) +
+           0.707107 * occ_func_0_1(9) * occ_func_0_0(7) * occ_func_0_1(0) *
+               occ_func_0_0(35)) +
+          (0.707107 * occ_func_0_0(8) * occ_func_0_1(0) * occ_func_0_1(6) *
+               occ_func_0_0(34) +
+           0.707107 * occ_func_0_1(8) * occ_func_0_0(0) * occ_func_0_1(6) *
+               occ_func_0_0(34)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_1(5) * occ_func_0_1(4) *
+               occ_func_0_0(83) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_0(5) * occ_func_0_1(4) *
+               occ_func_0_0(83)) +
+          (0.707107 * occ_func_0_0(82) * occ_func_0_1(27) * occ_func_0_1(26) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(82) * occ_func_0_0(27) * occ_func_0_1(26) *
+               occ_func_0_0(0)) +
           (0.707107 * occ_func_0_0(86) * occ_func_0_0(40) * occ_func_0_1(41) *
                occ_func_0_1(0) +
            0.707107 * occ_func_0_0(86) * occ_func_0_1(40) * occ_func_0_0(41) *
@@ -10921,22 +10009,22 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_13_8_at_0() const {
                occ_func_0_1(79) +
            0.707107 * occ_func_0_0(0) * occ_func_0_1(1) * occ_func_0_0(2) *
                occ_func_0_1(79)) +
-          (0.707107 * occ_func_0_0(0) * occ_func_0_0(9) * occ_func_0_1(7) *
-               occ_func_0_1(85) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(9) * occ_func_0_0(7) *
-               occ_func_0_1(85)) +
-          (0.707107 * occ_func_0_0(6) * occ_func_0_0(8) * occ_func_0_1(0) *
-               occ_func_0_1(39) +
-           0.707107 * occ_func_0_0(6) * occ_func_0_1(8) * occ_func_0_0(0) *
-               occ_func_0_1(39)) +
-          (0.707107 * occ_func_0_0(4) * occ_func_0_0(0) * occ_func_0_1(5) *
-               occ_func_0_1(37) +
-           0.707107 * occ_func_0_0(4) * occ_func_0_1(0) * occ_func_0_0(5) *
-               occ_func_0_1(37)) +
-          (0.707107 * occ_func_0_0(80) * occ_func_0_0(24) * occ_func_0_1(22) *
-               occ_func_0_1(0) +
-           0.707107 * occ_func_0_0(80) * occ_func_0_1(24) * occ_func_0_0(22) *
-               occ_func_0_1(0)) +
+          (0.707107 * occ_func_0_1(0) * occ_func_0_0(9) * occ_func_0_1(7) *
+               occ_func_0_0(85) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_1(9) * occ_func_0_0(7) *
+               occ_func_0_0(85)) +
+          (0.707107 * occ_func_0_1(6) * occ_func_0_0(8) * occ_func_0_1(0) *
+               occ_func_0_0(39) +
+           0.707107 * occ_func_0_1(6) * occ_func_0_1(8) * occ_func_0_0(0) *
+               occ_func_0_0(39)) +
+          (0.707107 * occ_func_0_1(4) * occ_func_0_0(0) * occ_func_0_1(5) *
+               occ_func_0_0(37) +
+           0.707107 * occ_func_0_1(4) * occ_func_0_1(0) * occ_func_0_0(5) *
+               occ_func_0_0(37)) +
+          (0.707107 * occ_func_0_1(80) * occ_func_0_0(24) * occ_func_0_1(22) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(80) * occ_func_0_1(24) * occ_func_0_0(22) *
+               occ_func_0_0(0)) +
           (0.707107 * occ_func_0_0(85) * occ_func_0_0(32) * occ_func_0_1(39) *
                occ_func_0_1(0) +
            0.707107 * occ_func_0_0(85) * occ_func_0_1(32) * occ_func_0_0(39) *
@@ -10987,52 +10075,52 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_13_8_at_0() const {
                occ_func_0_1(80)) +
           (0.707107 * occ_func_0_0(84) * occ_func_0_0(38) * occ_func_0_1(31) *
                occ_func_0_1(0) +
-           0.707107 * occ_func_0_0(84) * occ_func_0_1(38) * occ_func_0_0(31) *
+           0.707107 * occ_func_0_1(84) * occ_func_0_0(38) * occ_func_0_0(31) *
                occ_func_0_1(0)) +
           (0.707107 * occ_func_0_0(11) * occ_func_0_0(12) * occ_func_0_1(0) *
                occ_func_0_1(30) +
-           0.707107 * occ_func_0_0(11) * occ_func_0_1(12) * occ_func_0_0(0) *
+           0.707107 * occ_func_0_1(11) * occ_func_0_0(12) * occ_func_0_0(0) *
                occ_func_0_1(30)) +
           (0.707107 * occ_func_0_0(0) * occ_func_0_0(7) * occ_func_0_1(2) *
                occ_func_0_1(81) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(7) * occ_func_0_0(2) *
+           0.707107 * occ_func_0_1(0) * occ_func_0_0(7) * occ_func_0_0(2) *
                occ_func_0_1(81)) +
           (0.707107 * occ_func_0_0(6) * occ_func_0_0(0) * occ_func_0_1(1) *
                occ_func_0_1(23) +
-           0.707107 * occ_func_0_0(6) * occ_func_0_1(0) * occ_func_0_0(1) *
+           0.707107 * occ_func_0_1(6) * occ_func_0_0(0) * occ_func_0_0(1) *
                occ_func_0_1(23)) +
           (0.707107 * occ_func_0_0(10) * occ_func_0_0(11) * occ_func_0_1(0) *
                occ_func_0_1(33) +
-           0.707107 * occ_func_0_0(10) * occ_func_0_1(11) * occ_func_0_0(0) *
-               occ_func_0_1(33)) +
+           0.707107 * occ_func_0_1(10) * occ_func_0_0(11) * occ_func_0_1(0) *
+               occ_func_0_0(33)) +
           (0.707107 * occ_func_0_0(83) * occ_func_0_0(34) * occ_func_0_1(28) *
                occ_func_0_1(0) +
-           0.707107 * occ_func_0_0(83) * occ_func_0_1(34) * occ_func_0_0(28) *
-               occ_func_0_1(0)) +
+           0.707107 * occ_func_0_1(83) * occ_func_0_0(34) * occ_func_0_1(28) *
+               occ_func_0_0(0)) +
           (0.707107 * occ_func_0_0(0) * occ_func_0_0(8) * occ_func_0_1(3) *
                occ_func_0_1(82) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(8) * occ_func_0_0(3) *
-               occ_func_0_1(82)) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_0(8) * occ_func_0_1(3) *
+               occ_func_0_0(82)) +
           (0.707107 * occ_func_0_0(5) * occ_func_0_0(0) * occ_func_0_1(2) *
                occ_func_0_1(27) +
-           0.707107 * occ_func_0_0(5) * occ_func_0_1(0) * occ_func_0_0(2) *
-               occ_func_0_1(27)) +
-          (0.707107 * occ_func_0_0(0) * occ_func_0_0(11) * occ_func_0_1(12) *
-               occ_func_0_1(86) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(11) * occ_func_0_0(12) *
-               occ_func_0_1(86)) +
-          (0.707107 * occ_func_0_0(2) * occ_func_0_0(0) * occ_func_0_1(7) *
-               occ_func_0_1(41) +
-           0.707107 * occ_func_0_0(2) * occ_func_0_1(0) * occ_func_0_0(7) *
-               occ_func_0_1(41)) +
-          (0.707107 * occ_func_0_0(1) * occ_func_0_0(6) * occ_func_0_1(0) *
-               occ_func_0_1(40) +
-           0.707107 * occ_func_0_0(1) * occ_func_0_1(6) * occ_func_0_0(0) *
-               occ_func_0_1(40)) +
-          (0.707107 * occ_func_0_0(79) * occ_func_0_0(20) * occ_func_0_1(21) *
-               occ_func_0_1(0) +
-           0.707107 * occ_func_0_0(79) * occ_func_0_1(20) * occ_func_0_0(21) *
-               occ_func_0_1(0)) +
+           0.707107 * occ_func_0_1(5) * occ_func_0_0(0) * occ_func_0_1(2) *
+               occ_func_0_0(27)) +
+          (0.707107 * occ_func_0_1(0) * occ_func_0_0(11) * occ_func_0_1(12) *
+               occ_func_0_0(86) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_1(11) * occ_func_0_0(12) *
+               occ_func_0_0(86)) +
+          (0.707107 * occ_func_0_1(2) * occ_func_0_0(0) * occ_func_0_1(7) *
+               occ_func_0_0(41) +
+           0.707107 * occ_func_0_1(2) * occ_func_0_1(0) * occ_func_0_0(7) *
+               occ_func_0_0(41)) +
+          (0.707107 * occ_func_0_1(1) * occ_func_0_0(6) * occ_func_0_1(0) *
+               occ_func_0_0(40) +
+           0.707107 * occ_func_0_1(1) * occ_func_0_1(6) * occ_func_0_0(0) *
+               occ_func_0_0(40)) +
+          (0.707107 * occ_func_0_1(79) * occ_func_0_0(20) * occ_func_0_1(21) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(79) * occ_func_0_1(20) * occ_func_0_0(21) *
+               occ_func_0_0(0)) +
           (0.707107 * occ_func_0_0(86) * occ_func_0_0(42) * occ_func_0_1(40) *
                occ_func_0_1(0) +
            0.707107 * occ_func_0_0(86) * occ_func_0_1(42) * occ_func_0_0(40) *
@@ -11051,35 +10139,1207 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_13_8_at_0() const {
                occ_func_0_1(79)) +
           (0.707107 * occ_func_0_0(8) * occ_func_0_0(11) * occ_func_0_1(0) *
                occ_func_0_1(34) +
-           0.707107 * occ_func_0_0(8) * occ_func_0_1(11) * occ_func_0_0(0) *
-               occ_func_0_1(34)) +
+           0.707107 * occ_func_0_1(8) * occ_func_0_0(11) * occ_func_0_1(0) *
+               occ_func_0_0(34)) +
           (0.707107 * occ_func_0_0(0) * occ_func_0_0(10) * occ_func_0_1(5) *
                occ_func_0_1(83) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(10) * occ_func_0_0(5) *
-               occ_func_0_1(83)) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_0(10) * occ_func_0_1(5) *
+               occ_func_0_0(83)) +
           (0.707107 * occ_func_0_0(82) * occ_func_0_0(33) * occ_func_0_1(27) *
                occ_func_0_1(0) +
-           0.707107 * occ_func_0_0(82) * occ_func_0_1(33) * occ_func_0_0(27) *
-               occ_func_0_1(0)) +
+           0.707107 * occ_func_0_1(82) * occ_func_0_0(33) * occ_func_0_1(27) *
+               occ_func_0_0(0)) +
           (0.707107 * occ_func_0_0(3) * occ_func_0_0(0) * occ_func_0_1(2) *
                occ_func_0_1(28) +
-           0.707107 * occ_func_0_0(3) * occ_func_0_1(0) * occ_func_0_0(2) *
-               occ_func_0_1(28)) +
+           0.707107 * occ_func_0_1(3) * occ_func_0_0(0) * occ_func_0_1(2) *
+               occ_func_0_0(28)) +
+          (0.707107 * occ_func_0_0(7) * occ_func_0_1(0) * occ_func_0_1(9) *
+               occ_func_0_0(38) +
+           0.707107 * occ_func_0_1(7) * occ_func_0_1(0) * occ_func_0_0(9) *
+               occ_func_0_0(38)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_1(6) * occ_func_0_1(8) *
+               occ_func_0_0(84) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_1(6) * occ_func_0_0(8) *
+               occ_func_0_0(84)) +
+          (0.707107 * occ_func_0_0(5) * occ_func_0_1(4) * occ_func_0_1(0) *
+               occ_func_0_0(36) +
+           0.707107 * occ_func_0_1(5) * occ_func_0_1(4) * occ_func_0_0(0) *
+               occ_func_0_0(36)) +
+          (0.707107 * occ_func_0_0(81) * occ_func_0_1(23) * occ_func_0_1(25) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(81) * occ_func_0_1(23) * occ_func_0_0(25) *
+               occ_func_0_0(0))) /
+         24.;
+}
+template <typename Scalar>
+Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_13_4_at_0() const {
+  return (occ_func_0_0(0) * occ_func_0_1(7) * occ_func_0_1(12) *
+              occ_func_0_0(85) +
+          occ_func_0_0(6) * occ_func_0_1(0) * occ_func_0_1(11) *
+              occ_func_0_0(39) +
+          occ_func_0_0(1) * occ_func_0_1(2) * occ_func_0_1(0) *
+              occ_func_0_0(32) +
+          occ_func_0_0(80) * occ_func_0_1(22) * occ_func_0_1(29) *
+              occ_func_0_0(0) +
+          occ_func_0_1(83) * occ_func_0_0(35) * occ_func_0_1(34) *
+              occ_func_0_0(0) +
+          occ_func_0_1(0) * occ_func_0_0(9) * occ_func_0_1(8) *
+              occ_func_0_0(82) +
+          occ_func_0_1(5) * occ_func_0_0(7) * occ_func_0_1(0) *
+              occ_func_0_0(27) +
+          occ_func_0_1(4) * occ_func_0_0(0) * occ_func_0_1(6) *
+              occ_func_0_0(26) +
+          occ_func_0_1(84) * occ_func_0_1(36) * occ_func_0_0(38) *
+              occ_func_0_0(0) +
+          occ_func_0_1(8) * occ_func_0_1(0) * occ_func_0_0(9) *
+              occ_func_0_0(25) +
+          occ_func_0_1(0) * occ_func_0_1(5) * occ_func_0_0(7) *
+              occ_func_0_0(81) +
+          occ_func_0_1(6) * occ_func_0_1(4) * occ_func_0_0(0) *
+              occ_func_0_0(23) +
+          occ_func_0_0(0) * occ_func_0_1(10) * occ_func_0_1(11) *
+              occ_func_0_0(86) +
+          occ_func_0_0(3) * occ_func_0_1(0) * occ_func_0_1(8) *
+              occ_func_0_0(42) +
+          occ_func_0_0(2) * occ_func_0_1(5) * occ_func_0_1(0) *
+              occ_func_0_0(41) +
+          occ_func_0_0(79) * occ_func_0_1(19) * occ_func_0_1(20) *
+              occ_func_0_0(0) +
+          occ_func_0_0(84) * occ_func_0_1(31) * occ_func_0_1(36) *
+              occ_func_0_0(0) +
+          occ_func_0_0(11) * occ_func_0_1(0) * occ_func_0_1(10) *
+              occ_func_0_0(30) +
+          occ_func_0_0(8) * occ_func_0_1(3) * occ_func_0_1(0) *
+              occ_func_0_0(25) +
+          occ_func_0_0(0) * occ_func_0_1(2) * occ_func_0_1(5) *
+              occ_func_0_0(81) +
+          occ_func_0_0(0) * occ_func_0_1(12) * occ_func_0_1(10) *
+              occ_func_0_0(86) +
+          occ_func_0_0(3) * occ_func_0_1(9) * occ_func_0_1(0) *
+              occ_func_0_0(42) +
+          occ_func_0_0(1) * occ_func_0_1(0) * occ_func_0_1(4) *
+              occ_func_0_0(40) +
+          occ_func_0_0(79) * occ_func_0_1(21) * occ_func_0_1(19) *
+              occ_func_0_0(0) +
+          occ_func_0_1(10) * occ_func_0_0(0) * occ_func_0_0(12) *
+              occ_func_0_1(33) +
+          occ_func_0_1(83) * occ_func_0_0(28) * occ_func_0_0(35) *
+              occ_func_0_1(0) +
+          occ_func_0_1(0) * occ_func_0_0(3) * occ_func_0_0(9) *
+              occ_func_0_1(82) +
+          occ_func_0_1(4) * occ_func_0_0(1) * occ_func_0_0(0) *
+              occ_func_0_1(26) +
+          occ_func_0_0(0) * occ_func_0_1(8) * occ_func_0_1(11) *
+              occ_func_0_0(84) +
+          occ_func_0_0(5) * occ_func_0_1(0) * occ_func_0_1(10) *
+              occ_func_0_0(36) +
+          occ_func_0_0(2) * occ_func_0_1(3) * occ_func_0_1(0) *
+              occ_func_0_0(31) +
+          occ_func_0_0(81) * occ_func_0_1(25) * occ_func_0_1(30) *
+              occ_func_0_0(0) +
+          occ_func_0_0(86) * occ_func_0_1(41) * occ_func_0_1(42) *
+              occ_func_0_0(0) +
+          occ_func_0_0(11) * occ_func_0_1(0) * occ_func_0_1(8) *
+              occ_func_0_0(20) +
+          occ_func_0_0(10) * occ_func_0_1(5) * occ_func_0_1(0) *
+              occ_func_0_0(19) +
+          occ_func_0_0(0) * occ_func_0_1(2) * occ_func_0_1(3) *
+              occ_func_0_0(79) +
+          occ_func_0_1(7) * occ_func_0_1(12) * occ_func_0_0(0) *
+              occ_func_0_0(38) +
+          occ_func_0_1(0) * occ_func_0_1(11) * occ_func_0_0(6) *
+              occ_func_0_0(84) +
+          occ_func_0_1(2) * occ_func_0_1(0) * occ_func_0_0(1) *
+              occ_func_0_0(31) +
+          occ_func_0_1(81) * occ_func_0_1(30) * occ_func_0_0(23) *
+              occ_func_0_0(0) +
+          occ_func_0_0(0) * occ_func_0_1(12) * occ_func_0_1(9) *
+              occ_func_0_0(85) +
+          occ_func_0_0(4) * occ_func_0_1(10) * occ_func_0_1(0) *
+              occ_func_0_0(37) +
+          occ_func_0_0(1) * occ_func_0_1(0) * occ_func_0_1(3) *
+              occ_func_0_0(32) +
+          occ_func_0_0(80) * occ_func_0_1(29) * occ_func_0_1(24) *
+              occ_func_0_0(0) +
+          occ_func_0_1(9) * occ_func_0_0(0) * occ_func_0_0(12) *
+              occ_func_0_1(35) +
+          occ_func_0_1(0) * occ_func_0_0(4) * occ_func_0_0(10) *
+              occ_func_0_1(83) +
+          occ_func_0_1(82) * occ_func_0_0(26) * occ_func_0_0(33) *
+              occ_func_0_1(0) +
+          occ_func_0_1(3) * occ_func_0_0(1) * occ_func_0_0(0) *
+              occ_func_0_1(28) +
+          occ_func_0_1(9) * occ_func_0_1(7) * occ_func_0_0(0) *
+              occ_func_0_0(35) +
+          occ_func_0_1(8) * occ_func_0_1(0) * occ_func_0_0(6) *
+              occ_func_0_0(34) +
+          occ_func_0_1(0) * occ_func_0_1(5) * occ_func_0_0(4) *
+              occ_func_0_0(83) +
+          occ_func_0_1(82) * occ_func_0_1(27) * occ_func_0_0(26) *
+              occ_func_0_0(0) +
+          occ_func_0_0(86) * occ_func_0_1(40) * occ_func_0_1(41) *
+              occ_func_0_0(0) +
+          occ_func_0_0(12) * occ_func_0_1(0) * occ_func_0_1(7) *
+              occ_func_0_0(21) +
+          occ_func_0_0(11) * occ_func_0_1(6) * occ_func_0_1(0) *
+              occ_func_0_0(20) +
+          occ_func_0_0(0) * occ_func_0_1(1) * occ_func_0_1(2) *
+              occ_func_0_0(79) +
+          occ_func_0_0(0) * occ_func_0_1(9) * occ_func_0_1(7) *
+              occ_func_0_0(85) +
+          occ_func_0_0(6) * occ_func_0_1(8) * occ_func_0_1(0) *
+              occ_func_0_0(39) +
+          occ_func_0_0(4) * occ_func_0_1(0) * occ_func_0_1(5) *
+              occ_func_0_0(37) +
+          occ_func_0_0(80) * occ_func_0_1(24) * occ_func_0_1(22) *
+              occ_func_0_0(0) +
+          occ_func_0_0(85) * occ_func_0_1(32) * occ_func_0_1(39) *
+              occ_func_0_0(0) +
+          occ_func_0_0(12) * occ_func_0_1(0) * occ_func_0_1(11) *
+              occ_func_0_0(29) +
+          occ_func_0_0(7) * occ_func_0_1(2) * occ_func_0_1(0) *
+              occ_func_0_0(22) +
+          occ_func_0_0(0) * occ_func_0_1(1) * occ_func_0_1(6) *
+              occ_func_0_0(80) +
+          occ_func_0_0(85) * occ_func_0_1(39) * occ_func_0_1(37) *
+              occ_func_0_0(0) +
+          occ_func_0_0(9) * occ_func_0_1(8) * occ_func_0_1(0) *
+              occ_func_0_0(24) +
+          occ_func_0_0(7) * occ_func_0_1(0) * occ_func_0_1(5) *
+              occ_func_0_0(22) +
+          occ_func_0_0(0) * occ_func_0_1(6) * occ_func_0_1(4) *
+              occ_func_0_0(80) +
+          occ_func_0_0(85) * occ_func_0_1(37) * occ_func_0_1(32) *
+              occ_func_0_0(0) +
+          occ_func_0_0(12) * occ_func_0_1(10) * occ_func_0_1(0) *
+              occ_func_0_0(29) +
+          occ_func_0_0(9) * occ_func_0_1(0) * occ_func_0_1(3) *
+              occ_func_0_0(24) +
+          occ_func_0_0(0) * occ_func_0_1(4) * occ_func_0_1(1) *
+              occ_func_0_0(80) +
+          occ_func_0_1(84) * occ_func_0_0(38) * occ_func_0_1(31) *
+              occ_func_0_0(0) +
+          occ_func_0_1(11) * occ_func_0_0(12) * occ_func_0_1(0) *
+              occ_func_0_0(30) +
+          occ_func_0_1(0) * occ_func_0_0(7) * occ_func_0_1(2) *
+              occ_func_0_0(81) +
+          occ_func_0_1(6) * occ_func_0_0(0) * occ_func_0_1(1) *
+              occ_func_0_0(23) +
+          occ_func_0_1(10) * occ_func_0_0(11) * occ_func_0_0(0) *
+              occ_func_0_1(33) +
+          occ_func_0_1(83) * occ_func_0_0(34) * occ_func_0_0(28) *
+              occ_func_0_1(0) +
+          occ_func_0_1(0) * occ_func_0_0(8) * occ_func_0_0(3) *
+              occ_func_0_1(82) +
+          occ_func_0_1(5) * occ_func_0_0(0) * occ_func_0_0(2) *
+              occ_func_0_1(27) +
+          occ_func_0_0(0) * occ_func_0_1(11) * occ_func_0_1(12) *
+              occ_func_0_0(86) +
+          occ_func_0_0(2) * occ_func_0_1(0) * occ_func_0_1(7) *
+              occ_func_0_0(41) +
+          occ_func_0_0(1) * occ_func_0_1(6) * occ_func_0_1(0) *
+              occ_func_0_0(40) +
+          occ_func_0_0(79) * occ_func_0_1(20) * occ_func_0_1(21) *
+              occ_func_0_0(0) +
+          occ_func_0_0(86) * occ_func_0_1(42) * occ_func_0_1(40) *
+              occ_func_0_0(0) +
+          occ_func_0_0(12) * occ_func_0_1(9) * occ_func_0_1(0) *
+              occ_func_0_0(21) +
+          occ_func_0_0(10) * occ_func_0_1(0) * occ_func_0_1(4) *
+              occ_func_0_0(19) +
+          occ_func_0_0(0) * occ_func_0_1(3) * occ_func_0_1(1) *
+              occ_func_0_0(79) +
+          occ_func_0_1(8) * occ_func_0_0(11) * occ_func_0_0(0) *
+              occ_func_0_1(34) +
+          occ_func_0_1(0) * occ_func_0_0(10) * occ_func_0_0(5) *
+              occ_func_0_1(83) +
+          occ_func_0_1(82) * occ_func_0_0(33) * occ_func_0_0(27) *
+              occ_func_0_1(0) +
+          occ_func_0_1(3) * occ_func_0_0(0) * occ_func_0_0(2) *
+              occ_func_0_1(28) +
+          occ_func_0_1(7) * occ_func_0_0(0) * occ_func_0_1(9) *
+              occ_func_0_0(38) +
+          occ_func_0_1(0) * occ_func_0_0(6) * occ_func_0_1(8) *
+              occ_func_0_0(84) +
+          occ_func_0_1(5) * occ_func_0_0(4) * occ_func_0_1(0) *
+              occ_func_0_0(36) +
+          occ_func_0_1(81) * occ_func_0_0(23) * occ_func_0_1(25) *
+              occ_func_0_0(0)) /
+         24.;
+}
+template <typename Scalar>
+Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_13_5_at_0() const {
+  return (occ_func_0_1(0) * occ_func_0_1(7) * occ_func_0_1(12) *
+              occ_func_0_0(85) +
+          occ_func_0_1(6) * occ_func_0_1(0) * occ_func_0_1(11) *
+              occ_func_0_0(39) +
+          occ_func_0_1(1) * occ_func_0_1(2) * occ_func_0_1(0) *
+              occ_func_0_0(32) +
+          occ_func_0_1(80) * occ_func_0_1(22) * occ_func_0_1(29) *
+              occ_func_0_0(0) +
+          occ_func_0_1(83) * occ_func_0_0(35) * occ_func_0_1(34) *
+              occ_func_0_1(0) +
+          occ_func_0_1(0) * occ_func_0_0(9) * occ_func_0_1(8) *
+              occ_func_0_1(82) +
+          occ_func_0_1(5) * occ_func_0_0(7) * occ_func_0_1(0) *
+              occ_func_0_1(27) +
+          occ_func_0_1(4) * occ_func_0_0(0) * occ_func_0_1(6) *
+              occ_func_0_1(26) +
+          occ_func_0_1(84) * occ_func_0_1(36) * occ_func_0_0(38) *
+              occ_func_0_1(0) +
+          occ_func_0_1(8) * occ_func_0_1(0) * occ_func_0_0(9) *
+              occ_func_0_1(25) +
+          occ_func_0_1(0) * occ_func_0_1(5) * occ_func_0_0(7) *
+              occ_func_0_1(81) +
+          occ_func_0_1(6) * occ_func_0_1(4) * occ_func_0_0(0) *
+              occ_func_0_1(23) +
+          occ_func_0_1(0) * occ_func_0_1(10) * occ_func_0_1(11) *
+              occ_func_0_0(86) +
+          occ_func_0_1(3) * occ_func_0_1(0) * occ_func_0_1(8) *
+              occ_func_0_0(42) +
+          occ_func_0_1(2) * occ_func_0_1(5) * occ_func_0_1(0) *
+              occ_func_0_0(41) +
+          occ_func_0_1(79) * occ_func_0_1(19) * occ_func_0_1(20) *
+              occ_func_0_0(0) +
+          occ_func_0_0(84) * occ_func_0_1(31) * occ_func_0_1(36) *
+              occ_func_0_1(0) +
+          occ_func_0_0(11) * occ_func_0_1(0) * occ_func_0_1(10) *
+              occ_func_0_1(30) +
+          occ_func_0_0(8) * occ_func_0_1(3) * occ_func_0_1(0) *
+              occ_func_0_1(25) +
+          occ_func_0_0(0) * occ_func_0_1(2) * occ_func_0_1(5) *
+              occ_func_0_1(81) +
+          occ_func_0_1(0) * occ_func_0_1(12) * occ_func_0_1(10) *
+              occ_func_0_0(86) +
+          occ_func_0_1(3) * occ_func_0_1(9) * occ_func_0_1(0) *
+              occ_func_0_0(42) +
+          occ_func_0_1(1) * occ_func_0_1(0) * occ_func_0_1(4) *
+              occ_func_0_0(40) +
+          occ_func_0_1(79) * occ_func_0_1(21) * occ_func_0_1(19) *
+              occ_func_0_0(0) +
+          occ_func_0_1(10) * occ_func_0_1(0) * occ_func_0_0(12) *
+              occ_func_0_1(33) +
+          occ_func_0_1(83) * occ_func_0_1(28) * occ_func_0_0(35) *
+              occ_func_0_1(0) +
+          occ_func_0_1(0) * occ_func_0_1(3) * occ_func_0_0(9) *
+              occ_func_0_1(82) +
+          occ_func_0_1(4) * occ_func_0_1(1) * occ_func_0_0(0) *
+              occ_func_0_1(26) +
+          occ_func_0_1(0) * occ_func_0_1(8) * occ_func_0_1(11) *
+              occ_func_0_0(84) +
+          occ_func_0_1(5) * occ_func_0_1(0) * occ_func_0_1(10) *
+              occ_func_0_0(36) +
+          occ_func_0_1(2) * occ_func_0_1(3) * occ_func_0_1(0) *
+              occ_func_0_0(31) +
+          occ_func_0_1(81) * occ_func_0_1(25) * occ_func_0_1(30) *
+              occ_func_0_0(0) +
+          occ_func_0_0(86) * occ_func_0_1(41) * occ_func_0_1(42) *
+              occ_func_0_1(0) +
+          occ_func_0_0(11) * occ_func_0_1(0) * occ_func_0_1(8) *
+              occ_func_0_1(20) +
+          occ_func_0_0(10) * occ_func_0_1(5) * occ_func_0_1(0) *
+              occ_func_0_1(19) +
+          occ_func_0_0(0) * occ_func_0_1(2) * occ_func_0_1(3) *
+              occ_func_0_1(79) +
+          occ_func_0_1(7) * occ_func_0_1(12) * occ_func_0_1(0) *
+              occ_func_0_0(38) +
+          occ_func_0_1(0) * occ_func_0_1(11) * occ_func_0_1(6) *
+              occ_func_0_0(84) +
+          occ_func_0_1(2) * occ_func_0_1(0) * occ_func_0_1(1) *
+              occ_func_0_0(31) +
+          occ_func_0_1(81) * occ_func_0_1(30) * occ_func_0_1(23) *
+              occ_func_0_0(0) +
+          occ_func_0_1(0) * occ_func_0_1(12) * occ_func_0_1(9) *
+              occ_func_0_0(85) +
+          occ_func_0_1(4) * occ_func_0_1(10) * occ_func_0_1(0) *
+              occ_func_0_0(37) +
+          occ_func_0_1(1) * occ_func_0_1(0) * occ_func_0_1(3) *
+              occ_func_0_0(32) +
+          occ_func_0_1(80) * occ_func_0_1(29) * occ_func_0_1(24) *
+              occ_func_0_0(0) +
+          occ_func_0_1(9) * occ_func_0_1(0) * occ_func_0_0(12) *
+              occ_func_0_1(35) +
+          occ_func_0_1(0) * occ_func_0_1(4) * occ_func_0_0(10) *
+              occ_func_0_1(83) +
+          occ_func_0_1(82) * occ_func_0_1(26) * occ_func_0_0(33) *
+              occ_func_0_1(0) +
+          occ_func_0_1(3) * occ_func_0_1(1) * occ_func_0_0(0) *
+              occ_func_0_1(28) +
+          occ_func_0_1(9) * occ_func_0_1(7) * occ_func_0_1(0) *
+              occ_func_0_0(35) +
+          occ_func_0_1(8) * occ_func_0_1(0) * occ_func_0_1(6) *
+              occ_func_0_0(34) +
+          occ_func_0_1(0) * occ_func_0_1(5) * occ_func_0_1(4) *
+              occ_func_0_0(83) +
+          occ_func_0_1(82) * occ_func_0_1(27) * occ_func_0_1(26) *
+              occ_func_0_0(0) +
+          occ_func_0_0(86) * occ_func_0_1(40) * occ_func_0_1(41) *
+              occ_func_0_1(0) +
+          occ_func_0_0(12) * occ_func_0_1(0) * occ_func_0_1(7) *
+              occ_func_0_1(21) +
+          occ_func_0_0(11) * occ_func_0_1(6) * occ_func_0_1(0) *
+              occ_func_0_1(20) +
+          occ_func_0_0(0) * occ_func_0_1(1) * occ_func_0_1(2) *
+              occ_func_0_1(79) +
+          occ_func_0_1(0) * occ_func_0_1(9) * occ_func_0_1(7) *
+              occ_func_0_0(85) +
+          occ_func_0_1(6) * occ_func_0_1(8) * occ_func_0_1(0) *
+              occ_func_0_0(39) +
+          occ_func_0_1(4) * occ_func_0_1(0) * occ_func_0_1(5) *
+              occ_func_0_0(37) +
+          occ_func_0_1(80) * occ_func_0_1(24) * occ_func_0_1(22) *
+              occ_func_0_0(0) +
+          occ_func_0_0(85) * occ_func_0_1(32) * occ_func_0_1(39) *
+              occ_func_0_1(0) +
+          occ_func_0_0(12) * occ_func_0_1(0) * occ_func_0_1(11) *
+              occ_func_0_1(29) +
+          occ_func_0_0(7) * occ_func_0_1(2) * occ_func_0_1(0) *
+              occ_func_0_1(22) +
+          occ_func_0_0(0) * occ_func_0_1(1) * occ_func_0_1(6) *
+              occ_func_0_1(80) +
+          occ_func_0_0(85) * occ_func_0_1(39) * occ_func_0_1(37) *
+              occ_func_0_1(0) +
+          occ_func_0_0(9) * occ_func_0_1(8) * occ_func_0_1(0) *
+              occ_func_0_1(24) +
+          occ_func_0_0(7) * occ_func_0_1(0) * occ_func_0_1(5) *
+              occ_func_0_1(22) +
+          occ_func_0_0(0) * occ_func_0_1(6) * occ_func_0_1(4) *
+              occ_func_0_1(80) +
+          occ_func_0_0(85) * occ_func_0_1(37) * occ_func_0_1(32) *
+              occ_func_0_1(0) +
+          occ_func_0_0(12) * occ_func_0_1(10) * occ_func_0_1(0) *
+              occ_func_0_1(29) +
+          occ_func_0_0(9) * occ_func_0_1(0) * occ_func_0_1(3) *
+              occ_func_0_1(24) +
+          occ_func_0_0(0) * occ_func_0_1(4) * occ_func_0_1(1) *
+              occ_func_0_1(80) +
+          occ_func_0_1(84) * occ_func_0_0(38) * occ_func_0_1(31) *
+              occ_func_0_1(0) +
+          occ_func_0_1(11) * occ_func_0_0(12) * occ_func_0_1(0) *
+              occ_func_0_1(30) +
+          occ_func_0_1(0) * occ_func_0_0(7) * occ_func_0_1(2) *
+              occ_func_0_1(81) +
+          occ_func_0_1(6) * occ_func_0_0(0) * occ_func_0_1(1) *
+              occ_func_0_1(23) +
+          occ_func_0_1(10) * occ_func_0_0(11) * occ_func_0_1(0) *
+              occ_func_0_1(33) +
+          occ_func_0_1(83) * occ_func_0_0(34) * occ_func_0_1(28) *
+              occ_func_0_1(0) +
+          occ_func_0_1(0) * occ_func_0_0(8) * occ_func_0_1(3) *
+              occ_func_0_1(82) +
+          occ_func_0_1(5) * occ_func_0_0(0) * occ_func_0_1(2) *
+              occ_func_0_1(27) +
+          occ_func_0_1(0) * occ_func_0_1(11) * occ_func_0_1(12) *
+              occ_func_0_0(86) +
+          occ_func_0_1(2) * occ_func_0_1(0) * occ_func_0_1(7) *
+              occ_func_0_0(41) +
+          occ_func_0_1(1) * occ_func_0_1(6) * occ_func_0_1(0) *
+              occ_func_0_0(40) +
+          occ_func_0_1(79) * occ_func_0_1(20) * occ_func_0_1(21) *
+              occ_func_0_0(0) +
+          occ_func_0_0(86) * occ_func_0_1(42) * occ_func_0_1(40) *
+              occ_func_0_1(0) +
+          occ_func_0_0(12) * occ_func_0_1(9) * occ_func_0_1(0) *
+              occ_func_0_1(21) +
+          occ_func_0_0(10) * occ_func_0_1(0) * occ_func_0_1(4) *
+              occ_func_0_1(19) +
+          occ_func_0_0(0) * occ_func_0_1(3) * occ_func_0_1(1) *
+              occ_func_0_1(79) +
+          occ_func_0_1(8) * occ_func_0_0(11) * occ_func_0_1(0) *
+              occ_func_0_1(34) +
+          occ_func_0_1(0) * occ_func_0_0(10) * occ_func_0_1(5) *
+              occ_func_0_1(83) +
+          occ_func_0_1(82) * occ_func_0_0(33) * occ_func_0_1(27) *
+              occ_func_0_1(0) +
+          occ_func_0_1(3) * occ_func_0_0(0) * occ_func_0_1(2) *
+              occ_func_0_1(28) +
+          occ_func_0_1(7) * occ_func_0_1(0) * occ_func_0_1(9) *
+              occ_func_0_0(38) +
+          occ_func_0_1(0) * occ_func_0_1(6) * occ_func_0_1(8) *
+              occ_func_0_0(84) +
+          occ_func_0_1(5) * occ_func_0_1(4) * occ_func_0_1(0) *
+              occ_func_0_0(36) +
+          occ_func_0_1(81) * occ_func_0_1(23) * occ_func_0_1(25) *
+              occ_func_0_0(0)) /
+         24.;
+}
+template <typename Scalar>
+Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_13_6_at_0() const {
+  return (occ_func_0_0(0) * occ_func_0_0(7) * occ_func_0_0(12) *
+              occ_func_0_1(85) +
+          occ_func_0_0(6) * occ_func_0_0(0) * occ_func_0_0(11) *
+              occ_func_0_1(39) +
+          occ_func_0_0(1) * occ_func_0_0(2) * occ_func_0_0(0) *
+              occ_func_0_1(32) +
+          occ_func_0_0(80) * occ_func_0_0(22) * occ_func_0_0(29) *
+              occ_func_0_1(0) +
+          occ_func_0_0(83) * occ_func_0_1(35) * occ_func_0_0(34) *
+              occ_func_0_0(0) +
+          occ_func_0_0(0) * occ_func_0_1(9) * occ_func_0_0(8) *
+              occ_func_0_0(82) +
+          occ_func_0_0(5) * occ_func_0_1(7) * occ_func_0_0(0) *
+              occ_func_0_0(27) +
+          occ_func_0_0(4) * occ_func_0_1(0) * occ_func_0_0(6) *
+              occ_func_0_0(26) +
+          occ_func_0_0(84) * occ_func_0_0(36) * occ_func_0_1(38) *
+              occ_func_0_0(0) +
+          occ_func_0_0(8) * occ_func_0_0(0) * occ_func_0_1(9) *
+              occ_func_0_0(25) +
+          occ_func_0_0(0) * occ_func_0_0(5) * occ_func_0_1(7) *
+              occ_func_0_0(81) +
+          occ_func_0_0(6) * occ_func_0_0(4) * occ_func_0_1(0) *
+              occ_func_0_0(23) +
+          occ_func_0_0(0) * occ_func_0_0(10) * occ_func_0_0(11) *
+              occ_func_0_1(86) +
+          occ_func_0_0(3) * occ_func_0_0(0) * occ_func_0_0(8) *
+              occ_func_0_1(42) +
+          occ_func_0_0(2) * occ_func_0_0(5) * occ_func_0_0(0) *
+              occ_func_0_1(41) +
+          occ_func_0_0(79) * occ_func_0_0(19) * occ_func_0_0(20) *
+              occ_func_0_1(0) +
+          occ_func_0_1(84) * occ_func_0_0(31) * occ_func_0_0(36) *
+              occ_func_0_0(0) +
+          occ_func_0_1(11) * occ_func_0_0(0) * occ_func_0_0(10) *
+              occ_func_0_0(30) +
+          occ_func_0_1(8) * occ_func_0_0(3) * occ_func_0_0(0) *
+              occ_func_0_0(25) +
+          occ_func_0_1(0) * occ_func_0_0(2) * occ_func_0_0(5) *
+              occ_func_0_0(81) +
+          occ_func_0_0(0) * occ_func_0_0(12) * occ_func_0_0(10) *
+              occ_func_0_1(86) +
+          occ_func_0_0(3) * occ_func_0_0(9) * occ_func_0_0(0) *
+              occ_func_0_1(42) +
+          occ_func_0_0(1) * occ_func_0_0(0) * occ_func_0_0(4) *
+              occ_func_0_1(40) +
+          occ_func_0_0(79) * occ_func_0_0(21) * occ_func_0_0(19) *
+              occ_func_0_1(0) +
+          occ_func_0_0(10) * occ_func_0_0(0) * occ_func_0_1(12) *
+              occ_func_0_0(33) +
+          occ_func_0_0(83) * occ_func_0_0(28) * occ_func_0_1(35) *
+              occ_func_0_0(0) +
+          occ_func_0_0(0) * occ_func_0_0(3) * occ_func_0_1(9) *
+              occ_func_0_0(82) +
+          occ_func_0_0(4) * occ_func_0_0(1) * occ_func_0_1(0) *
+              occ_func_0_0(26) +
+          occ_func_0_0(0) * occ_func_0_0(8) * occ_func_0_0(11) *
+              occ_func_0_1(84) +
+          occ_func_0_0(5) * occ_func_0_0(0) * occ_func_0_0(10) *
+              occ_func_0_1(36) +
+          occ_func_0_0(2) * occ_func_0_0(3) * occ_func_0_0(0) *
+              occ_func_0_1(31) +
+          occ_func_0_0(81) * occ_func_0_0(25) * occ_func_0_0(30) *
+              occ_func_0_1(0) +
+          occ_func_0_1(86) * occ_func_0_0(41) * occ_func_0_0(42) *
+              occ_func_0_0(0) +
+          occ_func_0_1(11) * occ_func_0_0(0) * occ_func_0_0(8) *
+              occ_func_0_0(20) +
+          occ_func_0_1(10) * occ_func_0_0(5) * occ_func_0_0(0) *
+              occ_func_0_0(19) +
+          occ_func_0_1(0) * occ_func_0_0(2) * occ_func_0_0(3) *
+              occ_func_0_0(79) +
+          occ_func_0_0(7) * occ_func_0_0(12) * occ_func_0_0(0) *
+              occ_func_0_1(38) +
+          occ_func_0_0(0) * occ_func_0_0(11) * occ_func_0_0(6) *
+              occ_func_0_1(84) +
+          occ_func_0_0(2) * occ_func_0_0(0) * occ_func_0_0(1) *
+              occ_func_0_1(31) +
+          occ_func_0_0(81) * occ_func_0_0(30) * occ_func_0_0(23) *
+              occ_func_0_1(0) +
+          occ_func_0_0(0) * occ_func_0_0(12) * occ_func_0_0(9) *
+              occ_func_0_1(85) +
+          occ_func_0_0(4) * occ_func_0_0(10) * occ_func_0_0(0) *
+              occ_func_0_1(37) +
+          occ_func_0_0(1) * occ_func_0_0(0) * occ_func_0_0(3) *
+              occ_func_0_1(32) +
+          occ_func_0_0(80) * occ_func_0_0(29) * occ_func_0_0(24) *
+              occ_func_0_1(0) +
+          occ_func_0_0(9) * occ_func_0_0(0) * occ_func_0_1(12) *
+              occ_func_0_0(35) +
+          occ_func_0_0(0) * occ_func_0_0(4) * occ_func_0_1(10) *
+              occ_func_0_0(83) +
+          occ_func_0_0(82) * occ_func_0_0(26) * occ_func_0_1(33) *
+              occ_func_0_0(0) +
+          occ_func_0_0(3) * occ_func_0_0(1) * occ_func_0_1(0) *
+              occ_func_0_0(28) +
+          occ_func_0_0(9) * occ_func_0_0(7) * occ_func_0_0(0) *
+              occ_func_0_1(35) +
+          occ_func_0_0(8) * occ_func_0_0(0) * occ_func_0_0(6) *
+              occ_func_0_1(34) +
+          occ_func_0_0(0) * occ_func_0_0(5) * occ_func_0_0(4) *
+              occ_func_0_1(83) +
+          occ_func_0_0(82) * occ_func_0_0(27) * occ_func_0_0(26) *
+              occ_func_0_1(0) +
+          occ_func_0_1(86) * occ_func_0_0(40) * occ_func_0_0(41) *
+              occ_func_0_0(0) +
+          occ_func_0_1(12) * occ_func_0_0(0) * occ_func_0_0(7) *
+              occ_func_0_0(21) +
+          occ_func_0_1(11) * occ_func_0_0(6) * occ_func_0_0(0) *
+              occ_func_0_0(20) +
+          occ_func_0_1(0) * occ_func_0_0(1) * occ_func_0_0(2) *
+              occ_func_0_0(79) +
+          occ_func_0_0(0) * occ_func_0_0(9) * occ_func_0_0(7) *
+              occ_func_0_1(85) +
+          occ_func_0_0(6) * occ_func_0_0(8) * occ_func_0_0(0) *
+              occ_func_0_1(39) +
+          occ_func_0_0(4) * occ_func_0_0(0) * occ_func_0_0(5) *
+              occ_func_0_1(37) +
+          occ_func_0_0(80) * occ_func_0_0(24) * occ_func_0_0(22) *
+              occ_func_0_1(0) +
+          occ_func_0_1(85) * occ_func_0_0(32) * occ_func_0_0(39) *
+              occ_func_0_0(0) +
+          occ_func_0_1(12) * occ_func_0_0(0) * occ_func_0_0(11) *
+              occ_func_0_0(29) +
+          occ_func_0_1(7) * occ_func_0_0(2) * occ_func_0_0(0) *
+              occ_func_0_0(22) +
+          occ_func_0_1(0) * occ_func_0_0(1) * occ_func_0_0(6) *
+              occ_func_0_0(80) +
+          occ_func_0_1(85) * occ_func_0_0(39) * occ_func_0_0(37) *
+              occ_func_0_0(0) +
+          occ_func_0_1(9) * occ_func_0_0(8) * occ_func_0_0(0) *
+              occ_func_0_0(24) +
+          occ_func_0_1(7) * occ_func_0_0(0) * occ_func_0_0(5) *
+              occ_func_0_0(22) +
+          occ_func_0_1(0) * occ_func_0_0(6) * occ_func_0_0(4) *
+              occ_func_0_0(80) +
+          occ_func_0_1(85) * occ_func_0_0(37) * occ_func_0_0(32) *
+              occ_func_0_0(0) +
+          occ_func_0_1(12) * occ_func_0_0(10) * occ_func_0_0(0) *
+              occ_func_0_0(29) +
+          occ_func_0_1(9) * occ_func_0_0(0) * occ_func_0_0(3) *
+              occ_func_0_0(24) +
+          occ_func_0_1(0) * occ_func_0_0(4) * occ_func_0_0(1) *
+              occ_func_0_0(80) +
+          occ_func_0_0(84) * occ_func_0_1(38) * occ_func_0_0(31) *
+              occ_func_0_0(0) +
+          occ_func_0_0(11) * occ_func_0_1(12) * occ_func_0_0(0) *
+              occ_func_0_0(30) +
+          occ_func_0_0(0) * occ_func_0_1(7) * occ_func_0_0(2) *
+              occ_func_0_0(81) +
+          occ_func_0_0(6) * occ_func_0_1(0) * occ_func_0_0(1) *
+              occ_func_0_0(23) +
+          occ_func_0_0(10) * occ_func_0_1(11) * occ_func_0_0(0) *
+              occ_func_0_0(33) +
+          occ_func_0_0(83) * occ_func_0_1(34) * occ_func_0_0(28) *
+              occ_func_0_0(0) +
+          occ_func_0_0(0) * occ_func_0_1(8) * occ_func_0_0(3) *
+              occ_func_0_0(82) +
+          occ_func_0_0(5) * occ_func_0_1(0) * occ_func_0_0(2) *
+              occ_func_0_0(27) +
+          occ_func_0_0(0) * occ_func_0_0(11) * occ_func_0_0(12) *
+              occ_func_0_1(86) +
+          occ_func_0_0(2) * occ_func_0_0(0) * occ_func_0_0(7) *
+              occ_func_0_1(41) +
+          occ_func_0_0(1) * occ_func_0_0(6) * occ_func_0_0(0) *
+              occ_func_0_1(40) +
+          occ_func_0_0(79) * occ_func_0_0(20) * occ_func_0_0(21) *
+              occ_func_0_1(0) +
+          occ_func_0_1(86) * occ_func_0_0(42) * occ_func_0_0(40) *
+              occ_func_0_0(0) +
+          occ_func_0_1(12) * occ_func_0_0(9) * occ_func_0_0(0) *
+              occ_func_0_0(21) +
+          occ_func_0_1(10) * occ_func_0_0(0) * occ_func_0_0(4) *
+              occ_func_0_0(19) +
+          occ_func_0_1(0) * occ_func_0_0(3) * occ_func_0_0(1) *
+              occ_func_0_0(79) +
+          occ_func_0_0(8) * occ_func_0_1(11) * occ_func_0_0(0) *
+              occ_func_0_0(34) +
+          occ_func_0_0(0) * occ_func_0_1(10) * occ_func_0_0(5) *
+              occ_func_0_0(83) +
+          occ_func_0_0(82) * occ_func_0_1(33) * occ_func_0_0(27) *
+              occ_func_0_0(0) +
+          occ_func_0_0(3) * occ_func_0_1(0) * occ_func_0_0(2) *
+              occ_func_0_0(28) +
+          occ_func_0_0(7) * occ_func_0_0(0) * occ_func_0_0(9) *
+              occ_func_0_1(38) +
+          occ_func_0_0(0) * occ_func_0_0(6) * occ_func_0_0(8) *
+              occ_func_0_1(84) +
+          occ_func_0_0(5) * occ_func_0_0(4) * occ_func_0_0(0) *
+              occ_func_0_1(36) +
+          occ_func_0_0(81) * occ_func_0_0(23) * occ_func_0_0(25) *
+              occ_func_0_1(0)) /
+         24.;
+}
+template <typename Scalar>
+Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_13_7_at_0() const {
+  return (occ_func_0_1(0) * occ_func_0_0(7) * occ_func_0_0(12) *
+              occ_func_0_1(85) +
+          occ_func_0_1(6) * occ_func_0_0(0) * occ_func_0_0(11) *
+              occ_func_0_1(39) +
+          occ_func_0_1(1) * occ_func_0_0(2) * occ_func_0_0(0) *
+              occ_func_0_1(32) +
+          occ_func_0_1(80) * occ_func_0_0(22) * occ_func_0_0(29) *
+              occ_func_0_1(0) +
+          occ_func_0_0(83) * occ_func_0_1(35) * occ_func_0_0(34) *
+              occ_func_0_1(0) +
+          occ_func_0_0(0) * occ_func_0_1(9) * occ_func_0_0(8) *
+              occ_func_0_1(82) +
+          occ_func_0_0(5) * occ_func_0_1(7) * occ_func_0_0(0) *
+              occ_func_0_1(27) +
+          occ_func_0_0(4) * occ_func_0_1(0) * occ_func_0_0(6) *
+              occ_func_0_1(26) +
+          occ_func_0_0(84) * occ_func_0_0(36) * occ_func_0_1(38) *
+              occ_func_0_1(0) +
+          occ_func_0_0(8) * occ_func_0_0(0) * occ_func_0_1(9) *
+              occ_func_0_1(25) +
+          occ_func_0_0(0) * occ_func_0_0(5) * occ_func_0_1(7) *
+              occ_func_0_1(81) +
+          occ_func_0_0(6) * occ_func_0_0(4) * occ_func_0_1(0) *
+              occ_func_0_1(23) +
+          occ_func_0_1(0) * occ_func_0_0(10) * occ_func_0_0(11) *
+              occ_func_0_1(86) +
+          occ_func_0_1(3) * occ_func_0_0(0) * occ_func_0_0(8) *
+              occ_func_0_1(42) +
+          occ_func_0_1(2) * occ_func_0_0(5) * occ_func_0_0(0) *
+              occ_func_0_1(41) +
+          occ_func_0_1(79) * occ_func_0_0(19) * occ_func_0_0(20) *
+              occ_func_0_1(0) +
+          occ_func_0_1(84) * occ_func_0_0(31) * occ_func_0_0(36) *
+              occ_func_0_1(0) +
+          occ_func_0_1(11) * occ_func_0_0(0) * occ_func_0_0(10) *
+              occ_func_0_1(30) +
+          occ_func_0_1(8) * occ_func_0_0(3) * occ_func_0_0(0) *
+              occ_func_0_1(25) +
+          occ_func_0_1(0) * occ_func_0_0(2) * occ_func_0_0(5) *
+              occ_func_0_1(81) +
+          occ_func_0_1(0) * occ_func_0_0(12) * occ_func_0_0(10) *
+              occ_func_0_1(86) +
+          occ_func_0_1(3) * occ_func_0_0(9) * occ_func_0_0(0) *
+              occ_func_0_1(42) +
+          occ_func_0_1(1) * occ_func_0_0(0) * occ_func_0_0(4) *
+              occ_func_0_1(40) +
+          occ_func_0_1(79) * occ_func_0_0(21) * occ_func_0_0(19) *
+              occ_func_0_1(0) +
+          occ_func_0_0(10) * occ_func_0_1(0) * occ_func_0_1(12) *
+              occ_func_0_0(33) +
+          occ_func_0_0(83) * occ_func_0_1(28) * occ_func_0_1(35) *
+              occ_func_0_0(0) +
+          occ_func_0_0(0) * occ_func_0_1(3) * occ_func_0_1(9) *
+              occ_func_0_0(82) +
+          occ_func_0_0(4) * occ_func_0_1(1) * occ_func_0_1(0) *
+              occ_func_0_0(26) +
+          occ_func_0_1(0) * occ_func_0_0(8) * occ_func_0_0(11) *
+              occ_func_0_1(84) +
+          occ_func_0_1(5) * occ_func_0_0(0) * occ_func_0_0(10) *
+              occ_func_0_1(36) +
+          occ_func_0_1(2) * occ_func_0_0(3) * occ_func_0_0(0) *
+              occ_func_0_1(31) +
+          occ_func_0_1(81) * occ_func_0_0(25) * occ_func_0_0(30) *
+              occ_func_0_1(0) +
+          occ_func_0_1(86) * occ_func_0_0(41) * occ_func_0_0(42) *
+              occ_func_0_1(0) +
+          occ_func_0_1(11) * occ_func_0_0(0) * occ_func_0_0(8) *
+              occ_func_0_1(20) +
+          occ_func_0_1(10) * occ_func_0_0(5) * occ_func_0_0(0) *
+              occ_func_0_1(19) +
+          occ_func_0_1(0) * occ_func_0_0(2) * occ_func_0_0(3) *
+              occ_func_0_1(79) +
+          occ_func_0_0(7) * occ_func_0_0(12) * occ_func_0_1(0) *
+              occ_func_0_1(38) +
+          occ_func_0_0(0) * occ_func_0_0(11) * occ_func_0_1(6) *
+              occ_func_0_1(84) +
+          occ_func_0_0(2) * occ_func_0_0(0) * occ_func_0_1(1) *
+              occ_func_0_1(31) +
+          occ_func_0_0(81) * occ_func_0_0(30) * occ_func_0_1(23) *
+              occ_func_0_1(0) +
+          occ_func_0_1(0) * occ_func_0_0(12) * occ_func_0_0(9) *
+              occ_func_0_1(85) +
+          occ_func_0_1(4) * occ_func_0_0(10) * occ_func_0_0(0) *
+              occ_func_0_1(37) +
+          occ_func_0_1(1) * occ_func_0_0(0) * occ_func_0_0(3) *
+              occ_func_0_1(32) +
+          occ_func_0_1(80) * occ_func_0_0(29) * occ_func_0_0(24) *
+              occ_func_0_1(0) +
+          occ_func_0_0(9) * occ_func_0_1(0) * occ_func_0_1(12) *
+              occ_func_0_0(35) +
+          occ_func_0_0(0) * occ_func_0_1(4) * occ_func_0_1(10) *
+              occ_func_0_0(83) +
+          occ_func_0_0(82) * occ_func_0_1(26) * occ_func_0_1(33) *
+              occ_func_0_0(0) +
+          occ_func_0_0(3) * occ_func_0_1(1) * occ_func_0_1(0) *
+              occ_func_0_0(28) +
+          occ_func_0_0(9) * occ_func_0_0(7) * occ_func_0_1(0) *
+              occ_func_0_1(35) +
+          occ_func_0_0(8) * occ_func_0_0(0) * occ_func_0_1(6) *
+              occ_func_0_1(34) +
+          occ_func_0_0(0) * occ_func_0_0(5) * occ_func_0_1(4) *
+              occ_func_0_1(83) +
+          occ_func_0_0(82) * occ_func_0_0(27) * occ_func_0_1(26) *
+              occ_func_0_1(0) +
+          occ_func_0_1(86) * occ_func_0_0(40) * occ_func_0_0(41) *
+              occ_func_0_1(0) +
+          occ_func_0_1(12) * occ_func_0_0(0) * occ_func_0_0(7) *
+              occ_func_0_1(21) +
+          occ_func_0_1(11) * occ_func_0_0(6) * occ_func_0_0(0) *
+              occ_func_0_1(20) +
+          occ_func_0_1(0) * occ_func_0_0(1) * occ_func_0_0(2) *
+              occ_func_0_1(79) +
+          occ_func_0_1(0) * occ_func_0_0(9) * occ_func_0_0(7) *
+              occ_func_0_1(85) +
+          occ_func_0_1(6) * occ_func_0_0(8) * occ_func_0_0(0) *
+              occ_func_0_1(39) +
+          occ_func_0_1(4) * occ_func_0_0(0) * occ_func_0_0(5) *
+              occ_func_0_1(37) +
+          occ_func_0_1(80) * occ_func_0_0(24) * occ_func_0_0(22) *
+              occ_func_0_1(0) +
+          occ_func_0_1(85) * occ_func_0_0(32) * occ_func_0_0(39) *
+              occ_func_0_1(0) +
+          occ_func_0_1(12) * occ_func_0_0(0) * occ_func_0_0(11) *
+              occ_func_0_1(29) +
+          occ_func_0_1(7) * occ_func_0_0(2) * occ_func_0_0(0) *
+              occ_func_0_1(22) +
+          occ_func_0_1(0) * occ_func_0_0(1) * occ_func_0_0(6) *
+              occ_func_0_1(80) +
+          occ_func_0_1(85) * occ_func_0_0(39) * occ_func_0_0(37) *
+              occ_func_0_1(0) +
+          occ_func_0_1(9) * occ_func_0_0(8) * occ_func_0_0(0) *
+              occ_func_0_1(24) +
+          occ_func_0_1(7) * occ_func_0_0(0) * occ_func_0_0(5) *
+              occ_func_0_1(22) +
+          occ_func_0_1(0) * occ_func_0_0(6) * occ_func_0_0(4) *
+              occ_func_0_1(80) +
+          occ_func_0_1(85) * occ_func_0_0(37) * occ_func_0_0(32) *
+              occ_func_0_1(0) +
+          occ_func_0_1(12) * occ_func_0_0(10) * occ_func_0_0(0) *
+              occ_func_0_1(29) +
+          occ_func_0_1(9) * occ_func_0_0(0) * occ_func_0_0(3) *
+              occ_func_0_1(24) +
+          occ_func_0_1(0) * occ_func_0_0(4) * occ_func_0_0(1) *
+              occ_func_0_1(80) +
+          occ_func_0_0(84) * occ_func_0_1(38) * occ_func_0_0(31) *
+              occ_func_0_1(0) +
+          occ_func_0_0(11) * occ_func_0_1(12) * occ_func_0_0(0) *
+              occ_func_0_1(30) +
+          occ_func_0_0(0) * occ_func_0_1(7) * occ_func_0_0(2) *
+              occ_func_0_1(81) +
+          occ_func_0_0(6) * occ_func_0_1(0) * occ_func_0_0(1) *
+              occ_func_0_1(23) +
+          occ_func_0_0(10) * occ_func_0_1(11) * occ_func_0_1(0) *
+              occ_func_0_0(33) +
+          occ_func_0_0(83) * occ_func_0_1(34) * occ_func_0_1(28) *
+              occ_func_0_0(0) +
+          occ_func_0_0(0) * occ_func_0_1(8) * occ_func_0_1(3) *
+              occ_func_0_0(82) +
+          occ_func_0_0(5) * occ_func_0_1(0) * occ_func_0_1(2) *
+              occ_func_0_0(27) +
+          occ_func_0_1(0) * occ_func_0_0(11) * occ_func_0_0(12) *
+              occ_func_0_1(86) +
+          occ_func_0_1(2) * occ_func_0_0(0) * occ_func_0_0(7) *
+              occ_func_0_1(41) +
+          occ_func_0_1(1) * occ_func_0_0(6) * occ_func_0_0(0) *
+              occ_func_0_1(40) +
+          occ_func_0_1(79) * occ_func_0_0(20) * occ_func_0_0(21) *
+              occ_func_0_1(0) +
+          occ_func_0_1(86) * occ_func_0_0(42) * occ_func_0_0(40) *
+              occ_func_0_1(0) +
+          occ_func_0_1(12) * occ_func_0_0(9) * occ_func_0_0(0) *
+              occ_func_0_1(21) +
+          occ_func_0_1(10) * occ_func_0_0(0) * occ_func_0_0(4) *
+              occ_func_0_1(19) +
+          occ_func_0_1(0) * occ_func_0_0(3) * occ_func_0_0(1) *
+              occ_func_0_1(79) +
+          occ_func_0_0(8) * occ_func_0_1(11) * occ_func_0_1(0) *
+              occ_func_0_0(34) +
+          occ_func_0_0(0) * occ_func_0_1(10) * occ_func_0_1(5) *
+              occ_func_0_0(83) +
+          occ_func_0_0(82) * occ_func_0_1(33) * occ_func_0_1(27) *
+              occ_func_0_0(0) +
+          occ_func_0_0(3) * occ_func_0_1(0) * occ_func_0_1(2) *
+              occ_func_0_0(28) +
+          occ_func_0_0(7) * occ_func_0_1(0) * occ_func_0_0(9) *
+              occ_func_0_1(38) +
+          occ_func_0_0(0) * occ_func_0_1(6) * occ_func_0_0(8) *
+              occ_func_0_1(84) +
+          occ_func_0_0(5) * occ_func_0_1(4) * occ_func_0_0(0) *
+              occ_func_0_1(36) +
+          occ_func_0_0(81) * occ_func_0_1(23) * occ_func_0_0(25) *
+              occ_func_0_1(0)) /
+         24.;
+}
+template <typename Scalar>
+Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_13_8_at_0() const {
+  return ((0.707107 * occ_func_0_0(0) * occ_func_0_0(7) * occ_func_0_1(12) *
+               occ_func_0_1(85) +
+           0.707107 * occ_func_0_0(0) * occ_func_0_1(7) * occ_func_0_0(12) *
+               occ_func_0_1(85)) +
+          (0.707107 * occ_func_0_0(6) * occ_func_0_0(0) * occ_func_0_1(11) *
+               occ_func_0_1(39) +
+           0.707107 * occ_func_0_0(6) * occ_func_0_1(0) * occ_func_0_0(11) *
+               occ_func_0_1(39)) +
+          (0.707107 * occ_func_0_0(1) * occ_func_0_0(2) * occ_func_0_1(0) *
+               occ_func_0_1(32) +
+           0.707107 * occ_func_0_0(1) * occ_func_0_1(2) * occ_func_0_0(0) *
+               occ_func_0_1(32)) +
+          (0.707107 * occ_func_0_0(80) * occ_func_0_0(22) * occ_func_0_1(29) *
+               occ_func_0_1(0) +
+           0.707107 * occ_func_0_0(80) * occ_func_0_1(22) * occ_func_0_0(29) *
+               occ_func_0_1(0)) +
+          (0.707107 * occ_func_0_0(83) * occ_func_0_1(35) * occ_func_0_1(34) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(83) * occ_func_0_1(35) * occ_func_0_0(34) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_1(9) * occ_func_0_1(8) *
+               occ_func_0_0(82) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_1(9) * occ_func_0_0(8) *
+               occ_func_0_0(82)) +
+          (0.707107 * occ_func_0_0(5) * occ_func_0_1(7) * occ_func_0_1(0) *
+               occ_func_0_0(27) +
+           0.707107 * occ_func_0_1(5) * occ_func_0_1(7) * occ_func_0_0(0) *
+               occ_func_0_0(27)) +
+          (0.707107 * occ_func_0_0(4) * occ_func_0_1(0) * occ_func_0_1(6) *
+               occ_func_0_0(26) +
+           0.707107 * occ_func_0_1(4) * occ_func_0_1(0) * occ_func_0_0(6) *
+               occ_func_0_0(26)) +
+          (0.707107 * occ_func_0_0(84) * occ_func_0_1(36) * occ_func_0_1(38) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(84) * occ_func_0_0(36) * occ_func_0_1(38) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(8) * occ_func_0_1(0) * occ_func_0_1(9) *
+               occ_func_0_0(25) +
+           0.707107 * occ_func_0_1(8) * occ_func_0_0(0) * occ_func_0_1(9) *
+               occ_func_0_0(25)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_1(5) * occ_func_0_1(7) *
+               occ_func_0_0(81) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_0(5) * occ_func_0_1(7) *
+               occ_func_0_0(81)) +
+          (0.707107 * occ_func_0_0(6) * occ_func_0_1(4) * occ_func_0_1(0) *
+               occ_func_0_0(23) +
+           0.707107 * occ_func_0_1(6) * occ_func_0_0(4) * occ_func_0_1(0) *
+               occ_func_0_0(23)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_0(10) * occ_func_0_1(11) *
+               occ_func_0_1(86) +
+           0.707107 * occ_func_0_0(0) * occ_func_0_1(10) * occ_func_0_0(11) *
+               occ_func_0_1(86)) +
+          (0.707107 * occ_func_0_0(3) * occ_func_0_0(0) * occ_func_0_1(8) *
+               occ_func_0_1(42) +
+           0.707107 * occ_func_0_0(3) * occ_func_0_1(0) * occ_func_0_0(8) *
+               occ_func_0_1(42)) +
+          (0.707107 * occ_func_0_0(2) * occ_func_0_0(5) * occ_func_0_1(0) *
+               occ_func_0_1(41) +
+           0.707107 * occ_func_0_0(2) * occ_func_0_1(5) * occ_func_0_0(0) *
+               occ_func_0_1(41)) +
+          (0.707107 * occ_func_0_0(79) * occ_func_0_0(19) * occ_func_0_1(20) *
+               occ_func_0_1(0) +
+           0.707107 * occ_func_0_0(79) * occ_func_0_1(19) * occ_func_0_0(20) *
+               occ_func_0_1(0)) +
+          (0.707107 * occ_func_0_1(84) * occ_func_0_0(31) * occ_func_0_1(36) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(84) * occ_func_0_1(31) * occ_func_0_0(36) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_1(11) * occ_func_0_0(0) * occ_func_0_1(10) *
+               occ_func_0_0(30) +
+           0.707107 * occ_func_0_1(11) * occ_func_0_1(0) * occ_func_0_0(10) *
+               occ_func_0_0(30)) +
+          (0.707107 * occ_func_0_1(8) * occ_func_0_0(3) * occ_func_0_1(0) *
+               occ_func_0_0(25) +
+           0.707107 * occ_func_0_1(8) * occ_func_0_1(3) * occ_func_0_0(0) *
+               occ_func_0_0(25)) +
+          (0.707107 * occ_func_0_1(0) * occ_func_0_0(2) * occ_func_0_1(5) *
+               occ_func_0_0(81) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_1(2) * occ_func_0_0(5) *
+               occ_func_0_0(81)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_0(12) * occ_func_0_1(10) *
+               occ_func_0_1(86) +
+           0.707107 * occ_func_0_0(0) * occ_func_0_1(12) * occ_func_0_0(10) *
+               occ_func_0_1(86)) +
+          (0.707107 * occ_func_0_0(3) * occ_func_0_0(9) * occ_func_0_1(0) *
+               occ_func_0_1(42) +
+           0.707107 * occ_func_0_0(3) * occ_func_0_1(9) * occ_func_0_0(0) *
+               occ_func_0_1(42)) +
+          (0.707107 * occ_func_0_0(1) * occ_func_0_0(0) * occ_func_0_1(4) *
+               occ_func_0_1(40) +
+           0.707107 * occ_func_0_0(1) * occ_func_0_1(0) * occ_func_0_0(4) *
+               occ_func_0_1(40)) +
+          (0.707107 * occ_func_0_0(79) * occ_func_0_0(21) * occ_func_0_1(19) *
+               occ_func_0_1(0) +
+           0.707107 * occ_func_0_0(79) * occ_func_0_1(21) * occ_func_0_0(19) *
+               occ_func_0_1(0)) +
+          (0.707107 * occ_func_0_0(10) * occ_func_0_0(0) * occ_func_0_1(12) *
+               occ_func_0_1(33) +
+           0.707107 * occ_func_0_1(10) * occ_func_0_0(0) * occ_func_0_1(12) *
+               occ_func_0_0(33)) +
+          (0.707107 * occ_func_0_0(83) * occ_func_0_0(28) * occ_func_0_1(35) *
+               occ_func_0_1(0) +
+           0.707107 * occ_func_0_1(83) * occ_func_0_0(28) * occ_func_0_1(35) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_0(3) * occ_func_0_1(9) *
+               occ_func_0_1(82) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_0(3) * occ_func_0_1(9) *
+               occ_func_0_0(82)) +
+          (0.707107 * occ_func_0_0(4) * occ_func_0_0(1) * occ_func_0_1(0) *
+               occ_func_0_1(26) +
+           0.707107 * occ_func_0_1(4) * occ_func_0_0(1) * occ_func_0_1(0) *
+               occ_func_0_0(26)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_0(8) * occ_func_0_1(11) *
+               occ_func_0_1(84) +
+           0.707107 * occ_func_0_0(0) * occ_func_0_1(8) * occ_func_0_0(11) *
+               occ_func_0_1(84)) +
+          (0.707107 * occ_func_0_0(5) * occ_func_0_0(0) * occ_func_0_1(10) *
+               occ_func_0_1(36) +
+           0.707107 * occ_func_0_0(5) * occ_func_0_1(0) * occ_func_0_0(10) *
+               occ_func_0_1(36)) +
+          (0.707107 * occ_func_0_0(2) * occ_func_0_0(3) * occ_func_0_1(0) *
+               occ_func_0_1(31) +
+           0.707107 * occ_func_0_0(2) * occ_func_0_1(3) * occ_func_0_0(0) *
+               occ_func_0_1(31)) +
+          (0.707107 * occ_func_0_0(81) * occ_func_0_0(25) * occ_func_0_1(30) *
+               occ_func_0_1(0) +
+           0.707107 * occ_func_0_0(81) * occ_func_0_1(25) * occ_func_0_0(30) *
+               occ_func_0_1(0)) +
+          (0.707107 * occ_func_0_1(86) * occ_func_0_0(41) * occ_func_0_1(42) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(86) * occ_func_0_1(41) * occ_func_0_0(42) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_1(11) * occ_func_0_0(0) * occ_func_0_1(8) *
+               occ_func_0_0(20) +
+           0.707107 * occ_func_0_1(11) * occ_func_0_1(0) * occ_func_0_0(8) *
+               occ_func_0_0(20)) +
+          (0.707107 * occ_func_0_1(10) * occ_func_0_0(5) * occ_func_0_1(0) *
+               occ_func_0_0(19) +
+           0.707107 * occ_func_0_1(10) * occ_func_0_1(5) * occ_func_0_0(0) *
+               occ_func_0_0(19)) +
+          (0.707107 * occ_func_0_1(0) * occ_func_0_0(2) * occ_func_0_1(3) *
+               occ_func_0_0(79) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_1(2) * occ_func_0_0(3) *
+               occ_func_0_0(79)) +
+          (0.707107 * occ_func_0_0(7) * occ_func_0_1(12) * occ_func_0_0(0) *
+               occ_func_0_1(38) +
+           0.707107 * occ_func_0_1(7) * occ_func_0_0(12) * occ_func_0_0(0) *
+               occ_func_0_1(38)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_1(11) * occ_func_0_0(6) *
+               occ_func_0_1(84) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_0(11) * occ_func_0_0(6) *
+               occ_func_0_1(84)) +
+          (0.707107 * occ_func_0_0(2) * occ_func_0_1(0) * occ_func_0_0(1) *
+               occ_func_0_1(31) +
+           0.707107 * occ_func_0_1(2) * occ_func_0_0(0) * occ_func_0_0(1) *
+               occ_func_0_1(31)) +
+          (0.707107 * occ_func_0_0(81) * occ_func_0_1(30) * occ_func_0_0(23) *
+               occ_func_0_1(0) +
+           0.707107 * occ_func_0_1(81) * occ_func_0_0(30) * occ_func_0_0(23) *
+               occ_func_0_1(0)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_0(12) * occ_func_0_1(9) *
+               occ_func_0_1(85) +
+           0.707107 * occ_func_0_0(0) * occ_func_0_1(12) * occ_func_0_0(9) *
+               occ_func_0_1(85)) +
+          (0.707107 * occ_func_0_0(4) * occ_func_0_0(10) * occ_func_0_1(0) *
+               occ_func_0_1(37) +
+           0.707107 * occ_func_0_0(4) * occ_func_0_1(10) * occ_func_0_0(0) *
+               occ_func_0_1(37)) +
+          (0.707107 * occ_func_0_0(1) * occ_func_0_0(0) * occ_func_0_1(3) *
+               occ_func_0_1(32) +
+           0.707107 * occ_func_0_0(1) * occ_func_0_1(0) * occ_func_0_0(3) *
+               occ_func_0_1(32)) +
+          (0.707107 * occ_func_0_0(80) * occ_func_0_0(29) * occ_func_0_1(24) *
+               occ_func_0_1(0) +
+           0.707107 * occ_func_0_0(80) * occ_func_0_1(29) * occ_func_0_0(24) *
+               occ_func_0_1(0)) +
+          (0.707107 * occ_func_0_0(9) * occ_func_0_0(0) * occ_func_0_1(12) *
+               occ_func_0_1(35) +
+           0.707107 * occ_func_0_1(9) * occ_func_0_0(0) * occ_func_0_1(12) *
+               occ_func_0_0(35)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_0(4) * occ_func_0_1(10) *
+               occ_func_0_1(83) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_0(4) * occ_func_0_1(10) *
+               occ_func_0_0(83)) +
+          (0.707107 * occ_func_0_0(82) * occ_func_0_0(26) * occ_func_0_1(33) *
+               occ_func_0_1(0) +
+           0.707107 * occ_func_0_1(82) * occ_func_0_0(26) * occ_func_0_1(33) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(3) * occ_func_0_0(1) * occ_func_0_1(0) *
+               occ_func_0_1(28) +
+           0.707107 * occ_func_0_1(3) * occ_func_0_0(1) * occ_func_0_1(0) *
+               occ_func_0_0(28)) +
+          (0.707107 * occ_func_0_0(9) * occ_func_0_1(7) * occ_func_0_0(0) *
+               occ_func_0_1(35) +
+           0.707107 * occ_func_0_1(9) * occ_func_0_0(7) * occ_func_0_0(0) *
+               occ_func_0_1(35)) +
+          (0.707107 * occ_func_0_0(8) * occ_func_0_1(0) * occ_func_0_0(6) *
+               occ_func_0_1(34) +
+           0.707107 * occ_func_0_1(8) * occ_func_0_0(0) * occ_func_0_0(6) *
+               occ_func_0_1(34)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_1(5) * occ_func_0_0(4) *
+               occ_func_0_1(83) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_0(5) * occ_func_0_0(4) *
+               occ_func_0_1(83)) +
+          (0.707107 * occ_func_0_0(82) * occ_func_0_1(27) * occ_func_0_0(26) *
+               occ_func_0_1(0) +
+           0.707107 * occ_func_0_1(82) * occ_func_0_0(27) * occ_func_0_0(26) *
+               occ_func_0_1(0)) +
+          (0.707107 * occ_func_0_1(86) * occ_func_0_0(40) * occ_func_0_1(41) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(86) * occ_func_0_1(40) * occ_func_0_0(41) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_1(12) * occ_func_0_0(0) * occ_func_0_1(7) *
+               occ_func_0_0(21) +
+           0.707107 * occ_func_0_1(12) * occ_func_0_1(0) * occ_func_0_0(7) *
+               occ_func_0_0(21)) +
+          (0.707107 * occ_func_0_1(11) * occ_func_0_0(6) * occ_func_0_1(0) *
+               occ_func_0_0(20) +
+           0.707107 * occ_func_0_1(11) * occ_func_0_1(6) * occ_func_0_0(0) *
+               occ_func_0_0(20)) +
+          (0.707107 * occ_func_0_1(0) * occ_func_0_0(1) * occ_func_0_1(2) *
+               occ_func_0_0(79) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_1(1) * occ_func_0_0(2) *
+               occ_func_0_0(79)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_0(9) * occ_func_0_1(7) *
+               occ_func_0_1(85) +
+           0.707107 * occ_func_0_0(0) * occ_func_0_1(9) * occ_func_0_0(7) *
+               occ_func_0_1(85)) +
+          (0.707107 * occ_func_0_0(6) * occ_func_0_0(8) * occ_func_0_1(0) *
+               occ_func_0_1(39) +
+           0.707107 * occ_func_0_0(6) * occ_func_0_1(8) * occ_func_0_0(0) *
+               occ_func_0_1(39)) +
+          (0.707107 * occ_func_0_0(4) * occ_func_0_0(0) * occ_func_0_1(5) *
+               occ_func_0_1(37) +
+           0.707107 * occ_func_0_0(4) * occ_func_0_1(0) * occ_func_0_0(5) *
+               occ_func_0_1(37)) +
+          (0.707107 * occ_func_0_0(80) * occ_func_0_0(24) * occ_func_0_1(22) *
+               occ_func_0_1(0) +
+           0.707107 * occ_func_0_0(80) * occ_func_0_1(24) * occ_func_0_0(22) *
+               occ_func_0_1(0)) +
+          (0.707107 * occ_func_0_1(85) * occ_func_0_0(32) * occ_func_0_1(39) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(85) * occ_func_0_1(32) * occ_func_0_0(39) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_1(12) * occ_func_0_0(0) * occ_func_0_1(11) *
+               occ_func_0_0(29) +
+           0.707107 * occ_func_0_1(12) * occ_func_0_1(0) * occ_func_0_0(11) *
+               occ_func_0_0(29)) +
+          (0.707107 * occ_func_0_1(7) * occ_func_0_0(2) * occ_func_0_1(0) *
+               occ_func_0_0(22) +
+           0.707107 * occ_func_0_1(7) * occ_func_0_1(2) * occ_func_0_0(0) *
+               occ_func_0_0(22)) +
+          (0.707107 * occ_func_0_1(0) * occ_func_0_0(1) * occ_func_0_1(6) *
+               occ_func_0_0(80) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_1(1) * occ_func_0_0(6) *
+               occ_func_0_0(80)) +
+          (0.707107 * occ_func_0_1(85) * occ_func_0_0(39) * occ_func_0_1(37) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(85) * occ_func_0_1(39) * occ_func_0_0(37) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_1(9) * occ_func_0_0(8) * occ_func_0_1(0) *
+               occ_func_0_0(24) +
+           0.707107 * occ_func_0_1(9) * occ_func_0_1(8) * occ_func_0_0(0) *
+               occ_func_0_0(24)) +
+          (0.707107 * occ_func_0_1(7) * occ_func_0_0(0) * occ_func_0_1(5) *
+               occ_func_0_0(22) +
+           0.707107 * occ_func_0_1(7) * occ_func_0_1(0) * occ_func_0_0(5) *
+               occ_func_0_0(22)) +
+          (0.707107 * occ_func_0_1(0) * occ_func_0_0(6) * occ_func_0_1(4) *
+               occ_func_0_0(80) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_1(6) * occ_func_0_0(4) *
+               occ_func_0_0(80)) +
+          (0.707107 * occ_func_0_1(85) * occ_func_0_0(37) * occ_func_0_1(32) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(85) * occ_func_0_1(37) * occ_func_0_0(32) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_1(12) * occ_func_0_0(10) * occ_func_0_1(0) *
+               occ_func_0_0(29) +
+           0.707107 * occ_func_0_1(12) * occ_func_0_1(10) * occ_func_0_0(0) *
+               occ_func_0_0(29)) +
+          (0.707107 * occ_func_0_1(9) * occ_func_0_0(0) * occ_func_0_1(3) *
+               occ_func_0_0(24) +
+           0.707107 * occ_func_0_1(9) * occ_func_0_1(0) * occ_func_0_0(3) *
+               occ_func_0_0(24)) +
+          (0.707107 * occ_func_0_1(0) * occ_func_0_0(4) * occ_func_0_1(1) *
+               occ_func_0_0(80) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_1(4) * occ_func_0_0(1) *
+               occ_func_0_0(80)) +
+          (0.707107 * occ_func_0_0(84) * occ_func_0_1(38) * occ_func_0_1(31) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(84) * occ_func_0_1(38) * occ_func_0_0(31) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(11) * occ_func_0_1(12) * occ_func_0_1(0) *
+               occ_func_0_0(30) +
+           0.707107 * occ_func_0_1(11) * occ_func_0_1(12) * occ_func_0_0(0) *
+               occ_func_0_0(30)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_1(7) * occ_func_0_1(2) *
+               occ_func_0_0(81) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_1(7) * occ_func_0_0(2) *
+               occ_func_0_0(81)) +
+          (0.707107 * occ_func_0_0(6) * occ_func_0_1(0) * occ_func_0_1(1) *
+               occ_func_0_0(23) +
+           0.707107 * occ_func_0_1(6) * occ_func_0_1(0) * occ_func_0_0(1) *
+               occ_func_0_0(23)) +
+          (0.707107 * occ_func_0_0(10) * occ_func_0_1(11) * occ_func_0_0(0) *
+               occ_func_0_1(33) +
+           0.707107 * occ_func_0_1(10) * occ_func_0_1(11) * occ_func_0_0(0) *
+               occ_func_0_0(33)) +
+          (0.707107 * occ_func_0_0(83) * occ_func_0_1(34) * occ_func_0_0(28) *
+               occ_func_0_1(0) +
+           0.707107 * occ_func_0_1(83) * occ_func_0_1(34) * occ_func_0_0(28) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_1(8) * occ_func_0_0(3) *
+               occ_func_0_1(82) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_1(8) * occ_func_0_0(3) *
+               occ_func_0_0(82)) +
+          (0.707107 * occ_func_0_0(5) * occ_func_0_1(0) * occ_func_0_0(2) *
+               occ_func_0_1(27) +
+           0.707107 * occ_func_0_1(5) * occ_func_0_1(0) * occ_func_0_0(2) *
+               occ_func_0_0(27)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_0(11) * occ_func_0_1(12) *
+               occ_func_0_1(86) +
+           0.707107 * occ_func_0_0(0) * occ_func_0_1(11) * occ_func_0_0(12) *
+               occ_func_0_1(86)) +
+          (0.707107 * occ_func_0_0(2) * occ_func_0_0(0) * occ_func_0_1(7) *
+               occ_func_0_1(41) +
+           0.707107 * occ_func_0_0(2) * occ_func_0_1(0) * occ_func_0_0(7) *
+               occ_func_0_1(41)) +
+          (0.707107 * occ_func_0_0(1) * occ_func_0_0(6) * occ_func_0_1(0) *
+               occ_func_0_1(40) +
+           0.707107 * occ_func_0_0(1) * occ_func_0_1(6) * occ_func_0_0(0) *
+               occ_func_0_1(40)) +
+          (0.707107 * occ_func_0_0(79) * occ_func_0_0(20) * occ_func_0_1(21) *
+               occ_func_0_1(0) +
+           0.707107 * occ_func_0_0(79) * occ_func_0_1(20) * occ_func_0_0(21) *
+               occ_func_0_1(0)) +
+          (0.707107 * occ_func_0_1(86) * occ_func_0_0(42) * occ_func_0_1(40) *
+               occ_func_0_0(0) +
+           0.707107 * occ_func_0_1(86) * occ_func_0_1(42) * occ_func_0_0(40) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_1(12) * occ_func_0_0(9) * occ_func_0_1(0) *
+               occ_func_0_0(21) +
+           0.707107 * occ_func_0_1(12) * occ_func_0_1(9) * occ_func_0_0(0) *
+               occ_func_0_0(21)) +
+          (0.707107 * occ_func_0_1(10) * occ_func_0_0(0) * occ_func_0_1(4) *
+               occ_func_0_0(19) +
+           0.707107 * occ_func_0_1(10) * occ_func_0_1(0) * occ_func_0_0(4) *
+               occ_func_0_0(19)) +
+          (0.707107 * occ_func_0_1(0) * occ_func_0_0(3) * occ_func_0_1(1) *
+               occ_func_0_0(79) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_1(3) * occ_func_0_0(1) *
+               occ_func_0_0(79)) +
+          (0.707107 * occ_func_0_0(8) * occ_func_0_1(11) * occ_func_0_0(0) *
+               occ_func_0_1(34) +
+           0.707107 * occ_func_0_1(8) * occ_func_0_1(11) * occ_func_0_0(0) *
+               occ_func_0_0(34)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_1(10) * occ_func_0_0(5) *
+               occ_func_0_1(83) +
+           0.707107 * occ_func_0_1(0) * occ_func_0_1(10) * occ_func_0_0(5) *
+               occ_func_0_0(83)) +
+          (0.707107 * occ_func_0_0(82) * occ_func_0_1(33) * occ_func_0_0(27) *
+               occ_func_0_1(0) +
+           0.707107 * occ_func_0_1(82) * occ_func_0_1(33) * occ_func_0_0(27) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(3) * occ_func_0_1(0) * occ_func_0_0(2) *
+               occ_func_0_1(28) +
+           0.707107 * occ_func_0_1(3) * occ_func_0_1(0) * occ_func_0_0(2) *
+               occ_func_0_0(28)) +
           (0.707107 * occ_func_0_0(7) * occ_func_0_0(0) * occ_func_0_1(9) *
                occ_func_0_1(38) +
-           0.707107 * occ_func_0_0(7) * occ_func_0_1(0) * occ_func_0_0(9) *
+           0.707107 * occ_func_0_1(7) * occ_func_0_0(0) * occ_func_0_0(9) *
                occ_func_0_1(38)) +
           (0.707107 * occ_func_0_0(0) * occ_func_0_0(6) * occ_func_0_1(8) *
                occ_func_0_1(84) +
-           0.707107 * occ_func_0_0(0) * occ_func_0_1(6) * occ_func_0_0(8) *
+           0.707107 * occ_func_0_1(0) * occ_func_0_0(6) * occ_func_0_0(8) *
                occ_func_0_1(84)) +
           (0.707107 * occ_func_0_0(5) * occ_func_0_0(4) * occ_func_0_1(0) *
                occ_func_0_1(36) +
-           0.707107 * occ_func_0_0(5) * occ_func_0_1(4) * occ_func_0_0(0) *
+           0.707107 * occ_func_0_1(5) * occ_func_0_0(4) * occ_func_0_0(0) *
                occ_func_0_1(36)) +
           (0.707107 * occ_func_0_0(81) * occ_func_0_0(23) * occ_func_0_1(25) *
                occ_func_0_1(0) +
-           0.707107 * occ_func_0_0(81) * occ_func_0_1(23) * occ_func_0_0(25) *
+           0.707107 * occ_func_0_1(81) * occ_func_0_0(23) * occ_func_0_0(25) *
                occ_func_0_1(0))) /
          24.;
 }
@@ -11101,37 +11361,37 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_13_9_at_0() const {
                occ_func_0_1(0) +
            0.707107 * occ_func_0_1(80) * occ_func_0_1(22) * occ_func_0_0(29) *
                occ_func_0_1(0)) +
-          (0.707107 * occ_func_0_1(83) * occ_func_0_0(35) * occ_func_0_1(34) *
+          (0.707107 * occ_func_0_0(83) * occ_func_0_1(35) * occ_func_0_1(34) *
                occ_func_0_1(0) +
            0.707107 * occ_func_0_1(83) * occ_func_0_1(35) * occ_func_0_0(34) *
                occ_func_0_1(0)) +
-          (0.707107 * occ_func_0_1(0) * occ_func_0_0(9) * occ_func_0_1(8) *
+          (0.707107 * occ_func_0_0(0) * occ_func_0_1(9) * occ_func_0_1(8) *
                occ_func_0_1(82) +
            0.707107 * occ_func_0_1(0) * occ_func_0_1(9) * occ_func_0_0(8) *
                occ_func_0_1(82)) +
-          (0.707107 * occ_func_0_1(5) * occ_func_0_0(7) * occ_func_0_1(0) *
+          (0.707107 * occ_func_0_0(5) * occ_func_0_1(7) * occ_func_0_1(0) *
                occ_func_0_1(27) +
            0.707107 * occ_func_0_1(5) * occ_func_0_1(7) * occ_func_0_0(0) *
                occ_func_0_1(27)) +
-          (0.707107 * occ_func_0_1(4) * occ_func_0_0(0) * occ_func_0_1(6) *
+          (0.707107 * occ_func_0_0(4) * occ_func_0_1(0) * occ_func_0_1(6) *
                occ_func_0_1(26) +
            0.707107 * occ_func_0_1(4) * occ_func_0_1(0) * occ_func_0_0(6) *
                occ_func_0_1(26)) +
-          (0.707107 * occ_func_0_1(84) * occ_func_0_0(36) * occ_func_0_1(38) *
+          (0.707107 * occ_func_0_0(84) * occ_func_0_1(36) * occ_func_0_1(38) *
                occ_func_0_1(0) +
-           0.707107 * occ_func_0_1(84) * occ_func_0_1(36) * occ_func_0_0(38) *
+           0.707107 * occ_func_0_1(84) * occ_func_0_0(36) * occ_func_0_1(38) *
                occ_func_0_1(0)) +
-          (0.707107 * occ_func_0_1(8) * occ_func_0_0(0) * occ_func_0_1(9) *
+          (0.707107 * occ_func_0_0(8) * occ_func_0_1(0) * occ_func_0_1(9) *
                occ_func_0_1(25) +
-           0.707107 * occ_func_0_1(8) * occ_func_0_1(0) * occ_func_0_0(9) *
+           0.707107 * occ_func_0_1(8) * occ_func_0_0(0) * occ_func_0_1(9) *
                occ_func_0_1(25)) +
-          (0.707107 * occ_func_0_1(0) * occ_func_0_0(5) * occ_func_0_1(7) *
+          (0.707107 * occ_func_0_0(0) * occ_func_0_1(5) * occ_func_0_1(7) *
                occ_func_0_1(81) +
-           0.707107 * occ_func_0_1(0) * occ_func_0_1(5) * occ_func_0_0(7) *
+           0.707107 * occ_func_0_1(0) * occ_func_0_0(5) * occ_func_0_1(7) *
                occ_func_0_1(81)) +
-          (0.707107 * occ_func_0_1(6) * occ_func_0_0(4) * occ_func_0_1(0) *
+          (0.707107 * occ_func_0_0(6) * occ_func_0_1(4) * occ_func_0_1(0) *
                occ_func_0_1(23) +
-           0.707107 * occ_func_0_1(6) * occ_func_0_1(4) * occ_func_0_0(0) *
+           0.707107 * occ_func_0_1(6) * occ_func_0_0(4) * occ_func_0_1(0) *
                occ_func_0_1(23)) +
           (0.707107 * occ_func_0_1(0) * occ_func_0_0(10) * occ_func_0_1(11) *
                occ_func_0_1(86) +
@@ -11181,22 +11441,22 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_13_9_at_0() const {
                occ_func_0_1(0) +
            0.707107 * occ_func_0_1(79) * occ_func_0_1(21) * occ_func_0_0(19) *
                occ_func_0_1(0)) +
-          (0.707107 * occ_func_0_1(10) * occ_func_0_0(0) * occ_func_0_1(12) *
+          (0.707107 * occ_func_0_0(10) * occ_func_0_1(0) * occ_func_0_1(12) *
                occ_func_0_1(33) +
-           0.707107 * occ_func_0_1(10) * occ_func_0_1(0) * occ_func_0_0(12) *
-               occ_func_0_1(33)) +
-          (0.707107 * occ_func_0_1(83) * occ_func_0_0(28) * occ_func_0_1(35) *
+           0.707107 * occ_func_0_1(10) * occ_func_0_1(0) * occ_func_0_1(12) *
+               occ_func_0_0(33)) +
+          (0.707107 * occ_func_0_0(83) * occ_func_0_1(28) * occ_func_0_1(35) *
                occ_func_0_1(0) +
-           0.707107 * occ_func_0_1(83) * occ_func_0_1(28) * occ_func_0_0(35) *
-               occ_func_0_1(0)) +
-          (0.707107 * occ_func_0_1(0) * occ_func_0_0(3) * occ_func_0_1(9) *
+           0.707107 * occ_func_0_1(83) * occ_func_0_1(28) * occ_func_0_1(35) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_1(3) * occ_func_0_1(9) *
                occ_func_0_1(82) +
-           0.707107 * occ_func_0_1(0) * occ_func_0_1(3) * occ_func_0_0(9) *
-               occ_func_0_1(82)) +
-          (0.707107 * occ_func_0_1(4) * occ_func_0_0(1) * occ_func_0_1(0) *
+           0.707107 * occ_func_0_1(0) * occ_func_0_1(3) * occ_func_0_1(9) *
+               occ_func_0_0(82)) +
+          (0.707107 * occ_func_0_0(4) * occ_func_0_1(1) * occ_func_0_1(0) *
                occ_func_0_1(26) +
-           0.707107 * occ_func_0_1(4) * occ_func_0_1(1) * occ_func_0_0(0) *
-               occ_func_0_1(26)) +
+           0.707107 * occ_func_0_1(4) * occ_func_0_1(1) * occ_func_0_1(0) *
+               occ_func_0_0(26)) +
           (0.707107 * occ_func_0_1(0) * occ_func_0_0(8) * occ_func_0_1(11) *
                occ_func_0_1(84) +
            0.707107 * occ_func_0_1(0) * occ_func_0_1(8) * occ_func_0_0(11) *
@@ -11229,21 +11489,21 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_13_9_at_0() const {
                occ_func_0_1(79) +
            0.707107 * occ_func_0_1(0) * occ_func_0_1(2) * occ_func_0_0(3) *
                occ_func_0_1(79)) +
-          (0.707107 * occ_func_0_1(7) * occ_func_0_0(12) * occ_func_0_1(0) *
+          (0.707107 * occ_func_0_0(7) * occ_func_0_1(12) * occ_func_0_1(0) *
                occ_func_0_1(38) +
-           0.707107 * occ_func_0_1(7) * occ_func_0_1(12) * occ_func_0_0(0) *
+           0.707107 * occ_func_0_1(7) * occ_func_0_0(12) * occ_func_0_1(0) *
                occ_func_0_1(38)) +
-          (0.707107 * occ_func_0_1(0) * occ_func_0_0(11) * occ_func_0_1(6) *
+          (0.707107 * occ_func_0_0(0) * occ_func_0_1(11) * occ_func_0_1(6) *
                occ_func_0_1(84) +
-           0.707107 * occ_func_0_1(0) * occ_func_0_1(11) * occ_func_0_0(6) *
+           0.707107 * occ_func_0_1(0) * occ_func_0_0(11) * occ_func_0_1(6) *
                occ_func_0_1(84)) +
-          (0.707107 * occ_func_0_1(2) * occ_func_0_0(0) * occ_func_0_1(1) *
+          (0.707107 * occ_func_0_0(2) * occ_func_0_1(0) * occ_func_0_1(1) *
                occ_func_0_1(31) +
-           0.707107 * occ_func_0_1(2) * occ_func_0_1(0) * occ_func_0_0(1) *
+           0.707107 * occ_func_0_1(2) * occ_func_0_0(0) * occ_func_0_1(1) *
                occ_func_0_1(31)) +
-          (0.707107 * occ_func_0_1(81) * occ_func_0_0(30) * occ_func_0_1(23) *
+          (0.707107 * occ_func_0_0(81) * occ_func_0_1(30) * occ_func_0_1(23) *
                occ_func_0_1(0) +
-           0.707107 * occ_func_0_1(81) * occ_func_0_1(30) * occ_func_0_0(23) *
+           0.707107 * occ_func_0_1(81) * occ_func_0_0(30) * occ_func_0_1(23) *
                occ_func_0_1(0)) +
           (0.707107 * occ_func_0_1(0) * occ_func_0_0(12) * occ_func_0_1(9) *
                occ_func_0_1(85) +
@@ -11261,37 +11521,37 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_13_9_at_0() const {
                occ_func_0_1(0) +
            0.707107 * occ_func_0_1(80) * occ_func_0_1(29) * occ_func_0_0(24) *
                occ_func_0_1(0)) +
-          (0.707107 * occ_func_0_1(9) * occ_func_0_0(0) * occ_func_0_1(12) *
+          (0.707107 * occ_func_0_0(9) * occ_func_0_1(0) * occ_func_0_1(12) *
                occ_func_0_1(35) +
-           0.707107 * occ_func_0_1(9) * occ_func_0_1(0) * occ_func_0_0(12) *
-               occ_func_0_1(35)) +
-          (0.707107 * occ_func_0_1(0) * occ_func_0_0(4) * occ_func_0_1(10) *
+           0.707107 * occ_func_0_1(9) * occ_func_0_1(0) * occ_func_0_1(12) *
+               occ_func_0_0(35)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_1(4) * occ_func_0_1(10) *
                occ_func_0_1(83) +
-           0.707107 * occ_func_0_1(0) * occ_func_0_1(4) * occ_func_0_0(10) *
-               occ_func_0_1(83)) +
-          (0.707107 * occ_func_0_1(82) * occ_func_0_0(26) * occ_func_0_1(33) *
+           0.707107 * occ_func_0_1(0) * occ_func_0_1(4) * occ_func_0_1(10) *
+               occ_func_0_0(83)) +
+          (0.707107 * occ_func_0_0(82) * occ_func_0_1(26) * occ_func_0_1(33) *
                occ_func_0_1(0) +
-           0.707107 * occ_func_0_1(82) * occ_func_0_1(26) * occ_func_0_0(33) *
-               occ_func_0_1(0)) +
-          (0.707107 * occ_func_0_1(3) * occ_func_0_0(1) * occ_func_0_1(0) *
+           0.707107 * occ_func_0_1(82) * occ_func_0_1(26) * occ_func_0_1(33) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(3) * occ_func_0_1(1) * occ_func_0_1(0) *
                occ_func_0_1(28) +
-           0.707107 * occ_func_0_1(3) * occ_func_0_1(1) * occ_func_0_0(0) *
-               occ_func_0_1(28)) +
-          (0.707107 * occ_func_0_1(9) * occ_func_0_0(7) * occ_func_0_1(0) *
+           0.707107 * occ_func_0_1(3) * occ_func_0_1(1) * occ_func_0_1(0) *
+               occ_func_0_0(28)) +
+          (0.707107 * occ_func_0_0(9) * occ_func_0_1(7) * occ_func_0_1(0) *
                occ_func_0_1(35) +
-           0.707107 * occ_func_0_1(9) * occ_func_0_1(7) * occ_func_0_0(0) *
+           0.707107 * occ_func_0_1(9) * occ_func_0_0(7) * occ_func_0_1(0) *
                occ_func_0_1(35)) +
-          (0.707107 * occ_func_0_1(8) * occ_func_0_0(0) * occ_func_0_1(6) *
+          (0.707107 * occ_func_0_0(8) * occ_func_0_1(0) * occ_func_0_1(6) *
                occ_func_0_1(34) +
-           0.707107 * occ_func_0_1(8) * occ_func_0_1(0) * occ_func_0_0(6) *
+           0.707107 * occ_func_0_1(8) * occ_func_0_0(0) * occ_func_0_1(6) *
                occ_func_0_1(34)) +
-          (0.707107 * occ_func_0_1(0) * occ_func_0_0(5) * occ_func_0_1(4) *
+          (0.707107 * occ_func_0_0(0) * occ_func_0_1(5) * occ_func_0_1(4) *
                occ_func_0_1(83) +
-           0.707107 * occ_func_0_1(0) * occ_func_0_1(5) * occ_func_0_0(4) *
+           0.707107 * occ_func_0_1(0) * occ_func_0_0(5) * occ_func_0_1(4) *
                occ_func_0_1(83)) +
-          (0.707107 * occ_func_0_1(82) * occ_func_0_0(27) * occ_func_0_1(26) *
+          (0.707107 * occ_func_0_0(82) * occ_func_0_1(27) * occ_func_0_1(26) *
                occ_func_0_1(0) +
-           0.707107 * occ_func_0_1(82) * occ_func_0_1(27) * occ_func_0_0(26) *
+           0.707107 * occ_func_0_1(82) * occ_func_0_0(27) * occ_func_0_1(26) *
                occ_func_0_1(0)) +
           (0.707107 * occ_func_0_1(86) * occ_func_0_0(40) * occ_func_0_1(41) *
                occ_func_0_1(0) +
@@ -11373,38 +11633,38 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_13_9_at_0() const {
                occ_func_0_1(80) +
            0.707107 * occ_func_0_1(0) * occ_func_0_1(4) * occ_func_0_0(1) *
                occ_func_0_1(80)) +
-          (0.707107 * occ_func_0_1(84) * occ_func_0_0(38) * occ_func_0_1(31) *
+          (0.707107 * occ_func_0_0(84) * occ_func_0_1(38) * occ_func_0_1(31) *
                occ_func_0_1(0) +
            0.707107 * occ_func_0_1(84) * occ_func_0_1(38) * occ_func_0_0(31) *
                occ_func_0_1(0)) +
-          (0.707107 * occ_func_0_1(11) * occ_func_0_0(12) * occ_func_0_1(0) *
+          (0.707107 * occ_func_0_0(11) * occ_func_0_1(12) * occ_func_0_1(0) *
                occ_func_0_1(30) +
            0.707107 * occ_func_0_1(11) * occ_func_0_1(12) * occ_func_0_0(0) *
                occ_func_0_1(30)) +
-          (0.707107 * occ_func_0_1(0) * occ_func_0_0(7) * occ_func_0_1(2) *
+          (0.707107 * occ_func_0_0(0) * occ_func_0_1(7) * occ_func_0_1(2) *
                occ_func_0_1(81) +
            0.707107 * occ_func_0_1(0) * occ_func_0_1(7) * occ_func_0_0(2) *
                occ_func_0_1(81)) +
-          (0.707107 * occ_func_0_1(6) * occ_func_0_0(0) * occ_func_0_1(1) *
+          (0.707107 * occ_func_0_0(6) * occ_func_0_1(0) * occ_func_0_1(1) *
                occ_func_0_1(23) +
            0.707107 * occ_func_0_1(6) * occ_func_0_1(0) * occ_func_0_0(1) *
                occ_func_0_1(23)) +
-          (0.707107 * occ_func_0_1(10) * occ_func_0_0(11) * occ_func_0_1(0) *
+          (0.707107 * occ_func_0_0(10) * occ_func_0_1(11) * occ_func_0_1(0) *
                occ_func_0_1(33) +
-           0.707107 * occ_func_0_1(10) * occ_func_0_1(11) * occ_func_0_0(0) *
-               occ_func_0_1(33)) +
-          (0.707107 * occ_func_0_1(83) * occ_func_0_0(34) * occ_func_0_1(28) *
+           0.707107 * occ_func_0_1(10) * occ_func_0_1(11) * occ_func_0_1(0) *
+               occ_func_0_0(33)) +
+          (0.707107 * occ_func_0_0(83) * occ_func_0_1(34) * occ_func_0_1(28) *
                occ_func_0_1(0) +
-           0.707107 * occ_func_0_1(83) * occ_func_0_1(34) * occ_func_0_0(28) *
-               occ_func_0_1(0)) +
-          (0.707107 * occ_func_0_1(0) * occ_func_0_0(8) * occ_func_0_1(3) *
+           0.707107 * occ_func_0_1(83) * occ_func_0_1(34) * occ_func_0_1(28) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_1(8) * occ_func_0_1(3) *
                occ_func_0_1(82) +
-           0.707107 * occ_func_0_1(0) * occ_func_0_1(8) * occ_func_0_0(3) *
-               occ_func_0_1(82)) +
-          (0.707107 * occ_func_0_1(5) * occ_func_0_0(0) * occ_func_0_1(2) *
+           0.707107 * occ_func_0_1(0) * occ_func_0_1(8) * occ_func_0_1(3) *
+               occ_func_0_0(82)) +
+          (0.707107 * occ_func_0_0(5) * occ_func_0_1(0) * occ_func_0_1(2) *
                occ_func_0_1(27) +
-           0.707107 * occ_func_0_1(5) * occ_func_0_1(0) * occ_func_0_0(2) *
-               occ_func_0_1(27)) +
+           0.707107 * occ_func_0_1(5) * occ_func_0_1(0) * occ_func_0_1(2) *
+               occ_func_0_0(27)) +
           (0.707107 * occ_func_0_1(0) * occ_func_0_0(11) * occ_func_0_1(12) *
                occ_func_0_1(86) +
            0.707107 * occ_func_0_1(0) * occ_func_0_1(11) * occ_func_0_0(12) *
@@ -11437,35 +11697,35 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_13_9_at_0() const {
                occ_func_0_1(79) +
            0.707107 * occ_func_0_1(0) * occ_func_0_1(3) * occ_func_0_0(1) *
                occ_func_0_1(79)) +
-          (0.707107 * occ_func_0_1(8) * occ_func_0_0(11) * occ_func_0_1(0) *
+          (0.707107 * occ_func_0_0(8) * occ_func_0_1(11) * occ_func_0_1(0) *
                occ_func_0_1(34) +
-           0.707107 * occ_func_0_1(8) * occ_func_0_1(11) * occ_func_0_0(0) *
-               occ_func_0_1(34)) +
-          (0.707107 * occ_func_0_1(0) * occ_func_0_0(10) * occ_func_0_1(5) *
+           0.707107 * occ_func_0_1(8) * occ_func_0_1(11) * occ_func_0_1(0) *
+               occ_func_0_0(34)) +
+          (0.707107 * occ_func_0_0(0) * occ_func_0_1(10) * occ_func_0_1(5) *
                occ_func_0_1(83) +
-           0.707107 * occ_func_0_1(0) * occ_func_0_1(10) * occ_func_0_0(5) *
-               occ_func_0_1(83)) +
-          (0.707107 * occ_func_0_1(82) * occ_func_0_0(33) * occ_func_0_1(27) *
+           0.707107 * occ_func_0_1(0) * occ_func_0_1(10) * occ_func_0_1(5) *
+               occ_func_0_0(83)) +
+          (0.707107 * occ_func_0_0(82) * occ_func_0_1(33) * occ_func_0_1(27) *
                occ_func_0_1(0) +
-           0.707107 * occ_func_0_1(82) * occ_func_0_1(33) * occ_func_0_0(27) *
-               occ_func_0_1(0)) +
-          (0.707107 * occ_func_0_1(3) * occ_func_0_0(0) * occ_func_0_1(2) *
+           0.707107 * occ_func_0_1(82) * occ_func_0_1(33) * occ_func_0_1(27) *
+               occ_func_0_0(0)) +
+          (0.707107 * occ_func_0_0(3) * occ_func_0_1(0) * occ_func_0_1(2) *
                occ_func_0_1(28) +
-           0.707107 * occ_func_0_1(3) * occ_func_0_1(0) * occ_func_0_0(2) *
-               occ_func_0_1(28)) +
-          (0.707107 * occ_func_0_1(7) * occ_func_0_0(0) * occ_func_0_1(9) *
+           0.707107 * occ_func_0_1(3) * occ_func_0_1(0) * occ_func_0_1(2) *
+               occ_func_0_0(28)) +
+          (0.707107 * occ_func_0_0(7) * occ_func_0_1(0) * occ_func_0_1(9) *
                occ_func_0_1(38) +
            0.707107 * occ_func_0_1(7) * occ_func_0_1(0) * occ_func_0_0(9) *
                occ_func_0_1(38)) +
-          (0.707107 * occ_func_0_1(0) * occ_func_0_0(6) * occ_func_0_1(8) *
+          (0.707107 * occ_func_0_0(0) * occ_func_0_1(6) * occ_func_0_1(8) *
                occ_func_0_1(84) +
            0.707107 * occ_func_0_1(0) * occ_func_0_1(6) * occ_func_0_0(8) *
                occ_func_0_1(84)) +
-          (0.707107 * occ_func_0_1(5) * occ_func_0_0(4) * occ_func_0_1(0) *
+          (0.707107 * occ_func_0_0(5) * occ_func_0_1(4) * occ_func_0_1(0) *
                occ_func_0_1(36) +
            0.707107 * occ_func_0_1(5) * occ_func_0_1(4) * occ_func_0_0(0) *
                occ_func_0_1(36)) +
-          (0.707107 * occ_func_0_1(81) * occ_func_0_0(23) * occ_func_0_1(25) *
+          (0.707107 * occ_func_0_0(81) * occ_func_0_1(23) * occ_func_0_1(25) *
                occ_func_0_1(0) +
            0.707107 * occ_func_0_1(81) * occ_func_0_1(23) * occ_func_0_0(25) *
                occ_func_0_1(0))) /
@@ -11481,22 +11741,22 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_13_10_at_0() const {
               occ_func_0_1(32) +
           occ_func_0_0(80) * occ_func_0_1(22) * occ_func_0_1(29) *
               occ_func_0_1(0) +
-          occ_func_0_0(83) * occ_func_0_1(35) * occ_func_0_1(34) *
-              occ_func_0_1(0) +
-          occ_func_0_0(0) * occ_func_0_1(9) * occ_func_0_1(8) *
-              occ_func_0_1(82) +
-          occ_func_0_0(5) * occ_func_0_1(7) * occ_func_0_1(0) *
-              occ_func_0_1(27) +
-          occ_func_0_0(4) * occ_func_0_1(0) * occ_func_0_1(6) *
-              occ_func_0_1(26) +
-          occ_func_0_0(84) * occ_func_0_1(36) * occ_func_0_1(38) *
-              occ_func_0_1(0) +
-          occ_func_0_0(8) * occ_func_0_1(0) * occ_func_0_1(9) *
-              occ_func_0_1(25) +
-          occ_func_0_0(0) * occ_func_0_1(5) * occ_func_0_1(7) *
-              occ_func_0_1(81) +
-          occ_func_0_0(6) * occ_func_0_1(4) * occ_func_0_1(0) *
-              occ_func_0_1(23) +
+          occ_func_0_1(83) * occ_func_0_1(35) * occ_func_0_1(34) *
+              occ_func_0_0(0) +
+          occ_func_0_1(0) * occ_func_0_1(9) * occ_func_0_1(8) *
+              occ_func_0_0(82) +
+          occ_func_0_1(5) * occ_func_0_1(7) * occ_func_0_1(0) *
+              occ_func_0_0(27) +
+          occ_func_0_1(4) * occ_func_0_1(0) * occ_func_0_1(6) *
+              occ_func_0_0(26) +
+          occ_func_0_1(84) * occ_func_0_1(36) * occ_func_0_1(38) *
+              occ_func_0_0(0) +
+          occ_func_0_1(8) * occ_func_0_1(0) * occ_func_0_1(9) *
+              occ_func_0_0(25) +
+          occ_func_0_1(0) * occ_func_0_1(5) * occ_func_0_1(7) *
+              occ_func_0_0(81) +
+          occ_func_0_1(6) * occ_func_0_1(4) * occ_func_0_1(0) *
+              occ_func_0_0(23) +
           occ_func_0_0(0) * occ_func_0_1(10) * occ_func_0_1(11) *
               occ_func_0_1(86) +
           occ_func_0_0(3) * occ_func_0_1(0) * occ_func_0_1(8) *
@@ -11505,14 +11765,14 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_13_10_at_0() const {
               occ_func_0_1(41) +
           occ_func_0_0(79) * occ_func_0_1(19) * occ_func_0_1(20) *
               occ_func_0_1(0) +
-          occ_func_0_0(84) * occ_func_0_1(31) * occ_func_0_1(36) *
-              occ_func_0_1(0) +
-          occ_func_0_0(11) * occ_func_0_1(0) * occ_func_0_1(10) *
-              occ_func_0_1(30) +
-          occ_func_0_0(8) * occ_func_0_1(3) * occ_func_0_1(0) *
-              occ_func_0_1(25) +
-          occ_func_0_0(0) * occ_func_0_1(2) * occ_func_0_1(5) *
-              occ_func_0_1(81) +
+          occ_func_0_1(84) * occ_func_0_1(31) * occ_func_0_1(36) *
+              occ_func_0_0(0) +
+          occ_func_0_1(11) * occ_func_0_1(0) * occ_func_0_1(10) *
+              occ_func_0_0(30) +
+          occ_func_0_1(8) * occ_func_0_1(3) * occ_func_0_1(0) *
+              occ_func_0_0(25) +
+          occ_func_0_1(0) * occ_func_0_1(2) * occ_func_0_1(5) *
+              occ_func_0_0(81) +
           occ_func_0_0(0) * occ_func_0_1(12) * occ_func_0_1(10) *
               occ_func_0_1(86) +
           occ_func_0_0(3) * occ_func_0_1(9) * occ_func_0_1(0) *
@@ -11521,13 +11781,13 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_13_10_at_0() const {
               occ_func_0_1(40) +
           occ_func_0_0(79) * occ_func_0_1(21) * occ_func_0_1(19) *
               occ_func_0_1(0) +
-          occ_func_0_0(10) * occ_func_0_1(0) * occ_func_0_1(12) *
+          occ_func_0_1(10) * occ_func_0_0(0) * occ_func_0_1(12) *
               occ_func_0_1(33) +
-          occ_func_0_0(83) * occ_func_0_1(28) * occ_func_0_1(35) *
+          occ_func_0_1(83) * occ_func_0_0(28) * occ_func_0_1(35) *
               occ_func_0_1(0) +
-          occ_func_0_0(0) * occ_func_0_1(3) * occ_func_0_1(9) *
+          occ_func_0_1(0) * occ_func_0_0(3) * occ_func_0_1(9) *
               occ_func_0_1(82) +
-          occ_func_0_0(4) * occ_func_0_1(1) * occ_func_0_1(0) *
+          occ_func_0_1(4) * occ_func_0_0(1) * occ_func_0_1(0) *
               occ_func_0_1(26) +
           occ_func_0_0(0) * occ_func_0_1(8) * occ_func_0_1(11) *
               occ_func_0_1(84) +
@@ -11537,21 +11797,21 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_13_10_at_0() const {
               occ_func_0_1(31) +
           occ_func_0_0(81) * occ_func_0_1(25) * occ_func_0_1(30) *
               occ_func_0_1(0) +
-          occ_func_0_0(86) * occ_func_0_1(41) * occ_func_0_1(42) *
-              occ_func_0_1(0) +
-          occ_func_0_0(11) * occ_func_0_1(0) * occ_func_0_1(8) *
-              occ_func_0_1(20) +
-          occ_func_0_0(10) * occ_func_0_1(5) * occ_func_0_1(0) *
-              occ_func_0_1(19) +
-          occ_func_0_0(0) * occ_func_0_1(2) * occ_func_0_1(3) *
-              occ_func_0_1(79) +
-          occ_func_0_0(7) * occ_func_0_1(12) * occ_func_0_1(0) *
+          occ_func_0_1(86) * occ_func_0_1(41) * occ_func_0_1(42) *
+              occ_func_0_0(0) +
+          occ_func_0_1(11) * occ_func_0_1(0) * occ_func_0_1(8) *
+              occ_func_0_0(20) +
+          occ_func_0_1(10) * occ_func_0_1(5) * occ_func_0_1(0) *
+              occ_func_0_0(19) +
+          occ_func_0_1(0) * occ_func_0_1(2) * occ_func_0_1(3) *
+              occ_func_0_0(79) +
+          occ_func_0_1(7) * occ_func_0_1(12) * occ_func_0_0(0) *
               occ_func_0_1(38) +
-          occ_func_0_0(0) * occ_func_0_1(11) * occ_func_0_1(6) *
+          occ_func_0_1(0) * occ_func_0_1(11) * occ_func_0_0(6) *
               occ_func_0_1(84) +
-          occ_func_0_0(2) * occ_func_0_1(0) * occ_func_0_1(1) *
+          occ_func_0_1(2) * occ_func_0_1(0) * occ_func_0_0(1) *
               occ_func_0_1(31) +
-          occ_func_0_0(81) * occ_func_0_1(30) * occ_func_0_1(23) *
+          occ_func_0_1(81) * occ_func_0_1(30) * occ_func_0_0(23) *
               occ_func_0_1(0) +
           occ_func_0_0(0) * occ_func_0_1(12) * occ_func_0_1(9) *
               occ_func_0_1(85) +
@@ -11561,30 +11821,30 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_13_10_at_0() const {
               occ_func_0_1(32) +
           occ_func_0_0(80) * occ_func_0_1(29) * occ_func_0_1(24) *
               occ_func_0_1(0) +
-          occ_func_0_0(9) * occ_func_0_1(0) * occ_func_0_1(12) *
+          occ_func_0_1(9) * occ_func_0_0(0) * occ_func_0_1(12) *
               occ_func_0_1(35) +
-          occ_func_0_0(0) * occ_func_0_1(4) * occ_func_0_1(10) *
+          occ_func_0_1(0) * occ_func_0_0(4) * occ_func_0_1(10) *
               occ_func_0_1(83) +
-          occ_func_0_0(82) * occ_func_0_1(26) * occ_func_0_1(33) *
+          occ_func_0_1(82) * occ_func_0_0(26) * occ_func_0_1(33) *
               occ_func_0_1(0) +
-          occ_func_0_0(3) * occ_func_0_1(1) * occ_func_0_1(0) *
+          occ_func_0_1(3) * occ_func_0_0(1) * occ_func_0_1(0) *
               occ_func_0_1(28) +
-          occ_func_0_0(9) * occ_func_0_1(7) * occ_func_0_1(0) *
+          occ_func_0_1(9) * occ_func_0_1(7) * occ_func_0_0(0) *
               occ_func_0_1(35) +
-          occ_func_0_0(8) * occ_func_0_1(0) * occ_func_0_1(6) *
+          occ_func_0_1(8) * occ_func_0_1(0) * occ_func_0_0(6) *
               occ_func_0_1(34) +
-          occ_func_0_0(0) * occ_func_0_1(5) * occ_func_0_1(4) *
+          occ_func_0_1(0) * occ_func_0_1(5) * occ_func_0_0(4) *
               occ_func_0_1(83) +
-          occ_func_0_0(82) * occ_func_0_1(27) * occ_func_0_1(26) *
+          occ_func_0_1(82) * occ_func_0_1(27) * occ_func_0_0(26) *
               occ_func_0_1(0) +
-          occ_func_0_0(86) * occ_func_0_1(40) * occ_func_0_1(41) *
-              occ_func_0_1(0) +
-          occ_func_0_0(12) * occ_func_0_1(0) * occ_func_0_1(7) *
-              occ_func_0_1(21) +
-          occ_func_0_0(11) * occ_func_0_1(6) * occ_func_0_1(0) *
-              occ_func_0_1(20) +
-          occ_func_0_0(0) * occ_func_0_1(1) * occ_func_0_1(2) *
-              occ_func_0_1(79) +
+          occ_func_0_1(86) * occ_func_0_1(40) * occ_func_0_1(41) *
+              occ_func_0_0(0) +
+          occ_func_0_1(12) * occ_func_0_1(0) * occ_func_0_1(7) *
+              occ_func_0_0(21) +
+          occ_func_0_1(11) * occ_func_0_1(6) * occ_func_0_1(0) *
+              occ_func_0_0(20) +
+          occ_func_0_1(0) * occ_func_0_1(1) * occ_func_0_1(2) *
+              occ_func_0_0(79) +
           occ_func_0_0(0) * occ_func_0_1(9) * occ_func_0_1(7) *
               occ_func_0_1(85) +
           occ_func_0_0(6) * occ_func_0_1(8) * occ_func_0_1(0) *
@@ -11593,45 +11853,45 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_13_10_at_0() const {
               occ_func_0_1(37) +
           occ_func_0_0(80) * occ_func_0_1(24) * occ_func_0_1(22) *
               occ_func_0_1(0) +
-          occ_func_0_0(85) * occ_func_0_1(32) * occ_func_0_1(39) *
-              occ_func_0_1(0) +
-          occ_func_0_0(12) * occ_func_0_1(0) * occ_func_0_1(11) *
-              occ_func_0_1(29) +
-          occ_func_0_0(7) * occ_func_0_1(2) * occ_func_0_1(0) *
-              occ_func_0_1(22) +
-          occ_func_0_0(0) * occ_func_0_1(1) * occ_func_0_1(6) *
-              occ_func_0_1(80) +
-          occ_func_0_0(85) * occ_func_0_1(39) * occ_func_0_1(37) *
-              occ_func_0_1(0) +
-          occ_func_0_0(9) * occ_func_0_1(8) * occ_func_0_1(0) *
-              occ_func_0_1(24) +
-          occ_func_0_0(7) * occ_func_0_1(0) * occ_func_0_1(5) *
-              occ_func_0_1(22) +
-          occ_func_0_0(0) * occ_func_0_1(6) * occ_func_0_1(4) *
-              occ_func_0_1(80) +
-          occ_func_0_0(85) * occ_func_0_1(37) * occ_func_0_1(32) *
-              occ_func_0_1(0) +
-          occ_func_0_0(12) * occ_func_0_1(10) * occ_func_0_1(0) *
-              occ_func_0_1(29) +
-          occ_func_0_0(9) * occ_func_0_1(0) * occ_func_0_1(3) *
-              occ_func_0_1(24) +
-          occ_func_0_0(0) * occ_func_0_1(4) * occ_func_0_1(1) *
-              occ_func_0_1(80) +
-          occ_func_0_0(84) * occ_func_0_1(38) * occ_func_0_1(31) *
-              occ_func_0_1(0) +
-          occ_func_0_0(11) * occ_func_0_1(12) * occ_func_0_1(0) *
-              occ_func_0_1(30) +
-          occ_func_0_0(0) * occ_func_0_1(7) * occ_func_0_1(2) *
-              occ_func_0_1(81) +
-          occ_func_0_0(6) * occ_func_0_1(0) * occ_func_0_1(1) *
-              occ_func_0_1(23) +
-          occ_func_0_0(10) * occ_func_0_1(11) * occ_func_0_1(0) *
+          occ_func_0_1(85) * occ_func_0_1(32) * occ_func_0_1(39) *
+              occ_func_0_0(0) +
+          occ_func_0_1(12) * occ_func_0_1(0) * occ_func_0_1(11) *
+              occ_func_0_0(29) +
+          occ_func_0_1(7) * occ_func_0_1(2) * occ_func_0_1(0) *
+              occ_func_0_0(22) +
+          occ_func_0_1(0) * occ_func_0_1(1) * occ_func_0_1(6) *
+              occ_func_0_0(80) +
+          occ_func_0_1(85) * occ_func_0_1(39) * occ_func_0_1(37) *
+              occ_func_0_0(0) +
+          occ_func_0_1(9) * occ_func_0_1(8) * occ_func_0_1(0) *
+              occ_func_0_0(24) +
+          occ_func_0_1(7) * occ_func_0_1(0) * occ_func_0_1(5) *
+              occ_func_0_0(22) +
+          occ_func_0_1(0) * occ_func_0_1(6) * occ_func_0_1(4) *
+              occ_func_0_0(80) +
+          occ_func_0_1(85) * occ_func_0_1(37) * occ_func_0_1(32) *
+              occ_func_0_0(0) +
+          occ_func_0_1(12) * occ_func_0_1(10) * occ_func_0_1(0) *
+              occ_func_0_0(29) +
+          occ_func_0_1(9) * occ_func_0_1(0) * occ_func_0_1(3) *
+              occ_func_0_0(24) +
+          occ_func_0_1(0) * occ_func_0_1(4) * occ_func_0_1(1) *
+              occ_func_0_0(80) +
+          occ_func_0_1(84) * occ_func_0_1(38) * occ_func_0_1(31) *
+              occ_func_0_0(0) +
+          occ_func_0_1(11) * occ_func_0_1(12) * occ_func_0_1(0) *
+              occ_func_0_0(30) +
+          occ_func_0_1(0) * occ_func_0_1(7) * occ_func_0_1(2) *
+              occ_func_0_0(81) +
+          occ_func_0_1(6) * occ_func_0_1(0) * occ_func_0_1(1) *
+              occ_func_0_0(23) +
+          occ_func_0_1(10) * occ_func_0_1(11) * occ_func_0_0(0) *
               occ_func_0_1(33) +
-          occ_func_0_0(83) * occ_func_0_1(34) * occ_func_0_1(28) *
+          occ_func_0_1(83) * occ_func_0_1(34) * occ_func_0_0(28) *
               occ_func_0_1(0) +
-          occ_func_0_0(0) * occ_func_0_1(8) * occ_func_0_1(3) *
+          occ_func_0_1(0) * occ_func_0_1(8) * occ_func_0_0(3) *
               occ_func_0_1(82) +
-          occ_func_0_0(5) * occ_func_0_1(0) * occ_func_0_1(2) *
+          occ_func_0_1(5) * occ_func_0_1(0) * occ_func_0_0(2) *
               occ_func_0_1(27) +
           occ_func_0_0(0) * occ_func_0_1(11) * occ_func_0_1(12) *
               occ_func_0_1(86) +
@@ -11641,29 +11901,29 @@ Scalar OccClexulatorTest_Clexulator::site_eval_bfunc_13_10_at_0() const {
               occ_func_0_1(40) +
           occ_func_0_0(79) * occ_func_0_1(20) * occ_func_0_1(21) *
               occ_func_0_1(0) +
-          occ_func_0_0(86) * occ_func_0_1(42) * occ_func_0_1(40) *
-              occ_func_0_1(0) +
-          occ_func_0_0(12) * occ_func_0_1(9) * occ_func_0_1(0) *
-              occ_func_0_1(21) +
-          occ_func_0_0(10) * occ_func_0_1(0) * occ_func_0_1(4) *
-              occ_func_0_1(19) +
-          occ_func_0_0(0) * occ_func_0_1(3) * occ_func_0_1(1) *
-              occ_func_0_1(79) +
-          occ_func_0_0(8) * occ_func_0_1(11) * occ_func_0_1(0) *
+          occ_func_0_1(86) * occ_func_0_1(42) * occ_func_0_1(40) *
+              occ_func_0_0(0) +
+          occ_func_0_1(12) * occ_func_0_1(9) * occ_func_0_1(0) *
+              occ_func_0_0(21) +
+          occ_func_0_1(10) * occ_func_0_1(0) * occ_func_0_1(4) *
+              occ_func_0_0(19) +
+          occ_func_0_1(0) * occ_func_0_1(3) * occ_func_0_1(1) *
+              occ_func_0_0(79) +
+          occ_func_0_1(8) * occ_func_0_1(11) * occ_func_0_0(0) *
               occ_func_0_1(34) +
-          occ_func_0_0(0) * occ_func_0_1(10) * occ_func_0_1(5) *
+          occ_func_0_1(0) * occ_func_0_1(10) * occ_func_0_0(5) *
               occ_func_0_1(83) +
-          occ_func_0_0(82) * occ_func_0_1(33) * occ_func_0_1(27) *
+          occ_func_0_1(82) * occ_func_0_1(33) * occ_func_0_0(27) *
               occ_func_0_1(0) +
-          occ_func_0_0(3) * occ_func_0_1(0) * occ_func_0_1(2) *
+          occ_func_0_1(3) * occ_func_0_1(0) * occ_func_0_0(2) *
               occ_func_0_1(28) +
-          occ_func_0_0(7) * occ_func_0_1(0) * occ_func_0_1(9) *
+          occ_func_0_1(7) * occ_func_0_0(0) * occ_func_0_1(9) *
               occ_func_0_1(38) +
-          occ_func_0_0(0) * occ_func_0_1(6) * occ_func_0_1(8) *
+          occ_func_0_1(0) * occ_func_0_0(6) * occ_func_0_1(8) *
               occ_func_0_1(84) +
-          occ_func_0_0(5) * occ_func_0_1(4) * occ_func_0_1(0) *
+          occ_func_0_1(5) * occ_func_0_0(4) * occ_func_0_1(0) *
               occ_func_0_1(36) +
-          occ_func_0_0(81) * occ_func_0_1(23) * occ_func_0_1(25) *
+          occ_func_0_1(81) * occ_func_0_0(23) * occ_func_0_1(25) *
               occ_func_0_1(0)) /
          24.;
 }
@@ -11973,101 +12233,101 @@ Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_13_1_at_0(
              (occ_func_0_1(6) * occ_func_0_0(11) * occ_func_0_0(39) +
               occ_func_0_1(1) * occ_func_0_0(2) * occ_func_0_0(32) +
               occ_func_0_1(80) * occ_func_0_0(22) * occ_func_0_0(29) +
-              occ_func_0_1(83) * occ_func_0_0(35) * occ_func_0_0(34) +
-              occ_func_0_1(5) * occ_func_0_0(7) * occ_func_0_0(27) +
-              occ_func_0_1(4) * occ_func_0_0(6) * occ_func_0_0(26) +
-              occ_func_0_1(84) * occ_func_0_0(36) * occ_func_0_0(38) +
-              occ_func_0_1(8) * occ_func_0_0(9) * occ_func_0_0(25) +
-              occ_func_0_1(6) * occ_func_0_0(4) * occ_func_0_0(23) +
+              occ_func_0_0(9) * occ_func_0_0(8) * occ_func_0_1(82) +
+              occ_func_0_0(5) * occ_func_0_0(7) * occ_func_0_1(27) +
+              occ_func_0_0(4) * occ_func_0_0(6) * occ_func_0_1(26) +
+              occ_func_0_0(8) * occ_func_0_0(9) * occ_func_0_1(25) +
+              occ_func_0_0(5) * occ_func_0_0(7) * occ_func_0_1(81) +
+              occ_func_0_0(6) * occ_func_0_0(4) * occ_func_0_1(23) +
               occ_func_0_1(3) * occ_func_0_0(8) * occ_func_0_0(42) +
               occ_func_0_1(2) * occ_func_0_0(5) * occ_func_0_0(41) +
               occ_func_0_1(79) * occ_func_0_0(19) * occ_func_0_0(20) +
-              occ_func_0_1(84) * occ_func_0_0(31) * occ_func_0_0(36) +
-              occ_func_0_1(11) * occ_func_0_0(10) * occ_func_0_0(30) +
-              occ_func_0_1(8) * occ_func_0_0(3) * occ_func_0_0(25) +
+              occ_func_0_0(11) * occ_func_0_0(10) * occ_func_0_1(30) +
+              occ_func_0_0(8) * occ_func_0_0(3) * occ_func_0_1(25) +
+              occ_func_0_0(2) * occ_func_0_0(5) * occ_func_0_1(81) +
               occ_func_0_1(3) * occ_func_0_0(9) * occ_func_0_0(42) +
               occ_func_0_1(1) * occ_func_0_0(4) * occ_func_0_0(40) +
               occ_func_0_1(79) * occ_func_0_0(21) * occ_func_0_0(19) +
-              occ_func_0_1(10) * occ_func_0_0(12) * occ_func_0_0(33) +
-              occ_func_0_1(83) * occ_func_0_0(28) * occ_func_0_0(35) +
-              occ_func_0_1(4) * occ_func_0_0(1) * occ_func_0_0(26) +
+              occ_func_0_0(83) * occ_func_0_1(28) * occ_func_0_0(35) +
+              occ_func_0_1(3) * occ_func_0_0(9) * occ_func_0_0(82) +
+              occ_func_0_0(4) * occ_func_0_1(1) * occ_func_0_0(26) +
               occ_func_0_1(5) * occ_func_0_0(10) * occ_func_0_0(36) +
               occ_func_0_1(2) * occ_func_0_0(3) * occ_func_0_0(31) +
               occ_func_0_1(81) * occ_func_0_0(25) * occ_func_0_0(30) +
-              occ_func_0_1(86) * occ_func_0_0(41) * occ_func_0_0(42) +
-              occ_func_0_1(11) * occ_func_0_0(8) * occ_func_0_0(20) +
-              occ_func_0_1(10) * occ_func_0_0(5) * occ_func_0_0(19) +
-              occ_func_0_1(7) * occ_func_0_0(12) * occ_func_0_0(38) +
-              occ_func_0_1(2) * occ_func_0_0(1) * occ_func_0_0(31) +
-              occ_func_0_1(81) * occ_func_0_0(30) * occ_func_0_0(23) +
+              occ_func_0_0(11) * occ_func_0_0(8) * occ_func_0_1(20) +
+              occ_func_0_0(10) * occ_func_0_0(5) * occ_func_0_1(19) +
+              occ_func_0_0(2) * occ_func_0_0(3) * occ_func_0_1(79) +
+              occ_func_0_0(11) * occ_func_0_1(6) * occ_func_0_0(84) +
+              occ_func_0_0(2) * occ_func_0_1(1) * occ_func_0_0(31) +
+              occ_func_0_0(81) * occ_func_0_0(30) * occ_func_0_1(23) +
               occ_func_0_1(4) * occ_func_0_0(10) * occ_func_0_0(37) +
               occ_func_0_1(1) * occ_func_0_0(3) * occ_func_0_0(32) +
               occ_func_0_1(80) * occ_func_0_0(29) * occ_func_0_0(24) +
-              occ_func_0_1(9) * occ_func_0_0(12) * occ_func_0_0(35) +
-              occ_func_0_1(82) * occ_func_0_0(26) * occ_func_0_0(33) +
-              occ_func_0_1(3) * occ_func_0_0(1) * occ_func_0_0(28) +
-              occ_func_0_1(9) * occ_func_0_0(7) * occ_func_0_0(35) +
-              occ_func_0_1(8) * occ_func_0_0(6) * occ_func_0_0(34) +
-              occ_func_0_1(82) * occ_func_0_0(27) * occ_func_0_0(26) +
-              occ_func_0_1(86) * occ_func_0_0(40) * occ_func_0_0(41) +
-              occ_func_0_1(12) * occ_func_0_0(7) * occ_func_0_0(21) +
-              occ_func_0_1(11) * occ_func_0_0(6) * occ_func_0_0(20) +
+              occ_func_0_1(4) * occ_func_0_0(10) * occ_func_0_0(83) +
+              occ_func_0_0(82) * occ_func_0_1(26) * occ_func_0_0(33) +
+              occ_func_0_0(3) * occ_func_0_1(1) * occ_func_0_0(28) +
+              occ_func_0_0(8) * occ_func_0_1(6) * occ_func_0_0(34) +
+              occ_func_0_0(5) * occ_func_0_1(4) * occ_func_0_0(83) +
+              occ_func_0_0(82) * occ_func_0_0(27) * occ_func_0_1(26) +
+              occ_func_0_0(12) * occ_func_0_0(7) * occ_func_0_1(21) +
+              occ_func_0_0(11) * occ_func_0_0(6) * occ_func_0_1(20) +
+              occ_func_0_0(1) * occ_func_0_0(2) * occ_func_0_1(79) +
               occ_func_0_1(6) * occ_func_0_0(8) * occ_func_0_0(39) +
               occ_func_0_1(4) * occ_func_0_0(5) * occ_func_0_0(37) +
               occ_func_0_1(80) * occ_func_0_0(24) * occ_func_0_0(22) +
-              occ_func_0_1(85) * occ_func_0_0(32) * occ_func_0_0(39) +
-              occ_func_0_1(12) * occ_func_0_0(11) * occ_func_0_0(29) +
-              occ_func_0_1(7) * occ_func_0_0(2) * occ_func_0_0(22) +
-              occ_func_0_1(85) * occ_func_0_0(39) * occ_func_0_0(37) +
-              occ_func_0_1(9) * occ_func_0_0(8) * occ_func_0_0(24) +
-              occ_func_0_1(7) * occ_func_0_0(5) * occ_func_0_0(22) +
-              occ_func_0_1(85) * occ_func_0_0(37) * occ_func_0_0(32) +
-              occ_func_0_1(12) * occ_func_0_0(10) * occ_func_0_0(29) +
-              occ_func_0_1(9) * occ_func_0_0(3) * occ_func_0_0(24) +
-              occ_func_0_1(84) * occ_func_0_0(38) * occ_func_0_0(31) +
-              occ_func_0_1(11) * occ_func_0_0(12) * occ_func_0_0(30) +
-              occ_func_0_1(6) * occ_func_0_0(1) * occ_func_0_0(23) +
-              occ_func_0_1(10) * occ_func_0_0(11) * occ_func_0_0(33) +
-              occ_func_0_1(83) * occ_func_0_0(34) * occ_func_0_0(28) +
-              occ_func_0_1(5) * occ_func_0_0(2) * occ_func_0_0(27) +
+              occ_func_0_0(12) * occ_func_0_0(11) * occ_func_0_1(29) +
+              occ_func_0_0(7) * occ_func_0_0(2) * occ_func_0_1(22) +
+              occ_func_0_0(1) * occ_func_0_0(6) * occ_func_0_1(80) +
+              occ_func_0_0(9) * occ_func_0_0(8) * occ_func_0_1(24) +
+              occ_func_0_0(7) * occ_func_0_0(5) * occ_func_0_1(22) +
+              occ_func_0_0(6) * occ_func_0_0(4) * occ_func_0_1(80) +
+              occ_func_0_0(12) * occ_func_0_0(10) * occ_func_0_1(29) +
+              occ_func_0_0(9) * occ_func_0_0(3) * occ_func_0_1(24) +
+              occ_func_0_0(4) * occ_func_0_0(1) * occ_func_0_1(80) +
+              occ_func_0_0(11) * occ_func_0_0(12) * occ_func_0_1(30) +
+              occ_func_0_0(7) * occ_func_0_0(2) * occ_func_0_1(81) +
+              occ_func_0_0(6) * occ_func_0_0(1) * occ_func_0_1(23) +
+              occ_func_0_0(83) * occ_func_0_0(34) * occ_func_0_1(28) +
+              occ_func_0_0(8) * occ_func_0_1(3) * occ_func_0_0(82) +
+              occ_func_0_0(5) * occ_func_0_1(2) * occ_func_0_0(27) +
               occ_func_0_1(2) * occ_func_0_0(7) * occ_func_0_0(41) +
               occ_func_0_1(1) * occ_func_0_0(6) * occ_func_0_0(40) +
               occ_func_0_1(79) * occ_func_0_0(20) * occ_func_0_0(21) +
-              occ_func_0_1(86) * occ_func_0_0(42) * occ_func_0_0(40) +
-              occ_func_0_1(12) * occ_func_0_0(9) * occ_func_0_0(21) +
-              occ_func_0_1(10) * occ_func_0_0(4) * occ_func_0_0(19) +
-              occ_func_0_1(8) * occ_func_0_0(11) * occ_func_0_0(34) +
-              occ_func_0_1(82) * occ_func_0_0(33) * occ_func_0_0(27) +
-              occ_func_0_1(3) * occ_func_0_0(2) * occ_func_0_0(28) +
-              occ_func_0_1(7) * occ_func_0_0(9) * occ_func_0_0(38) +
-              occ_func_0_1(5) * occ_func_0_0(4) * occ_func_0_0(36) +
-              occ_func_0_1(81) * occ_func_0_0(23) * occ_func_0_0(25)) /
+              occ_func_0_0(12) * occ_func_0_0(9) * occ_func_0_1(21) +
+              occ_func_0_0(10) * occ_func_0_0(4) * occ_func_0_1(19) +
+              occ_func_0_0(3) * occ_func_0_0(1) * occ_func_0_1(79) +
+              occ_func_0_0(10) * occ_func_0_1(5) * occ_func_0_0(83) +
+              occ_func_0_0(82) * occ_func_0_0(33) * occ_func_0_1(27) +
+              occ_func_0_0(3) * occ_func_0_1(2) * occ_func_0_0(28) +
+              occ_func_0_1(6) * occ_func_0_0(8) * occ_func_0_0(84) +
+              occ_func_0_0(5) * occ_func_0_1(4) * occ_func_0_0(36) +
+              occ_func_0_0(81) * occ_func_0_1(23) * occ_func_0_0(25)) /
              24. +
          (m_occ_func_0_1[occ_f] - m_occ_func_0_1[occ_i]) *
              (occ_func_0_0(7) * occ_func_0_0(12) * occ_func_0_0(85) +
-              occ_func_0_0(9) * occ_func_0_0(8) * occ_func_0_0(82) +
-              occ_func_0_0(5) * occ_func_0_0(7) * occ_func_0_0(81) +
+              occ_func_0_0(83) * occ_func_0_0(35) * occ_func_0_0(34) +
+              occ_func_0_0(84) * occ_func_0_0(36) * occ_func_0_0(38) +
               occ_func_0_0(10) * occ_func_0_0(11) * occ_func_0_0(86) +
-              occ_func_0_0(2) * occ_func_0_0(5) * occ_func_0_0(81) +
+              occ_func_0_0(84) * occ_func_0_0(31) * occ_func_0_0(36) +
               occ_func_0_0(12) * occ_func_0_0(10) * occ_func_0_0(86) +
-              occ_func_0_0(3) * occ_func_0_0(9) * occ_func_0_0(82) +
+              occ_func_0_0(10) * occ_func_0_0(12) * occ_func_0_0(33) +
               occ_func_0_0(8) * occ_func_0_0(11) * occ_func_0_0(84) +
-              occ_func_0_0(2) * occ_func_0_0(3) * occ_func_0_0(79) +
-              occ_func_0_0(11) * occ_func_0_0(6) * occ_func_0_0(84) +
+              occ_func_0_0(86) * occ_func_0_0(41) * occ_func_0_0(42) +
+              occ_func_0_0(7) * occ_func_0_0(12) * occ_func_0_0(38) +
               occ_func_0_0(12) * occ_func_0_0(9) * occ_func_0_0(85) +
-              occ_func_0_0(4) * occ_func_0_0(10) * occ_func_0_0(83) +
-              occ_func_0_0(5) * occ_func_0_0(4) * occ_func_0_0(83) +
-              occ_func_0_0(1) * occ_func_0_0(2) * occ_func_0_0(79) +
+              occ_func_0_0(9) * occ_func_0_0(12) * occ_func_0_0(35) +
+              occ_func_0_0(9) * occ_func_0_0(7) * occ_func_0_0(35) +
+              occ_func_0_0(86) * occ_func_0_0(40) * occ_func_0_0(41) +
               occ_func_0_0(9) * occ_func_0_0(7) * occ_func_0_0(85) +
-              occ_func_0_0(1) * occ_func_0_0(6) * occ_func_0_0(80) +
-              occ_func_0_0(6) * occ_func_0_0(4) * occ_func_0_0(80) +
-              occ_func_0_0(4) * occ_func_0_0(1) * occ_func_0_0(80) +
-              occ_func_0_0(7) * occ_func_0_0(2) * occ_func_0_0(81) +
-              occ_func_0_0(8) * occ_func_0_0(3) * occ_func_0_0(82) +
+              occ_func_0_0(85) * occ_func_0_0(32) * occ_func_0_0(39) +
+              occ_func_0_0(85) * occ_func_0_0(39) * occ_func_0_0(37) +
+              occ_func_0_0(85) * occ_func_0_0(37) * occ_func_0_0(32) +
+              occ_func_0_0(84) * occ_func_0_0(38) * occ_func_0_0(31) +
+              occ_func_0_0(10) * occ_func_0_0(11) * occ_func_0_0(33) +
               occ_func_0_0(11) * occ_func_0_0(12) * occ_func_0_0(86) +
-              occ_func_0_0(3) * occ_func_0_0(1) * occ_func_0_0(79) +
-              occ_func_0_0(10) * occ_func_0_0(5) * occ_func_0_0(83) +
-              occ_func_0_0(6) * occ_func_0_0(8) * occ_func_0_0(84)) /
+              occ_func_0_0(86) * occ_func_0_0(42) * occ_func_0_0(40) +
+              occ_func_0_0(8) * occ_func_0_0(11) * occ_func_0_0(34) +
+              occ_func_0_0(7) * occ_func_0_0(9) * occ_func_0_0(38)) /
              24.;
 }
 template <typename Scalar>
@@ -12086,22 +12346,22 @@ Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_13_2_at_0(
                    occ_func_0_0(29)) +
               (0.707107 * occ_func_0_0(83) * occ_func_0_0(35) *
                    occ_func_0_1(34) +
-               0.707107 * occ_func_0_0(83) * occ_func_0_1(35) *
+               0.707107 * occ_func_0_1(83) * occ_func_0_0(35) *
                    occ_func_0_0(34)) +
-              (0.707107 * occ_func_0_0(9) * occ_func_0_1(8) * occ_func_0_0(82) +
-               0.707107 * occ_func_0_1(9) * occ_func_0_0(8) *
-                   occ_func_0_0(82)) +
-              0.707107 * occ_func_0_0(5) * occ_func_0_1(7) * occ_func_0_0(27) +
-              0.707107 * occ_func_0_0(4) * occ_func_0_1(6) * occ_func_0_0(26) +
-              (0.707107 * occ_func_0_0(84) * occ_func_0_0(36) *
-                   occ_func_0_1(38) +
-               0.707107 * occ_func_0_0(84) * occ_func_0_1(36) *
+              0.707107 * occ_func_0_0(9) * occ_func_0_1(8) * occ_func_0_0(82) +
+              0.707107 * occ_func_0_1(5) * occ_func_0_0(7) * occ_func_0_0(27) +
+              (0.707107 * occ_func_0_0(4) * occ_func_0_1(6) * occ_func_0_0(26) +
+               0.707107 * occ_func_0_1(4) * occ_func_0_0(6) *
+                   occ_func_0_0(26)) +
+              (0.707107 * occ_func_0_0(84) * occ_func_0_1(36) *
+                   occ_func_0_0(38) +
+               0.707107 * occ_func_0_1(84) * occ_func_0_0(36) *
                    occ_func_0_0(38)) +
-              0.707107 * occ_func_0_0(8) * occ_func_0_1(9) * occ_func_0_0(25) +
-              (0.707107 * occ_func_0_0(5) * occ_func_0_1(7) * occ_func_0_0(81) +
-               0.707107 * occ_func_0_1(5) * occ_func_0_0(7) *
-                   occ_func_0_0(81)) +
-              0.707107 * occ_func_0_0(6) * occ_func_0_1(4) * occ_func_0_0(23) +
+              0.707107 * occ_func_0_1(8) * occ_func_0_0(9) * occ_func_0_0(25) +
+              0.707107 * occ_func_0_1(5) * occ_func_0_0(7) * occ_func_0_0(81) +
+              (0.707107 * occ_func_0_0(6) * occ_func_0_1(4) * occ_func_0_0(23) +
+               0.707107 * occ_func_0_1(6) * occ_func_0_0(4) *
+                   occ_func_0_0(23)) +
               (0.707107 * occ_func_0_0(10) * occ_func_0_1(11) *
                    occ_func_0_0(86) +
                0.707107 * occ_func_0_1(10) * occ_func_0_0(11) *
@@ -12132,16 +12392,16 @@ Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_13_2_at_0(
                    occ_func_0_1(19) +
                0.707107 * occ_func_0_0(79) * occ_func_0_1(21) *
                    occ_func_0_0(19)) +
-              0.707107 * occ_func_0_0(10) * occ_func_0_1(12) *
-                  occ_func_0_0(33) +
-              (0.707107 * occ_func_0_0(83) * occ_func_0_0(28) *
-                   occ_func_0_1(35) +
-               0.707107 * occ_func_0_0(83) * occ_func_0_1(28) *
-                   occ_func_0_0(35)) +
-              (0.707107 * occ_func_0_0(3) * occ_func_0_1(9) * occ_func_0_0(82) +
-               0.707107 * occ_func_0_1(3) * occ_func_0_0(9) *
-                   occ_func_0_0(82)) +
-              0.707107 * occ_func_0_0(4) * occ_func_0_1(1) * occ_func_0_0(26) +
+              (0.707107 * occ_func_0_0(10) * occ_func_0_0(12) *
+                   occ_func_0_1(33) +
+               0.707107 * occ_func_0_1(10) * occ_func_0_0(12) *
+                   occ_func_0_0(33)) +
+              0.707107 * occ_func_0_1(83) * occ_func_0_0(28) *
+                  occ_func_0_0(35) +
+              0.707107 * occ_func_0_0(3) * occ_func_0_0(9) * occ_func_0_1(82) +
+              (0.707107 * occ_func_0_0(4) * occ_func_0_0(1) * occ_func_0_1(26) +
+               0.707107 * occ_func_0_1(4) * occ_func_0_0(1) *
+                   occ_func_0_0(26)) +
               (0.707107 * occ_func_0_0(8) * occ_func_0_1(11) *
                    occ_func_0_0(84) +
                0.707107 * occ_func_0_1(8) * occ_func_0_0(11) *
@@ -12161,15 +12421,15 @@ Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_13_2_at_0(
               (0.707107 * occ_func_0_0(2) * occ_func_0_1(3) * occ_func_0_0(79) +
                0.707107 * occ_func_0_1(2) * occ_func_0_0(3) *
                    occ_func_0_0(79)) +
-              0.707107 * occ_func_0_0(7) * occ_func_0_1(12) * occ_func_0_0(38) +
-              (0.707107 * occ_func_0_0(11) * occ_func_0_1(6) *
-                   occ_func_0_0(84) +
-               0.707107 * occ_func_0_1(11) * occ_func_0_0(6) *
-                   occ_func_0_0(84)) +
-              0.707107 * occ_func_0_0(2) * occ_func_0_1(1) * occ_func_0_0(31) +
-              (0.707107 * occ_func_0_0(81) * occ_func_0_0(30) *
-                   occ_func_0_1(23) +
-               0.707107 * occ_func_0_0(81) * occ_func_0_1(30) *
+              (0.707107 * occ_func_0_0(7) * occ_func_0_1(12) *
+                   occ_func_0_0(38) +
+               0.707107 * occ_func_0_1(7) * occ_func_0_0(12) *
+                   occ_func_0_0(38)) +
+              0.707107 * occ_func_0_1(11) * occ_func_0_0(6) * occ_func_0_0(84) +
+              0.707107 * occ_func_0_1(2) * occ_func_0_0(1) * occ_func_0_0(31) +
+              (0.707107 * occ_func_0_0(81) * occ_func_0_1(30) *
+                   occ_func_0_0(23) +
+               0.707107 * occ_func_0_1(81) * occ_func_0_0(30) *
                    occ_func_0_0(23)) +
               (0.707107 * occ_func_0_0(12) * occ_func_0_1(9) *
                    occ_func_0_0(85) +
@@ -12181,24 +12441,24 @@ Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_13_2_at_0(
                    occ_func_0_1(24) +
                0.707107 * occ_func_0_0(80) * occ_func_0_1(29) *
                    occ_func_0_0(24)) +
-              0.707107 * occ_func_0_0(9) * occ_func_0_1(12) * occ_func_0_0(35) +
-              (0.707107 * occ_func_0_0(4) * occ_func_0_1(10) *
-                   occ_func_0_0(83) +
-               0.707107 * occ_func_0_1(4) * occ_func_0_0(10) *
-                   occ_func_0_0(83)) +
-              (0.707107 * occ_func_0_0(82) * occ_func_0_0(26) *
-                   occ_func_0_1(33) +
-               0.707107 * occ_func_0_0(82) * occ_func_0_1(26) *
-                   occ_func_0_0(33)) +
-              0.707107 * occ_func_0_0(3) * occ_func_0_1(1) * occ_func_0_0(28) +
-              0.707107 * occ_func_0_0(9) * occ_func_0_1(7) * occ_func_0_0(35) +
-              0.707107 * occ_func_0_0(8) * occ_func_0_1(6) * occ_func_0_0(34) +
-              (0.707107 * occ_func_0_0(5) * occ_func_0_1(4) * occ_func_0_0(83) +
-               0.707107 * occ_func_0_1(5) * occ_func_0_0(4) *
-                   occ_func_0_0(83)) +
-              (0.707107 * occ_func_0_0(82) * occ_func_0_0(27) *
-                   occ_func_0_1(26) +
-               0.707107 * occ_func_0_0(82) * occ_func_0_1(27) *
+              (0.707107 * occ_func_0_0(9) * occ_func_0_0(12) *
+                   occ_func_0_1(35) +
+               0.707107 * occ_func_0_1(9) * occ_func_0_0(12) *
+                   occ_func_0_0(35)) +
+              0.707107 * occ_func_0_0(4) * occ_func_0_0(10) * occ_func_0_1(83) +
+              0.707107 * occ_func_0_1(82) * occ_func_0_0(26) *
+                  occ_func_0_0(33) +
+              (0.707107 * occ_func_0_0(3) * occ_func_0_0(1) * occ_func_0_1(28) +
+               0.707107 * occ_func_0_1(3) * occ_func_0_0(1) *
+                   occ_func_0_0(28)) +
+              (0.707107 * occ_func_0_0(9) * occ_func_0_1(7) * occ_func_0_0(35) +
+               0.707107 * occ_func_0_1(9) * occ_func_0_0(7) *
+                   occ_func_0_0(35)) +
+              0.707107 * occ_func_0_1(8) * occ_func_0_0(6) * occ_func_0_0(34) +
+              0.707107 * occ_func_0_1(5) * occ_func_0_0(4) * occ_func_0_0(83) +
+              (0.707107 * occ_func_0_0(82) * occ_func_0_1(27) *
+                   occ_func_0_0(26) +
+               0.707107 * occ_func_0_1(82) * occ_func_0_0(27) *
                    occ_func_0_0(26)) +
               (0.707107 * occ_func_0_0(86) * occ_func_0_0(40) *
                    occ_func_0_1(41) +
@@ -12249,24 +12509,24 @@ Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_13_2_at_0(
                    occ_func_0_0(80)) +
               (0.707107 * occ_func_0_0(84) * occ_func_0_0(38) *
                    occ_func_0_1(31) +
-               0.707107 * occ_func_0_0(84) * occ_func_0_1(38) *
+               0.707107 * occ_func_0_1(84) * occ_func_0_0(38) *
                    occ_func_0_0(31)) +
-              0.707107 * occ_func_0_0(11) * occ_func_0_1(12) *
+              0.707107 * occ_func_0_1(11) * occ_func_0_0(12) *
                   occ_func_0_0(30) +
-              (0.707107 * occ_func_0_0(7) * occ_func_0_1(2) * occ_func_0_0(81) +
-               0.707107 * occ_func_0_1(7) * occ_func_0_0(2) *
-                   occ_func_0_0(81)) +
-              0.707107 * occ_func_0_0(6) * occ_func_0_1(1) * occ_func_0_0(23) +
-              0.707107 * occ_func_0_0(10) * occ_func_0_1(11) *
-                  occ_func_0_0(33) +
-              (0.707107 * occ_func_0_0(83) * occ_func_0_0(34) *
-                   occ_func_0_1(28) +
-               0.707107 * occ_func_0_0(83) * occ_func_0_1(34) *
-                   occ_func_0_0(28)) +
-              (0.707107 * occ_func_0_0(8) * occ_func_0_1(3) * occ_func_0_0(82) +
-               0.707107 * occ_func_0_1(8) * occ_func_0_0(3) *
-                   occ_func_0_0(82)) +
-              0.707107 * occ_func_0_0(5) * occ_func_0_1(2) * occ_func_0_0(27) +
+              0.707107 * occ_func_0_0(7) * occ_func_0_1(2) * occ_func_0_0(81) +
+              (0.707107 * occ_func_0_0(6) * occ_func_0_1(1) * occ_func_0_0(23) +
+               0.707107 * occ_func_0_1(6) * occ_func_0_0(1) *
+                   occ_func_0_0(23)) +
+              (0.707107 * occ_func_0_0(10) * occ_func_0_0(11) *
+                   occ_func_0_1(33) +
+               0.707107 * occ_func_0_1(10) * occ_func_0_0(11) *
+                   occ_func_0_0(33)) +
+              0.707107 * occ_func_0_1(83) * occ_func_0_0(34) *
+                  occ_func_0_0(28) +
+              0.707107 * occ_func_0_0(8) * occ_func_0_0(3) * occ_func_0_1(82) +
+              (0.707107 * occ_func_0_0(5) * occ_func_0_0(2) * occ_func_0_1(27) +
+               0.707107 * occ_func_0_1(5) * occ_func_0_0(2) *
+                   occ_func_0_0(27)) +
               (0.707107 * occ_func_0_0(11) * occ_func_0_1(12) *
                    occ_func_0_0(86) +
                0.707107 * occ_func_0_1(11) * occ_func_0_0(12) *
@@ -12286,33 +12546,33 @@ Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_13_2_at_0(
               (0.707107 * occ_func_0_0(3) * occ_func_0_1(1) * occ_func_0_0(79) +
                0.707107 * occ_func_0_1(3) * occ_func_0_0(1) *
                    occ_func_0_0(79)) +
-              0.707107 * occ_func_0_0(8) * occ_func_0_1(11) * occ_func_0_0(34) +
-              (0.707107 * occ_func_0_0(10) * occ_func_0_1(5) *
-                   occ_func_0_0(83) +
-               0.707107 * occ_func_0_1(10) * occ_func_0_0(5) *
-                   occ_func_0_0(83)) +
-              (0.707107 * occ_func_0_0(82) * occ_func_0_0(33) *
-                   occ_func_0_1(27) +
-               0.707107 * occ_func_0_0(82) * occ_func_0_1(33) *
-                   occ_func_0_0(27)) +
-              0.707107 * occ_func_0_0(3) * occ_func_0_1(2) * occ_func_0_0(28) +
-              0.707107 * occ_func_0_0(7) * occ_func_0_1(9) * occ_func_0_0(38) +
-              (0.707107 * occ_func_0_0(6) * occ_func_0_1(8) * occ_func_0_0(84) +
-               0.707107 * occ_func_0_1(6) * occ_func_0_0(8) *
-                   occ_func_0_0(84)) +
-              0.707107 * occ_func_0_0(5) * occ_func_0_1(4) * occ_func_0_0(36) +
+              (0.707107 * occ_func_0_0(8) * occ_func_0_0(11) *
+                   occ_func_0_1(34) +
+               0.707107 * occ_func_0_1(8) * occ_func_0_0(11) *
+                   occ_func_0_0(34)) +
+              0.707107 * occ_func_0_0(10) * occ_func_0_0(5) * occ_func_0_1(83) +
+              0.707107 * occ_func_0_1(82) * occ_func_0_0(33) *
+                  occ_func_0_0(27) +
+              (0.707107 * occ_func_0_0(3) * occ_func_0_0(2) * occ_func_0_1(28) +
+               0.707107 * occ_func_0_1(3) * occ_func_0_0(2) *
+                   occ_func_0_0(28)) +
+              (0.707107 * occ_func_0_0(7) * occ_func_0_1(9) * occ_func_0_0(38) +
+               0.707107 * occ_func_0_1(7) * occ_func_0_0(9) *
+                   occ_func_0_0(38)) +
+              0.707107 * occ_func_0_0(6) * occ_func_0_1(8) * occ_func_0_0(84) +
+              0.707107 * occ_func_0_1(5) * occ_func_0_0(4) * occ_func_0_0(36) +
               (0.707107 * occ_func_0_0(81) * occ_func_0_0(23) *
                    occ_func_0_1(25) +
-               0.707107 * occ_func_0_0(81) * occ_func_0_1(23) *
+               0.707107 * occ_func_0_1(81) * occ_func_0_0(23) *
                    occ_func_0_0(25))) /
              24. +
          (m_occ_func_0_1[occ_f] - m_occ_func_0_1[occ_i]) *
              (0.707107 * occ_func_0_0(6) * occ_func_0_0(11) * occ_func_0_0(39) +
               0.707107 * occ_func_0_0(1) * occ_func_0_0(2) * occ_func_0_0(32) +
+              0.707107 * occ_func_0_0(9) * occ_func_0_0(8) * occ_func_0_0(82) +
               0.707107 * occ_func_0_0(5) * occ_func_0_0(7) * occ_func_0_0(27) +
-              0.707107 * occ_func_0_0(4) * occ_func_0_0(6) * occ_func_0_0(26) +
               0.707107 * occ_func_0_0(8) * occ_func_0_0(9) * occ_func_0_0(25) +
-              0.707107 * occ_func_0_0(6) * occ_func_0_0(4) * occ_func_0_0(23) +
+              0.707107 * occ_func_0_0(5) * occ_func_0_0(7) * occ_func_0_0(81) +
               0.707107 * occ_func_0_0(3) * occ_func_0_0(8) * occ_func_0_0(42) +
               0.707107 * occ_func_0_0(2) * occ_func_0_0(5) * occ_func_0_0(41) +
               0.707107 * occ_func_0_0(11) * occ_func_0_0(10) *
@@ -12320,21 +12580,22 @@ Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_13_2_at_0(
               0.707107 * occ_func_0_0(8) * occ_func_0_0(3) * occ_func_0_0(25) +
               0.707107 * occ_func_0_0(3) * occ_func_0_0(9) * occ_func_0_0(42) +
               0.707107 * occ_func_0_0(1) * occ_func_0_0(4) * occ_func_0_0(40) +
-              0.707107 * occ_func_0_0(10) * occ_func_0_0(12) *
-                  occ_func_0_0(33) +
-              0.707107 * occ_func_0_0(4) * occ_func_0_0(1) * occ_func_0_0(26) +
+              0.707107 * occ_func_0_0(83) * occ_func_0_0(28) *
+                  occ_func_0_0(35) +
+              0.707107 * occ_func_0_0(3) * occ_func_0_0(9) * occ_func_0_0(82) +
               0.707107 * occ_func_0_0(5) * occ_func_0_0(10) * occ_func_0_0(36) +
               0.707107 * occ_func_0_0(2) * occ_func_0_0(3) * occ_func_0_0(31) +
               0.707107 * occ_func_0_0(11) * occ_func_0_0(8) * occ_func_0_0(20) +
               0.707107 * occ_func_0_0(10) * occ_func_0_0(5) * occ_func_0_0(19) +
-              0.707107 * occ_func_0_0(7) * occ_func_0_0(12) * occ_func_0_0(38) +
+              0.707107 * occ_func_0_0(11) * occ_func_0_0(6) * occ_func_0_0(84) +
               0.707107 * occ_func_0_0(2) * occ_func_0_0(1) * occ_func_0_0(31) +
               0.707107 * occ_func_0_0(4) * occ_func_0_0(10) * occ_func_0_0(37) +
               0.707107 * occ_func_0_0(1) * occ_func_0_0(3) * occ_func_0_0(32) +
-              0.707107 * occ_func_0_0(9) * occ_func_0_0(12) * occ_func_0_0(35) +
-              0.707107 * occ_func_0_0(3) * occ_func_0_0(1) * occ_func_0_0(28) +
-              0.707107 * occ_func_0_0(9) * occ_func_0_0(7) * occ_func_0_0(35) +
+              0.707107 * occ_func_0_0(4) * occ_func_0_0(10) * occ_func_0_0(83) +
+              0.707107 * occ_func_0_0(82) * occ_func_0_0(26) *
+                  occ_func_0_0(33) +
               0.707107 * occ_func_0_0(8) * occ_func_0_0(6) * occ_func_0_0(34) +
+              0.707107 * occ_func_0_0(5) * occ_func_0_0(4) * occ_func_0_0(83) +
               0.707107 * occ_func_0_0(12) * occ_func_0_0(7) * occ_func_0_0(21) +
               0.707107 * occ_func_0_0(11) * occ_func_0_0(6) * occ_func_0_0(20) +
               0.707107 * occ_func_0_0(6) * occ_func_0_0(8) * occ_func_0_0(39) +
@@ -12349,17 +12610,18 @@ Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_13_2_at_0(
               0.707107 * occ_func_0_0(9) * occ_func_0_0(3) * occ_func_0_0(24) +
               0.707107 * occ_func_0_0(11) * occ_func_0_0(12) *
                   occ_func_0_0(30) +
-              0.707107 * occ_func_0_0(6) * occ_func_0_0(1) * occ_func_0_0(23) +
-              0.707107 * occ_func_0_0(10) * occ_func_0_0(11) *
-                  occ_func_0_0(33) +
-              0.707107 * occ_func_0_0(5) * occ_func_0_0(2) * occ_func_0_0(27) +
+              0.707107 * occ_func_0_0(7) * occ_func_0_0(2) * occ_func_0_0(81) +
+              0.707107 * occ_func_0_0(83) * occ_func_0_0(34) *
+                  occ_func_0_0(28) +
+              0.707107 * occ_func_0_0(8) * occ_func_0_0(3) * occ_func_0_0(82) +
               0.707107 * occ_func_0_0(2) * occ_func_0_0(7) * occ_func_0_0(41) +
               0.707107 * occ_func_0_0(1) * occ_func_0_0(6) * occ_func_0_0(40) +
               0.707107 * occ_func_0_0(12) * occ_func_0_0(9) * occ_func_0_0(21) +
               0.707107 * occ_func_0_0(10) * occ_func_0_0(4) * occ_func_0_0(19) +
-              0.707107 * occ_func_0_0(8) * occ_func_0_0(11) * occ_func_0_0(34) +
-              0.707107 * occ_func_0_0(3) * occ_func_0_0(2) * occ_func_0_0(28) +
-              0.707107 * occ_func_0_0(7) * occ_func_0_0(9) * occ_func_0_0(38) +
+              0.707107 * occ_func_0_0(10) * occ_func_0_0(5) * occ_func_0_0(83) +
+              0.707107 * occ_func_0_0(82) * occ_func_0_0(33) *
+                  occ_func_0_0(27) +
+              0.707107 * occ_func_0_0(6) * occ_func_0_0(8) * occ_func_0_0(84) +
               0.707107 * occ_func_0_0(5) * occ_func_0_0(4) * occ_func_0_0(36)) /
              24.;
 }
@@ -12373,793 +12635,86 @@ Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_13_3_at_0(
                    occ_func_0_1(29) +
                0.707107 * occ_func_0_1(80) * occ_func_0_1(22) *
                    occ_func_0_0(29)) +
-              (0.707107 * occ_func_0_1(83) * occ_func_0_0(35) *
-                   occ_func_0_1(34) +
-               0.707107 * occ_func_0_1(83) * occ_func_0_1(35) *
-                   occ_func_0_0(34)) +
-              0.707107 * occ_func_0_1(5) * occ_func_0_1(7) * occ_func_0_0(27) +
-              0.707107 * occ_func_0_1(4) * occ_func_0_1(6) * occ_func_0_0(26) +
-              (0.707107 * occ_func_0_1(84) * occ_func_0_0(36) *
-                   occ_func_0_1(38) +
-               0.707107 * occ_func_0_1(84) * occ_func_0_1(36) *
-                   occ_func_0_0(38)) +
-              0.707107 * occ_func_0_1(8) * occ_func_0_1(9) * occ_func_0_0(25) +
-              0.707107 * occ_func_0_1(6) * occ_func_0_1(4) * occ_func_0_0(23) +
+              0.707107 * occ_func_0_0(9) * occ_func_0_1(8) * occ_func_0_1(82) +
+              0.707107 * occ_func_0_1(5) * occ_func_0_0(7) * occ_func_0_1(27) +
+              (0.707107 * occ_func_0_0(4) * occ_func_0_1(6) * occ_func_0_1(26) +
+               0.707107 * occ_func_0_1(4) * occ_func_0_0(6) *
+                   occ_func_0_1(26)) +
+              0.707107 * occ_func_0_1(8) * occ_func_0_0(9) * occ_func_0_1(25) +
+              0.707107 * occ_func_0_1(5) * occ_func_0_0(7) * occ_func_0_1(81) +
+              (0.707107 * occ_func_0_0(6) * occ_func_0_1(4) * occ_func_0_1(23) +
+               0.707107 * occ_func_0_1(6) * occ_func_0_0(4) *
+                   occ_func_0_1(23)) +
               0.707107 * occ_func_0_1(3) * occ_func_0_1(8) * occ_func_0_0(42) +
               0.707107 * occ_func_0_1(2) * occ_func_0_1(5) * occ_func_0_0(41) +
               (0.707107 * occ_func_0_1(79) * occ_func_0_0(19) *
                    occ_func_0_1(20) +
                0.707107 * occ_func_0_1(79) * occ_func_0_1(19) *
                    occ_func_0_0(20)) +
-              (0.707107 * occ_func_0_1(84) * occ_func_0_0(31) *
-                   occ_func_0_1(36) +
-               0.707107 * occ_func_0_1(84) * occ_func_0_1(31) *
-                   occ_func_0_0(36)) +
-              0.707107 * occ_func_0_1(11) * occ_func_0_1(10) *
-                  occ_func_0_0(30) +
-              0.707107 * occ_func_0_1(8) * occ_func_0_1(3) * occ_func_0_0(25) +
-              0.707107 * occ_func_0_1(3) * occ_func_0_1(9) * occ_func_0_0(42) +
-              0.707107 * occ_func_0_1(1) * occ_func_0_1(4) * occ_func_0_0(40) +
-              (0.707107 * occ_func_0_1(79) * occ_func_0_0(21) *
-                   occ_func_0_1(19) +
-               0.707107 * occ_func_0_1(79) * occ_func_0_1(21) *
-                   occ_func_0_0(19)) +
-              0.707107 * occ_func_0_1(10) * occ_func_0_1(12) *
-                  occ_func_0_0(33) +
-              (0.707107 * occ_func_0_1(83) * occ_func_0_0(28) *
-                   occ_func_0_1(35) +
-               0.707107 * occ_func_0_1(83) * occ_func_0_1(28) *
-                   occ_func_0_0(35)) +
-              0.707107 * occ_func_0_1(4) * occ_func_0_1(1) * occ_func_0_0(26) +
-              0.707107 * occ_func_0_1(5) * occ_func_0_1(10) * occ_func_0_0(36) +
-              0.707107 * occ_func_0_1(2) * occ_func_0_1(3) * occ_func_0_0(31) +
-              (0.707107 * occ_func_0_1(81) * occ_func_0_0(25) *
-                   occ_func_0_1(30) +
-               0.707107 * occ_func_0_1(81) * occ_func_0_1(25) *
-                   occ_func_0_0(30)) +
-              (0.707107 * occ_func_0_1(86) * occ_func_0_0(41) *
-                   occ_func_0_1(42) +
-               0.707107 * occ_func_0_1(86) * occ_func_0_1(41) *
-                   occ_func_0_0(42)) +
-              0.707107 * occ_func_0_1(11) * occ_func_0_1(8) * occ_func_0_0(20) +
-              0.707107 * occ_func_0_1(10) * occ_func_0_1(5) * occ_func_0_0(19) +
-              0.707107 * occ_func_0_1(7) * occ_func_0_1(12) * occ_func_0_0(38) +
-              0.707107 * occ_func_0_1(2) * occ_func_0_1(1) * occ_func_0_0(31) +
-              (0.707107 * occ_func_0_1(81) * occ_func_0_0(30) *
-                   occ_func_0_1(23) +
-               0.707107 * occ_func_0_1(81) * occ_func_0_1(30) *
-                   occ_func_0_0(23)) +
-              0.707107 * occ_func_0_1(4) * occ_func_0_1(10) * occ_func_0_0(37) +
-              0.707107 * occ_func_0_1(1) * occ_func_0_1(3) * occ_func_0_0(32) +
-              (0.707107 * occ_func_0_1(80) * occ_func_0_0(29) *
-                   occ_func_0_1(24) +
-               0.707107 * occ_func_0_1(80) * occ_func_0_1(29) *
-                   occ_func_0_0(24)) +
-              0.707107 * occ_func_0_1(9) * occ_func_0_1(12) * occ_func_0_0(35) +
-              (0.707107 * occ_func_0_1(82) * occ_func_0_0(26) *
-                   occ_func_0_1(33) +
-               0.707107 * occ_func_0_1(82) * occ_func_0_1(26) *
-                   occ_func_0_0(33)) +
-              0.707107 * occ_func_0_1(3) * occ_func_0_1(1) * occ_func_0_0(28) +
-              0.707107 * occ_func_0_1(9) * occ_func_0_1(7) * occ_func_0_0(35) +
-              0.707107 * occ_func_0_1(8) * occ_func_0_1(6) * occ_func_0_0(34) +
-              (0.707107 * occ_func_0_1(82) * occ_func_0_0(27) *
-                   occ_func_0_1(26) +
-               0.707107 * occ_func_0_1(82) * occ_func_0_1(27) *
-                   occ_func_0_0(26)) +
-              (0.707107 * occ_func_0_1(86) * occ_func_0_0(40) *
-                   occ_func_0_1(41) +
-               0.707107 * occ_func_0_1(86) * occ_func_0_1(40) *
-                   occ_func_0_0(41)) +
-              0.707107 * occ_func_0_1(12) * occ_func_0_1(7) * occ_func_0_0(21) +
-              0.707107 * occ_func_0_1(11) * occ_func_0_1(6) * occ_func_0_0(20) +
-              0.707107 * occ_func_0_1(6) * occ_func_0_1(8) * occ_func_0_0(39) +
-              0.707107 * occ_func_0_1(4) * occ_func_0_1(5) * occ_func_0_0(37) +
-              (0.707107 * occ_func_0_1(80) * occ_func_0_0(24) *
-                   occ_func_0_1(22) +
-               0.707107 * occ_func_0_1(80) * occ_func_0_1(24) *
-                   occ_func_0_0(22)) +
-              (0.707107 * occ_func_0_1(85) * occ_func_0_0(32) *
-                   occ_func_0_1(39) +
-               0.707107 * occ_func_0_1(85) * occ_func_0_1(32) *
-                   occ_func_0_0(39)) +
-              0.707107 * occ_func_0_1(12) * occ_func_0_1(11) *
-                  occ_func_0_0(29) +
-              0.707107 * occ_func_0_1(7) * occ_func_0_1(2) * occ_func_0_0(22) +
-              (0.707107 * occ_func_0_1(85) * occ_func_0_0(39) *
-                   occ_func_0_1(37) +
-               0.707107 * occ_func_0_1(85) * occ_func_0_1(39) *
-                   occ_func_0_0(37)) +
-              0.707107 * occ_func_0_1(9) * occ_func_0_1(8) * occ_func_0_0(24) +
-              0.707107 * occ_func_0_1(7) * occ_func_0_1(5) * occ_func_0_0(22) +
-              (0.707107 * occ_func_0_1(85) * occ_func_0_0(37) *
-                   occ_func_0_1(32) +
-               0.707107 * occ_func_0_1(85) * occ_func_0_1(37) *
-                   occ_func_0_0(32)) +
-              0.707107 * occ_func_0_1(12) * occ_func_0_1(10) *
-                  occ_func_0_0(29) +
-              0.707107 * occ_func_0_1(9) * occ_func_0_1(3) * occ_func_0_0(24) +
-              (0.707107 * occ_func_0_1(84) * occ_func_0_0(38) *
-                   occ_func_0_1(31) +
-               0.707107 * occ_func_0_1(84) * occ_func_0_1(38) *
-                   occ_func_0_0(31)) +
-              0.707107 * occ_func_0_1(11) * occ_func_0_1(12) *
-                  occ_func_0_0(30) +
-              0.707107 * occ_func_0_1(6) * occ_func_0_1(1) * occ_func_0_0(23) +
-              0.707107 * occ_func_0_1(10) * occ_func_0_1(11) *
-                  occ_func_0_0(33) +
-              (0.707107 * occ_func_0_1(83) * occ_func_0_0(34) *
-                   occ_func_0_1(28) +
-               0.707107 * occ_func_0_1(83) * occ_func_0_1(34) *
-                   occ_func_0_0(28)) +
-              0.707107 * occ_func_0_1(5) * occ_func_0_1(2) * occ_func_0_0(27) +
-              0.707107 * occ_func_0_1(2) * occ_func_0_1(7) * occ_func_0_0(41) +
-              0.707107 * occ_func_0_1(1) * occ_func_0_1(6) * occ_func_0_0(40) +
-              (0.707107 * occ_func_0_1(79) * occ_func_0_0(20) *
-                   occ_func_0_1(21) +
-               0.707107 * occ_func_0_1(79) * occ_func_0_1(20) *
-                   occ_func_0_0(21)) +
-              (0.707107 * occ_func_0_1(86) * occ_func_0_0(42) *
-                   occ_func_0_1(40) +
-               0.707107 * occ_func_0_1(86) * occ_func_0_1(42) *
-                   occ_func_0_0(40)) +
-              0.707107 * occ_func_0_1(12) * occ_func_0_1(9) * occ_func_0_0(21) +
-              0.707107 * occ_func_0_1(10) * occ_func_0_1(4) * occ_func_0_0(19) +
-              0.707107 * occ_func_0_1(8) * occ_func_0_1(11) * occ_func_0_0(34) +
-              (0.707107 * occ_func_0_1(82) * occ_func_0_0(33) *
-                   occ_func_0_1(27) +
-               0.707107 * occ_func_0_1(82) * occ_func_0_1(33) *
-                   occ_func_0_0(27)) +
-              0.707107 * occ_func_0_1(3) * occ_func_0_1(2) * occ_func_0_0(28) +
-              0.707107 * occ_func_0_1(7) * occ_func_0_1(9) * occ_func_0_0(38) +
-              0.707107 * occ_func_0_1(5) * occ_func_0_1(4) * occ_func_0_0(36) +
-              (0.707107 * occ_func_0_1(81) * occ_func_0_0(23) *
-                   occ_func_0_1(25) +
-               0.707107 * occ_func_0_1(81) * occ_func_0_1(23) *
-                   occ_func_0_0(25))) /
-             24. +
-         (m_occ_func_0_1[occ_f] - m_occ_func_0_1[occ_i]) *
-             ((0.707107 * occ_func_0_0(7) * occ_func_0_1(12) *
-                   occ_func_0_0(85) +
-               0.707107 * occ_func_0_1(7) * occ_func_0_0(12) *
-                   occ_func_0_0(85)) +
-              0.707107 * occ_func_0_1(6) * occ_func_0_0(11) * occ_func_0_0(39) +
-              0.707107 * occ_func_0_1(1) * occ_func_0_0(2) * occ_func_0_0(32) +
-              (0.707107 * occ_func_0_0(9) * occ_func_0_1(8) * occ_func_0_0(82) +
-               0.707107 * occ_func_0_1(9) * occ_func_0_0(8) *
-                   occ_func_0_0(82)) +
-              0.707107 * occ_func_0_1(5) * occ_func_0_0(7) * occ_func_0_0(27) +
-              0.707107 * occ_func_0_1(4) * occ_func_0_0(6) * occ_func_0_0(26) +
-              0.707107 * occ_func_0_1(8) * occ_func_0_0(9) * occ_func_0_0(25) +
-              (0.707107 * occ_func_0_0(5) * occ_func_0_1(7) * occ_func_0_0(81) +
-               0.707107 * occ_func_0_1(5) * occ_func_0_0(7) *
-                   occ_func_0_0(81)) +
-              0.707107 * occ_func_0_1(6) * occ_func_0_0(4) * occ_func_0_0(23) +
-              (0.707107 * occ_func_0_0(10) * occ_func_0_1(11) *
-                   occ_func_0_0(86) +
-               0.707107 * occ_func_0_1(10) * occ_func_0_0(11) *
-                   occ_func_0_0(86)) +
-              0.707107 * occ_func_0_1(3) * occ_func_0_0(8) * occ_func_0_0(42) +
-              0.707107 * occ_func_0_1(2) * occ_func_0_0(5) * occ_func_0_0(41) +
-              0.707107 * occ_func_0_1(11) * occ_func_0_0(10) *
-                  occ_func_0_0(30) +
-              0.707107 * occ_func_0_1(8) * occ_func_0_0(3) * occ_func_0_0(25) +
-              (0.707107 * occ_func_0_0(2) * occ_func_0_1(5) * occ_func_0_0(81) +
-               0.707107 * occ_func_0_1(2) * occ_func_0_0(5) *
-                   occ_func_0_0(81)) +
-              (0.707107 * occ_func_0_0(12) * occ_func_0_1(10) *
-                   occ_func_0_0(86) +
-               0.707107 * occ_func_0_1(12) * occ_func_0_0(10) *
-                   occ_func_0_0(86)) +
-              0.707107 * occ_func_0_1(3) * occ_func_0_0(9) * occ_func_0_0(42) +
-              0.707107 * occ_func_0_1(1) * occ_func_0_0(4) * occ_func_0_0(40) +
-              0.707107 * occ_func_0_1(10) * occ_func_0_0(12) *
-                  occ_func_0_0(33) +
-              (0.707107 * occ_func_0_0(3) * occ_func_0_1(9) * occ_func_0_0(82) +
-               0.707107 * occ_func_0_1(3) * occ_func_0_0(9) *
-                   occ_func_0_0(82)) +
-              0.707107 * occ_func_0_1(4) * occ_func_0_0(1) * occ_func_0_0(26) +
-              (0.707107 * occ_func_0_0(8) * occ_func_0_1(11) *
-                   occ_func_0_0(84) +
-               0.707107 * occ_func_0_1(8) * occ_func_0_0(11) *
-                   occ_func_0_0(84)) +
-              0.707107 * occ_func_0_1(5) * occ_func_0_0(10) * occ_func_0_0(36) +
-              0.707107 * occ_func_0_1(2) * occ_func_0_0(3) * occ_func_0_0(31) +
-              0.707107 * occ_func_0_1(11) * occ_func_0_0(8) * occ_func_0_0(20) +
-              0.707107 * occ_func_0_1(10) * occ_func_0_0(5) * occ_func_0_0(19) +
-              (0.707107 * occ_func_0_0(2) * occ_func_0_1(3) * occ_func_0_0(79) +
-               0.707107 * occ_func_0_1(2) * occ_func_0_0(3) *
-                   occ_func_0_0(79)) +
-              0.707107 * occ_func_0_1(7) * occ_func_0_0(12) * occ_func_0_0(38) +
-              (0.707107 * occ_func_0_0(11) * occ_func_0_1(6) *
-                   occ_func_0_0(84) +
-               0.707107 * occ_func_0_1(11) * occ_func_0_0(6) *
-                   occ_func_0_0(84)) +
-              0.707107 * occ_func_0_1(2) * occ_func_0_0(1) * occ_func_0_0(31) +
-              (0.707107 * occ_func_0_0(12) * occ_func_0_1(9) *
-                   occ_func_0_0(85) +
-               0.707107 * occ_func_0_1(12) * occ_func_0_0(9) *
-                   occ_func_0_0(85)) +
-              0.707107 * occ_func_0_1(4) * occ_func_0_0(10) * occ_func_0_0(37) +
-              0.707107 * occ_func_0_1(1) * occ_func_0_0(3) * occ_func_0_0(32) +
-              0.707107 * occ_func_0_1(9) * occ_func_0_0(12) * occ_func_0_0(35) +
-              (0.707107 * occ_func_0_0(4) * occ_func_0_1(10) *
-                   occ_func_0_0(83) +
-               0.707107 * occ_func_0_1(4) * occ_func_0_0(10) *
-                   occ_func_0_0(83)) +
-              0.707107 * occ_func_0_1(3) * occ_func_0_0(1) * occ_func_0_0(28) +
-              0.707107 * occ_func_0_1(9) * occ_func_0_0(7) * occ_func_0_0(35) +
-              0.707107 * occ_func_0_1(8) * occ_func_0_0(6) * occ_func_0_0(34) +
-              (0.707107 * occ_func_0_0(5) * occ_func_0_1(4) * occ_func_0_0(83) +
-               0.707107 * occ_func_0_1(5) * occ_func_0_0(4) *
-                   occ_func_0_0(83)) +
-              0.707107 * occ_func_0_1(12) * occ_func_0_0(7) * occ_func_0_0(21) +
-              0.707107 * occ_func_0_1(11) * occ_func_0_0(6) * occ_func_0_0(20) +
-              (0.707107 * occ_func_0_0(1) * occ_func_0_1(2) * occ_func_0_0(79) +
-               0.707107 * occ_func_0_1(1) * occ_func_0_0(2) *
-                   occ_func_0_0(79)) +
-              (0.707107 * occ_func_0_0(9) * occ_func_0_1(7) * occ_func_0_0(85) +
-               0.707107 * occ_func_0_1(9) * occ_func_0_0(7) *
-                   occ_func_0_0(85)) +
-              0.707107 * occ_func_0_1(6) * occ_func_0_0(8) * occ_func_0_0(39) +
-              0.707107 * occ_func_0_1(4) * occ_func_0_0(5) * occ_func_0_0(37) +
-              0.707107 * occ_func_0_1(12) * occ_func_0_0(11) *
-                  occ_func_0_0(29) +
-              0.707107 * occ_func_0_1(7) * occ_func_0_0(2) * occ_func_0_0(22) +
-              (0.707107 * occ_func_0_0(1) * occ_func_0_1(6) * occ_func_0_0(80) +
-               0.707107 * occ_func_0_1(1) * occ_func_0_0(6) *
-                   occ_func_0_0(80)) +
-              0.707107 * occ_func_0_1(9) * occ_func_0_0(8) * occ_func_0_0(24) +
-              0.707107 * occ_func_0_1(7) * occ_func_0_0(5) * occ_func_0_0(22) +
-              (0.707107 * occ_func_0_0(6) * occ_func_0_1(4) * occ_func_0_0(80) +
-               0.707107 * occ_func_0_1(6) * occ_func_0_0(4) *
-                   occ_func_0_0(80)) +
-              0.707107 * occ_func_0_1(12) * occ_func_0_0(10) *
-                  occ_func_0_0(29) +
-              0.707107 * occ_func_0_1(9) * occ_func_0_0(3) * occ_func_0_0(24) +
-              (0.707107 * occ_func_0_0(4) * occ_func_0_1(1) * occ_func_0_0(80) +
-               0.707107 * occ_func_0_1(4) * occ_func_0_0(1) *
-                   occ_func_0_0(80)) +
-              0.707107 * occ_func_0_1(11) * occ_func_0_0(12) *
-                  occ_func_0_0(30) +
-              (0.707107 * occ_func_0_0(7) * occ_func_0_1(2) * occ_func_0_0(81) +
-               0.707107 * occ_func_0_1(7) * occ_func_0_0(2) *
-                   occ_func_0_0(81)) +
-              0.707107 * occ_func_0_1(6) * occ_func_0_0(1) * occ_func_0_0(23) +
-              0.707107 * occ_func_0_1(10) * occ_func_0_0(11) *
-                  occ_func_0_0(33) +
-              (0.707107 * occ_func_0_0(8) * occ_func_0_1(3) * occ_func_0_0(82) +
-               0.707107 * occ_func_0_1(8) * occ_func_0_0(3) *
-                   occ_func_0_0(82)) +
-              0.707107 * occ_func_0_1(5) * occ_func_0_0(2) * occ_func_0_0(27) +
-              (0.707107 * occ_func_0_0(11) * occ_func_0_1(12) *
-                   occ_func_0_0(86) +
-               0.707107 * occ_func_0_1(11) * occ_func_0_0(12) *
-                   occ_func_0_0(86)) +
-              0.707107 * occ_func_0_1(2) * occ_func_0_0(7) * occ_func_0_0(41) +
-              0.707107 * occ_func_0_1(1) * occ_func_0_0(6) * occ_func_0_0(40) +
-              0.707107 * occ_func_0_1(12) * occ_func_0_0(9) * occ_func_0_0(21) +
-              0.707107 * occ_func_0_1(10) * occ_func_0_0(4) * occ_func_0_0(19) +
-              (0.707107 * occ_func_0_0(3) * occ_func_0_1(1) * occ_func_0_0(79) +
-               0.707107 * occ_func_0_1(3) * occ_func_0_0(1) *
-                   occ_func_0_0(79)) +
-              0.707107 * occ_func_0_1(8) * occ_func_0_0(11) * occ_func_0_0(34) +
-              (0.707107 * occ_func_0_0(10) * occ_func_0_1(5) *
-                   occ_func_0_0(83) +
-               0.707107 * occ_func_0_1(10) * occ_func_0_0(5) *
-                   occ_func_0_0(83)) +
-              0.707107 * occ_func_0_1(3) * occ_func_0_0(2) * occ_func_0_0(28) +
-              0.707107 * occ_func_0_1(7) * occ_func_0_0(9) * occ_func_0_0(38) +
-              (0.707107 * occ_func_0_0(6) * occ_func_0_1(8) * occ_func_0_0(84) +
-               0.707107 * occ_func_0_1(6) * occ_func_0_0(8) *
-                   occ_func_0_0(84)) +
-              0.707107 * occ_func_0_1(5) * occ_func_0_0(4) * occ_func_0_0(36)) /
-             24.;
-}
-template <typename Scalar>
-Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_13_4_at_0(
-    int occ_i, int occ_f) const {
-  return (m_occ_func_0_0[occ_f] - m_occ_func_0_0[occ_i]) *
-             (occ_func_0_1(7) * occ_func_0_1(12) * occ_func_0_0(85) +
-              occ_func_0_0(80) * occ_func_0_1(22) * occ_func_0_1(29) +
-              occ_func_0_0(83) * occ_func_0_1(35) * occ_func_0_1(34) +
-              occ_func_0_1(9) * occ_func_0_1(8) * occ_func_0_0(82) +
-              occ_func_0_0(84) * occ_func_0_1(36) * occ_func_0_1(38) +
-              occ_func_0_1(5) * occ_func_0_1(7) * occ_func_0_0(81) +
-              occ_func_0_1(10) * occ_func_0_1(11) * occ_func_0_0(86) +
-              occ_func_0_0(79) * occ_func_0_1(19) * occ_func_0_1(20) +
-              occ_func_0_0(84) * occ_func_0_1(31) * occ_func_0_1(36) +
-              occ_func_0_1(2) * occ_func_0_1(5) * occ_func_0_0(81) +
-              occ_func_0_1(12) * occ_func_0_1(10) * occ_func_0_0(86) +
-              occ_func_0_0(79) * occ_func_0_1(21) * occ_func_0_1(19) +
-              occ_func_0_0(83) * occ_func_0_1(28) * occ_func_0_1(35) +
-              occ_func_0_1(3) * occ_func_0_1(9) * occ_func_0_0(82) +
-              occ_func_0_1(8) * occ_func_0_1(11) * occ_func_0_0(84) +
-              occ_func_0_0(81) * occ_func_0_1(25) * occ_func_0_1(30) +
-              occ_func_0_0(86) * occ_func_0_1(41) * occ_func_0_1(42) +
-              occ_func_0_1(2) * occ_func_0_1(3) * occ_func_0_0(79) +
-              occ_func_0_1(11) * occ_func_0_1(6) * occ_func_0_0(84) +
-              occ_func_0_0(81) * occ_func_0_1(30) * occ_func_0_1(23) +
-              occ_func_0_1(12) * occ_func_0_1(9) * occ_func_0_0(85) +
-              occ_func_0_0(80) * occ_func_0_1(29) * occ_func_0_1(24) +
-              occ_func_0_1(4) * occ_func_0_1(10) * occ_func_0_0(83) +
-              occ_func_0_0(82) * occ_func_0_1(26) * occ_func_0_1(33) +
-              occ_func_0_1(5) * occ_func_0_1(4) * occ_func_0_0(83) +
-              occ_func_0_0(82) * occ_func_0_1(27) * occ_func_0_1(26) +
-              occ_func_0_0(86) * occ_func_0_1(40) * occ_func_0_1(41) +
-              occ_func_0_1(1) * occ_func_0_1(2) * occ_func_0_0(79) +
-              occ_func_0_1(9) * occ_func_0_1(7) * occ_func_0_0(85) +
-              occ_func_0_0(80) * occ_func_0_1(24) * occ_func_0_1(22) +
-              occ_func_0_0(85) * occ_func_0_1(32) * occ_func_0_1(39) +
-              occ_func_0_1(1) * occ_func_0_1(6) * occ_func_0_0(80) +
-              occ_func_0_0(85) * occ_func_0_1(39) * occ_func_0_1(37) +
-              occ_func_0_1(6) * occ_func_0_1(4) * occ_func_0_0(80) +
-              occ_func_0_0(85) * occ_func_0_1(37) * occ_func_0_1(32) +
-              occ_func_0_1(4) * occ_func_0_1(1) * occ_func_0_0(80) +
-              occ_func_0_0(84) * occ_func_0_1(38) * occ_func_0_1(31) +
-              occ_func_0_1(7) * occ_func_0_1(2) * occ_func_0_0(81) +
-              occ_func_0_0(83) * occ_func_0_1(34) * occ_func_0_1(28) +
-              occ_func_0_1(8) * occ_func_0_1(3) * occ_func_0_0(82) +
-              occ_func_0_1(11) * occ_func_0_1(12) * occ_func_0_0(86) +
-              occ_func_0_0(79) * occ_func_0_1(20) * occ_func_0_1(21) +
-              occ_func_0_0(86) * occ_func_0_1(42) * occ_func_0_1(40) +
-              occ_func_0_1(3) * occ_func_0_1(1) * occ_func_0_0(79) +
-              occ_func_0_1(10) * occ_func_0_1(5) * occ_func_0_0(83) +
-              occ_func_0_0(82) * occ_func_0_1(33) * occ_func_0_1(27) +
-              occ_func_0_1(6) * occ_func_0_1(8) * occ_func_0_0(84) +
-              occ_func_0_0(81) * occ_func_0_1(23) * occ_func_0_1(25)) /
-             24. +
-         (m_occ_func_0_1[occ_f] - m_occ_func_0_1[occ_i]) *
-             (occ_func_0_0(6) * occ_func_0_1(11) * occ_func_0_0(39) +
-              occ_func_0_0(1) * occ_func_0_1(2) * occ_func_0_0(32) +
-              occ_func_0_0(5) * occ_func_0_1(7) * occ_func_0_0(27) +
-              occ_func_0_0(4) * occ_func_0_1(6) * occ_func_0_0(26) +
-              occ_func_0_0(8) * occ_func_0_1(9) * occ_func_0_0(25) +
-              occ_func_0_0(6) * occ_func_0_1(4) * occ_func_0_0(23) +
-              occ_func_0_0(3) * occ_func_0_1(8) * occ_func_0_0(42) +
-              occ_func_0_0(2) * occ_func_0_1(5) * occ_func_0_0(41) +
-              occ_func_0_0(11) * occ_func_0_1(10) * occ_func_0_0(30) +
-              occ_func_0_0(8) * occ_func_0_1(3) * occ_func_0_0(25) +
-              occ_func_0_0(3) * occ_func_0_1(9) * occ_func_0_0(42) +
-              occ_func_0_0(1) * occ_func_0_1(4) * occ_func_0_0(40) +
-              occ_func_0_0(10) * occ_func_0_1(12) * occ_func_0_0(33) +
-              occ_func_0_0(4) * occ_func_0_1(1) * occ_func_0_0(26) +
-              occ_func_0_0(5) * occ_func_0_1(10) * occ_func_0_0(36) +
-              occ_func_0_0(2) * occ_func_0_1(3) * occ_func_0_0(31) +
-              occ_func_0_0(11) * occ_func_0_1(8) * occ_func_0_0(20) +
-              occ_func_0_0(10) * occ_func_0_1(5) * occ_func_0_0(19) +
-              occ_func_0_0(7) * occ_func_0_1(12) * occ_func_0_0(38) +
-              occ_func_0_0(2) * occ_func_0_1(1) * occ_func_0_0(31) +
-              occ_func_0_0(4) * occ_func_0_1(10) * occ_func_0_0(37) +
-              occ_func_0_0(1) * occ_func_0_1(3) * occ_func_0_0(32) +
-              occ_func_0_0(9) * occ_func_0_1(12) * occ_func_0_0(35) +
-              occ_func_0_0(3) * occ_func_0_1(1) * occ_func_0_0(28) +
-              occ_func_0_0(9) * occ_func_0_1(7) * occ_func_0_0(35) +
-              occ_func_0_0(8) * occ_func_0_1(6) * occ_func_0_0(34) +
-              occ_func_0_0(12) * occ_func_0_1(7) * occ_func_0_0(21) +
-              occ_func_0_0(11) * occ_func_0_1(6) * occ_func_0_0(20) +
-              occ_func_0_0(6) * occ_func_0_1(8) * occ_func_0_0(39) +
-              occ_func_0_0(4) * occ_func_0_1(5) * occ_func_0_0(37) +
-              occ_func_0_0(12) * occ_func_0_1(11) * occ_func_0_0(29) +
-              occ_func_0_0(7) * occ_func_0_1(2) * occ_func_0_0(22) +
-              occ_func_0_0(9) * occ_func_0_1(8) * occ_func_0_0(24) +
-              occ_func_0_0(7) * occ_func_0_1(5) * occ_func_0_0(22) +
-              occ_func_0_0(12) * occ_func_0_1(10) * occ_func_0_0(29) +
-              occ_func_0_0(9) * occ_func_0_1(3) * occ_func_0_0(24) +
-              occ_func_0_0(11) * occ_func_0_1(12) * occ_func_0_0(30) +
-              occ_func_0_0(6) * occ_func_0_1(1) * occ_func_0_0(23) +
-              occ_func_0_0(10) * occ_func_0_1(11) * occ_func_0_0(33) +
-              occ_func_0_0(5) * occ_func_0_1(2) * occ_func_0_0(27) +
-              occ_func_0_0(2) * occ_func_0_1(7) * occ_func_0_0(41) +
-              occ_func_0_0(1) * occ_func_0_1(6) * occ_func_0_0(40) +
-              occ_func_0_0(12) * occ_func_0_1(9) * occ_func_0_0(21) +
-              occ_func_0_0(10) * occ_func_0_1(4) * occ_func_0_0(19) +
-              occ_func_0_0(8) * occ_func_0_1(11) * occ_func_0_0(34) +
-              occ_func_0_0(3) * occ_func_0_1(2) * occ_func_0_0(28) +
-              occ_func_0_0(7) * occ_func_0_1(9) * occ_func_0_0(38) +
-              occ_func_0_0(5) * occ_func_0_1(4) * occ_func_0_0(36)) /
-             24.;
-}
-template <typename Scalar>
-Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_13_5_at_0(
-    int occ_i, int occ_f) const {
-  return (m_occ_func_0_0[occ_f] - m_occ_func_0_0[occ_i]) *
-             (occ_func_0_1(80) * occ_func_0_1(22) * occ_func_0_1(29) +
-              occ_func_0_1(83) * occ_func_0_1(35) * occ_func_0_1(34) +
-              occ_func_0_1(84) * occ_func_0_1(36) * occ_func_0_1(38) +
-              occ_func_0_1(79) * occ_func_0_1(19) * occ_func_0_1(20) +
-              occ_func_0_1(84) * occ_func_0_1(31) * occ_func_0_1(36) +
-              occ_func_0_1(79) * occ_func_0_1(21) * occ_func_0_1(19) +
-              occ_func_0_1(83) * occ_func_0_1(28) * occ_func_0_1(35) +
-              occ_func_0_1(81) * occ_func_0_1(25) * occ_func_0_1(30) +
-              occ_func_0_1(86) * occ_func_0_1(41) * occ_func_0_1(42) +
-              occ_func_0_1(81) * occ_func_0_1(30) * occ_func_0_1(23) +
-              occ_func_0_1(80) * occ_func_0_1(29) * occ_func_0_1(24) +
-              occ_func_0_1(82) * occ_func_0_1(26) * occ_func_0_1(33) +
-              occ_func_0_1(82) * occ_func_0_1(27) * occ_func_0_1(26) +
-              occ_func_0_1(86) * occ_func_0_1(40) * occ_func_0_1(41) +
-              occ_func_0_1(80) * occ_func_0_1(24) * occ_func_0_1(22) +
-              occ_func_0_1(85) * occ_func_0_1(32) * occ_func_0_1(39) +
-              occ_func_0_1(85) * occ_func_0_1(39) * occ_func_0_1(37) +
-              occ_func_0_1(85) * occ_func_0_1(37) * occ_func_0_1(32) +
-              occ_func_0_1(84) * occ_func_0_1(38) * occ_func_0_1(31) +
-              occ_func_0_1(83) * occ_func_0_1(34) * occ_func_0_1(28) +
-              occ_func_0_1(79) * occ_func_0_1(20) * occ_func_0_1(21) +
-              occ_func_0_1(86) * occ_func_0_1(42) * occ_func_0_1(40) +
-              occ_func_0_1(82) * occ_func_0_1(33) * occ_func_0_1(27) +
-              occ_func_0_1(81) * occ_func_0_1(23) * occ_func_0_1(25)) /
-             24. +
-         (m_occ_func_0_1[occ_f] - m_occ_func_0_1[occ_i]) *
-             (occ_func_0_1(7) * occ_func_0_1(12) * occ_func_0_0(85) +
-              occ_func_0_1(6) * occ_func_0_1(11) * occ_func_0_0(39) +
-              occ_func_0_1(1) * occ_func_0_1(2) * occ_func_0_0(32) +
-              occ_func_0_1(9) * occ_func_0_1(8) * occ_func_0_0(82) +
-              occ_func_0_1(5) * occ_func_0_1(7) * occ_func_0_0(27) +
-              occ_func_0_1(4) * occ_func_0_1(6) * occ_func_0_0(26) +
-              occ_func_0_1(8) * occ_func_0_1(9) * occ_func_0_0(25) +
-              occ_func_0_1(5) * occ_func_0_1(7) * occ_func_0_0(81) +
-              occ_func_0_1(6) * occ_func_0_1(4) * occ_func_0_0(23) +
-              occ_func_0_1(10) * occ_func_0_1(11) * occ_func_0_0(86) +
-              occ_func_0_1(3) * occ_func_0_1(8) * occ_func_0_0(42) +
-              occ_func_0_1(2) * occ_func_0_1(5) * occ_func_0_0(41) +
-              occ_func_0_1(11) * occ_func_0_1(10) * occ_func_0_0(30) +
-              occ_func_0_1(8) * occ_func_0_1(3) * occ_func_0_0(25) +
-              occ_func_0_1(2) * occ_func_0_1(5) * occ_func_0_0(81) +
-              occ_func_0_1(12) * occ_func_0_1(10) * occ_func_0_0(86) +
-              occ_func_0_1(3) * occ_func_0_1(9) * occ_func_0_0(42) +
-              occ_func_0_1(1) * occ_func_0_1(4) * occ_func_0_0(40) +
-              occ_func_0_1(10) * occ_func_0_1(12) * occ_func_0_0(33) +
-              occ_func_0_1(3) * occ_func_0_1(9) * occ_func_0_0(82) +
-              occ_func_0_1(4) * occ_func_0_1(1) * occ_func_0_0(26) +
-              occ_func_0_1(8) * occ_func_0_1(11) * occ_func_0_0(84) +
-              occ_func_0_1(5) * occ_func_0_1(10) * occ_func_0_0(36) +
-              occ_func_0_1(2) * occ_func_0_1(3) * occ_func_0_0(31) +
-              occ_func_0_1(11) * occ_func_0_1(8) * occ_func_0_0(20) +
-              occ_func_0_1(10) * occ_func_0_1(5) * occ_func_0_0(19) +
-              occ_func_0_1(2) * occ_func_0_1(3) * occ_func_0_0(79) +
-              occ_func_0_1(7) * occ_func_0_1(12) * occ_func_0_0(38) +
-              occ_func_0_1(11) * occ_func_0_1(6) * occ_func_0_0(84) +
-              occ_func_0_1(2) * occ_func_0_1(1) * occ_func_0_0(31) +
-              occ_func_0_1(12) * occ_func_0_1(9) * occ_func_0_0(85) +
-              occ_func_0_1(4) * occ_func_0_1(10) * occ_func_0_0(37) +
-              occ_func_0_1(1) * occ_func_0_1(3) * occ_func_0_0(32) +
-              occ_func_0_1(9) * occ_func_0_1(12) * occ_func_0_0(35) +
-              occ_func_0_1(4) * occ_func_0_1(10) * occ_func_0_0(83) +
-              occ_func_0_1(3) * occ_func_0_1(1) * occ_func_0_0(28) +
-              occ_func_0_1(9) * occ_func_0_1(7) * occ_func_0_0(35) +
-              occ_func_0_1(8) * occ_func_0_1(6) * occ_func_0_0(34) +
-              occ_func_0_1(5) * occ_func_0_1(4) * occ_func_0_0(83) +
-              occ_func_0_1(12) * occ_func_0_1(7) * occ_func_0_0(21) +
-              occ_func_0_1(11) * occ_func_0_1(6) * occ_func_0_0(20) +
-              occ_func_0_1(1) * occ_func_0_1(2) * occ_func_0_0(79) +
-              occ_func_0_1(9) * occ_func_0_1(7) * occ_func_0_0(85) +
-              occ_func_0_1(6) * occ_func_0_1(8) * occ_func_0_0(39) +
-              occ_func_0_1(4) * occ_func_0_1(5) * occ_func_0_0(37) +
-              occ_func_0_1(12) * occ_func_0_1(11) * occ_func_0_0(29) +
-              occ_func_0_1(7) * occ_func_0_1(2) * occ_func_0_0(22) +
-              occ_func_0_1(1) * occ_func_0_1(6) * occ_func_0_0(80) +
-              occ_func_0_1(9) * occ_func_0_1(8) * occ_func_0_0(24) +
-              occ_func_0_1(7) * occ_func_0_1(5) * occ_func_0_0(22) +
-              occ_func_0_1(6) * occ_func_0_1(4) * occ_func_0_0(80) +
-              occ_func_0_1(12) * occ_func_0_1(10) * occ_func_0_0(29) +
-              occ_func_0_1(9) * occ_func_0_1(3) * occ_func_0_0(24) +
-              occ_func_0_1(4) * occ_func_0_1(1) * occ_func_0_0(80) +
-              occ_func_0_1(11) * occ_func_0_1(12) * occ_func_0_0(30) +
-              occ_func_0_1(7) * occ_func_0_1(2) * occ_func_0_0(81) +
-              occ_func_0_1(6) * occ_func_0_1(1) * occ_func_0_0(23) +
-              occ_func_0_1(10) * occ_func_0_1(11) * occ_func_0_0(33) +
-              occ_func_0_1(8) * occ_func_0_1(3) * occ_func_0_0(82) +
-              occ_func_0_1(5) * occ_func_0_1(2) * occ_func_0_0(27) +
-              occ_func_0_1(11) * occ_func_0_1(12) * occ_func_0_0(86) +
-              occ_func_0_1(2) * occ_func_0_1(7) * occ_func_0_0(41) +
-              occ_func_0_1(1) * occ_func_0_1(6) * occ_func_0_0(40) +
-              occ_func_0_1(12) * occ_func_0_1(9) * occ_func_0_0(21) +
-              occ_func_0_1(10) * occ_func_0_1(4) * occ_func_0_0(19) +
-              occ_func_0_1(3) * occ_func_0_1(1) * occ_func_0_0(79) +
-              occ_func_0_1(8) * occ_func_0_1(11) * occ_func_0_0(34) +
-              occ_func_0_1(10) * occ_func_0_1(5) * occ_func_0_0(83) +
-              occ_func_0_1(3) * occ_func_0_1(2) * occ_func_0_0(28) +
-              occ_func_0_1(7) * occ_func_0_1(9) * occ_func_0_0(38) +
-              occ_func_0_1(6) * occ_func_0_1(8) * occ_func_0_0(84) +
-              occ_func_0_1(5) * occ_func_0_1(4) * occ_func_0_0(36)) /
-             24.;
-}
-template <typename Scalar>
-Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_13_6_at_0(
-    int occ_i, int occ_f) const {
-  return (m_occ_func_0_0[occ_f] - m_occ_func_0_0[occ_i]) *
-             (occ_func_0_0(7) * occ_func_0_0(12) * occ_func_0_1(85) +
-              occ_func_0_0(6) * occ_func_0_0(11) * occ_func_0_1(39) +
-              occ_func_0_0(1) * occ_func_0_0(2) * occ_func_0_1(32) +
-              occ_func_0_0(9) * occ_func_0_0(8) * occ_func_0_1(82) +
-              occ_func_0_0(5) * occ_func_0_0(7) * occ_func_0_1(27) +
-              occ_func_0_0(4) * occ_func_0_0(6) * occ_func_0_1(26) +
-              occ_func_0_0(8) * occ_func_0_0(9) * occ_func_0_1(25) +
-              occ_func_0_0(5) * occ_func_0_0(7) * occ_func_0_1(81) +
-              occ_func_0_0(6) * occ_func_0_0(4) * occ_func_0_1(23) +
-              occ_func_0_0(10) * occ_func_0_0(11) * occ_func_0_1(86) +
-              occ_func_0_0(3) * occ_func_0_0(8) * occ_func_0_1(42) +
-              occ_func_0_0(2) * occ_func_0_0(5) * occ_func_0_1(41) +
-              occ_func_0_0(11) * occ_func_0_0(10) * occ_func_0_1(30) +
-              occ_func_0_0(8) * occ_func_0_0(3) * occ_func_0_1(25) +
-              occ_func_0_0(2) * occ_func_0_0(5) * occ_func_0_1(81) +
-              occ_func_0_0(12) * occ_func_0_0(10) * occ_func_0_1(86) +
-              occ_func_0_0(3) * occ_func_0_0(9) * occ_func_0_1(42) +
-              occ_func_0_0(1) * occ_func_0_0(4) * occ_func_0_1(40) +
-              occ_func_0_0(10) * occ_func_0_0(12) * occ_func_0_1(33) +
-              occ_func_0_0(3) * occ_func_0_0(9) * occ_func_0_1(82) +
-              occ_func_0_0(4) * occ_func_0_0(1) * occ_func_0_1(26) +
-              occ_func_0_0(8) * occ_func_0_0(11) * occ_func_0_1(84) +
-              occ_func_0_0(5) * occ_func_0_0(10) * occ_func_0_1(36) +
-              occ_func_0_0(2) * occ_func_0_0(3) * occ_func_0_1(31) +
-              occ_func_0_0(11) * occ_func_0_0(8) * occ_func_0_1(20) +
-              occ_func_0_0(10) * occ_func_0_0(5) * occ_func_0_1(19) +
-              occ_func_0_0(2) * occ_func_0_0(3) * occ_func_0_1(79) +
-              occ_func_0_0(7) * occ_func_0_0(12) * occ_func_0_1(38) +
-              occ_func_0_0(11) * occ_func_0_0(6) * occ_func_0_1(84) +
-              occ_func_0_0(2) * occ_func_0_0(1) * occ_func_0_1(31) +
-              occ_func_0_0(12) * occ_func_0_0(9) * occ_func_0_1(85) +
-              occ_func_0_0(4) * occ_func_0_0(10) * occ_func_0_1(37) +
-              occ_func_0_0(1) * occ_func_0_0(3) * occ_func_0_1(32) +
-              occ_func_0_0(9) * occ_func_0_0(12) * occ_func_0_1(35) +
-              occ_func_0_0(4) * occ_func_0_0(10) * occ_func_0_1(83) +
-              occ_func_0_0(3) * occ_func_0_0(1) * occ_func_0_1(28) +
-              occ_func_0_0(9) * occ_func_0_0(7) * occ_func_0_1(35) +
-              occ_func_0_0(8) * occ_func_0_0(6) * occ_func_0_1(34) +
-              occ_func_0_0(5) * occ_func_0_0(4) * occ_func_0_1(83) +
-              occ_func_0_0(12) * occ_func_0_0(7) * occ_func_0_1(21) +
-              occ_func_0_0(11) * occ_func_0_0(6) * occ_func_0_1(20) +
-              occ_func_0_0(1) * occ_func_0_0(2) * occ_func_0_1(79) +
-              occ_func_0_0(9) * occ_func_0_0(7) * occ_func_0_1(85) +
-              occ_func_0_0(6) * occ_func_0_0(8) * occ_func_0_1(39) +
-              occ_func_0_0(4) * occ_func_0_0(5) * occ_func_0_1(37) +
-              occ_func_0_0(12) * occ_func_0_0(11) * occ_func_0_1(29) +
-              occ_func_0_0(7) * occ_func_0_0(2) * occ_func_0_1(22) +
-              occ_func_0_0(1) * occ_func_0_0(6) * occ_func_0_1(80) +
-              occ_func_0_0(9) * occ_func_0_0(8) * occ_func_0_1(24) +
-              occ_func_0_0(7) * occ_func_0_0(5) * occ_func_0_1(22) +
-              occ_func_0_0(6) * occ_func_0_0(4) * occ_func_0_1(80) +
-              occ_func_0_0(12) * occ_func_0_0(10) * occ_func_0_1(29) +
-              occ_func_0_0(9) * occ_func_0_0(3) * occ_func_0_1(24) +
-              occ_func_0_0(4) * occ_func_0_0(1) * occ_func_0_1(80) +
-              occ_func_0_0(11) * occ_func_0_0(12) * occ_func_0_1(30) +
-              occ_func_0_0(7) * occ_func_0_0(2) * occ_func_0_1(81) +
-              occ_func_0_0(6) * occ_func_0_0(1) * occ_func_0_1(23) +
-              occ_func_0_0(10) * occ_func_0_0(11) * occ_func_0_1(33) +
-              occ_func_0_0(8) * occ_func_0_0(3) * occ_func_0_1(82) +
-              occ_func_0_0(5) * occ_func_0_0(2) * occ_func_0_1(27) +
-              occ_func_0_0(11) * occ_func_0_0(12) * occ_func_0_1(86) +
-              occ_func_0_0(2) * occ_func_0_0(7) * occ_func_0_1(41) +
-              occ_func_0_0(1) * occ_func_0_0(6) * occ_func_0_1(40) +
-              occ_func_0_0(12) * occ_func_0_0(9) * occ_func_0_1(21) +
-              occ_func_0_0(10) * occ_func_0_0(4) * occ_func_0_1(19) +
-              occ_func_0_0(3) * occ_func_0_0(1) * occ_func_0_1(79) +
-              occ_func_0_0(8) * occ_func_0_0(11) * occ_func_0_1(34) +
-              occ_func_0_0(10) * occ_func_0_0(5) * occ_func_0_1(83) +
-              occ_func_0_0(3) * occ_func_0_0(2) * occ_func_0_1(28) +
-              occ_func_0_0(7) * occ_func_0_0(9) * occ_func_0_1(38) +
-              occ_func_0_0(6) * occ_func_0_0(8) * occ_func_0_1(84) +
-              occ_func_0_0(5) * occ_func_0_0(4) * occ_func_0_1(36)) /
-             24. +
-         (m_occ_func_0_1[occ_f] - m_occ_func_0_1[occ_i]) *
-             (occ_func_0_0(80) * occ_func_0_0(22) * occ_func_0_0(29) +
-              occ_func_0_0(83) * occ_func_0_0(35) * occ_func_0_0(34) +
-              occ_func_0_0(84) * occ_func_0_0(36) * occ_func_0_0(38) +
-              occ_func_0_0(79) * occ_func_0_0(19) * occ_func_0_0(20) +
-              occ_func_0_0(84) * occ_func_0_0(31) * occ_func_0_0(36) +
-              occ_func_0_0(79) * occ_func_0_0(21) * occ_func_0_0(19) +
-              occ_func_0_0(83) * occ_func_0_0(28) * occ_func_0_0(35) +
-              occ_func_0_0(81) * occ_func_0_0(25) * occ_func_0_0(30) +
-              occ_func_0_0(86) * occ_func_0_0(41) * occ_func_0_0(42) +
-              occ_func_0_0(81) * occ_func_0_0(30) * occ_func_0_0(23) +
-              occ_func_0_0(80) * occ_func_0_0(29) * occ_func_0_0(24) +
-              occ_func_0_0(82) * occ_func_0_0(26) * occ_func_0_0(33) +
-              occ_func_0_0(82) * occ_func_0_0(27) * occ_func_0_0(26) +
-              occ_func_0_0(86) * occ_func_0_0(40) * occ_func_0_0(41) +
-              occ_func_0_0(80) * occ_func_0_0(24) * occ_func_0_0(22) +
-              occ_func_0_0(85) * occ_func_0_0(32) * occ_func_0_0(39) +
-              occ_func_0_0(85) * occ_func_0_0(39) * occ_func_0_0(37) +
-              occ_func_0_0(85) * occ_func_0_0(37) * occ_func_0_0(32) +
-              occ_func_0_0(84) * occ_func_0_0(38) * occ_func_0_0(31) +
-              occ_func_0_0(83) * occ_func_0_0(34) * occ_func_0_0(28) +
-              occ_func_0_0(79) * occ_func_0_0(20) * occ_func_0_0(21) +
-              occ_func_0_0(86) * occ_func_0_0(42) * occ_func_0_0(40) +
-              occ_func_0_0(82) * occ_func_0_0(33) * occ_func_0_0(27) +
-              occ_func_0_0(81) * occ_func_0_0(23) * occ_func_0_0(25)) /
-             24.;
-}
-template <typename Scalar>
-Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_13_7_at_0(
-    int occ_i, int occ_f) const {
-  return (m_occ_func_0_0[occ_f] - m_occ_func_0_0[occ_i]) *
-             (occ_func_0_1(6) * occ_func_0_0(11) * occ_func_0_1(39) +
-              occ_func_0_1(1) * occ_func_0_0(2) * occ_func_0_1(32) +
-              occ_func_0_1(5) * occ_func_0_0(7) * occ_func_0_1(27) +
-              occ_func_0_1(4) * occ_func_0_0(6) * occ_func_0_1(26) +
-              occ_func_0_1(8) * occ_func_0_0(9) * occ_func_0_1(25) +
-              occ_func_0_1(6) * occ_func_0_0(4) * occ_func_0_1(23) +
-              occ_func_0_1(3) * occ_func_0_0(8) * occ_func_0_1(42) +
-              occ_func_0_1(2) * occ_func_0_0(5) * occ_func_0_1(41) +
-              occ_func_0_1(11) * occ_func_0_0(10) * occ_func_0_1(30) +
-              occ_func_0_1(8) * occ_func_0_0(3) * occ_func_0_1(25) +
-              occ_func_0_1(3) * occ_func_0_0(9) * occ_func_0_1(42) +
-              occ_func_0_1(1) * occ_func_0_0(4) * occ_func_0_1(40) +
-              occ_func_0_1(10) * occ_func_0_0(12) * occ_func_0_1(33) +
-              occ_func_0_1(4) * occ_func_0_0(1) * occ_func_0_1(26) +
-              occ_func_0_1(5) * occ_func_0_0(10) * occ_func_0_1(36) +
-              occ_func_0_1(2) * occ_func_0_0(3) * occ_func_0_1(31) +
-              occ_func_0_1(11) * occ_func_0_0(8) * occ_func_0_1(20) +
-              occ_func_0_1(10) * occ_func_0_0(5) * occ_func_0_1(19) +
-              occ_func_0_1(7) * occ_func_0_0(12) * occ_func_0_1(38) +
-              occ_func_0_1(2) * occ_func_0_0(1) * occ_func_0_1(31) +
-              occ_func_0_1(4) * occ_func_0_0(10) * occ_func_0_1(37) +
-              occ_func_0_1(1) * occ_func_0_0(3) * occ_func_0_1(32) +
-              occ_func_0_1(9) * occ_func_0_0(12) * occ_func_0_1(35) +
-              occ_func_0_1(3) * occ_func_0_0(1) * occ_func_0_1(28) +
-              occ_func_0_1(9) * occ_func_0_0(7) * occ_func_0_1(35) +
-              occ_func_0_1(8) * occ_func_0_0(6) * occ_func_0_1(34) +
-              occ_func_0_1(12) * occ_func_0_0(7) * occ_func_0_1(21) +
-              occ_func_0_1(11) * occ_func_0_0(6) * occ_func_0_1(20) +
-              occ_func_0_1(6) * occ_func_0_0(8) * occ_func_0_1(39) +
-              occ_func_0_1(4) * occ_func_0_0(5) * occ_func_0_1(37) +
-              occ_func_0_1(12) * occ_func_0_0(11) * occ_func_0_1(29) +
-              occ_func_0_1(7) * occ_func_0_0(2) * occ_func_0_1(22) +
-              occ_func_0_1(9) * occ_func_0_0(8) * occ_func_0_1(24) +
-              occ_func_0_1(7) * occ_func_0_0(5) * occ_func_0_1(22) +
-              occ_func_0_1(12) * occ_func_0_0(10) * occ_func_0_1(29) +
-              occ_func_0_1(9) * occ_func_0_0(3) * occ_func_0_1(24) +
-              occ_func_0_1(11) * occ_func_0_0(12) * occ_func_0_1(30) +
-              occ_func_0_1(6) * occ_func_0_0(1) * occ_func_0_1(23) +
-              occ_func_0_1(10) * occ_func_0_0(11) * occ_func_0_1(33) +
-              occ_func_0_1(5) * occ_func_0_0(2) * occ_func_0_1(27) +
-              occ_func_0_1(2) * occ_func_0_0(7) * occ_func_0_1(41) +
-              occ_func_0_1(1) * occ_func_0_0(6) * occ_func_0_1(40) +
-              occ_func_0_1(12) * occ_func_0_0(9) * occ_func_0_1(21) +
-              occ_func_0_1(10) * occ_func_0_0(4) * occ_func_0_1(19) +
-              occ_func_0_1(8) * occ_func_0_0(11) * occ_func_0_1(34) +
-              occ_func_0_1(3) * occ_func_0_0(2) * occ_func_0_1(28) +
-              occ_func_0_1(7) * occ_func_0_0(9) * occ_func_0_1(38) +
-              occ_func_0_1(5) * occ_func_0_0(4) * occ_func_0_1(36)) /
-             24. +
-         (m_occ_func_0_1[occ_f] - m_occ_func_0_1[occ_i]) *
-             (occ_func_0_0(7) * occ_func_0_0(12) * occ_func_0_1(85) +
-              occ_func_0_1(80) * occ_func_0_0(22) * occ_func_0_0(29) +
-              occ_func_0_1(83) * occ_func_0_0(35) * occ_func_0_0(34) +
-              occ_func_0_0(9) * occ_func_0_0(8) * occ_func_0_1(82) +
-              occ_func_0_1(84) * occ_func_0_0(36) * occ_func_0_0(38) +
-              occ_func_0_0(5) * occ_func_0_0(7) * occ_func_0_1(81) +
-              occ_func_0_0(10) * occ_func_0_0(11) * occ_func_0_1(86) +
-              occ_func_0_1(79) * occ_func_0_0(19) * occ_func_0_0(20) +
-              occ_func_0_1(84) * occ_func_0_0(31) * occ_func_0_0(36) +
-              occ_func_0_0(2) * occ_func_0_0(5) * occ_func_0_1(81) +
-              occ_func_0_0(12) * occ_func_0_0(10) * occ_func_0_1(86) +
-              occ_func_0_1(79) * occ_func_0_0(21) * occ_func_0_0(19) +
-              occ_func_0_1(83) * occ_func_0_0(28) * occ_func_0_0(35) +
-              occ_func_0_0(3) * occ_func_0_0(9) * occ_func_0_1(82) +
-              occ_func_0_0(8) * occ_func_0_0(11) * occ_func_0_1(84) +
-              occ_func_0_1(81) * occ_func_0_0(25) * occ_func_0_0(30) +
-              occ_func_0_1(86) * occ_func_0_0(41) * occ_func_0_0(42) +
-              occ_func_0_0(2) * occ_func_0_0(3) * occ_func_0_1(79) +
-              occ_func_0_0(11) * occ_func_0_0(6) * occ_func_0_1(84) +
-              occ_func_0_1(81) * occ_func_0_0(30) * occ_func_0_0(23) +
-              occ_func_0_0(12) * occ_func_0_0(9) * occ_func_0_1(85) +
-              occ_func_0_1(80) * occ_func_0_0(29) * occ_func_0_0(24) +
-              occ_func_0_0(4) * occ_func_0_0(10) * occ_func_0_1(83) +
-              occ_func_0_1(82) * occ_func_0_0(26) * occ_func_0_0(33) +
-              occ_func_0_0(5) * occ_func_0_0(4) * occ_func_0_1(83) +
-              occ_func_0_1(82) * occ_func_0_0(27) * occ_func_0_0(26) +
-              occ_func_0_1(86) * occ_func_0_0(40) * occ_func_0_0(41) +
-              occ_func_0_0(1) * occ_func_0_0(2) * occ_func_0_1(79) +
-              occ_func_0_0(9) * occ_func_0_0(7) * occ_func_0_1(85) +
-              occ_func_0_1(80) * occ_func_0_0(24) * occ_func_0_0(22) +
-              occ_func_0_1(85) * occ_func_0_0(32) * occ_func_0_0(39) +
-              occ_func_0_0(1) * occ_func_0_0(6) * occ_func_0_1(80) +
-              occ_func_0_1(85) * occ_func_0_0(39) * occ_func_0_0(37) +
-              occ_func_0_0(6) * occ_func_0_0(4) * occ_func_0_1(80) +
-              occ_func_0_1(85) * occ_func_0_0(37) * occ_func_0_0(32) +
-              occ_func_0_0(4) * occ_func_0_0(1) * occ_func_0_1(80) +
-              occ_func_0_1(84) * occ_func_0_0(38) * occ_func_0_0(31) +
-              occ_func_0_0(7) * occ_func_0_0(2) * occ_func_0_1(81) +
-              occ_func_0_1(83) * occ_func_0_0(34) * occ_func_0_0(28) +
-              occ_func_0_0(8) * occ_func_0_0(3) * occ_func_0_1(82) +
-              occ_func_0_0(11) * occ_func_0_0(12) * occ_func_0_1(86) +
-              occ_func_0_1(79) * occ_func_0_0(20) * occ_func_0_0(21) +
-              occ_func_0_1(86) * occ_func_0_0(42) * occ_func_0_0(40) +
-              occ_func_0_0(3) * occ_func_0_0(1) * occ_func_0_1(79) +
-              occ_func_0_0(10) * occ_func_0_0(5) * occ_func_0_1(83) +
-              occ_func_0_1(82) * occ_func_0_0(33) * occ_func_0_0(27) +
-              occ_func_0_0(6) * occ_func_0_0(8) * occ_func_0_1(84) +
-              occ_func_0_1(81) * occ_func_0_0(23) * occ_func_0_0(25)) /
-             24.;
-}
-template <typename Scalar>
-Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_13_8_at_0(
-    int occ_i, int occ_f) const {
-  return (m_occ_func_0_0[occ_f] - m_occ_func_0_0[occ_i]) *
-             ((0.707107 * occ_func_0_0(7) * occ_func_0_1(12) *
-                   occ_func_0_1(85) +
-               0.707107 * occ_func_0_1(7) * occ_func_0_0(12) *
-                   occ_func_0_1(85)) +
-              0.707107 * occ_func_0_0(6) * occ_func_0_1(11) * occ_func_0_1(39) +
-              0.707107 * occ_func_0_0(1) * occ_func_0_1(2) * occ_func_0_1(32) +
-              (0.707107 * occ_func_0_0(9) * occ_func_0_1(8) * occ_func_0_1(82) +
-               0.707107 * occ_func_0_1(9) * occ_func_0_0(8) *
-                   occ_func_0_1(82)) +
-              0.707107 * occ_func_0_0(5) * occ_func_0_1(7) * occ_func_0_1(27) +
-              0.707107 * occ_func_0_0(4) * occ_func_0_1(6) * occ_func_0_1(26) +
-              0.707107 * occ_func_0_0(8) * occ_func_0_1(9) * occ_func_0_1(25) +
-              (0.707107 * occ_func_0_0(5) * occ_func_0_1(7) * occ_func_0_1(81) +
-               0.707107 * occ_func_0_1(5) * occ_func_0_0(7) *
-                   occ_func_0_1(81)) +
-              0.707107 * occ_func_0_0(6) * occ_func_0_1(4) * occ_func_0_1(23) +
-              (0.707107 * occ_func_0_0(10) * occ_func_0_1(11) *
-                   occ_func_0_1(86) +
-               0.707107 * occ_func_0_1(10) * occ_func_0_0(11) *
-                   occ_func_0_1(86)) +
-              0.707107 * occ_func_0_0(3) * occ_func_0_1(8) * occ_func_0_1(42) +
-              0.707107 * occ_func_0_0(2) * occ_func_0_1(5) * occ_func_0_1(41) +
               0.707107 * occ_func_0_0(11) * occ_func_0_1(10) *
                   occ_func_0_1(30) +
               0.707107 * occ_func_0_0(8) * occ_func_0_1(3) * occ_func_0_1(25) +
               (0.707107 * occ_func_0_0(2) * occ_func_0_1(5) * occ_func_0_1(81) +
                0.707107 * occ_func_0_1(2) * occ_func_0_0(5) *
                    occ_func_0_1(81)) +
-              (0.707107 * occ_func_0_0(12) * occ_func_0_1(10) *
-                   occ_func_0_1(86) +
-               0.707107 * occ_func_0_1(12) * occ_func_0_0(10) *
-                   occ_func_0_1(86)) +
-              0.707107 * occ_func_0_0(3) * occ_func_0_1(9) * occ_func_0_1(42) +
-              0.707107 * occ_func_0_0(1) * occ_func_0_1(4) * occ_func_0_1(40) +
-              0.707107 * occ_func_0_0(10) * occ_func_0_1(12) *
-                  occ_func_0_1(33) +
-              (0.707107 * occ_func_0_0(3) * occ_func_0_1(9) * occ_func_0_1(82) +
-               0.707107 * occ_func_0_1(3) * occ_func_0_0(9) *
-                   occ_func_0_1(82)) +
-              0.707107 * occ_func_0_0(4) * occ_func_0_1(1) * occ_func_0_1(26) +
-              (0.707107 * occ_func_0_0(8) * occ_func_0_1(11) *
-                   occ_func_0_1(84) +
-               0.707107 * occ_func_0_1(8) * occ_func_0_0(11) *
-                   occ_func_0_1(84)) +
-              0.707107 * occ_func_0_0(5) * occ_func_0_1(10) * occ_func_0_1(36) +
-              0.707107 * occ_func_0_0(2) * occ_func_0_1(3) * occ_func_0_1(31) +
+              0.707107 * occ_func_0_1(3) * occ_func_0_1(9) * occ_func_0_0(42) +
+              0.707107 * occ_func_0_1(1) * occ_func_0_1(4) * occ_func_0_0(40) +
+              (0.707107 * occ_func_0_1(79) * occ_func_0_0(21) *
+                   occ_func_0_1(19) +
+               0.707107 * occ_func_0_1(79) * occ_func_0_1(21) *
+                   occ_func_0_0(19)) +
+              0.707107 * occ_func_0_1(83) * occ_func_0_1(28) *
+                  occ_func_0_0(35) +
+              0.707107 * occ_func_0_1(3) * occ_func_0_0(9) * occ_func_0_1(82) +
+              (0.707107 * occ_func_0_0(4) * occ_func_0_1(1) * occ_func_0_1(26) +
+               0.707107 * occ_func_0_1(4) * occ_func_0_1(1) *
+                   occ_func_0_0(26)) +
+              0.707107 * occ_func_0_1(5) * occ_func_0_1(10) * occ_func_0_0(36) +
+              0.707107 * occ_func_0_1(2) * occ_func_0_1(3) * occ_func_0_0(31) +
+              (0.707107 * occ_func_0_1(81) * occ_func_0_0(25) *
+                   occ_func_0_1(30) +
+               0.707107 * occ_func_0_1(81) * occ_func_0_1(25) *
+                   occ_func_0_0(30)) +
               0.707107 * occ_func_0_0(11) * occ_func_0_1(8) * occ_func_0_1(20) +
               0.707107 * occ_func_0_0(10) * occ_func_0_1(5) * occ_func_0_1(19) +
               (0.707107 * occ_func_0_0(2) * occ_func_0_1(3) * occ_func_0_1(79) +
                0.707107 * occ_func_0_1(2) * occ_func_0_0(3) *
                    occ_func_0_1(79)) +
-              0.707107 * occ_func_0_0(7) * occ_func_0_1(12) * occ_func_0_1(38) +
-              (0.707107 * occ_func_0_0(11) * occ_func_0_1(6) *
-                   occ_func_0_1(84) +
-               0.707107 * occ_func_0_1(11) * occ_func_0_0(6) *
-                   occ_func_0_1(84)) +
-              0.707107 * occ_func_0_0(2) * occ_func_0_1(1) * occ_func_0_1(31) +
-              (0.707107 * occ_func_0_0(12) * occ_func_0_1(9) *
-                   occ_func_0_1(85) +
-               0.707107 * occ_func_0_1(12) * occ_func_0_0(9) *
-                   occ_func_0_1(85)) +
-              0.707107 * occ_func_0_0(4) * occ_func_0_1(10) * occ_func_0_1(37) +
-              0.707107 * occ_func_0_0(1) * occ_func_0_1(3) * occ_func_0_1(32) +
-              0.707107 * occ_func_0_0(9) * occ_func_0_1(12) * occ_func_0_1(35) +
-              (0.707107 * occ_func_0_0(4) * occ_func_0_1(10) *
-                   occ_func_0_1(83) +
-               0.707107 * occ_func_0_1(4) * occ_func_0_0(10) *
-                   occ_func_0_1(83)) +
-              0.707107 * occ_func_0_0(3) * occ_func_0_1(1) * occ_func_0_1(28) +
-              0.707107 * occ_func_0_0(9) * occ_func_0_1(7) * occ_func_0_1(35) +
-              0.707107 * occ_func_0_0(8) * occ_func_0_1(6) * occ_func_0_1(34) +
-              (0.707107 * occ_func_0_0(5) * occ_func_0_1(4) * occ_func_0_1(83) +
-               0.707107 * occ_func_0_1(5) * occ_func_0_0(4) *
-                   occ_func_0_1(83)) +
+              0.707107 * occ_func_0_1(11) * occ_func_0_1(6) * occ_func_0_0(84) +
+              0.707107 * occ_func_0_1(2) * occ_func_0_1(1) * occ_func_0_0(31) +
+              (0.707107 * occ_func_0_0(81) * occ_func_0_1(30) *
+                   occ_func_0_1(23) +
+               0.707107 * occ_func_0_1(81) * occ_func_0_0(30) *
+                   occ_func_0_1(23)) +
+              0.707107 * occ_func_0_1(4) * occ_func_0_1(10) * occ_func_0_0(37) +
+              0.707107 * occ_func_0_1(1) * occ_func_0_1(3) * occ_func_0_0(32) +
+              (0.707107 * occ_func_0_1(80) * occ_func_0_0(29) *
+                   occ_func_0_1(24) +
+               0.707107 * occ_func_0_1(80) * occ_func_0_1(29) *
+                   occ_func_0_0(24)) +
+              0.707107 * occ_func_0_1(4) * occ_func_0_0(10) * occ_func_0_1(83) +
+              0.707107 * occ_func_0_1(82) * occ_func_0_1(26) *
+                  occ_func_0_0(33) +
+              (0.707107 * occ_func_0_0(3) * occ_func_0_1(1) * occ_func_0_1(28) +
+               0.707107 * occ_func_0_1(3) * occ_func_0_1(1) *
+                   occ_func_0_0(28)) +
+              0.707107 * occ_func_0_1(8) * occ_func_0_1(6) * occ_func_0_0(34) +
+              0.707107 * occ_func_0_1(5) * occ_func_0_1(4) * occ_func_0_0(83) +
+              (0.707107 * occ_func_0_0(82) * occ_func_0_1(27) *
+                   occ_func_0_1(26) +
+               0.707107 * occ_func_0_1(82) * occ_func_0_0(27) *
+                   occ_func_0_1(26)) +
               0.707107 * occ_func_0_0(12) * occ_func_0_1(7) * occ_func_0_1(21) +
               0.707107 * occ_func_0_0(11) * occ_func_0_1(6) * occ_func_0_1(20) +
               (0.707107 * occ_func_0_0(1) * occ_func_0_1(2) * occ_func_0_1(79) +
                0.707107 * occ_func_0_1(1) * occ_func_0_0(2) *
                    occ_func_0_1(79)) +
-              (0.707107 * occ_func_0_0(9) * occ_func_0_1(7) * occ_func_0_1(85) +
-               0.707107 * occ_func_0_1(9) * occ_func_0_0(7) *
-                   occ_func_0_1(85)) +
-              0.707107 * occ_func_0_0(6) * occ_func_0_1(8) * occ_func_0_1(39) +
-              0.707107 * occ_func_0_0(4) * occ_func_0_1(5) * occ_func_0_1(37) +
+              0.707107 * occ_func_0_1(6) * occ_func_0_1(8) * occ_func_0_0(39) +
+              0.707107 * occ_func_0_1(4) * occ_func_0_1(5) * occ_func_0_0(37) +
+              (0.707107 * occ_func_0_1(80) * occ_func_0_0(24) *
+                   occ_func_0_1(22) +
+               0.707107 * occ_func_0_1(80) * occ_func_0_1(24) *
+                   occ_func_0_0(22)) +
               0.707107 * occ_func_0_0(12) * occ_func_0_1(11) *
                   occ_func_0_1(29) +
               0.707107 * occ_func_0_0(7) * occ_func_0_1(2) * occ_func_0_1(22) +
@@ -13177,66 +12732,67 @@ Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_13_8_at_0(
               (0.707107 * occ_func_0_0(4) * occ_func_0_1(1) * occ_func_0_1(80) +
                0.707107 * occ_func_0_1(4) * occ_func_0_0(1) *
                    occ_func_0_1(80)) +
-              0.707107 * occ_func_0_0(11) * occ_func_0_1(12) *
+              0.707107 * occ_func_0_1(11) * occ_func_0_0(12) *
                   occ_func_0_1(30) +
-              (0.707107 * occ_func_0_0(7) * occ_func_0_1(2) * occ_func_0_1(81) +
-               0.707107 * occ_func_0_1(7) * occ_func_0_0(2) *
-                   occ_func_0_1(81)) +
-              0.707107 * occ_func_0_0(6) * occ_func_0_1(1) * occ_func_0_1(23) +
-              0.707107 * occ_func_0_0(10) * occ_func_0_1(11) *
-                  occ_func_0_1(33) +
-              (0.707107 * occ_func_0_0(8) * occ_func_0_1(3) * occ_func_0_1(82) +
-               0.707107 * occ_func_0_1(8) * occ_func_0_0(3) *
-                   occ_func_0_1(82)) +
-              0.707107 * occ_func_0_0(5) * occ_func_0_1(2) * occ_func_0_1(27) +
-              (0.707107 * occ_func_0_0(11) * occ_func_0_1(12) *
-                   occ_func_0_1(86) +
-               0.707107 * occ_func_0_1(11) * occ_func_0_0(12) *
-                   occ_func_0_1(86)) +
-              0.707107 * occ_func_0_0(2) * occ_func_0_1(7) * occ_func_0_1(41) +
-              0.707107 * occ_func_0_0(1) * occ_func_0_1(6) * occ_func_0_1(40) +
+              0.707107 * occ_func_0_0(7) * occ_func_0_1(2) * occ_func_0_1(81) +
+              (0.707107 * occ_func_0_0(6) * occ_func_0_1(1) * occ_func_0_1(23) +
+               0.707107 * occ_func_0_1(6) * occ_func_0_0(1) *
+                   occ_func_0_1(23)) +
+              0.707107 * occ_func_0_1(83) * occ_func_0_0(34) *
+                  occ_func_0_1(28) +
+              0.707107 * occ_func_0_0(8) * occ_func_0_1(3) * occ_func_0_1(82) +
+              (0.707107 * occ_func_0_0(5) * occ_func_0_1(2) * occ_func_0_1(27) +
+               0.707107 * occ_func_0_1(5) * occ_func_0_1(2) *
+                   occ_func_0_0(27)) +
+              0.707107 * occ_func_0_1(2) * occ_func_0_1(7) * occ_func_0_0(41) +
+              0.707107 * occ_func_0_1(1) * occ_func_0_1(6) * occ_func_0_0(40) +
+              (0.707107 * occ_func_0_1(79) * occ_func_0_0(20) *
+                   occ_func_0_1(21) +
+               0.707107 * occ_func_0_1(79) * occ_func_0_1(20) *
+                   occ_func_0_0(21)) +
               0.707107 * occ_func_0_0(12) * occ_func_0_1(9) * occ_func_0_1(21) +
               0.707107 * occ_func_0_0(10) * occ_func_0_1(4) * occ_func_0_1(19) +
               (0.707107 * occ_func_0_0(3) * occ_func_0_1(1) * occ_func_0_1(79) +
                0.707107 * occ_func_0_1(3) * occ_func_0_0(1) *
                    occ_func_0_1(79)) +
-              0.707107 * occ_func_0_0(8) * occ_func_0_1(11) * occ_func_0_1(34) +
-              (0.707107 * occ_func_0_0(10) * occ_func_0_1(5) *
-                   occ_func_0_1(83) +
-               0.707107 * occ_func_0_1(10) * occ_func_0_0(5) *
-                   occ_func_0_1(83)) +
-              0.707107 * occ_func_0_0(3) * occ_func_0_1(2) * occ_func_0_1(28) +
-              0.707107 * occ_func_0_0(7) * occ_func_0_1(9) * occ_func_0_1(38) +
-              (0.707107 * occ_func_0_0(6) * occ_func_0_1(8) * occ_func_0_1(84) +
-               0.707107 * occ_func_0_1(6) * occ_func_0_0(8) *
-                   occ_func_0_1(84)) +
-              0.707107 * occ_func_0_0(5) * occ_func_0_1(4) * occ_func_0_1(36)) /
+              0.707107 * occ_func_0_0(10) * occ_func_0_1(5) * occ_func_0_1(83) +
+              0.707107 * occ_func_0_1(82) * occ_func_0_0(33) *
+                  occ_func_0_1(27) +
+              (0.707107 * occ_func_0_0(3) * occ_func_0_1(2) * occ_func_0_1(28) +
+               0.707107 * occ_func_0_1(3) * occ_func_0_1(2) *
+                   occ_func_0_0(28)) +
+              0.707107 * occ_func_0_1(6) * occ_func_0_1(8) * occ_func_0_0(84) +
+              0.707107 * occ_func_0_1(5) * occ_func_0_1(4) * occ_func_0_0(36) +
+              (0.707107 * occ_func_0_0(81) * occ_func_0_1(23) *
+                   occ_func_0_1(25) +
+               0.707107 * occ_func_0_1(81) * occ_func_0_1(23) *
+                   occ_func_0_0(25))) /
              24. +
          (m_occ_func_0_1[occ_f] - m_occ_func_0_1[occ_i]) *
-             (0.707107 * occ_func_0_0(6) * occ_func_0_0(11) * occ_func_0_1(39) +
-              0.707107 * occ_func_0_0(1) * occ_func_0_0(2) * occ_func_0_1(32) +
-              (0.707107 * occ_func_0_0(80) * occ_func_0_0(22) *
-                   occ_func_0_1(29) +
-               0.707107 * occ_func_0_0(80) * occ_func_0_1(22) *
-                   occ_func_0_0(29)) +
+             ((0.707107 * occ_func_0_0(7) * occ_func_0_1(12) *
+                   occ_func_0_0(85) +
+               0.707107 * occ_func_0_1(7) * occ_func_0_0(12) *
+                   occ_func_0_0(85)) +
+              0.707107 * occ_func_0_1(6) * occ_func_0_0(11) * occ_func_0_0(39) +
+              0.707107 * occ_func_0_1(1) * occ_func_0_0(2) * occ_func_0_0(32) +
               (0.707107 * occ_func_0_0(83) * occ_func_0_0(35) *
                    occ_func_0_1(34) +
-               0.707107 * occ_func_0_0(83) * occ_func_0_1(35) *
+               0.707107 * occ_func_0_1(83) * occ_func_0_0(35) *
                    occ_func_0_0(34)) +
+              0.707107 * occ_func_0_0(9) * occ_func_0_0(8) * occ_func_0_1(82) +
               0.707107 * occ_func_0_0(5) * occ_func_0_0(7) * occ_func_0_1(27) +
-              0.707107 * occ_func_0_0(4) * occ_func_0_0(6) * occ_func_0_1(26) +
-              (0.707107 * occ_func_0_0(84) * occ_func_0_0(36) *
-                   occ_func_0_1(38) +
-               0.707107 * occ_func_0_0(84) * occ_func_0_1(36) *
+              (0.707107 * occ_func_0_0(84) * occ_func_0_1(36) *
+                   occ_func_0_0(38) +
+               0.707107 * occ_func_0_1(84) * occ_func_0_0(36) *
                    occ_func_0_0(38)) +
               0.707107 * occ_func_0_0(8) * occ_func_0_0(9) * occ_func_0_1(25) +
-              0.707107 * occ_func_0_0(6) * occ_func_0_0(4) * occ_func_0_1(23) +
-              0.707107 * occ_func_0_0(3) * occ_func_0_0(8) * occ_func_0_1(42) +
-              0.707107 * occ_func_0_0(2) * occ_func_0_0(5) * occ_func_0_1(41) +
-              (0.707107 * occ_func_0_0(79) * occ_func_0_0(19) *
-                   occ_func_0_1(20) +
-               0.707107 * occ_func_0_0(79) * occ_func_0_1(19) *
-                   occ_func_0_0(20)) +
+              0.707107 * occ_func_0_0(5) * occ_func_0_0(7) * occ_func_0_1(81) +
+              (0.707107 * occ_func_0_0(10) * occ_func_0_1(11) *
+                   occ_func_0_0(86) +
+               0.707107 * occ_func_0_1(10) * occ_func_0_0(11) *
+                   occ_func_0_0(86)) +
+              0.707107 * occ_func_0_1(3) * occ_func_0_0(8) * occ_func_0_0(42) +
+              0.707107 * occ_func_0_1(2) * occ_func_0_0(5) * occ_func_0_0(41) +
               (0.707107 * occ_func_0_0(84) * occ_func_0_0(31) *
                    occ_func_0_1(36) +
                0.707107 * occ_func_0_0(84) * occ_func_0_1(31) *
@@ -13244,67 +12800,66 @@ Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_13_8_at_0(
               0.707107 * occ_func_0_0(11) * occ_func_0_0(10) *
                   occ_func_0_1(30) +
               0.707107 * occ_func_0_0(8) * occ_func_0_0(3) * occ_func_0_1(25) +
-              0.707107 * occ_func_0_0(3) * occ_func_0_0(9) * occ_func_0_1(42) +
-              0.707107 * occ_func_0_0(1) * occ_func_0_0(4) * occ_func_0_1(40) +
-              (0.707107 * occ_func_0_0(79) * occ_func_0_0(21) *
-                   occ_func_0_1(19) +
-               0.707107 * occ_func_0_0(79) * occ_func_0_1(21) *
-                   occ_func_0_0(19)) +
-              0.707107 * occ_func_0_0(10) * occ_func_0_0(12) *
-                  occ_func_0_1(33) +
-              (0.707107 * occ_func_0_0(83) * occ_func_0_0(28) *
-                   occ_func_0_1(35) +
-               0.707107 * occ_func_0_0(83) * occ_func_0_1(28) *
-                   occ_func_0_0(35)) +
-              0.707107 * occ_func_0_0(4) * occ_func_0_0(1) * occ_func_0_1(26) +
-              0.707107 * occ_func_0_0(5) * occ_func_0_0(10) * occ_func_0_1(36) +
-              0.707107 * occ_func_0_0(2) * occ_func_0_0(3) * occ_func_0_1(31) +
-              (0.707107 * occ_func_0_0(81) * occ_func_0_0(25) *
-                   occ_func_0_1(30) +
-               0.707107 * occ_func_0_0(81) * occ_func_0_1(25) *
-                   occ_func_0_0(30)) +
+              (0.707107 * occ_func_0_0(12) * occ_func_0_1(10) *
+                   occ_func_0_0(86) +
+               0.707107 * occ_func_0_1(12) * occ_func_0_0(10) *
+                   occ_func_0_0(86)) +
+              0.707107 * occ_func_0_1(3) * occ_func_0_0(9) * occ_func_0_0(42) +
+              0.707107 * occ_func_0_1(1) * occ_func_0_0(4) * occ_func_0_0(40) +
+              (0.707107 * occ_func_0_0(10) * occ_func_0_0(12) *
+                   occ_func_0_1(33) +
+               0.707107 * occ_func_0_1(10) * occ_func_0_0(12) *
+                   occ_func_0_0(33)) +
+              0.707107 * occ_func_0_0(83) * occ_func_0_1(28) *
+                  occ_func_0_0(35) +
+              0.707107 * occ_func_0_1(3) * occ_func_0_0(9) * occ_func_0_0(82) +
+              (0.707107 * occ_func_0_0(8) * occ_func_0_1(11) *
+                   occ_func_0_0(84) +
+               0.707107 * occ_func_0_1(8) * occ_func_0_0(11) *
+                   occ_func_0_0(84)) +
+              0.707107 * occ_func_0_1(5) * occ_func_0_0(10) * occ_func_0_0(36) +
+              0.707107 * occ_func_0_1(2) * occ_func_0_0(3) * occ_func_0_0(31) +
               (0.707107 * occ_func_0_0(86) * occ_func_0_0(41) *
                    occ_func_0_1(42) +
                0.707107 * occ_func_0_0(86) * occ_func_0_1(41) *
                    occ_func_0_0(42)) +
               0.707107 * occ_func_0_0(11) * occ_func_0_0(8) * occ_func_0_1(20) +
               0.707107 * occ_func_0_0(10) * occ_func_0_0(5) * occ_func_0_1(19) +
-              0.707107 * occ_func_0_0(7) * occ_func_0_0(12) * occ_func_0_1(38) +
-              0.707107 * occ_func_0_0(2) * occ_func_0_0(1) * occ_func_0_1(31) +
-              (0.707107 * occ_func_0_0(81) * occ_func_0_0(30) *
-                   occ_func_0_1(23) +
-               0.707107 * occ_func_0_0(81) * occ_func_0_1(30) *
-                   occ_func_0_0(23)) +
-              0.707107 * occ_func_0_0(4) * occ_func_0_0(10) * occ_func_0_1(37) +
-              0.707107 * occ_func_0_0(1) * occ_func_0_0(3) * occ_func_0_1(32) +
-              (0.707107 * occ_func_0_0(80) * occ_func_0_0(29) *
-                   occ_func_0_1(24) +
-               0.707107 * occ_func_0_0(80) * occ_func_0_1(29) *
-                   occ_func_0_0(24)) +
-              0.707107 * occ_func_0_0(9) * occ_func_0_0(12) * occ_func_0_1(35) +
-              (0.707107 * occ_func_0_0(82) * occ_func_0_0(26) *
-                   occ_func_0_1(33) +
-               0.707107 * occ_func_0_0(82) * occ_func_0_1(26) *
-                   occ_func_0_0(33)) +
-              0.707107 * occ_func_0_0(3) * occ_func_0_0(1) * occ_func_0_1(28) +
-              0.707107 * occ_func_0_0(9) * occ_func_0_0(7) * occ_func_0_1(35) +
-              0.707107 * occ_func_0_0(8) * occ_func_0_0(6) * occ_func_0_1(34) +
-              (0.707107 * occ_func_0_0(82) * occ_func_0_0(27) *
-                   occ_func_0_1(26) +
-               0.707107 * occ_func_0_0(82) * occ_func_0_1(27) *
-                   occ_func_0_0(26)) +
+              (0.707107 * occ_func_0_0(7) * occ_func_0_1(12) *
+                   occ_func_0_0(38) +
+               0.707107 * occ_func_0_1(7) * occ_func_0_0(12) *
+                   occ_func_0_0(38)) +
+              0.707107 * occ_func_0_0(11) * occ_func_0_1(6) * occ_func_0_0(84) +
+              0.707107 * occ_func_0_0(2) * occ_func_0_1(1) * occ_func_0_0(31) +
+              (0.707107 * occ_func_0_0(12) * occ_func_0_1(9) *
+                   occ_func_0_0(85) +
+               0.707107 * occ_func_0_1(12) * occ_func_0_0(9) *
+                   occ_func_0_0(85)) +
+              0.707107 * occ_func_0_1(4) * occ_func_0_0(10) * occ_func_0_0(37) +
+              0.707107 * occ_func_0_1(1) * occ_func_0_0(3) * occ_func_0_0(32) +
+              (0.707107 * occ_func_0_0(9) * occ_func_0_0(12) *
+                   occ_func_0_1(35) +
+               0.707107 * occ_func_0_1(9) * occ_func_0_0(12) *
+                   occ_func_0_0(35)) +
+              0.707107 * occ_func_0_1(4) * occ_func_0_0(10) * occ_func_0_0(83) +
+              0.707107 * occ_func_0_0(82) * occ_func_0_1(26) *
+                  occ_func_0_0(33) +
+              (0.707107 * occ_func_0_0(9) * occ_func_0_1(7) * occ_func_0_0(35) +
+               0.707107 * occ_func_0_1(9) * occ_func_0_0(7) *
+                   occ_func_0_0(35)) +
+              0.707107 * occ_func_0_0(8) * occ_func_0_1(6) * occ_func_0_0(34) +
+              0.707107 * occ_func_0_0(5) * occ_func_0_1(4) * occ_func_0_0(83) +
               (0.707107 * occ_func_0_0(86) * occ_func_0_0(40) *
                    occ_func_0_1(41) +
                0.707107 * occ_func_0_0(86) * occ_func_0_1(40) *
                    occ_func_0_0(41)) +
               0.707107 * occ_func_0_0(12) * occ_func_0_0(7) * occ_func_0_1(21) +
               0.707107 * occ_func_0_0(11) * occ_func_0_0(6) * occ_func_0_1(20) +
-              0.707107 * occ_func_0_0(6) * occ_func_0_0(8) * occ_func_0_1(39) +
-              0.707107 * occ_func_0_0(4) * occ_func_0_0(5) * occ_func_0_1(37) +
-              (0.707107 * occ_func_0_0(80) * occ_func_0_0(24) *
-                   occ_func_0_1(22) +
-               0.707107 * occ_func_0_0(80) * occ_func_0_1(24) *
-                   occ_func_0_0(22)) +
+              (0.707107 * occ_func_0_0(9) * occ_func_0_1(7) * occ_func_0_0(85) +
+               0.707107 * occ_func_0_1(9) * occ_func_0_0(7) *
+                   occ_func_0_0(85)) +
+              0.707107 * occ_func_0_1(6) * occ_func_0_0(8) * occ_func_0_0(39) +
+              0.707107 * occ_func_0_1(4) * occ_func_0_0(5) * occ_func_0_0(37) +
               (0.707107 * occ_func_0_0(85) * occ_func_0_0(32) *
                    occ_func_0_1(39) +
                0.707107 * occ_func_0_0(85) * occ_func_0_1(32) *
@@ -13327,41 +12882,752 @@ Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_13_8_at_0(
               0.707107 * occ_func_0_0(9) * occ_func_0_0(3) * occ_func_0_1(24) +
               (0.707107 * occ_func_0_0(84) * occ_func_0_0(38) *
                    occ_func_0_1(31) +
-               0.707107 * occ_func_0_0(84) * occ_func_0_1(38) *
+               0.707107 * occ_func_0_1(84) * occ_func_0_0(38) *
                    occ_func_0_0(31)) +
               0.707107 * occ_func_0_0(11) * occ_func_0_0(12) *
                   occ_func_0_1(30) +
-              0.707107 * occ_func_0_0(6) * occ_func_0_0(1) * occ_func_0_1(23) +
-              0.707107 * occ_func_0_0(10) * occ_func_0_0(11) *
-                  occ_func_0_1(33) +
-              (0.707107 * occ_func_0_0(83) * occ_func_0_0(34) *
-                   occ_func_0_1(28) +
-               0.707107 * occ_func_0_0(83) * occ_func_0_1(34) *
-                   occ_func_0_0(28)) +
-              0.707107 * occ_func_0_0(5) * occ_func_0_0(2) * occ_func_0_1(27) +
-              0.707107 * occ_func_0_0(2) * occ_func_0_0(7) * occ_func_0_1(41) +
-              0.707107 * occ_func_0_0(1) * occ_func_0_0(6) * occ_func_0_1(40) +
-              (0.707107 * occ_func_0_0(79) * occ_func_0_0(20) *
-                   occ_func_0_1(21) +
-               0.707107 * occ_func_0_0(79) * occ_func_0_1(20) *
-                   occ_func_0_0(21)) +
+              0.707107 * occ_func_0_0(7) * occ_func_0_0(2) * occ_func_0_1(81) +
+              (0.707107 * occ_func_0_0(10) * occ_func_0_0(11) *
+                   occ_func_0_1(33) +
+               0.707107 * occ_func_0_1(10) * occ_func_0_0(11) *
+                   occ_func_0_0(33)) +
+              0.707107 * occ_func_0_0(83) * occ_func_0_0(34) *
+                  occ_func_0_1(28) +
+              0.707107 * occ_func_0_0(8) * occ_func_0_1(3) * occ_func_0_0(82) +
+              (0.707107 * occ_func_0_0(11) * occ_func_0_1(12) *
+                   occ_func_0_0(86) +
+               0.707107 * occ_func_0_1(11) * occ_func_0_0(12) *
+                   occ_func_0_0(86)) +
+              0.707107 * occ_func_0_1(2) * occ_func_0_0(7) * occ_func_0_0(41) +
+              0.707107 * occ_func_0_1(1) * occ_func_0_0(6) * occ_func_0_0(40) +
               (0.707107 * occ_func_0_0(86) * occ_func_0_0(42) *
                    occ_func_0_1(40) +
                0.707107 * occ_func_0_0(86) * occ_func_0_1(42) *
                    occ_func_0_0(40)) +
               0.707107 * occ_func_0_0(12) * occ_func_0_0(9) * occ_func_0_1(21) +
               0.707107 * occ_func_0_0(10) * occ_func_0_0(4) * occ_func_0_1(19) +
-              0.707107 * occ_func_0_0(8) * occ_func_0_0(11) * occ_func_0_1(34) +
-              (0.707107 * occ_func_0_0(82) * occ_func_0_0(33) *
-                   occ_func_0_1(27) +
-               0.707107 * occ_func_0_0(82) * occ_func_0_1(33) *
+              (0.707107 * occ_func_0_0(8) * occ_func_0_0(11) *
+                   occ_func_0_1(34) +
+               0.707107 * occ_func_0_1(8) * occ_func_0_0(11) *
+                   occ_func_0_0(34)) +
+              0.707107 * occ_func_0_0(10) * occ_func_0_1(5) * occ_func_0_0(83) +
+              0.707107 * occ_func_0_0(82) * occ_func_0_0(33) *
+                  occ_func_0_1(27) +
+              (0.707107 * occ_func_0_0(7) * occ_func_0_1(9) * occ_func_0_0(38) +
+               0.707107 * occ_func_0_1(7) * occ_func_0_0(9) *
+                   occ_func_0_0(38)) +
+              0.707107 * occ_func_0_1(6) * occ_func_0_0(8) * occ_func_0_0(84) +
+              0.707107 * occ_func_0_0(5) * occ_func_0_1(4) * occ_func_0_0(36)) /
+             24.;
+}
+template <typename Scalar>
+Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_13_4_at_0(
+    int occ_i, int occ_f) const {
+  return (m_occ_func_0_0[occ_f] - m_occ_func_0_0[occ_i]) *
+             (occ_func_0_1(7) * occ_func_0_1(12) * occ_func_0_0(85) +
+              occ_func_0_0(80) * occ_func_0_1(22) * occ_func_0_1(29) +
+              occ_func_0_1(83) * occ_func_0_0(35) * occ_func_0_1(34) +
+              occ_func_0_1(4) * occ_func_0_1(6) * occ_func_0_0(26) +
+              occ_func_0_1(84) * occ_func_0_1(36) * occ_func_0_0(38) +
+              occ_func_0_1(6) * occ_func_0_1(4) * occ_func_0_0(23) +
+              occ_func_0_1(10) * occ_func_0_1(11) * occ_func_0_0(86) +
+              occ_func_0_0(79) * occ_func_0_1(19) * occ_func_0_1(20) +
+              occ_func_0_0(84) * occ_func_0_1(31) * occ_func_0_1(36) +
+              occ_func_0_1(2) * occ_func_0_1(5) * occ_func_0_0(81) +
+              occ_func_0_1(12) * occ_func_0_1(10) * occ_func_0_0(86) +
+              occ_func_0_0(79) * occ_func_0_1(21) * occ_func_0_1(19) +
+              occ_func_0_1(10) * occ_func_0_0(12) * occ_func_0_1(33) +
+              occ_func_0_1(4) * occ_func_0_0(1) * occ_func_0_1(26) +
+              occ_func_0_1(8) * occ_func_0_1(11) * occ_func_0_0(84) +
+              occ_func_0_0(81) * occ_func_0_1(25) * occ_func_0_1(30) +
+              occ_func_0_0(86) * occ_func_0_1(41) * occ_func_0_1(42) +
+              occ_func_0_1(2) * occ_func_0_1(3) * occ_func_0_0(79) +
+              occ_func_0_1(7) * occ_func_0_1(12) * occ_func_0_0(38) +
+              occ_func_0_1(81) * occ_func_0_1(30) * occ_func_0_0(23) +
+              occ_func_0_1(12) * occ_func_0_1(9) * occ_func_0_0(85) +
+              occ_func_0_0(80) * occ_func_0_1(29) * occ_func_0_1(24) +
+              occ_func_0_1(9) * occ_func_0_0(12) * occ_func_0_1(35) +
+              occ_func_0_1(3) * occ_func_0_0(1) * occ_func_0_1(28) +
+              occ_func_0_1(9) * occ_func_0_1(7) * occ_func_0_0(35) +
+              occ_func_0_1(82) * occ_func_0_1(27) * occ_func_0_0(26) +
+              occ_func_0_0(86) * occ_func_0_1(40) * occ_func_0_1(41) +
+              occ_func_0_1(1) * occ_func_0_1(2) * occ_func_0_0(79) +
+              occ_func_0_1(9) * occ_func_0_1(7) * occ_func_0_0(85) +
+              occ_func_0_0(80) * occ_func_0_1(24) * occ_func_0_1(22) +
+              occ_func_0_0(85) * occ_func_0_1(32) * occ_func_0_1(39) +
+              occ_func_0_1(1) * occ_func_0_1(6) * occ_func_0_0(80) +
+              occ_func_0_0(85) * occ_func_0_1(39) * occ_func_0_1(37) +
+              occ_func_0_1(6) * occ_func_0_1(4) * occ_func_0_0(80) +
+              occ_func_0_0(85) * occ_func_0_1(37) * occ_func_0_1(32) +
+              occ_func_0_1(4) * occ_func_0_1(1) * occ_func_0_0(80) +
+              occ_func_0_1(84) * occ_func_0_0(38) * occ_func_0_1(31) +
+              occ_func_0_1(6) * occ_func_0_1(1) * occ_func_0_0(23) +
+              occ_func_0_1(10) * occ_func_0_0(11) * occ_func_0_1(33) +
+              occ_func_0_1(5) * occ_func_0_0(2) * occ_func_0_1(27) +
+              occ_func_0_1(11) * occ_func_0_1(12) * occ_func_0_0(86) +
+              occ_func_0_0(79) * occ_func_0_1(20) * occ_func_0_1(21) +
+              occ_func_0_0(86) * occ_func_0_1(42) * occ_func_0_1(40) +
+              occ_func_0_1(3) * occ_func_0_1(1) * occ_func_0_0(79) +
+              occ_func_0_1(8) * occ_func_0_0(11) * occ_func_0_1(34) +
+              occ_func_0_1(3) * occ_func_0_0(2) * occ_func_0_1(28) +
+              occ_func_0_1(7) * occ_func_0_1(9) * occ_func_0_0(38) +
+              occ_func_0_1(81) * occ_func_0_0(23) * occ_func_0_1(25)) /
+             24. +
+         (m_occ_func_0_1[occ_f] - m_occ_func_0_1[occ_i]) *
+             (occ_func_0_0(6) * occ_func_0_1(11) * occ_func_0_0(39) +
+              occ_func_0_0(1) * occ_func_0_1(2) * occ_func_0_0(32) +
+              occ_func_0_0(9) * occ_func_0_1(8) * occ_func_0_0(82) +
+              occ_func_0_1(5) * occ_func_0_0(7) * occ_func_0_0(27) +
+              occ_func_0_1(8) * occ_func_0_0(9) * occ_func_0_0(25) +
+              occ_func_0_1(5) * occ_func_0_0(7) * occ_func_0_0(81) +
+              occ_func_0_0(3) * occ_func_0_1(8) * occ_func_0_0(42) +
+              occ_func_0_0(2) * occ_func_0_1(5) * occ_func_0_0(41) +
+              occ_func_0_0(11) * occ_func_0_1(10) * occ_func_0_0(30) +
+              occ_func_0_0(8) * occ_func_0_1(3) * occ_func_0_0(25) +
+              occ_func_0_0(3) * occ_func_0_1(9) * occ_func_0_0(42) +
+              occ_func_0_0(1) * occ_func_0_1(4) * occ_func_0_0(40) +
+              occ_func_0_1(83) * occ_func_0_0(28) * occ_func_0_0(35) +
+              occ_func_0_0(3) * occ_func_0_0(9) * occ_func_0_1(82) +
+              occ_func_0_0(5) * occ_func_0_1(10) * occ_func_0_0(36) +
+              occ_func_0_0(2) * occ_func_0_1(3) * occ_func_0_0(31) +
+              occ_func_0_0(11) * occ_func_0_1(8) * occ_func_0_0(20) +
+              occ_func_0_0(10) * occ_func_0_1(5) * occ_func_0_0(19) +
+              occ_func_0_1(11) * occ_func_0_0(6) * occ_func_0_0(84) +
+              occ_func_0_1(2) * occ_func_0_0(1) * occ_func_0_0(31) +
+              occ_func_0_0(4) * occ_func_0_1(10) * occ_func_0_0(37) +
+              occ_func_0_0(1) * occ_func_0_1(3) * occ_func_0_0(32) +
+              occ_func_0_0(4) * occ_func_0_0(10) * occ_func_0_1(83) +
+              occ_func_0_1(82) * occ_func_0_0(26) * occ_func_0_0(33) +
+              occ_func_0_1(8) * occ_func_0_0(6) * occ_func_0_0(34) +
+              occ_func_0_1(5) * occ_func_0_0(4) * occ_func_0_0(83) +
+              occ_func_0_0(12) * occ_func_0_1(7) * occ_func_0_0(21) +
+              occ_func_0_0(11) * occ_func_0_1(6) * occ_func_0_0(20) +
+              occ_func_0_0(6) * occ_func_0_1(8) * occ_func_0_0(39) +
+              occ_func_0_0(4) * occ_func_0_1(5) * occ_func_0_0(37) +
+              occ_func_0_0(12) * occ_func_0_1(11) * occ_func_0_0(29) +
+              occ_func_0_0(7) * occ_func_0_1(2) * occ_func_0_0(22) +
+              occ_func_0_0(9) * occ_func_0_1(8) * occ_func_0_0(24) +
+              occ_func_0_0(7) * occ_func_0_1(5) * occ_func_0_0(22) +
+              occ_func_0_0(12) * occ_func_0_1(10) * occ_func_0_0(29) +
+              occ_func_0_0(9) * occ_func_0_1(3) * occ_func_0_0(24) +
+              occ_func_0_1(11) * occ_func_0_0(12) * occ_func_0_0(30) +
+              occ_func_0_0(7) * occ_func_0_1(2) * occ_func_0_0(81) +
+              occ_func_0_1(83) * occ_func_0_0(34) * occ_func_0_0(28) +
+              occ_func_0_0(8) * occ_func_0_0(3) * occ_func_0_1(82) +
+              occ_func_0_0(2) * occ_func_0_1(7) * occ_func_0_0(41) +
+              occ_func_0_0(1) * occ_func_0_1(6) * occ_func_0_0(40) +
+              occ_func_0_0(12) * occ_func_0_1(9) * occ_func_0_0(21) +
+              occ_func_0_0(10) * occ_func_0_1(4) * occ_func_0_0(19) +
+              occ_func_0_0(10) * occ_func_0_0(5) * occ_func_0_1(83) +
+              occ_func_0_1(82) * occ_func_0_0(33) * occ_func_0_0(27) +
+              occ_func_0_0(6) * occ_func_0_1(8) * occ_func_0_0(84) +
+              occ_func_0_1(5) * occ_func_0_0(4) * occ_func_0_0(36)) /
+             24.;
+}
+template <typename Scalar>
+Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_13_5_at_0(
+    int occ_i, int occ_f) const {
+  return (m_occ_func_0_0[occ_f] - m_occ_func_0_0[occ_i]) *
+             (occ_func_0_1(80) * occ_func_0_1(22) * occ_func_0_1(29) +
+              occ_func_0_1(4) * occ_func_0_1(6) * occ_func_0_1(26) +
+              occ_func_0_1(6) * occ_func_0_1(4) * occ_func_0_1(23) +
+              occ_func_0_1(79) * occ_func_0_1(19) * occ_func_0_1(20) +
+              occ_func_0_1(2) * occ_func_0_1(5) * occ_func_0_1(81) +
+              occ_func_0_1(79) * occ_func_0_1(21) * occ_func_0_1(19) +
+              occ_func_0_1(4) * occ_func_0_1(1) * occ_func_0_1(26) +
+              occ_func_0_1(81) * occ_func_0_1(25) * occ_func_0_1(30) +
+              occ_func_0_1(2) * occ_func_0_1(3) * occ_func_0_1(79) +
+              occ_func_0_1(81) * occ_func_0_1(30) * occ_func_0_1(23) +
+              occ_func_0_1(80) * occ_func_0_1(29) * occ_func_0_1(24) +
+              occ_func_0_1(3) * occ_func_0_1(1) * occ_func_0_1(28) +
+              occ_func_0_1(82) * occ_func_0_1(27) * occ_func_0_1(26) +
+              occ_func_0_1(1) * occ_func_0_1(2) * occ_func_0_1(79) +
+              occ_func_0_1(80) * occ_func_0_1(24) * occ_func_0_1(22) +
+              occ_func_0_1(1) * occ_func_0_1(6) * occ_func_0_1(80) +
+              occ_func_0_1(6) * occ_func_0_1(4) * occ_func_0_1(80) +
+              occ_func_0_1(4) * occ_func_0_1(1) * occ_func_0_1(80) +
+              occ_func_0_1(6) * occ_func_0_1(1) * occ_func_0_1(23) +
+              occ_func_0_1(5) * occ_func_0_1(2) * occ_func_0_1(27) +
+              occ_func_0_1(79) * occ_func_0_1(20) * occ_func_0_1(21) +
+              occ_func_0_1(3) * occ_func_0_1(1) * occ_func_0_1(79) +
+              occ_func_0_1(3) * occ_func_0_1(2) * occ_func_0_1(28) +
+              occ_func_0_1(81) * occ_func_0_1(23) * occ_func_0_1(25)) /
+             24. +
+         (m_occ_func_0_1[occ_f] - m_occ_func_0_1[occ_i]) *
+             (occ_func_0_1(7) * occ_func_0_1(12) * occ_func_0_0(85) +
+              occ_func_0_1(6) * occ_func_0_1(11) * occ_func_0_0(39) +
+              occ_func_0_1(1) * occ_func_0_1(2) * occ_func_0_0(32) +
+              occ_func_0_1(83) * occ_func_0_0(35) * occ_func_0_1(34) +
+              occ_func_0_0(9) * occ_func_0_1(8) * occ_func_0_1(82) +
+              occ_func_0_1(5) * occ_func_0_0(7) * occ_func_0_1(27) +
+              occ_func_0_1(84) * occ_func_0_1(36) * occ_func_0_0(38) +
+              occ_func_0_1(8) * occ_func_0_0(9) * occ_func_0_1(25) +
+              occ_func_0_1(5) * occ_func_0_0(7) * occ_func_0_1(81) +
+              occ_func_0_1(10) * occ_func_0_1(11) * occ_func_0_0(86) +
+              occ_func_0_1(3) * occ_func_0_1(8) * occ_func_0_0(42) +
+              occ_func_0_1(2) * occ_func_0_1(5) * occ_func_0_0(41) +
+              occ_func_0_0(84) * occ_func_0_1(31) * occ_func_0_1(36) +
+              occ_func_0_0(11) * occ_func_0_1(10) * occ_func_0_1(30) +
+              occ_func_0_0(8) * occ_func_0_1(3) * occ_func_0_1(25) +
+              occ_func_0_1(12) * occ_func_0_1(10) * occ_func_0_0(86) +
+              occ_func_0_1(3) * occ_func_0_1(9) * occ_func_0_0(42) +
+              occ_func_0_1(1) * occ_func_0_1(4) * occ_func_0_0(40) +
+              occ_func_0_1(10) * occ_func_0_0(12) * occ_func_0_1(33) +
+              occ_func_0_1(83) * occ_func_0_1(28) * occ_func_0_0(35) +
+              occ_func_0_1(3) * occ_func_0_0(9) * occ_func_0_1(82) +
+              occ_func_0_1(8) * occ_func_0_1(11) * occ_func_0_0(84) +
+              occ_func_0_1(5) * occ_func_0_1(10) * occ_func_0_0(36) +
+              occ_func_0_1(2) * occ_func_0_1(3) * occ_func_0_0(31) +
+              occ_func_0_0(86) * occ_func_0_1(41) * occ_func_0_1(42) +
+              occ_func_0_0(11) * occ_func_0_1(8) * occ_func_0_1(20) +
+              occ_func_0_0(10) * occ_func_0_1(5) * occ_func_0_1(19) +
+              occ_func_0_1(7) * occ_func_0_1(12) * occ_func_0_0(38) +
+              occ_func_0_1(11) * occ_func_0_1(6) * occ_func_0_0(84) +
+              occ_func_0_1(2) * occ_func_0_1(1) * occ_func_0_0(31) +
+              occ_func_0_1(12) * occ_func_0_1(9) * occ_func_0_0(85) +
+              occ_func_0_1(4) * occ_func_0_1(10) * occ_func_0_0(37) +
+              occ_func_0_1(1) * occ_func_0_1(3) * occ_func_0_0(32) +
+              occ_func_0_1(9) * occ_func_0_0(12) * occ_func_0_1(35) +
+              occ_func_0_1(4) * occ_func_0_0(10) * occ_func_0_1(83) +
+              occ_func_0_1(82) * occ_func_0_1(26) * occ_func_0_0(33) +
+              occ_func_0_1(9) * occ_func_0_1(7) * occ_func_0_0(35) +
+              occ_func_0_1(8) * occ_func_0_1(6) * occ_func_0_0(34) +
+              occ_func_0_1(5) * occ_func_0_1(4) * occ_func_0_0(83) +
+              occ_func_0_0(86) * occ_func_0_1(40) * occ_func_0_1(41) +
+              occ_func_0_0(12) * occ_func_0_1(7) * occ_func_0_1(21) +
+              occ_func_0_0(11) * occ_func_0_1(6) * occ_func_0_1(20) +
+              occ_func_0_1(9) * occ_func_0_1(7) * occ_func_0_0(85) +
+              occ_func_0_1(6) * occ_func_0_1(8) * occ_func_0_0(39) +
+              occ_func_0_1(4) * occ_func_0_1(5) * occ_func_0_0(37) +
+              occ_func_0_0(85) * occ_func_0_1(32) * occ_func_0_1(39) +
+              occ_func_0_0(12) * occ_func_0_1(11) * occ_func_0_1(29) +
+              occ_func_0_0(7) * occ_func_0_1(2) * occ_func_0_1(22) +
+              occ_func_0_0(85) * occ_func_0_1(39) * occ_func_0_1(37) +
+              occ_func_0_0(9) * occ_func_0_1(8) * occ_func_0_1(24) +
+              occ_func_0_0(7) * occ_func_0_1(5) * occ_func_0_1(22) +
+              occ_func_0_0(85) * occ_func_0_1(37) * occ_func_0_1(32) +
+              occ_func_0_0(12) * occ_func_0_1(10) * occ_func_0_1(29) +
+              occ_func_0_0(9) * occ_func_0_1(3) * occ_func_0_1(24) +
+              occ_func_0_1(84) * occ_func_0_0(38) * occ_func_0_1(31) +
+              occ_func_0_1(11) * occ_func_0_0(12) * occ_func_0_1(30) +
+              occ_func_0_0(7) * occ_func_0_1(2) * occ_func_0_1(81) +
+              occ_func_0_1(10) * occ_func_0_0(11) * occ_func_0_1(33) +
+              occ_func_0_1(83) * occ_func_0_0(34) * occ_func_0_1(28) +
+              occ_func_0_0(8) * occ_func_0_1(3) * occ_func_0_1(82) +
+              occ_func_0_1(11) * occ_func_0_1(12) * occ_func_0_0(86) +
+              occ_func_0_1(2) * occ_func_0_1(7) * occ_func_0_0(41) +
+              occ_func_0_1(1) * occ_func_0_1(6) * occ_func_0_0(40) +
+              occ_func_0_0(86) * occ_func_0_1(42) * occ_func_0_1(40) +
+              occ_func_0_0(12) * occ_func_0_1(9) * occ_func_0_1(21) +
+              occ_func_0_0(10) * occ_func_0_1(4) * occ_func_0_1(19) +
+              occ_func_0_1(8) * occ_func_0_0(11) * occ_func_0_1(34) +
+              occ_func_0_0(10) * occ_func_0_1(5) * occ_func_0_1(83) +
+              occ_func_0_1(82) * occ_func_0_0(33) * occ_func_0_1(27) +
+              occ_func_0_1(7) * occ_func_0_1(9) * occ_func_0_0(38) +
+              occ_func_0_1(6) * occ_func_0_1(8) * occ_func_0_0(84) +
+              occ_func_0_1(5) * occ_func_0_1(4) * occ_func_0_0(36)) /
+             24.;
+}
+template <typename Scalar>
+Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_13_6_at_0(
+    int occ_i, int occ_f) const {
+  return (m_occ_func_0_0[occ_f] - m_occ_func_0_0[occ_i]) *
+             (occ_func_0_0(7) * occ_func_0_0(12) * occ_func_0_1(85) +
+              occ_func_0_0(6) * occ_func_0_0(11) * occ_func_0_1(39) +
+              occ_func_0_0(1) * occ_func_0_0(2) * occ_func_0_1(32) +
+              occ_func_0_0(83) * occ_func_0_1(35) * occ_func_0_0(34) +
+              occ_func_0_1(9) * occ_func_0_0(8) * occ_func_0_0(82) +
+              occ_func_0_0(5) * occ_func_0_1(7) * occ_func_0_0(27) +
+              occ_func_0_0(84) * occ_func_0_0(36) * occ_func_0_1(38) +
+              occ_func_0_0(8) * occ_func_0_1(9) * occ_func_0_0(25) +
+              occ_func_0_0(5) * occ_func_0_1(7) * occ_func_0_0(81) +
+              occ_func_0_0(10) * occ_func_0_0(11) * occ_func_0_1(86) +
+              occ_func_0_0(3) * occ_func_0_0(8) * occ_func_0_1(42) +
+              occ_func_0_0(2) * occ_func_0_0(5) * occ_func_0_1(41) +
+              occ_func_0_1(84) * occ_func_0_0(31) * occ_func_0_0(36) +
+              occ_func_0_1(11) * occ_func_0_0(10) * occ_func_0_0(30) +
+              occ_func_0_1(8) * occ_func_0_0(3) * occ_func_0_0(25) +
+              occ_func_0_0(12) * occ_func_0_0(10) * occ_func_0_1(86) +
+              occ_func_0_0(3) * occ_func_0_0(9) * occ_func_0_1(42) +
+              occ_func_0_0(1) * occ_func_0_0(4) * occ_func_0_1(40) +
+              occ_func_0_0(10) * occ_func_0_1(12) * occ_func_0_0(33) +
+              occ_func_0_0(83) * occ_func_0_0(28) * occ_func_0_1(35) +
+              occ_func_0_0(3) * occ_func_0_1(9) * occ_func_0_0(82) +
+              occ_func_0_0(8) * occ_func_0_0(11) * occ_func_0_1(84) +
+              occ_func_0_0(5) * occ_func_0_0(10) * occ_func_0_1(36) +
+              occ_func_0_0(2) * occ_func_0_0(3) * occ_func_0_1(31) +
+              occ_func_0_1(86) * occ_func_0_0(41) * occ_func_0_0(42) +
+              occ_func_0_1(11) * occ_func_0_0(8) * occ_func_0_0(20) +
+              occ_func_0_1(10) * occ_func_0_0(5) * occ_func_0_0(19) +
+              occ_func_0_0(7) * occ_func_0_0(12) * occ_func_0_1(38) +
+              occ_func_0_0(11) * occ_func_0_0(6) * occ_func_0_1(84) +
+              occ_func_0_0(2) * occ_func_0_0(1) * occ_func_0_1(31) +
+              occ_func_0_0(12) * occ_func_0_0(9) * occ_func_0_1(85) +
+              occ_func_0_0(4) * occ_func_0_0(10) * occ_func_0_1(37) +
+              occ_func_0_0(1) * occ_func_0_0(3) * occ_func_0_1(32) +
+              occ_func_0_0(9) * occ_func_0_1(12) * occ_func_0_0(35) +
+              occ_func_0_0(4) * occ_func_0_1(10) * occ_func_0_0(83) +
+              occ_func_0_0(82) * occ_func_0_0(26) * occ_func_0_1(33) +
+              occ_func_0_0(9) * occ_func_0_0(7) * occ_func_0_1(35) +
+              occ_func_0_0(8) * occ_func_0_0(6) * occ_func_0_1(34) +
+              occ_func_0_0(5) * occ_func_0_0(4) * occ_func_0_1(83) +
+              occ_func_0_1(86) * occ_func_0_0(40) * occ_func_0_0(41) +
+              occ_func_0_1(12) * occ_func_0_0(7) * occ_func_0_0(21) +
+              occ_func_0_1(11) * occ_func_0_0(6) * occ_func_0_0(20) +
+              occ_func_0_0(9) * occ_func_0_0(7) * occ_func_0_1(85) +
+              occ_func_0_0(6) * occ_func_0_0(8) * occ_func_0_1(39) +
+              occ_func_0_0(4) * occ_func_0_0(5) * occ_func_0_1(37) +
+              occ_func_0_1(85) * occ_func_0_0(32) * occ_func_0_0(39) +
+              occ_func_0_1(12) * occ_func_0_0(11) * occ_func_0_0(29) +
+              occ_func_0_1(7) * occ_func_0_0(2) * occ_func_0_0(22) +
+              occ_func_0_1(85) * occ_func_0_0(39) * occ_func_0_0(37) +
+              occ_func_0_1(9) * occ_func_0_0(8) * occ_func_0_0(24) +
+              occ_func_0_1(7) * occ_func_0_0(5) * occ_func_0_0(22) +
+              occ_func_0_1(85) * occ_func_0_0(37) * occ_func_0_0(32) +
+              occ_func_0_1(12) * occ_func_0_0(10) * occ_func_0_0(29) +
+              occ_func_0_1(9) * occ_func_0_0(3) * occ_func_0_0(24) +
+              occ_func_0_0(84) * occ_func_0_1(38) * occ_func_0_0(31) +
+              occ_func_0_0(11) * occ_func_0_1(12) * occ_func_0_0(30) +
+              occ_func_0_1(7) * occ_func_0_0(2) * occ_func_0_0(81) +
+              occ_func_0_0(10) * occ_func_0_1(11) * occ_func_0_0(33) +
+              occ_func_0_0(83) * occ_func_0_1(34) * occ_func_0_0(28) +
+              occ_func_0_1(8) * occ_func_0_0(3) * occ_func_0_0(82) +
+              occ_func_0_0(11) * occ_func_0_0(12) * occ_func_0_1(86) +
+              occ_func_0_0(2) * occ_func_0_0(7) * occ_func_0_1(41) +
+              occ_func_0_0(1) * occ_func_0_0(6) * occ_func_0_1(40) +
+              occ_func_0_1(86) * occ_func_0_0(42) * occ_func_0_0(40) +
+              occ_func_0_1(12) * occ_func_0_0(9) * occ_func_0_0(21) +
+              occ_func_0_1(10) * occ_func_0_0(4) * occ_func_0_0(19) +
+              occ_func_0_0(8) * occ_func_0_1(11) * occ_func_0_0(34) +
+              occ_func_0_1(10) * occ_func_0_0(5) * occ_func_0_0(83) +
+              occ_func_0_0(82) * occ_func_0_1(33) * occ_func_0_0(27) +
+              occ_func_0_0(7) * occ_func_0_0(9) * occ_func_0_1(38) +
+              occ_func_0_0(6) * occ_func_0_0(8) * occ_func_0_1(84) +
+              occ_func_0_0(5) * occ_func_0_0(4) * occ_func_0_1(36)) /
+             24. +
+         (m_occ_func_0_1[occ_f] - m_occ_func_0_1[occ_i]) *
+             (occ_func_0_0(80) * occ_func_0_0(22) * occ_func_0_0(29) +
+              occ_func_0_0(4) * occ_func_0_0(6) * occ_func_0_0(26) +
+              occ_func_0_0(6) * occ_func_0_0(4) * occ_func_0_0(23) +
+              occ_func_0_0(79) * occ_func_0_0(19) * occ_func_0_0(20) +
+              occ_func_0_0(2) * occ_func_0_0(5) * occ_func_0_0(81) +
+              occ_func_0_0(79) * occ_func_0_0(21) * occ_func_0_0(19) +
+              occ_func_0_0(4) * occ_func_0_0(1) * occ_func_0_0(26) +
+              occ_func_0_0(81) * occ_func_0_0(25) * occ_func_0_0(30) +
+              occ_func_0_0(2) * occ_func_0_0(3) * occ_func_0_0(79) +
+              occ_func_0_0(81) * occ_func_0_0(30) * occ_func_0_0(23) +
+              occ_func_0_0(80) * occ_func_0_0(29) * occ_func_0_0(24) +
+              occ_func_0_0(3) * occ_func_0_0(1) * occ_func_0_0(28) +
+              occ_func_0_0(82) * occ_func_0_0(27) * occ_func_0_0(26) +
+              occ_func_0_0(1) * occ_func_0_0(2) * occ_func_0_0(79) +
+              occ_func_0_0(80) * occ_func_0_0(24) * occ_func_0_0(22) +
+              occ_func_0_0(1) * occ_func_0_0(6) * occ_func_0_0(80) +
+              occ_func_0_0(6) * occ_func_0_0(4) * occ_func_0_0(80) +
+              occ_func_0_0(4) * occ_func_0_0(1) * occ_func_0_0(80) +
+              occ_func_0_0(6) * occ_func_0_0(1) * occ_func_0_0(23) +
+              occ_func_0_0(5) * occ_func_0_0(2) * occ_func_0_0(27) +
+              occ_func_0_0(79) * occ_func_0_0(20) * occ_func_0_0(21) +
+              occ_func_0_0(3) * occ_func_0_0(1) * occ_func_0_0(79) +
+              occ_func_0_0(3) * occ_func_0_0(2) * occ_func_0_0(28) +
+              occ_func_0_0(81) * occ_func_0_0(23) * occ_func_0_0(25)) /
+             24.;
+}
+template <typename Scalar>
+Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_13_7_at_0(
+    int occ_i, int occ_f) const {
+  return (m_occ_func_0_0[occ_f] - m_occ_func_0_0[occ_i]) *
+             (occ_func_0_1(6) * occ_func_0_0(11) * occ_func_0_1(39) +
+              occ_func_0_1(1) * occ_func_0_0(2) * occ_func_0_1(32) +
+              occ_func_0_1(9) * occ_func_0_0(8) * occ_func_0_1(82) +
+              occ_func_0_0(5) * occ_func_0_1(7) * occ_func_0_1(27) +
+              occ_func_0_0(8) * occ_func_0_1(9) * occ_func_0_1(25) +
+              occ_func_0_0(5) * occ_func_0_1(7) * occ_func_0_1(81) +
+              occ_func_0_1(3) * occ_func_0_0(8) * occ_func_0_1(42) +
+              occ_func_0_1(2) * occ_func_0_0(5) * occ_func_0_1(41) +
+              occ_func_0_1(11) * occ_func_0_0(10) * occ_func_0_1(30) +
+              occ_func_0_1(8) * occ_func_0_0(3) * occ_func_0_1(25) +
+              occ_func_0_1(3) * occ_func_0_0(9) * occ_func_0_1(42) +
+              occ_func_0_1(1) * occ_func_0_0(4) * occ_func_0_1(40) +
+              occ_func_0_0(83) * occ_func_0_1(28) * occ_func_0_1(35) +
+              occ_func_0_1(3) * occ_func_0_1(9) * occ_func_0_0(82) +
+              occ_func_0_1(5) * occ_func_0_0(10) * occ_func_0_1(36) +
+              occ_func_0_1(2) * occ_func_0_0(3) * occ_func_0_1(31) +
+              occ_func_0_1(11) * occ_func_0_0(8) * occ_func_0_1(20) +
+              occ_func_0_1(10) * occ_func_0_0(5) * occ_func_0_1(19) +
+              occ_func_0_0(11) * occ_func_0_1(6) * occ_func_0_1(84) +
+              occ_func_0_0(2) * occ_func_0_1(1) * occ_func_0_1(31) +
+              occ_func_0_1(4) * occ_func_0_0(10) * occ_func_0_1(37) +
+              occ_func_0_1(1) * occ_func_0_0(3) * occ_func_0_1(32) +
+              occ_func_0_1(4) * occ_func_0_1(10) * occ_func_0_0(83) +
+              occ_func_0_0(82) * occ_func_0_1(26) * occ_func_0_1(33) +
+              occ_func_0_0(8) * occ_func_0_1(6) * occ_func_0_1(34) +
+              occ_func_0_0(5) * occ_func_0_1(4) * occ_func_0_1(83) +
+              occ_func_0_1(12) * occ_func_0_0(7) * occ_func_0_1(21) +
+              occ_func_0_1(11) * occ_func_0_0(6) * occ_func_0_1(20) +
+              occ_func_0_1(6) * occ_func_0_0(8) * occ_func_0_1(39) +
+              occ_func_0_1(4) * occ_func_0_0(5) * occ_func_0_1(37) +
+              occ_func_0_1(12) * occ_func_0_0(11) * occ_func_0_1(29) +
+              occ_func_0_1(7) * occ_func_0_0(2) * occ_func_0_1(22) +
+              occ_func_0_1(9) * occ_func_0_0(8) * occ_func_0_1(24) +
+              occ_func_0_1(7) * occ_func_0_0(5) * occ_func_0_1(22) +
+              occ_func_0_1(12) * occ_func_0_0(10) * occ_func_0_1(29) +
+              occ_func_0_1(9) * occ_func_0_0(3) * occ_func_0_1(24) +
+              occ_func_0_0(11) * occ_func_0_1(12) * occ_func_0_1(30) +
+              occ_func_0_1(7) * occ_func_0_0(2) * occ_func_0_1(81) +
+              occ_func_0_0(83) * occ_func_0_1(34) * occ_func_0_1(28) +
+              occ_func_0_1(8) * occ_func_0_1(3) * occ_func_0_0(82) +
+              occ_func_0_1(2) * occ_func_0_0(7) * occ_func_0_1(41) +
+              occ_func_0_1(1) * occ_func_0_0(6) * occ_func_0_1(40) +
+              occ_func_0_1(12) * occ_func_0_0(9) * occ_func_0_1(21) +
+              occ_func_0_1(10) * occ_func_0_0(4) * occ_func_0_1(19) +
+              occ_func_0_1(10) * occ_func_0_1(5) * occ_func_0_0(83) +
+              occ_func_0_0(82) * occ_func_0_1(33) * occ_func_0_1(27) +
+              occ_func_0_1(6) * occ_func_0_0(8) * occ_func_0_1(84) +
+              occ_func_0_0(5) * occ_func_0_1(4) * occ_func_0_1(36)) /
+             24. +
+         (m_occ_func_0_1[occ_f] - m_occ_func_0_1[occ_i]) *
+             (occ_func_0_0(7) * occ_func_0_0(12) * occ_func_0_1(85) +
+              occ_func_0_1(80) * occ_func_0_0(22) * occ_func_0_0(29) +
+              occ_func_0_0(83) * occ_func_0_1(35) * occ_func_0_0(34) +
+              occ_func_0_0(4) * occ_func_0_0(6) * occ_func_0_1(26) +
+              occ_func_0_0(84) * occ_func_0_0(36) * occ_func_0_1(38) +
+              occ_func_0_0(6) * occ_func_0_0(4) * occ_func_0_1(23) +
+              occ_func_0_0(10) * occ_func_0_0(11) * occ_func_0_1(86) +
+              occ_func_0_1(79) * occ_func_0_0(19) * occ_func_0_0(20) +
+              occ_func_0_1(84) * occ_func_0_0(31) * occ_func_0_0(36) +
+              occ_func_0_0(2) * occ_func_0_0(5) * occ_func_0_1(81) +
+              occ_func_0_0(12) * occ_func_0_0(10) * occ_func_0_1(86) +
+              occ_func_0_1(79) * occ_func_0_0(21) * occ_func_0_0(19) +
+              occ_func_0_0(10) * occ_func_0_1(12) * occ_func_0_0(33) +
+              occ_func_0_0(4) * occ_func_0_1(1) * occ_func_0_0(26) +
+              occ_func_0_0(8) * occ_func_0_0(11) * occ_func_0_1(84) +
+              occ_func_0_1(81) * occ_func_0_0(25) * occ_func_0_0(30) +
+              occ_func_0_1(86) * occ_func_0_0(41) * occ_func_0_0(42) +
+              occ_func_0_0(2) * occ_func_0_0(3) * occ_func_0_1(79) +
+              occ_func_0_0(7) * occ_func_0_0(12) * occ_func_0_1(38) +
+              occ_func_0_0(81) * occ_func_0_0(30) * occ_func_0_1(23) +
+              occ_func_0_0(12) * occ_func_0_0(9) * occ_func_0_1(85) +
+              occ_func_0_1(80) * occ_func_0_0(29) * occ_func_0_0(24) +
+              occ_func_0_0(9) * occ_func_0_1(12) * occ_func_0_0(35) +
+              occ_func_0_0(3) * occ_func_0_1(1) * occ_func_0_0(28) +
+              occ_func_0_0(9) * occ_func_0_0(7) * occ_func_0_1(35) +
+              occ_func_0_0(82) * occ_func_0_0(27) * occ_func_0_1(26) +
+              occ_func_0_1(86) * occ_func_0_0(40) * occ_func_0_0(41) +
+              occ_func_0_0(1) * occ_func_0_0(2) * occ_func_0_1(79) +
+              occ_func_0_0(9) * occ_func_0_0(7) * occ_func_0_1(85) +
+              occ_func_0_1(80) * occ_func_0_0(24) * occ_func_0_0(22) +
+              occ_func_0_1(85) * occ_func_0_0(32) * occ_func_0_0(39) +
+              occ_func_0_0(1) * occ_func_0_0(6) * occ_func_0_1(80) +
+              occ_func_0_1(85) * occ_func_0_0(39) * occ_func_0_0(37) +
+              occ_func_0_0(6) * occ_func_0_0(4) * occ_func_0_1(80) +
+              occ_func_0_1(85) * occ_func_0_0(37) * occ_func_0_0(32) +
+              occ_func_0_0(4) * occ_func_0_0(1) * occ_func_0_1(80) +
+              occ_func_0_0(84) * occ_func_0_1(38) * occ_func_0_0(31) +
+              occ_func_0_0(6) * occ_func_0_0(1) * occ_func_0_1(23) +
+              occ_func_0_0(10) * occ_func_0_1(11) * occ_func_0_0(33) +
+              occ_func_0_0(5) * occ_func_0_1(2) * occ_func_0_0(27) +
+              occ_func_0_0(11) * occ_func_0_0(12) * occ_func_0_1(86) +
+              occ_func_0_1(79) * occ_func_0_0(20) * occ_func_0_0(21) +
+              occ_func_0_1(86) * occ_func_0_0(42) * occ_func_0_0(40) +
+              occ_func_0_0(3) * occ_func_0_0(1) * occ_func_0_1(79) +
+              occ_func_0_0(8) * occ_func_0_1(11) * occ_func_0_0(34) +
+              occ_func_0_0(3) * occ_func_0_1(2) * occ_func_0_0(28) +
+              occ_func_0_0(7) * occ_func_0_0(9) * occ_func_0_1(38) +
+              occ_func_0_0(81) * occ_func_0_1(23) * occ_func_0_0(25)) /
+             24.;
+}
+template <typename Scalar>
+Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_13_8_at_0(
+    int occ_i, int occ_f) const {
+  return (m_occ_func_0_0[occ_f] - m_occ_func_0_0[occ_i]) *
+             ((0.707107 * occ_func_0_0(7) * occ_func_0_1(12) *
+                   occ_func_0_1(85) +
+               0.707107 * occ_func_0_1(7) * occ_func_0_0(12) *
+                   occ_func_0_1(85)) +
+              0.707107 * occ_func_0_0(6) * occ_func_0_1(11) * occ_func_0_1(39) +
+              0.707107 * occ_func_0_0(1) * occ_func_0_1(2) * occ_func_0_1(32) +
+              (0.707107 * occ_func_0_0(83) * occ_func_0_1(35) *
+                   occ_func_0_1(34) +
+               0.707107 * occ_func_0_1(83) * occ_func_0_1(35) *
+                   occ_func_0_0(34)) +
+              0.707107 * occ_func_0_1(9) * occ_func_0_1(8) * occ_func_0_0(82) +
+              0.707107 * occ_func_0_1(5) * occ_func_0_1(7) * occ_func_0_0(27) +
+              (0.707107 * occ_func_0_0(84) * occ_func_0_1(36) *
+                   occ_func_0_1(38) +
+               0.707107 * occ_func_0_1(84) * occ_func_0_0(36) *
+                   occ_func_0_1(38)) +
+              0.707107 * occ_func_0_1(8) * occ_func_0_1(9) * occ_func_0_0(25) +
+              0.707107 * occ_func_0_1(5) * occ_func_0_1(7) * occ_func_0_0(81) +
+              (0.707107 * occ_func_0_0(10) * occ_func_0_1(11) *
+                   occ_func_0_1(86) +
+               0.707107 * occ_func_0_1(10) * occ_func_0_0(11) *
+                   occ_func_0_1(86)) +
+              0.707107 * occ_func_0_0(3) * occ_func_0_1(8) * occ_func_0_1(42) +
+              0.707107 * occ_func_0_0(2) * occ_func_0_1(5) * occ_func_0_1(41) +
+              (0.707107 * occ_func_0_1(84) * occ_func_0_0(31) *
+                   occ_func_0_1(36) +
+               0.707107 * occ_func_0_1(84) * occ_func_0_1(31) *
+                   occ_func_0_0(36)) +
+              0.707107 * occ_func_0_1(11) * occ_func_0_1(10) *
+                  occ_func_0_0(30) +
+              0.707107 * occ_func_0_1(8) * occ_func_0_1(3) * occ_func_0_0(25) +
+              (0.707107 * occ_func_0_0(12) * occ_func_0_1(10) *
+                   occ_func_0_1(86) +
+               0.707107 * occ_func_0_1(12) * occ_func_0_0(10) *
+                   occ_func_0_1(86)) +
+              0.707107 * occ_func_0_0(3) * occ_func_0_1(9) * occ_func_0_1(42) +
+              0.707107 * occ_func_0_0(1) * occ_func_0_1(4) * occ_func_0_1(40) +
+              (0.707107 * occ_func_0_0(10) * occ_func_0_1(12) *
+                   occ_func_0_1(33) +
+               0.707107 * occ_func_0_1(10) * occ_func_0_1(12) *
+                   occ_func_0_0(33)) +
+              0.707107 * occ_func_0_1(83) * occ_func_0_0(28) *
+                  occ_func_0_1(35) +
+              0.707107 * occ_func_0_0(3) * occ_func_0_1(9) * occ_func_0_1(82) +
+              (0.707107 * occ_func_0_0(8) * occ_func_0_1(11) *
+                   occ_func_0_1(84) +
+               0.707107 * occ_func_0_1(8) * occ_func_0_0(11) *
+                   occ_func_0_1(84)) +
+              0.707107 * occ_func_0_0(5) * occ_func_0_1(10) * occ_func_0_1(36) +
+              0.707107 * occ_func_0_0(2) * occ_func_0_1(3) * occ_func_0_1(31) +
+              (0.707107 * occ_func_0_1(86) * occ_func_0_0(41) *
+                   occ_func_0_1(42) +
+               0.707107 * occ_func_0_1(86) * occ_func_0_1(41) *
+                   occ_func_0_0(42)) +
+              0.707107 * occ_func_0_1(11) * occ_func_0_1(8) * occ_func_0_0(20) +
+              0.707107 * occ_func_0_1(10) * occ_func_0_1(5) * occ_func_0_0(19) +
+              (0.707107 * occ_func_0_0(7) * occ_func_0_1(12) *
+                   occ_func_0_1(38) +
+               0.707107 * occ_func_0_1(7) * occ_func_0_0(12) *
+                   occ_func_0_1(38)) +
+              0.707107 * occ_func_0_1(11) * occ_func_0_0(6) * occ_func_0_1(84) +
+              0.707107 * occ_func_0_1(2) * occ_func_0_0(1) * occ_func_0_1(31) +
+              (0.707107 * occ_func_0_0(12) * occ_func_0_1(9) *
+                   occ_func_0_1(85) +
+               0.707107 * occ_func_0_1(12) * occ_func_0_0(9) *
+                   occ_func_0_1(85)) +
+              0.707107 * occ_func_0_0(4) * occ_func_0_1(10) * occ_func_0_1(37) +
+              0.707107 * occ_func_0_0(1) * occ_func_0_1(3) * occ_func_0_1(32) +
+              (0.707107 * occ_func_0_0(9) * occ_func_0_1(12) *
+                   occ_func_0_1(35) +
+               0.707107 * occ_func_0_1(9) * occ_func_0_1(12) *
+                   occ_func_0_0(35)) +
+              0.707107 * occ_func_0_0(4) * occ_func_0_1(10) * occ_func_0_1(83) +
+              0.707107 * occ_func_0_1(82) * occ_func_0_0(26) *
+                  occ_func_0_1(33) +
+              (0.707107 * occ_func_0_0(9) * occ_func_0_1(7) * occ_func_0_1(35) +
+               0.707107 * occ_func_0_1(9) * occ_func_0_0(7) *
+                   occ_func_0_1(35)) +
+              0.707107 * occ_func_0_1(8) * occ_func_0_0(6) * occ_func_0_1(34) +
+              0.707107 * occ_func_0_1(5) * occ_func_0_0(4) * occ_func_0_1(83) +
+              (0.707107 * occ_func_0_1(86) * occ_func_0_0(40) *
+                   occ_func_0_1(41) +
+               0.707107 * occ_func_0_1(86) * occ_func_0_1(40) *
+                   occ_func_0_0(41)) +
+              0.707107 * occ_func_0_1(12) * occ_func_0_1(7) * occ_func_0_0(21) +
+              0.707107 * occ_func_0_1(11) * occ_func_0_1(6) * occ_func_0_0(20) +
+              (0.707107 * occ_func_0_0(9) * occ_func_0_1(7) * occ_func_0_1(85) +
+               0.707107 * occ_func_0_1(9) * occ_func_0_0(7) *
+                   occ_func_0_1(85)) +
+              0.707107 * occ_func_0_0(6) * occ_func_0_1(8) * occ_func_0_1(39) +
+              0.707107 * occ_func_0_0(4) * occ_func_0_1(5) * occ_func_0_1(37) +
+              (0.707107 * occ_func_0_1(85) * occ_func_0_0(32) *
+                   occ_func_0_1(39) +
+               0.707107 * occ_func_0_1(85) * occ_func_0_1(32) *
+                   occ_func_0_0(39)) +
+              0.707107 * occ_func_0_1(12) * occ_func_0_1(11) *
+                  occ_func_0_0(29) +
+              0.707107 * occ_func_0_1(7) * occ_func_0_1(2) * occ_func_0_0(22) +
+              (0.707107 * occ_func_0_1(85) * occ_func_0_0(39) *
+                   occ_func_0_1(37) +
+               0.707107 * occ_func_0_1(85) * occ_func_0_1(39) *
+                   occ_func_0_0(37)) +
+              0.707107 * occ_func_0_1(9) * occ_func_0_1(8) * occ_func_0_0(24) +
+              0.707107 * occ_func_0_1(7) * occ_func_0_1(5) * occ_func_0_0(22) +
+              (0.707107 * occ_func_0_1(85) * occ_func_0_0(37) *
+                   occ_func_0_1(32) +
+               0.707107 * occ_func_0_1(85) * occ_func_0_1(37) *
+                   occ_func_0_0(32)) +
+              0.707107 * occ_func_0_1(12) * occ_func_0_1(10) *
+                  occ_func_0_0(29) +
+              0.707107 * occ_func_0_1(9) * occ_func_0_1(3) * occ_func_0_0(24) +
+              (0.707107 * occ_func_0_0(84) * occ_func_0_1(38) *
+                   occ_func_0_1(31) +
+               0.707107 * occ_func_0_1(84) * occ_func_0_1(38) *
+                   occ_func_0_0(31)) +
+              0.707107 * occ_func_0_1(11) * occ_func_0_1(12) *
+                  occ_func_0_0(30) +
+              0.707107 * occ_func_0_1(7) * occ_func_0_1(2) * occ_func_0_0(81) +
+              (0.707107 * occ_func_0_0(10) * occ_func_0_1(11) *
+                   occ_func_0_1(33) +
+               0.707107 * occ_func_0_1(10) * occ_func_0_1(11) *
+                   occ_func_0_0(33)) +
+              0.707107 * occ_func_0_1(83) * occ_func_0_1(34) *
+                  occ_func_0_0(28) +
+              0.707107 * occ_func_0_1(8) * occ_func_0_0(3) * occ_func_0_1(82) +
+              (0.707107 * occ_func_0_0(11) * occ_func_0_1(12) *
+                   occ_func_0_1(86) +
+               0.707107 * occ_func_0_1(11) * occ_func_0_0(12) *
+                   occ_func_0_1(86)) +
+              0.707107 * occ_func_0_0(2) * occ_func_0_1(7) * occ_func_0_1(41) +
+              0.707107 * occ_func_0_0(1) * occ_func_0_1(6) * occ_func_0_1(40) +
+              (0.707107 * occ_func_0_1(86) * occ_func_0_0(42) *
+                   occ_func_0_1(40) +
+               0.707107 * occ_func_0_1(86) * occ_func_0_1(42) *
+                   occ_func_0_0(40)) +
+              0.707107 * occ_func_0_1(12) * occ_func_0_1(9) * occ_func_0_0(21) +
+              0.707107 * occ_func_0_1(10) * occ_func_0_1(4) * occ_func_0_0(19) +
+              (0.707107 * occ_func_0_0(8) * occ_func_0_1(11) *
+                   occ_func_0_1(34) +
+               0.707107 * occ_func_0_1(8) * occ_func_0_1(11) *
+                   occ_func_0_0(34)) +
+              0.707107 * occ_func_0_1(10) * occ_func_0_0(5) * occ_func_0_1(83) +
+              0.707107 * occ_func_0_1(82) * occ_func_0_1(33) *
+                  occ_func_0_0(27) +
+              (0.707107 * occ_func_0_0(7) * occ_func_0_1(9) * occ_func_0_1(38) +
+               0.707107 * occ_func_0_1(7) * occ_func_0_0(9) *
+                   occ_func_0_1(38)) +
+              0.707107 * occ_func_0_0(6) * occ_func_0_1(8) * occ_func_0_1(84) +
+              0.707107 * occ_func_0_1(5) * occ_func_0_0(4) * occ_func_0_1(36)) /
+             24. +
+         (m_occ_func_0_1[occ_f] - m_occ_func_0_1[occ_i]) *
+             (0.707107 * occ_func_0_0(6) * occ_func_0_0(11) * occ_func_0_1(39) +
+              0.707107 * occ_func_0_0(1) * occ_func_0_0(2) * occ_func_0_1(32) +
+              (0.707107 * occ_func_0_0(80) * occ_func_0_0(22) *
+                   occ_func_0_1(29) +
+               0.707107 * occ_func_0_0(80) * occ_func_0_1(22) *
+                   occ_func_0_0(29)) +
+              0.707107 * occ_func_0_1(9) * occ_func_0_0(8) * occ_func_0_0(82) +
+              0.707107 * occ_func_0_0(5) * occ_func_0_1(7) * occ_func_0_0(27) +
+              (0.707107 * occ_func_0_0(4) * occ_func_0_1(6) * occ_func_0_0(26) +
+               0.707107 * occ_func_0_1(4) * occ_func_0_0(6) *
+                   occ_func_0_0(26)) +
+              0.707107 * occ_func_0_0(8) * occ_func_0_1(9) * occ_func_0_0(25) +
+              0.707107 * occ_func_0_0(5) * occ_func_0_1(7) * occ_func_0_0(81) +
+              (0.707107 * occ_func_0_0(6) * occ_func_0_1(4) * occ_func_0_0(23) +
+               0.707107 * occ_func_0_1(6) * occ_func_0_0(4) *
+                   occ_func_0_0(23)) +
+              0.707107 * occ_func_0_0(3) * occ_func_0_0(8) * occ_func_0_1(42) +
+              0.707107 * occ_func_0_0(2) * occ_func_0_0(5) * occ_func_0_1(41) +
+              (0.707107 * occ_func_0_0(79) * occ_func_0_0(19) *
+                   occ_func_0_1(20) +
+               0.707107 * occ_func_0_0(79) * occ_func_0_1(19) *
+                   occ_func_0_0(20)) +
+              0.707107 * occ_func_0_1(11) * occ_func_0_0(10) *
+                  occ_func_0_0(30) +
+              0.707107 * occ_func_0_1(8) * occ_func_0_0(3) * occ_func_0_0(25) +
+              (0.707107 * occ_func_0_0(2) * occ_func_0_1(5) * occ_func_0_0(81) +
+               0.707107 * occ_func_0_1(2) * occ_func_0_0(5) *
+                   occ_func_0_0(81)) +
+              0.707107 * occ_func_0_0(3) * occ_func_0_0(9) * occ_func_0_1(42) +
+              0.707107 * occ_func_0_0(1) * occ_func_0_0(4) * occ_func_0_1(40) +
+              (0.707107 * occ_func_0_0(79) * occ_func_0_0(21) *
+                   occ_func_0_1(19) +
+               0.707107 * occ_func_0_0(79) * occ_func_0_1(21) *
+                   occ_func_0_0(19)) +
+              0.707107 * occ_func_0_0(83) * occ_func_0_0(28) *
+                  occ_func_0_1(35) +
+              0.707107 * occ_func_0_0(3) * occ_func_0_1(9) * occ_func_0_0(82) +
+              (0.707107 * occ_func_0_0(4) * occ_func_0_0(1) * occ_func_0_1(26) +
+               0.707107 * occ_func_0_1(4) * occ_func_0_0(1) *
+                   occ_func_0_0(26)) +
+              0.707107 * occ_func_0_0(5) * occ_func_0_0(10) * occ_func_0_1(36) +
+              0.707107 * occ_func_0_0(2) * occ_func_0_0(3) * occ_func_0_1(31) +
+              (0.707107 * occ_func_0_0(81) * occ_func_0_0(25) *
+                   occ_func_0_1(30) +
+               0.707107 * occ_func_0_0(81) * occ_func_0_1(25) *
+                   occ_func_0_0(30)) +
+              0.707107 * occ_func_0_1(11) * occ_func_0_0(8) * occ_func_0_0(20) +
+              0.707107 * occ_func_0_1(10) * occ_func_0_0(5) * occ_func_0_0(19) +
+              (0.707107 * occ_func_0_0(2) * occ_func_0_1(3) * occ_func_0_0(79) +
+               0.707107 * occ_func_0_1(2) * occ_func_0_0(3) *
+                   occ_func_0_0(79)) +
+              0.707107 * occ_func_0_0(11) * occ_func_0_0(6) * occ_func_0_1(84) +
+              0.707107 * occ_func_0_0(2) * occ_func_0_0(1) * occ_func_0_1(31) +
+              (0.707107 * occ_func_0_0(81) * occ_func_0_1(30) *
+                   occ_func_0_0(23) +
+               0.707107 * occ_func_0_1(81) * occ_func_0_0(30) *
+                   occ_func_0_0(23)) +
+              0.707107 * occ_func_0_0(4) * occ_func_0_0(10) * occ_func_0_1(37) +
+              0.707107 * occ_func_0_0(1) * occ_func_0_0(3) * occ_func_0_1(32) +
+              (0.707107 * occ_func_0_0(80) * occ_func_0_0(29) *
+                   occ_func_0_1(24) +
+               0.707107 * occ_func_0_0(80) * occ_func_0_1(29) *
+                   occ_func_0_0(24)) +
+              0.707107 * occ_func_0_0(4) * occ_func_0_1(10) * occ_func_0_0(83) +
+              0.707107 * occ_func_0_0(82) * occ_func_0_0(26) *
+                  occ_func_0_1(33) +
+              (0.707107 * occ_func_0_0(3) * occ_func_0_0(1) * occ_func_0_1(28) +
+               0.707107 * occ_func_0_1(3) * occ_func_0_0(1) *
+                   occ_func_0_0(28)) +
+              0.707107 * occ_func_0_0(8) * occ_func_0_0(6) * occ_func_0_1(34) +
+              0.707107 * occ_func_0_0(5) * occ_func_0_0(4) * occ_func_0_1(83) +
+              (0.707107 * occ_func_0_0(82) * occ_func_0_1(27) *
+                   occ_func_0_0(26) +
+               0.707107 * occ_func_0_1(82) * occ_func_0_0(27) *
+                   occ_func_0_0(26)) +
+              0.707107 * occ_func_0_1(12) * occ_func_0_0(7) * occ_func_0_0(21) +
+              0.707107 * occ_func_0_1(11) * occ_func_0_0(6) * occ_func_0_0(20) +
+              (0.707107 * occ_func_0_0(1) * occ_func_0_1(2) * occ_func_0_0(79) +
+               0.707107 * occ_func_0_1(1) * occ_func_0_0(2) *
+                   occ_func_0_0(79)) +
+              0.707107 * occ_func_0_0(6) * occ_func_0_0(8) * occ_func_0_1(39) +
+              0.707107 * occ_func_0_0(4) * occ_func_0_0(5) * occ_func_0_1(37) +
+              (0.707107 * occ_func_0_0(80) * occ_func_0_0(24) *
+                   occ_func_0_1(22) +
+               0.707107 * occ_func_0_0(80) * occ_func_0_1(24) *
+                   occ_func_0_0(22)) +
+              0.707107 * occ_func_0_1(12) * occ_func_0_0(11) *
+                  occ_func_0_0(29) +
+              0.707107 * occ_func_0_1(7) * occ_func_0_0(2) * occ_func_0_0(22) +
+              (0.707107 * occ_func_0_0(1) * occ_func_0_1(6) * occ_func_0_0(80) +
+               0.707107 * occ_func_0_1(1) * occ_func_0_0(6) *
+                   occ_func_0_0(80)) +
+              0.707107 * occ_func_0_1(9) * occ_func_0_0(8) * occ_func_0_0(24) +
+              0.707107 * occ_func_0_1(7) * occ_func_0_0(5) * occ_func_0_0(22) +
+              (0.707107 * occ_func_0_0(6) * occ_func_0_1(4) * occ_func_0_0(80) +
+               0.707107 * occ_func_0_1(6) * occ_func_0_0(4) *
+                   occ_func_0_0(80)) +
+              0.707107 * occ_func_0_1(12) * occ_func_0_0(10) *
+                  occ_func_0_0(29) +
+              0.707107 * occ_func_0_1(9) * occ_func_0_0(3) * occ_func_0_0(24) +
+              (0.707107 * occ_func_0_0(4) * occ_func_0_1(1) * occ_func_0_0(80) +
+               0.707107 * occ_func_0_1(4) * occ_func_0_0(1) *
+                   occ_func_0_0(80)) +
+              0.707107 * occ_func_0_0(11) * occ_func_0_1(12) *
+                  occ_func_0_0(30) +
+              0.707107 * occ_func_0_1(7) * occ_func_0_0(2) * occ_func_0_0(81) +
+              (0.707107 * occ_func_0_0(6) * occ_func_0_1(1) * occ_func_0_0(23) +
+               0.707107 * occ_func_0_1(6) * occ_func_0_0(1) *
+                   occ_func_0_0(23)) +
+              0.707107 * occ_func_0_0(83) * occ_func_0_1(34) *
+                  occ_func_0_0(28) +
+              0.707107 * occ_func_0_1(8) * occ_func_0_0(3) * occ_func_0_0(82) +
+              (0.707107 * occ_func_0_0(5) * occ_func_0_0(2) * occ_func_0_1(27) +
+               0.707107 * occ_func_0_1(5) * occ_func_0_0(2) *
                    occ_func_0_0(27)) +
-              0.707107 * occ_func_0_0(3) * occ_func_0_0(2) * occ_func_0_1(28) +
-              0.707107 * occ_func_0_0(7) * occ_func_0_0(9) * occ_func_0_1(38) +
+              0.707107 * occ_func_0_0(2) * occ_func_0_0(7) * occ_func_0_1(41) +
+              0.707107 * occ_func_0_0(1) * occ_func_0_0(6) * occ_func_0_1(40) +
+              (0.707107 * occ_func_0_0(79) * occ_func_0_0(20) *
+                   occ_func_0_1(21) +
+               0.707107 * occ_func_0_0(79) * occ_func_0_1(20) *
+                   occ_func_0_0(21)) +
+              0.707107 * occ_func_0_1(12) * occ_func_0_0(9) * occ_func_0_0(21) +
+              0.707107 * occ_func_0_1(10) * occ_func_0_0(4) * occ_func_0_0(19) +
+              (0.707107 * occ_func_0_0(3) * occ_func_0_1(1) * occ_func_0_0(79) +
+               0.707107 * occ_func_0_1(3) * occ_func_0_0(1) *
+                   occ_func_0_0(79)) +
+              0.707107 * occ_func_0_1(10) * occ_func_0_0(5) * occ_func_0_0(83) +
+              0.707107 * occ_func_0_0(82) * occ_func_0_1(33) *
+                  occ_func_0_0(27) +
+              (0.707107 * occ_func_0_0(3) * occ_func_0_0(2) * occ_func_0_1(28) +
+               0.707107 * occ_func_0_1(3) * occ_func_0_0(2) *
+                   occ_func_0_0(28)) +
+              0.707107 * occ_func_0_0(6) * occ_func_0_0(8) * occ_func_0_1(84) +
               0.707107 * occ_func_0_0(5) * occ_func_0_0(4) * occ_func_0_1(36) +
               (0.707107 * occ_func_0_0(81) * occ_func_0_0(23) *
                    occ_func_0_1(25) +
-               0.707107 * occ_func_0_0(81) * occ_func_0_1(23) *
+               0.707107 * occ_func_0_1(81) * occ_func_0_0(23) *
                    occ_func_0_0(25))) /
              24.;
 }
@@ -13371,10 +13637,10 @@ Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_13_9_at_0(
   return (m_occ_func_0_0[occ_f] - m_occ_func_0_0[occ_i]) *
              (0.707107 * occ_func_0_1(6) * occ_func_0_1(11) * occ_func_0_1(39) +
               0.707107 * occ_func_0_1(1) * occ_func_0_1(2) * occ_func_0_1(32) +
+              0.707107 * occ_func_0_1(9) * occ_func_0_1(8) * occ_func_0_1(82) +
               0.707107 * occ_func_0_1(5) * occ_func_0_1(7) * occ_func_0_1(27) +
-              0.707107 * occ_func_0_1(4) * occ_func_0_1(6) * occ_func_0_1(26) +
               0.707107 * occ_func_0_1(8) * occ_func_0_1(9) * occ_func_0_1(25) +
-              0.707107 * occ_func_0_1(6) * occ_func_0_1(4) * occ_func_0_1(23) +
+              0.707107 * occ_func_0_1(5) * occ_func_0_1(7) * occ_func_0_1(81) +
               0.707107 * occ_func_0_1(3) * occ_func_0_1(8) * occ_func_0_1(42) +
               0.707107 * occ_func_0_1(2) * occ_func_0_1(5) * occ_func_0_1(41) +
               0.707107 * occ_func_0_1(11) * occ_func_0_1(10) *
@@ -13382,21 +13648,22 @@ Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_13_9_at_0(
               0.707107 * occ_func_0_1(8) * occ_func_0_1(3) * occ_func_0_1(25) +
               0.707107 * occ_func_0_1(3) * occ_func_0_1(9) * occ_func_0_1(42) +
               0.707107 * occ_func_0_1(1) * occ_func_0_1(4) * occ_func_0_1(40) +
-              0.707107 * occ_func_0_1(10) * occ_func_0_1(12) *
-                  occ_func_0_1(33) +
-              0.707107 * occ_func_0_1(4) * occ_func_0_1(1) * occ_func_0_1(26) +
+              0.707107 * occ_func_0_1(83) * occ_func_0_1(28) *
+                  occ_func_0_1(35) +
+              0.707107 * occ_func_0_1(3) * occ_func_0_1(9) * occ_func_0_1(82) +
               0.707107 * occ_func_0_1(5) * occ_func_0_1(10) * occ_func_0_1(36) +
               0.707107 * occ_func_0_1(2) * occ_func_0_1(3) * occ_func_0_1(31) +
               0.707107 * occ_func_0_1(11) * occ_func_0_1(8) * occ_func_0_1(20) +
               0.707107 * occ_func_0_1(10) * occ_func_0_1(5) * occ_func_0_1(19) +
-              0.707107 * occ_func_0_1(7) * occ_func_0_1(12) * occ_func_0_1(38) +
+              0.707107 * occ_func_0_1(11) * occ_func_0_1(6) * occ_func_0_1(84) +
               0.707107 * occ_func_0_1(2) * occ_func_0_1(1) * occ_func_0_1(31) +
               0.707107 * occ_func_0_1(4) * occ_func_0_1(10) * occ_func_0_1(37) +
               0.707107 * occ_func_0_1(1) * occ_func_0_1(3) * occ_func_0_1(32) +
-              0.707107 * occ_func_0_1(9) * occ_func_0_1(12) * occ_func_0_1(35) +
-              0.707107 * occ_func_0_1(3) * occ_func_0_1(1) * occ_func_0_1(28) +
-              0.707107 * occ_func_0_1(9) * occ_func_0_1(7) * occ_func_0_1(35) +
+              0.707107 * occ_func_0_1(4) * occ_func_0_1(10) * occ_func_0_1(83) +
+              0.707107 * occ_func_0_1(82) * occ_func_0_1(26) *
+                  occ_func_0_1(33) +
               0.707107 * occ_func_0_1(8) * occ_func_0_1(6) * occ_func_0_1(34) +
+              0.707107 * occ_func_0_1(5) * occ_func_0_1(4) * occ_func_0_1(83) +
               0.707107 * occ_func_0_1(12) * occ_func_0_1(7) * occ_func_0_1(21) +
               0.707107 * occ_func_0_1(11) * occ_func_0_1(6) * occ_func_0_1(20) +
               0.707107 * occ_func_0_1(6) * occ_func_0_1(8) * occ_func_0_1(39) +
@@ -13411,17 +13678,18 @@ Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_13_9_at_0(
               0.707107 * occ_func_0_1(9) * occ_func_0_1(3) * occ_func_0_1(24) +
               0.707107 * occ_func_0_1(11) * occ_func_0_1(12) *
                   occ_func_0_1(30) +
-              0.707107 * occ_func_0_1(6) * occ_func_0_1(1) * occ_func_0_1(23) +
-              0.707107 * occ_func_0_1(10) * occ_func_0_1(11) *
-                  occ_func_0_1(33) +
-              0.707107 * occ_func_0_1(5) * occ_func_0_1(2) * occ_func_0_1(27) +
+              0.707107 * occ_func_0_1(7) * occ_func_0_1(2) * occ_func_0_1(81) +
+              0.707107 * occ_func_0_1(83) * occ_func_0_1(34) *
+                  occ_func_0_1(28) +
+              0.707107 * occ_func_0_1(8) * occ_func_0_1(3) * occ_func_0_1(82) +
               0.707107 * occ_func_0_1(2) * occ_func_0_1(7) * occ_func_0_1(41) +
               0.707107 * occ_func_0_1(1) * occ_func_0_1(6) * occ_func_0_1(40) +
               0.707107 * occ_func_0_1(12) * occ_func_0_1(9) * occ_func_0_1(21) +
               0.707107 * occ_func_0_1(10) * occ_func_0_1(4) * occ_func_0_1(19) +
-              0.707107 * occ_func_0_1(8) * occ_func_0_1(11) * occ_func_0_1(34) +
-              0.707107 * occ_func_0_1(3) * occ_func_0_1(2) * occ_func_0_1(28) +
-              0.707107 * occ_func_0_1(7) * occ_func_0_1(9) * occ_func_0_1(38) +
+              0.707107 * occ_func_0_1(10) * occ_func_0_1(5) * occ_func_0_1(83) +
+              0.707107 * occ_func_0_1(82) * occ_func_0_1(33) *
+                  occ_func_0_1(27) +
+              0.707107 * occ_func_0_1(6) * occ_func_0_1(8) * occ_func_0_1(84) +
               0.707107 * occ_func_0_1(5) * occ_func_0_1(4) * occ_func_0_1(36)) /
              24. +
          (m_occ_func_0_1[occ_f] - m_occ_func_0_1[occ_i]) *
@@ -13435,24 +13703,24 @@ Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_13_9_at_0(
                    occ_func_0_1(29) +
                0.707107 * occ_func_0_1(80) * occ_func_0_1(22) *
                    occ_func_0_0(29)) +
-              (0.707107 * occ_func_0_1(83) * occ_func_0_0(35) *
+              (0.707107 * occ_func_0_0(83) * occ_func_0_1(35) *
                    occ_func_0_1(34) +
                0.707107 * occ_func_0_1(83) * occ_func_0_1(35) *
                    occ_func_0_0(34)) +
-              (0.707107 * occ_func_0_0(9) * occ_func_0_1(8) * occ_func_0_1(82) +
-               0.707107 * occ_func_0_1(9) * occ_func_0_0(8) *
-                   occ_func_0_1(82)) +
-              0.707107 * occ_func_0_1(5) * occ_func_0_0(7) * occ_func_0_1(27) +
-              0.707107 * occ_func_0_1(4) * occ_func_0_0(6) * occ_func_0_1(26) +
-              (0.707107 * occ_func_0_1(84) * occ_func_0_0(36) *
+              0.707107 * occ_func_0_1(9) * occ_func_0_0(8) * occ_func_0_1(82) +
+              0.707107 * occ_func_0_0(5) * occ_func_0_1(7) * occ_func_0_1(27) +
+              (0.707107 * occ_func_0_0(4) * occ_func_0_1(6) * occ_func_0_1(26) +
+               0.707107 * occ_func_0_1(4) * occ_func_0_0(6) *
+                   occ_func_0_1(26)) +
+              (0.707107 * occ_func_0_0(84) * occ_func_0_1(36) *
                    occ_func_0_1(38) +
-               0.707107 * occ_func_0_1(84) * occ_func_0_1(36) *
-                   occ_func_0_0(38)) +
-              0.707107 * occ_func_0_1(8) * occ_func_0_0(9) * occ_func_0_1(25) +
-              (0.707107 * occ_func_0_0(5) * occ_func_0_1(7) * occ_func_0_1(81) +
-               0.707107 * occ_func_0_1(5) * occ_func_0_0(7) *
-                   occ_func_0_1(81)) +
-              0.707107 * occ_func_0_1(6) * occ_func_0_0(4) * occ_func_0_1(23) +
+               0.707107 * occ_func_0_1(84) * occ_func_0_0(36) *
+                   occ_func_0_1(38)) +
+              0.707107 * occ_func_0_0(8) * occ_func_0_1(9) * occ_func_0_1(25) +
+              0.707107 * occ_func_0_0(5) * occ_func_0_1(7) * occ_func_0_1(81) +
+              (0.707107 * occ_func_0_0(6) * occ_func_0_1(4) * occ_func_0_1(23) +
+               0.707107 * occ_func_0_1(6) * occ_func_0_0(4) *
+                   occ_func_0_1(23)) +
               (0.707107 * occ_func_0_0(10) * occ_func_0_1(11) *
                    occ_func_0_1(86) +
                0.707107 * occ_func_0_1(10) * occ_func_0_0(11) *
@@ -13483,16 +13751,16 @@ Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_13_9_at_0(
                    occ_func_0_1(19) +
                0.707107 * occ_func_0_1(79) * occ_func_0_1(21) *
                    occ_func_0_0(19)) +
-              0.707107 * occ_func_0_1(10) * occ_func_0_0(12) *
-                  occ_func_0_1(33) +
-              (0.707107 * occ_func_0_1(83) * occ_func_0_0(28) *
-                   occ_func_0_1(35) +
-               0.707107 * occ_func_0_1(83) * occ_func_0_1(28) *
-                   occ_func_0_0(35)) +
-              (0.707107 * occ_func_0_0(3) * occ_func_0_1(9) * occ_func_0_1(82) +
-               0.707107 * occ_func_0_1(3) * occ_func_0_0(9) *
-                   occ_func_0_1(82)) +
-              0.707107 * occ_func_0_1(4) * occ_func_0_0(1) * occ_func_0_1(26) +
+              (0.707107 * occ_func_0_0(10) * occ_func_0_1(12) *
+                   occ_func_0_1(33) +
+               0.707107 * occ_func_0_1(10) * occ_func_0_1(12) *
+                   occ_func_0_0(33)) +
+              0.707107 * occ_func_0_0(83) * occ_func_0_1(28) *
+                  occ_func_0_1(35) +
+              0.707107 * occ_func_0_1(3) * occ_func_0_1(9) * occ_func_0_0(82) +
+              (0.707107 * occ_func_0_0(4) * occ_func_0_1(1) * occ_func_0_1(26) +
+               0.707107 * occ_func_0_1(4) * occ_func_0_1(1) *
+                   occ_func_0_0(26)) +
               (0.707107 * occ_func_0_0(8) * occ_func_0_1(11) *
                    occ_func_0_1(84) +
                0.707107 * occ_func_0_1(8) * occ_func_0_0(11) *
@@ -13512,16 +13780,16 @@ Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_13_9_at_0(
               (0.707107 * occ_func_0_0(2) * occ_func_0_1(3) * occ_func_0_1(79) +
                0.707107 * occ_func_0_1(2) * occ_func_0_0(3) *
                    occ_func_0_1(79)) +
-              0.707107 * occ_func_0_1(7) * occ_func_0_0(12) * occ_func_0_1(38) +
-              (0.707107 * occ_func_0_0(11) * occ_func_0_1(6) *
-                   occ_func_0_1(84) +
-               0.707107 * occ_func_0_1(11) * occ_func_0_0(6) *
-                   occ_func_0_1(84)) +
-              0.707107 * occ_func_0_1(2) * occ_func_0_0(1) * occ_func_0_1(31) +
-              (0.707107 * occ_func_0_1(81) * occ_func_0_0(30) *
+              (0.707107 * occ_func_0_0(7) * occ_func_0_1(12) *
+                   occ_func_0_1(38) +
+               0.707107 * occ_func_0_1(7) * occ_func_0_0(12) *
+                   occ_func_0_1(38)) +
+              0.707107 * occ_func_0_0(11) * occ_func_0_1(6) * occ_func_0_1(84) +
+              0.707107 * occ_func_0_0(2) * occ_func_0_1(1) * occ_func_0_1(31) +
+              (0.707107 * occ_func_0_0(81) * occ_func_0_1(30) *
                    occ_func_0_1(23) +
-               0.707107 * occ_func_0_1(81) * occ_func_0_1(30) *
-                   occ_func_0_0(23)) +
+               0.707107 * occ_func_0_1(81) * occ_func_0_0(30) *
+                   occ_func_0_1(23)) +
               (0.707107 * occ_func_0_0(12) * occ_func_0_1(9) *
                    occ_func_0_1(85) +
                0.707107 * occ_func_0_1(12) * occ_func_0_0(9) *
@@ -13532,25 +13800,25 @@ Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_13_9_at_0(
                    occ_func_0_1(24) +
                0.707107 * occ_func_0_1(80) * occ_func_0_1(29) *
                    occ_func_0_0(24)) +
-              0.707107 * occ_func_0_1(9) * occ_func_0_0(12) * occ_func_0_1(35) +
-              (0.707107 * occ_func_0_0(4) * occ_func_0_1(10) *
-                   occ_func_0_1(83) +
-               0.707107 * occ_func_0_1(4) * occ_func_0_0(10) *
-                   occ_func_0_1(83)) +
-              (0.707107 * occ_func_0_1(82) * occ_func_0_0(26) *
-                   occ_func_0_1(33) +
-               0.707107 * occ_func_0_1(82) * occ_func_0_1(26) *
-                   occ_func_0_0(33)) +
-              0.707107 * occ_func_0_1(3) * occ_func_0_0(1) * occ_func_0_1(28) +
-              0.707107 * occ_func_0_1(9) * occ_func_0_0(7) * occ_func_0_1(35) +
-              0.707107 * occ_func_0_1(8) * occ_func_0_0(6) * occ_func_0_1(34) +
-              (0.707107 * occ_func_0_0(5) * occ_func_0_1(4) * occ_func_0_1(83) +
-               0.707107 * occ_func_0_1(5) * occ_func_0_0(4) *
-                   occ_func_0_1(83)) +
-              (0.707107 * occ_func_0_1(82) * occ_func_0_0(27) *
+              (0.707107 * occ_func_0_0(9) * occ_func_0_1(12) *
+                   occ_func_0_1(35) +
+               0.707107 * occ_func_0_1(9) * occ_func_0_1(12) *
+                   occ_func_0_0(35)) +
+              0.707107 * occ_func_0_1(4) * occ_func_0_1(10) * occ_func_0_0(83) +
+              0.707107 * occ_func_0_0(82) * occ_func_0_1(26) *
+                  occ_func_0_1(33) +
+              (0.707107 * occ_func_0_0(3) * occ_func_0_1(1) * occ_func_0_1(28) +
+               0.707107 * occ_func_0_1(3) * occ_func_0_1(1) *
+                   occ_func_0_0(28)) +
+              (0.707107 * occ_func_0_0(9) * occ_func_0_1(7) * occ_func_0_1(35) +
+               0.707107 * occ_func_0_1(9) * occ_func_0_0(7) *
+                   occ_func_0_1(35)) +
+              0.707107 * occ_func_0_0(8) * occ_func_0_1(6) * occ_func_0_1(34) +
+              0.707107 * occ_func_0_0(5) * occ_func_0_1(4) * occ_func_0_1(83) +
+              (0.707107 * occ_func_0_0(82) * occ_func_0_1(27) *
                    occ_func_0_1(26) +
-               0.707107 * occ_func_0_1(82) * occ_func_0_1(27) *
-                   occ_func_0_0(26)) +
+               0.707107 * occ_func_0_1(82) * occ_func_0_0(27) *
+                   occ_func_0_1(26)) +
               (0.707107 * occ_func_0_1(86) * occ_func_0_0(40) *
                    occ_func_0_1(41) +
                0.707107 * occ_func_0_1(86) * occ_func_0_1(40) *
@@ -13598,26 +13866,26 @@ Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_13_9_at_0(
               (0.707107 * occ_func_0_0(4) * occ_func_0_1(1) * occ_func_0_1(80) +
                0.707107 * occ_func_0_1(4) * occ_func_0_0(1) *
                    occ_func_0_1(80)) +
-              (0.707107 * occ_func_0_1(84) * occ_func_0_0(38) *
+              (0.707107 * occ_func_0_0(84) * occ_func_0_1(38) *
                    occ_func_0_1(31) +
                0.707107 * occ_func_0_1(84) * occ_func_0_1(38) *
                    occ_func_0_0(31)) +
-              0.707107 * occ_func_0_1(11) * occ_func_0_0(12) *
+              0.707107 * occ_func_0_0(11) * occ_func_0_1(12) *
                   occ_func_0_1(30) +
-              (0.707107 * occ_func_0_0(7) * occ_func_0_1(2) * occ_func_0_1(81) +
-               0.707107 * occ_func_0_1(7) * occ_func_0_0(2) *
-                   occ_func_0_1(81)) +
-              0.707107 * occ_func_0_1(6) * occ_func_0_0(1) * occ_func_0_1(23) +
-              0.707107 * occ_func_0_1(10) * occ_func_0_0(11) *
-                  occ_func_0_1(33) +
-              (0.707107 * occ_func_0_1(83) * occ_func_0_0(34) *
-                   occ_func_0_1(28) +
-               0.707107 * occ_func_0_1(83) * occ_func_0_1(34) *
-                   occ_func_0_0(28)) +
-              (0.707107 * occ_func_0_0(8) * occ_func_0_1(3) * occ_func_0_1(82) +
-               0.707107 * occ_func_0_1(8) * occ_func_0_0(3) *
-                   occ_func_0_1(82)) +
-              0.707107 * occ_func_0_1(5) * occ_func_0_0(2) * occ_func_0_1(27) +
+              0.707107 * occ_func_0_1(7) * occ_func_0_0(2) * occ_func_0_1(81) +
+              (0.707107 * occ_func_0_0(6) * occ_func_0_1(1) * occ_func_0_1(23) +
+               0.707107 * occ_func_0_1(6) * occ_func_0_0(1) *
+                   occ_func_0_1(23)) +
+              (0.707107 * occ_func_0_0(10) * occ_func_0_1(11) *
+                   occ_func_0_1(33) +
+               0.707107 * occ_func_0_1(10) * occ_func_0_1(11) *
+                   occ_func_0_0(33)) +
+              0.707107 * occ_func_0_0(83) * occ_func_0_1(34) *
+                  occ_func_0_1(28) +
+              0.707107 * occ_func_0_1(8) * occ_func_0_1(3) * occ_func_0_0(82) +
+              (0.707107 * occ_func_0_0(5) * occ_func_0_1(2) * occ_func_0_1(27) +
+               0.707107 * occ_func_0_1(5) * occ_func_0_1(2) *
+                   occ_func_0_0(27)) +
               (0.707107 * occ_func_0_0(11) * occ_func_0_1(12) *
                    occ_func_0_1(86) +
                0.707107 * occ_func_0_1(11) * occ_func_0_0(12) *
@@ -13637,22 +13905,22 @@ Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_13_9_at_0(
               (0.707107 * occ_func_0_0(3) * occ_func_0_1(1) * occ_func_0_1(79) +
                0.707107 * occ_func_0_1(3) * occ_func_0_0(1) *
                    occ_func_0_1(79)) +
-              0.707107 * occ_func_0_1(8) * occ_func_0_0(11) * occ_func_0_1(34) +
-              (0.707107 * occ_func_0_0(10) * occ_func_0_1(5) *
-                   occ_func_0_1(83) +
-               0.707107 * occ_func_0_1(10) * occ_func_0_0(5) *
-                   occ_func_0_1(83)) +
-              (0.707107 * occ_func_0_1(82) * occ_func_0_0(33) *
-                   occ_func_0_1(27) +
-               0.707107 * occ_func_0_1(82) * occ_func_0_1(33) *
-                   occ_func_0_0(27)) +
-              0.707107 * occ_func_0_1(3) * occ_func_0_0(2) * occ_func_0_1(28) +
-              0.707107 * occ_func_0_1(7) * occ_func_0_0(9) * occ_func_0_1(38) +
-              (0.707107 * occ_func_0_0(6) * occ_func_0_1(8) * occ_func_0_1(84) +
-               0.707107 * occ_func_0_1(6) * occ_func_0_0(8) *
-                   occ_func_0_1(84)) +
-              0.707107 * occ_func_0_1(5) * occ_func_0_0(4) * occ_func_0_1(36) +
-              (0.707107 * occ_func_0_1(81) * occ_func_0_0(23) *
+              (0.707107 * occ_func_0_0(8) * occ_func_0_1(11) *
+                   occ_func_0_1(34) +
+               0.707107 * occ_func_0_1(8) * occ_func_0_1(11) *
+                   occ_func_0_0(34)) +
+              0.707107 * occ_func_0_1(10) * occ_func_0_1(5) * occ_func_0_0(83) +
+              0.707107 * occ_func_0_0(82) * occ_func_0_1(33) *
+                  occ_func_0_1(27) +
+              (0.707107 * occ_func_0_0(3) * occ_func_0_1(2) * occ_func_0_1(28) +
+               0.707107 * occ_func_0_1(3) * occ_func_0_1(2) *
+                   occ_func_0_0(28)) +
+              (0.707107 * occ_func_0_0(7) * occ_func_0_1(9) * occ_func_0_1(38) +
+               0.707107 * occ_func_0_1(7) * occ_func_0_0(9) *
+                   occ_func_0_1(38)) +
+              0.707107 * occ_func_0_1(6) * occ_func_0_0(8) * occ_func_0_1(84) +
+              0.707107 * occ_func_0_0(5) * occ_func_0_1(4) * occ_func_0_1(36) +
+              (0.707107 * occ_func_0_0(81) * occ_func_0_1(23) *
                    occ_func_0_1(25) +
                0.707107 * occ_func_0_1(81) * occ_func_0_1(23) *
                    occ_func_0_0(25))) /
@@ -13663,103 +13931,103 @@ Scalar OccClexulatorTest_Clexulator::site_deval_bfunc_13_10_at_0(
     int occ_i, int occ_f) const {
   return (m_occ_func_0_0[occ_f] - m_occ_func_0_0[occ_i]) *
              (occ_func_0_1(7) * occ_func_0_1(12) * occ_func_0_1(85) +
-              occ_func_0_1(9) * occ_func_0_1(8) * occ_func_0_1(82) +
-              occ_func_0_1(5) * occ_func_0_1(7) * occ_func_0_1(81) +
+              occ_func_0_1(83) * occ_func_0_1(35) * occ_func_0_1(34) +
+              occ_func_0_1(84) * occ_func_0_1(36) * occ_func_0_1(38) +
               occ_func_0_1(10) * occ_func_0_1(11) * occ_func_0_1(86) +
-              occ_func_0_1(2) * occ_func_0_1(5) * occ_func_0_1(81) +
+              occ_func_0_1(84) * occ_func_0_1(31) * occ_func_0_1(36) +
               occ_func_0_1(12) * occ_func_0_1(10) * occ_func_0_1(86) +
-              occ_func_0_1(3) * occ_func_0_1(9) * occ_func_0_1(82) +
+              occ_func_0_1(10) * occ_func_0_1(12) * occ_func_0_1(33) +
               occ_func_0_1(8) * occ_func_0_1(11) * occ_func_0_1(84) +
-              occ_func_0_1(2) * occ_func_0_1(3) * occ_func_0_1(79) +
-              occ_func_0_1(11) * occ_func_0_1(6) * occ_func_0_1(84) +
+              occ_func_0_1(86) * occ_func_0_1(41) * occ_func_0_1(42) +
+              occ_func_0_1(7) * occ_func_0_1(12) * occ_func_0_1(38) +
               occ_func_0_1(12) * occ_func_0_1(9) * occ_func_0_1(85) +
-              occ_func_0_1(4) * occ_func_0_1(10) * occ_func_0_1(83) +
-              occ_func_0_1(5) * occ_func_0_1(4) * occ_func_0_1(83) +
-              occ_func_0_1(1) * occ_func_0_1(2) * occ_func_0_1(79) +
+              occ_func_0_1(9) * occ_func_0_1(12) * occ_func_0_1(35) +
+              occ_func_0_1(9) * occ_func_0_1(7) * occ_func_0_1(35) +
+              occ_func_0_1(86) * occ_func_0_1(40) * occ_func_0_1(41) +
               occ_func_0_1(9) * occ_func_0_1(7) * occ_func_0_1(85) +
-              occ_func_0_1(1) * occ_func_0_1(6) * occ_func_0_1(80) +
-              occ_func_0_1(6) * occ_func_0_1(4) * occ_func_0_1(80) +
-              occ_func_0_1(4) * occ_func_0_1(1) * occ_func_0_1(80) +
-              occ_func_0_1(7) * occ_func_0_1(2) * occ_func_0_1(81) +
-              occ_func_0_1(8) * occ_func_0_1(3) * occ_func_0_1(82) +
+              occ_func_0_1(85) * occ_func_0_1(32) * occ_func_0_1(39) +
+              occ_func_0_1(85) * occ_func_0_1(39) * occ_func_0_1(37) +
+              occ_func_0_1(85) * occ_func_0_1(37) * occ_func_0_1(32) +
+              occ_func_0_1(84) * occ_func_0_1(38) * occ_func_0_1(31) +
+              occ_func_0_1(10) * occ_func_0_1(11) * occ_func_0_1(33) +
               occ_func_0_1(11) * occ_func_0_1(12) * occ_func_0_1(86) +
-              occ_func_0_1(3) * occ_func_0_1(1) * occ_func_0_1(79) +
-              occ_func_0_1(10) * occ_func_0_1(5) * occ_func_0_1(83) +
-              occ_func_0_1(6) * occ_func_0_1(8) * occ_func_0_1(84)) /
+              occ_func_0_1(86) * occ_func_0_1(42) * occ_func_0_1(40) +
+              occ_func_0_1(8) * occ_func_0_1(11) * occ_func_0_1(34) +
+              occ_func_0_1(7) * occ_func_0_1(9) * occ_func_0_1(38)) /
              24. +
          (m_occ_func_0_1[occ_f] - m_occ_func_0_1[occ_i]) *
              (occ_func_0_0(6) * occ_func_0_1(11) * occ_func_0_1(39) +
               occ_func_0_0(1) * occ_func_0_1(2) * occ_func_0_1(32) +
               occ_func_0_0(80) * occ_func_0_1(22) * occ_func_0_1(29) +
-              occ_func_0_0(83) * occ_func_0_1(35) * occ_func_0_1(34) +
-              occ_func_0_0(5) * occ_func_0_1(7) * occ_func_0_1(27) +
-              occ_func_0_0(4) * occ_func_0_1(6) * occ_func_0_1(26) +
-              occ_func_0_0(84) * occ_func_0_1(36) * occ_func_0_1(38) +
-              occ_func_0_0(8) * occ_func_0_1(9) * occ_func_0_1(25) +
-              occ_func_0_0(6) * occ_func_0_1(4) * occ_func_0_1(23) +
+              occ_func_0_1(9) * occ_func_0_1(8) * occ_func_0_0(82) +
+              occ_func_0_1(5) * occ_func_0_1(7) * occ_func_0_0(27) +
+              occ_func_0_1(4) * occ_func_0_1(6) * occ_func_0_0(26) +
+              occ_func_0_1(8) * occ_func_0_1(9) * occ_func_0_0(25) +
+              occ_func_0_1(5) * occ_func_0_1(7) * occ_func_0_0(81) +
+              occ_func_0_1(6) * occ_func_0_1(4) * occ_func_0_0(23) +
               occ_func_0_0(3) * occ_func_0_1(8) * occ_func_0_1(42) +
               occ_func_0_0(2) * occ_func_0_1(5) * occ_func_0_1(41) +
               occ_func_0_0(79) * occ_func_0_1(19) * occ_func_0_1(20) +
-              occ_func_0_0(84) * occ_func_0_1(31) * occ_func_0_1(36) +
-              occ_func_0_0(11) * occ_func_0_1(10) * occ_func_0_1(30) +
-              occ_func_0_0(8) * occ_func_0_1(3) * occ_func_0_1(25) +
+              occ_func_0_1(11) * occ_func_0_1(10) * occ_func_0_0(30) +
+              occ_func_0_1(8) * occ_func_0_1(3) * occ_func_0_0(25) +
+              occ_func_0_1(2) * occ_func_0_1(5) * occ_func_0_0(81) +
               occ_func_0_0(3) * occ_func_0_1(9) * occ_func_0_1(42) +
               occ_func_0_0(1) * occ_func_0_1(4) * occ_func_0_1(40) +
               occ_func_0_0(79) * occ_func_0_1(21) * occ_func_0_1(19) +
-              occ_func_0_0(10) * occ_func_0_1(12) * occ_func_0_1(33) +
-              occ_func_0_0(83) * occ_func_0_1(28) * occ_func_0_1(35) +
-              occ_func_0_0(4) * occ_func_0_1(1) * occ_func_0_1(26) +
+              occ_func_0_1(83) * occ_func_0_0(28) * occ_func_0_1(35) +
+              occ_func_0_0(3) * occ_func_0_1(9) * occ_func_0_1(82) +
+              occ_func_0_1(4) * occ_func_0_0(1) * occ_func_0_1(26) +
               occ_func_0_0(5) * occ_func_0_1(10) * occ_func_0_1(36) +
               occ_func_0_0(2) * occ_func_0_1(3) * occ_func_0_1(31) +
               occ_func_0_0(81) * occ_func_0_1(25) * occ_func_0_1(30) +
-              occ_func_0_0(86) * occ_func_0_1(41) * occ_func_0_1(42) +
-              occ_func_0_0(11) * occ_func_0_1(8) * occ_func_0_1(20) +
-              occ_func_0_0(10) * occ_func_0_1(5) * occ_func_0_1(19) +
-              occ_func_0_0(7) * occ_func_0_1(12) * occ_func_0_1(38) +
-              occ_func_0_0(2) * occ_func_0_1(1) * occ_func_0_1(31) +
-              occ_func_0_0(81) * occ_func_0_1(30) * occ_func_0_1(23) +
+              occ_func_0_1(11) * occ_func_0_1(8) * occ_func_0_0(20) +
+              occ_func_0_1(10) * occ_func_0_1(5) * occ_func_0_0(19) +
+              occ_func_0_1(2) * occ_func_0_1(3) * occ_func_0_0(79) +
+              occ_func_0_1(11) * occ_func_0_0(6) * occ_func_0_1(84) +
+              occ_func_0_1(2) * occ_func_0_0(1) * occ_func_0_1(31) +
+              occ_func_0_1(81) * occ_func_0_1(30) * occ_func_0_0(23) +
               occ_func_0_0(4) * occ_func_0_1(10) * occ_func_0_1(37) +
               occ_func_0_0(1) * occ_func_0_1(3) * occ_func_0_1(32) +
               occ_func_0_0(80) * occ_func_0_1(29) * occ_func_0_1(24) +
-              occ_func_0_0(9) * occ_func_0_1(12) * occ_func_0_1(35) +
-              occ_func_0_0(82) * occ_func_0_1(26) * occ_func_0_1(33) +
-              occ_func_0_0(3) * occ_func_0_1(1) * occ_func_0_1(28) +
-              occ_func_0_0(9) * occ_func_0_1(7) * occ_func_0_1(35) +
-              occ_func_0_0(8) * occ_func_0_1(6) * occ_func_0_1(34) +
-              occ_func_0_0(82) * occ_func_0_1(27) * occ_func_0_1(26) +
-              occ_func_0_0(86) * occ_func_0_1(40) * occ_func_0_1(41) +
-              occ_func_0_0(12) * occ_func_0_1(7) * occ_func_0_1(21) +
-              occ_func_0_0(11) * occ_func_0_1(6) * occ_func_0_1(20) +
+              occ_func_0_0(4) * occ_func_0_1(10) * occ_func_0_1(83) +
+              occ_func_0_1(82) * occ_func_0_0(26) * occ_func_0_1(33) +
+              occ_func_0_1(3) * occ_func_0_0(1) * occ_func_0_1(28) +
+              occ_func_0_1(8) * occ_func_0_0(6) * occ_func_0_1(34) +
+              occ_func_0_1(5) * occ_func_0_0(4) * occ_func_0_1(83) +
+              occ_func_0_1(82) * occ_func_0_1(27) * occ_func_0_0(26) +
+              occ_func_0_1(12) * occ_func_0_1(7) * occ_func_0_0(21) +
+              occ_func_0_1(11) * occ_func_0_1(6) * occ_func_0_0(20) +
+              occ_func_0_1(1) * occ_func_0_1(2) * occ_func_0_0(79) +
               occ_func_0_0(6) * occ_func_0_1(8) * occ_func_0_1(39) +
               occ_func_0_0(4) * occ_func_0_1(5) * occ_func_0_1(37) +
               occ_func_0_0(80) * occ_func_0_1(24) * occ_func_0_1(22) +
-              occ_func_0_0(85) * occ_func_0_1(32) * occ_func_0_1(39) +
-              occ_func_0_0(12) * occ_func_0_1(11) * occ_func_0_1(29) +
-              occ_func_0_0(7) * occ_func_0_1(2) * occ_func_0_1(22) +
-              occ_func_0_0(85) * occ_func_0_1(39) * occ_func_0_1(37) +
-              occ_func_0_0(9) * occ_func_0_1(8) * occ_func_0_1(24) +
-              occ_func_0_0(7) * occ_func_0_1(5) * occ_func_0_1(22) +
-              occ_func_0_0(85) * occ_func_0_1(37) * occ_func_0_1(32) +
-              occ_func_0_0(12) * occ_func_0_1(10) * occ_func_0_1(29) +
-              occ_func_0_0(9) * occ_func_0_1(3) * occ_func_0_1(24) +
-              occ_func_0_0(84) * occ_func_0_1(38) * occ_func_0_1(31) +
-              occ_func_0_0(11) * occ_func_0_1(12) * occ_func_0_1(30) +
-              occ_func_0_0(6) * occ_func_0_1(1) * occ_func_0_1(23) +
-              occ_func_0_0(10) * occ_func_0_1(11) * occ_func_0_1(33) +
-              occ_func_0_0(83) * occ_func_0_1(34) * occ_func_0_1(28) +
-              occ_func_0_0(5) * occ_func_0_1(2) * occ_func_0_1(27) +
+              occ_func_0_1(12) * occ_func_0_1(11) * occ_func_0_0(29) +
+              occ_func_0_1(7) * occ_func_0_1(2) * occ_func_0_0(22) +
+              occ_func_0_1(1) * occ_func_0_1(6) * occ_func_0_0(80) +
+              occ_func_0_1(9) * occ_func_0_1(8) * occ_func_0_0(24) +
+              occ_func_0_1(7) * occ_func_0_1(5) * occ_func_0_0(22) +
+              occ_func_0_1(6) * occ_func_0_1(4) * occ_func_0_0(80) +
+              occ_func_0_1(12) * occ_func_0_1(10) * occ_func_0_0(29) +
+              occ_func_0_1(9) * occ_func_0_1(3) * occ_func_0_0(24) +
+              occ_func_0_1(4) * occ_func_0_1(1) * occ_func_0_0(80) +
+              occ_func_0_1(11) * occ_func_0_1(12) * occ_func_0_0(30) +
+              occ_func_0_1(7) * occ_func_0_1(2) * occ_func_0_0(81) +
+              occ_func_0_1(6) * occ_func_0_1(1) * occ_func_0_0(23) +
+              occ_func_0_1(83) * occ_func_0_1(34) * occ_func_0_0(28) +
+              occ_func_0_1(8) * occ_func_0_0(3) * occ_func_0_1(82) +
+              occ_func_0_1(5) * occ_func_0_0(2) * occ_func_0_1(27) +
               occ_func_0_0(2) * occ_func_0_1(7) * occ_func_0_1(41) +
               occ_func_0_0(1) * occ_func_0_1(6) * occ_func_0_1(40) +
               occ_func_0_0(79) * occ_func_0_1(20) * occ_func_0_1(21) +
-              occ_func_0_0(86) * occ_func_0_1(42) * occ_func_0_1(40) +
-              occ_func_0_0(12) * occ_func_0_1(9) * occ_func_0_1(21) +
-              occ_func_0_0(10) * occ_func_0_1(4) * occ_func_0_1(19) +
-              occ_func_0_0(8) * occ_func_0_1(11) * occ_func_0_1(34) +
-              occ_func_0_0(82) * occ_func_0_1(33) * occ_func_0_1(27) +
-              occ_func_0_0(3) * occ_func_0_1(2) * occ_func_0_1(28) +
-              occ_func_0_0(7) * occ_func_0_1(9) * occ_func_0_1(38) +
-              occ_func_0_0(5) * occ_func_0_1(4) * occ_func_0_1(36) +
-              occ_func_0_0(81) * occ_func_0_1(23) * occ_func_0_1(25)) /
+              occ_func_0_1(12) * occ_func_0_1(9) * occ_func_0_0(21) +
+              occ_func_0_1(10) * occ_func_0_1(4) * occ_func_0_0(19) +
+              occ_func_0_1(3) * occ_func_0_1(1) * occ_func_0_0(79) +
+              occ_func_0_1(10) * occ_func_0_0(5) * occ_func_0_1(83) +
+              occ_func_0_1(82) * occ_func_0_1(33) * occ_func_0_0(27) +
+              occ_func_0_1(3) * occ_func_0_0(2) * occ_func_0_1(28) +
+              occ_func_0_0(6) * occ_func_0_1(8) * occ_func_0_1(84) +
+              occ_func_0_1(5) * occ_func_0_0(4) * occ_func_0_1(36) +
+              occ_func_0_1(81) * occ_func_0_0(23) * occ_func_0_1(25)) /
              24.;
 }
 template <typename Scalar>

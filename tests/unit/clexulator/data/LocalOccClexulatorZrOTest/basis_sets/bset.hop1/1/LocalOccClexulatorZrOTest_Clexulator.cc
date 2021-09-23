@@ -9903,6 +9903,10 @@ LocalOccClexulatorZrOTest_Clexulator::LocalOccClexulatorZrOTest_Clexulator()
   m_weight_matrix.row(1) << -1, 2, 0;
   m_weight_matrix.row(2) << 0, 0, 5;
 
+  m_sublat_indices = std::set<int>{2, 3};
+
+  m_n_sublattices = 4;
+
   m_neighborhood = std::set<xtal::UnitCell>{
       xtal::UnitCell(-2, -1, 0),  xtal::UnitCell(-1, -2, 0),
       xtal::UnitCell(-1, -1, -1), xtal::UnitCell(-1, -1, 0),
@@ -9919,16 +9923,31 @@ LocalOccClexulatorZrOTest_Clexulator::LocalOccClexulatorZrOTest_Clexulator()
       xtal::UnitCell(1, 2, 0),    xtal::UnitCell(2, 1, 0)};
 
   m_orbit_neighborhood.resize(corr_size());
+  m_orbit_site_neighborhood.resize(corr_size());
   m_orbit_neighborhood[1] = std::set<xtal::UnitCell>{xtal::UnitCell(0, 0, -1),
                                                      xtal::UnitCell(0, 0, 1)};
 
+  m_orbit_site_neighborhood[1] = std::set<xtal::UnitCellCoord>{
+      xtal::UnitCellCoord(3, 0, 0, -1), xtal::UnitCellCoord(2, 0, 0, 1)};
+
   m_orbit_neighborhood[2] = std::set<xtal::UnitCell>{xtal::UnitCell(0, 0, -1),
                                                      xtal::UnitCell(0, 0, 1)};
+
+  m_orbit_site_neighborhood[2] = std::set<xtal::UnitCellCoord>{
+      xtal::UnitCellCoord(2, 0, 0, -1), xtal::UnitCellCoord(3, 0, 0, 1)};
 
   m_orbit_neighborhood[3] = std::set<xtal::UnitCell>{
       xtal::UnitCell(-1, -1, 0), xtal::UnitCell(-1, 0, 0),
       xtal::UnitCell(0, -1, 0),  xtal::UnitCell(0, 1, 0),
       xtal::UnitCell(1, 0, 0),   xtal::UnitCell(1, 1, 0)};
+
+  m_orbit_site_neighborhood[3] = std::set<xtal::UnitCellCoord>{
+      xtal::UnitCellCoord(2, -1, -1, 0), xtal::UnitCellCoord(3, -1, -1, 0),
+      xtal::UnitCellCoord(2, -1, 0, 0),  xtal::UnitCellCoord(3, -1, 0, 0),
+      xtal::UnitCellCoord(2, 0, -1, 0),  xtal::UnitCellCoord(3, 0, -1, 0),
+      xtal::UnitCellCoord(2, 0, 1, 0),   xtal::UnitCellCoord(3, 0, 1, 0),
+      xtal::UnitCellCoord(2, 1, 0, 0),   xtal::UnitCellCoord(3, 1, 0, 0),
+      xtal::UnitCellCoord(2, 1, 1, 0),   xtal::UnitCellCoord(3, 1, 1, 0)};
 
   m_orbit_neighborhood[4] = std::set<xtal::UnitCell>{
       xtal::UnitCell(-1, -1, -1), xtal::UnitCell(-1, -1, 1),
@@ -9938,21 +9957,51 @@ LocalOccClexulatorZrOTest_Clexulator::LocalOccClexulatorZrOTest_Clexulator()
       xtal::UnitCell(1, 0, -1),   xtal::UnitCell(1, 0, 1),
       xtal::UnitCell(1, 1, -1),   xtal::UnitCell(1, 1, 1)};
 
+  m_orbit_site_neighborhood[4] = std::set<xtal::UnitCellCoord>{
+      xtal::UnitCellCoord(3, -1, -1, -1), xtal::UnitCellCoord(2, -1, -1, 1),
+      xtal::UnitCellCoord(3, -1, 0, -1),  xtal::UnitCellCoord(2, -1, 0, 1),
+      xtal::UnitCellCoord(3, 0, -1, -1),  xtal::UnitCellCoord(2, 0, -1, 1),
+      xtal::UnitCellCoord(3, 0, 1, -1),   xtal::UnitCellCoord(2, 0, 1, 1),
+      xtal::UnitCellCoord(3, 1, 0, -1),   xtal::UnitCellCoord(2, 1, 0, 1),
+      xtal::UnitCellCoord(3, 1, 1, -1),   xtal::UnitCellCoord(2, 1, 1, 1)};
+
   m_orbit_neighborhood[5] = std::set<xtal::UnitCell>{xtal::UnitCell(-2, -1, 0),
                                                      xtal::UnitCell(1, -1, 0),
                                                      xtal::UnitCell(1, 2, 0)};
+
+  m_orbit_site_neighborhood[5] = std::set<xtal::UnitCellCoord>{
+      xtal::UnitCellCoord(2, -2, -1, 0), xtal::UnitCellCoord(3, -2, -1, 0),
+      xtal::UnitCellCoord(2, 1, -1, 0),  xtal::UnitCellCoord(3, 1, -1, 0),
+      xtal::UnitCellCoord(2, 1, 2, 0),   xtal::UnitCellCoord(3, 1, 2, 0)};
 
   m_orbit_neighborhood[6] = std::set<xtal::UnitCell>{xtal::UnitCell(-1, -2, 0),
                                                      xtal::UnitCell(-1, 1, 0),
                                                      xtal::UnitCell(2, 1, 0)};
 
+  m_orbit_site_neighborhood[6] = std::set<xtal::UnitCellCoord>{
+      xtal::UnitCellCoord(2, -1, -2, 0), xtal::UnitCellCoord(3, -1, -2, 0),
+      xtal::UnitCellCoord(2, -1, 1, 0),  xtal::UnitCellCoord(3, -1, 1, 0),
+      xtal::UnitCellCoord(2, 2, 1, 0),   xtal::UnitCellCoord(3, 2, 1, 0)};
+
   m_orbit_neighborhood[7] = std::set<xtal::UnitCell>{xtal::UnitCell(0, 0, -1),
                                                      xtal::UnitCell(0, 0, 1)};
+
+  m_orbit_site_neighborhood[7] = std::set<xtal::UnitCellCoord>{
+      xtal::UnitCellCoord(2, 0, 0, -1), xtal::UnitCellCoord(3, 0, 0, -1),
+      xtal::UnitCellCoord(2, 0, 0, 1), xtal::UnitCellCoord(3, 0, 0, 1)};
 
   m_orbit_neighborhood[8] = std::set<xtal::UnitCell>{
       xtal::UnitCell(-1, -1, 0), xtal::UnitCell(-1, 0, 0),
       xtal::UnitCell(0, -1, 0),  xtal::UnitCell(0, 1, 0),
       xtal::UnitCell(1, 0, 0),   xtal::UnitCell(1, 1, 0)};
+
+  m_orbit_site_neighborhood[8] = std::set<xtal::UnitCellCoord>{
+      xtal::UnitCellCoord(2, -1, -1, 0), xtal::UnitCellCoord(3, -1, -1, 0),
+      xtal::UnitCellCoord(2, -1, 0, 0),  xtal::UnitCellCoord(3, -1, 0, 0),
+      xtal::UnitCellCoord(2, 0, -1, 0),  xtal::UnitCellCoord(3, 0, -1, 0),
+      xtal::UnitCellCoord(2, 0, 1, 0),   xtal::UnitCellCoord(3, 0, 1, 0),
+      xtal::UnitCellCoord(2, 1, 0, 0),   xtal::UnitCellCoord(3, 1, 0, 0),
+      xtal::UnitCellCoord(2, 1, 1, 0),   xtal::UnitCellCoord(3, 1, 1, 0)};
 
   m_orbit_neighborhood[9] = std::set<xtal::UnitCell>{
       xtal::UnitCell(-1, -1, -1), xtal::UnitCell(-1, -1, 0),
@@ -9965,13 +10014,37 @@ LocalOccClexulatorZrOTest_Clexulator::LocalOccClexulatorZrOTest_Clexulator()
       xtal::UnitCell(1, 0, 1),    xtal::UnitCell(1, 1, -1),
       xtal::UnitCell(1, 1, 0),    xtal::UnitCell(1, 1, 1)};
 
+  m_orbit_site_neighborhood[9] = std::set<xtal::UnitCellCoord>{
+      xtal::UnitCellCoord(3, -1, -1, -1), xtal::UnitCellCoord(2, -1, -1, 0),
+      xtal::UnitCellCoord(3, -1, -1, 0),  xtal::UnitCellCoord(2, -1, -1, 1),
+      xtal::UnitCellCoord(3, -1, 0, -1),  xtal::UnitCellCoord(2, -1, 0, 0),
+      xtal::UnitCellCoord(3, -1, 0, 0),   xtal::UnitCellCoord(2, -1, 0, 1),
+      xtal::UnitCellCoord(3, 0, -1, -1),  xtal::UnitCellCoord(2, 0, -1, 0),
+      xtal::UnitCellCoord(3, 0, -1, 0),   xtal::UnitCellCoord(2, 0, -1, 1),
+      xtal::UnitCellCoord(3, 0, 1, -1),   xtal::UnitCellCoord(2, 0, 1, 0),
+      xtal::UnitCellCoord(3, 0, 1, 0),    xtal::UnitCellCoord(2, 0, 1, 1),
+      xtal::UnitCellCoord(3, 1, 0, -1),   xtal::UnitCellCoord(2, 1, 0, 0),
+      xtal::UnitCellCoord(3, 1, 0, 0),    xtal::UnitCellCoord(2, 1, 0, 1),
+      xtal::UnitCellCoord(3, 1, 1, -1),   xtal::UnitCellCoord(2, 1, 1, 0),
+      xtal::UnitCellCoord(3, 1, 1, 0),    xtal::UnitCellCoord(2, 1, 1, 1)};
+
   m_orbit_neighborhood[10] = std::set<xtal::UnitCell>{xtal::UnitCell(-2, -1, 0),
                                                       xtal::UnitCell(1, -1, 0),
                                                       xtal::UnitCell(1, 2, 0)};
 
+  m_orbit_site_neighborhood[10] = std::set<xtal::UnitCellCoord>{
+      xtal::UnitCellCoord(2, -2, -1, 0), xtal::UnitCellCoord(3, -2, -1, 0),
+      xtal::UnitCellCoord(2, 1, -1, 0),  xtal::UnitCellCoord(3, 1, -1, 0),
+      xtal::UnitCellCoord(2, 1, 2, 0),   xtal::UnitCellCoord(3, 1, 2, 0)};
+
   m_orbit_neighborhood[11] = std::set<xtal::UnitCell>{xtal::UnitCell(-1, -2, 0),
                                                       xtal::UnitCell(-1, 1, 0),
                                                       xtal::UnitCell(2, 1, 0)};
+
+  m_orbit_site_neighborhood[11] = std::set<xtal::UnitCellCoord>{
+      xtal::UnitCellCoord(2, -1, -2, 0), xtal::UnitCellCoord(3, -1, -2, 0),
+      xtal::UnitCellCoord(2, -1, 1, 0),  xtal::UnitCellCoord(3, -1, 1, 0),
+      xtal::UnitCellCoord(2, 2, 1, 0),   xtal::UnitCellCoord(3, 2, 1, 0)};
 
   m_orbit_neighborhood[12] = std::set<xtal::UnitCell>{
       xtal::UnitCell(-1, -1, -1), xtal::UnitCell(-1, -1, 1),
@@ -9982,10 +10055,27 @@ LocalOccClexulatorZrOTest_Clexulator::LocalOccClexulatorZrOTest_Clexulator()
       xtal::UnitCell(1, 0, -1),   xtal::UnitCell(1, 0, 1),
       xtal::UnitCell(1, 1, -1),   xtal::UnitCell(1, 1, 1)};
 
+  m_orbit_site_neighborhood[12] = std::set<xtal::UnitCellCoord>{
+      xtal::UnitCellCoord(3, -1, -1, -1), xtal::UnitCellCoord(2, -1, -1, 1),
+      xtal::UnitCellCoord(3, -1, 0, -1),  xtal::UnitCellCoord(2, -1, 0, 1),
+      xtal::UnitCellCoord(3, 0, -1, -1),  xtal::UnitCellCoord(2, 0, -1, 1),
+      xtal::UnitCellCoord(3, 0, 0, -1),   xtal::UnitCellCoord(2, 0, 0, 1),
+      xtal::UnitCellCoord(3, 0, 1, -1),   xtal::UnitCellCoord(2, 0, 1, 1),
+      xtal::UnitCellCoord(3, 1, 0, -1),   xtal::UnitCellCoord(2, 1, 0, 1),
+      xtal::UnitCellCoord(3, 1, 1, -1),   xtal::UnitCellCoord(2, 1, 1, 1)};
+
   m_orbit_neighborhood[13] = std::set<xtal::UnitCell>{
       xtal::UnitCell(-1, -1, 0), xtal::UnitCell(-1, 0, 0),
       xtal::UnitCell(0, -1, 0),  xtal::UnitCell(0, 1, 0),
       xtal::UnitCell(1, 0, 0),   xtal::UnitCell(1, 1, 0)};
+
+  m_orbit_site_neighborhood[13] = std::set<xtal::UnitCellCoord>{
+      xtal::UnitCellCoord(2, -1, -1, 0), xtal::UnitCellCoord(3, -1, -1, 0),
+      xtal::UnitCellCoord(2, -1, 0, 0),  xtal::UnitCellCoord(3, -1, 0, 0),
+      xtal::UnitCellCoord(2, 0, -1, 0),  xtal::UnitCellCoord(3, 0, -1, 0),
+      xtal::UnitCellCoord(2, 0, 1, 0),   xtal::UnitCellCoord(3, 0, 1, 0),
+      xtal::UnitCellCoord(2, 1, 0, 0),   xtal::UnitCellCoord(3, 1, 0, 0),
+      xtal::UnitCellCoord(2, 1, 1, 0),   xtal::UnitCellCoord(3, 1, 1, 0)};
 
   m_orbit_neighborhood[14] = std::set<xtal::UnitCell>{
       xtal::UnitCell(-1, -1, -1), xtal::UnitCell(-1, -1, 1),
@@ -9995,10 +10085,26 @@ LocalOccClexulatorZrOTest_Clexulator::LocalOccClexulatorZrOTest_Clexulator()
       xtal::UnitCell(1, 0, -1),   xtal::UnitCell(1, 0, 1),
       xtal::UnitCell(1, 1, -1),   xtal::UnitCell(1, 1, 1)};
 
+  m_orbit_site_neighborhood[14] = std::set<xtal::UnitCellCoord>{
+      xtal::UnitCellCoord(3, -1, -1, -1), xtal::UnitCellCoord(2, -1, -1, 1),
+      xtal::UnitCellCoord(3, -1, 0, -1),  xtal::UnitCellCoord(2, -1, 0, 1),
+      xtal::UnitCellCoord(3, 0, -1, -1),  xtal::UnitCellCoord(2, 0, -1, 1),
+      xtal::UnitCellCoord(3, 0, 1, -1),   xtal::UnitCellCoord(2, 0, 1, 1),
+      xtal::UnitCellCoord(3, 1, 0, -1),   xtal::UnitCellCoord(2, 1, 0, 1),
+      xtal::UnitCellCoord(3, 1, 1, -1),   xtal::UnitCellCoord(2, 1, 1, 1)};
+
   m_orbit_neighborhood[15] = std::set<xtal::UnitCell>{
       xtal::UnitCell(-1, -1, 0), xtal::UnitCell(-1, 0, 0),
       xtal::UnitCell(0, -1, 0),  xtal::UnitCell(0, 1, 0),
       xtal::UnitCell(1, 0, 0),   xtal::UnitCell(1, 1, 0)};
+
+  m_orbit_site_neighborhood[15] = std::set<xtal::UnitCellCoord>{
+      xtal::UnitCellCoord(2, -1, -1, 0), xtal::UnitCellCoord(3, -1, -1, 0),
+      xtal::UnitCellCoord(2, -1, 0, 0),  xtal::UnitCellCoord(3, -1, 0, 0),
+      xtal::UnitCellCoord(2, 0, -1, 0),  xtal::UnitCellCoord(3, 0, -1, 0),
+      xtal::UnitCellCoord(2, 0, 1, 0),   xtal::UnitCellCoord(3, 0, 1, 0),
+      xtal::UnitCellCoord(2, 1, 0, 0),   xtal::UnitCellCoord(3, 1, 0, 0),
+      xtal::UnitCellCoord(2, 1, 1, 0),   xtal::UnitCellCoord(3, 1, 1, 0)};
 
   m_orbit_neighborhood[16] = std::set<xtal::UnitCell>{
       xtal::UnitCell(-1, -1, -1), xtal::UnitCell(-1, -1, 1),
@@ -10008,12 +10114,31 @@ LocalOccClexulatorZrOTest_Clexulator::LocalOccClexulatorZrOTest_Clexulator()
       xtal::UnitCell(1, 0, -1),   xtal::UnitCell(1, 0, 1),
       xtal::UnitCell(1, 1, -1),   xtal::UnitCell(1, 1, 1)};
 
+  m_orbit_site_neighborhood[16] = std::set<xtal::UnitCellCoord>{
+      xtal::UnitCellCoord(3, -1, -1, -1), xtal::UnitCellCoord(2, -1, -1, 1),
+      xtal::UnitCellCoord(3, -1, 0, -1),  xtal::UnitCellCoord(2, -1, 0, 1),
+      xtal::UnitCellCoord(3, 0, -1, -1),  xtal::UnitCellCoord(2, 0, -1, 1),
+      xtal::UnitCellCoord(3, 0, 1, -1),   xtal::UnitCellCoord(2, 0, 1, 1),
+      xtal::UnitCellCoord(3, 1, 0, -1),   xtal::UnitCellCoord(2, 1, 0, 1),
+      xtal::UnitCellCoord(3, 1, 1, -1),   xtal::UnitCellCoord(2, 1, 1, 1)};
+
   m_orbit_neighborhood[17] = std::set<xtal::UnitCell>{
       xtal::UnitCell(-2, -1, 0), xtal::UnitCell(-1, -1, 0),
       xtal::UnitCell(-1, 0, 0),  xtal::UnitCell(0, -1, 0),
       xtal::UnitCell(0, 1, 0),   xtal::UnitCell(1, -1, 0),
       xtal::UnitCell(1, 0, 0),   xtal::UnitCell(1, 1, 0),
       xtal::UnitCell(1, 2, 0)};
+
+  m_orbit_site_neighborhood[17] = std::set<xtal::UnitCellCoord>{
+      xtal::UnitCellCoord(2, -2, -1, 0), xtal::UnitCellCoord(3, -2, -1, 0),
+      xtal::UnitCellCoord(2, -1, -1, 0), xtal::UnitCellCoord(3, -1, -1, 0),
+      xtal::UnitCellCoord(2, -1, 0, 0),  xtal::UnitCellCoord(3, -1, 0, 0),
+      xtal::UnitCellCoord(2, 0, -1, 0),  xtal::UnitCellCoord(3, 0, -1, 0),
+      xtal::UnitCellCoord(2, 0, 1, 0),   xtal::UnitCellCoord(3, 0, 1, 0),
+      xtal::UnitCellCoord(2, 1, -1, 0),  xtal::UnitCellCoord(3, 1, -1, 0),
+      xtal::UnitCellCoord(2, 1, 0, 0),   xtal::UnitCellCoord(3, 1, 0, 0),
+      xtal::UnitCellCoord(2, 1, 1, 0),   xtal::UnitCellCoord(3, 1, 1, 0),
+      xtal::UnitCellCoord(2, 1, 2, 0),   xtal::UnitCellCoord(3, 1, 2, 0)};
 
   m_orbit_neighborhood[18] = std::set<xtal::UnitCell>{
       xtal::UnitCell(-1, -2, 0), xtal::UnitCell(-1, -1, 0),
@@ -10022,11 +10147,31 @@ LocalOccClexulatorZrOTest_Clexulator::LocalOccClexulatorZrOTest_Clexulator()
       xtal::UnitCell(1, 0, 0),   xtal::UnitCell(1, 1, 0),
       xtal::UnitCell(2, 1, 0)};
 
+  m_orbit_site_neighborhood[18] = std::set<xtal::UnitCellCoord>{
+      xtal::UnitCellCoord(2, -1, -2, 0), xtal::UnitCellCoord(3, -1, -2, 0),
+      xtal::UnitCellCoord(2, -1, -1, 0), xtal::UnitCellCoord(3, -1, -1, 0),
+      xtal::UnitCellCoord(2, -1, 0, 0),  xtal::UnitCellCoord(3, -1, 0, 0),
+      xtal::UnitCellCoord(2, -1, 1, 0),  xtal::UnitCellCoord(3, -1, 1, 0),
+      xtal::UnitCellCoord(2, 0, -1, 0),  xtal::UnitCellCoord(3, 0, -1, 0),
+      xtal::UnitCellCoord(2, 0, 1, 0),   xtal::UnitCellCoord(3, 0, 1, 0),
+      xtal::UnitCellCoord(2, 1, 0, 0),   xtal::UnitCellCoord(3, 1, 0, 0),
+      xtal::UnitCellCoord(2, 1, 1, 0),   xtal::UnitCellCoord(3, 1, 1, 0),
+      xtal::UnitCellCoord(2, 2, 1, 0),   xtal::UnitCellCoord(3, 2, 1, 0)};
+
   m_orbit_neighborhood[19] = std::set<xtal::UnitCell>{
       xtal::UnitCell(-1, -1, 0), xtal::UnitCell(-1, 0, 0),
       xtal::UnitCell(0, -1, 0),  xtal::UnitCell(0, 0, -1),
       xtal::UnitCell(0, 0, 1),   xtal::UnitCell(0, 1, 0),
       xtal::UnitCell(1, 0, 0),   xtal::UnitCell(1, 1, 0)};
+
+  m_orbit_site_neighborhood[19] = std::set<xtal::UnitCellCoord>{
+      xtal::UnitCellCoord(2, -1, -1, 0), xtal::UnitCellCoord(3, -1, -1, 0),
+      xtal::UnitCellCoord(2, -1, 0, 0),  xtal::UnitCellCoord(3, -1, 0, 0),
+      xtal::UnitCellCoord(2, 0, -1, 0),  xtal::UnitCellCoord(3, 0, -1, 0),
+      xtal::UnitCellCoord(3, 0, 0, -1),  xtal::UnitCellCoord(2, 0, 0, 1),
+      xtal::UnitCellCoord(2, 0, 1, 0),   xtal::UnitCellCoord(3, 0, 1, 0),
+      xtal::UnitCellCoord(2, 1, 0, 0),   xtal::UnitCellCoord(3, 1, 0, 0),
+      xtal::UnitCellCoord(2, 1, 1, 0),   xtal::UnitCellCoord(3, 1, 1, 0)};
 
   m_orbit_neighborhood[20] = std::set<xtal::UnitCell>{
       xtal::UnitCell(-1, -1, -1), xtal::UnitCell(-1, -1, 1),
@@ -10037,10 +10182,27 @@ LocalOccClexulatorZrOTest_Clexulator::LocalOccClexulatorZrOTest_Clexulator()
       xtal::UnitCell(1, 0, -1),   xtal::UnitCell(1, 0, 1),
       xtal::UnitCell(1, 1, -1),   xtal::UnitCell(1, 1, 1)};
 
+  m_orbit_site_neighborhood[20] = std::set<xtal::UnitCellCoord>{
+      xtal::UnitCellCoord(3, -1, -1, -1), xtal::UnitCellCoord(2, -1, -1, 1),
+      xtal::UnitCellCoord(3, -1, 0, -1),  xtal::UnitCellCoord(2, -1, 0, 1),
+      xtal::UnitCellCoord(3, 0, -1, -1),  xtal::UnitCellCoord(2, 0, -1, 1),
+      xtal::UnitCellCoord(2, 0, 0, -1),   xtal::UnitCellCoord(3, 0, 0, 1),
+      xtal::UnitCellCoord(3, 0, 1, -1),   xtal::UnitCellCoord(2, 0, 1, 1),
+      xtal::UnitCellCoord(3, 1, 0, -1),   xtal::UnitCellCoord(2, 1, 0, 1),
+      xtal::UnitCellCoord(3, 1, 1, -1),   xtal::UnitCellCoord(2, 1, 1, 1)};
+
   m_orbit_neighborhood[21] = std::set<xtal::UnitCell>{
       xtal::UnitCell(-1, -1, 0), xtal::UnitCell(-1, 0, 0),
       xtal::UnitCell(0, -1, 0),  xtal::UnitCell(0, 1, 0),
       xtal::UnitCell(1, 0, 0),   xtal::UnitCell(1, 1, 0)};
+
+  m_orbit_site_neighborhood[21] = std::set<xtal::UnitCellCoord>{
+      xtal::UnitCellCoord(2, -1, -1, 0), xtal::UnitCellCoord(3, -1, -1, 0),
+      xtal::UnitCellCoord(2, -1, 0, 0),  xtal::UnitCellCoord(3, -1, 0, 0),
+      xtal::UnitCellCoord(2, 0, -1, 0),  xtal::UnitCellCoord(3, 0, -1, 0),
+      xtal::UnitCellCoord(2, 0, 1, 0),   xtal::UnitCellCoord(3, 0, 1, 0),
+      xtal::UnitCellCoord(2, 1, 0, 0),   xtal::UnitCellCoord(3, 1, 0, 0),
+      xtal::UnitCellCoord(2, 1, 1, 0),   xtal::UnitCellCoord(3, 1, 1, 0)};
 
   m_orbit_neighborhood[22] = std::set<xtal::UnitCell>{
       xtal::UnitCell(-1, -1, -1), xtal::UnitCell(-1, -1, 0),
@@ -10053,10 +10215,32 @@ LocalOccClexulatorZrOTest_Clexulator::LocalOccClexulatorZrOTest_Clexulator()
       xtal::UnitCell(1, 0, 1),    xtal::UnitCell(1, 1, -1),
       xtal::UnitCell(1, 1, 0),    xtal::UnitCell(1, 1, 1)};
 
+  m_orbit_site_neighborhood[22] = std::set<xtal::UnitCellCoord>{
+      xtal::UnitCellCoord(3, -1, -1, -1), xtal::UnitCellCoord(2, -1, -1, 0),
+      xtal::UnitCellCoord(3, -1, -1, 0),  xtal::UnitCellCoord(2, -1, -1, 1),
+      xtal::UnitCellCoord(3, -1, 0, -1),  xtal::UnitCellCoord(2, -1, 0, 0),
+      xtal::UnitCellCoord(3, -1, 0, 0),   xtal::UnitCellCoord(2, -1, 0, 1),
+      xtal::UnitCellCoord(3, 0, -1, -1),  xtal::UnitCellCoord(2, 0, -1, 0),
+      xtal::UnitCellCoord(3, 0, -1, 0),   xtal::UnitCellCoord(2, 0, -1, 1),
+      xtal::UnitCellCoord(3, 0, 1, -1),   xtal::UnitCellCoord(2, 0, 1, 0),
+      xtal::UnitCellCoord(3, 0, 1, 0),    xtal::UnitCellCoord(2, 0, 1, 1),
+      xtal::UnitCellCoord(3, 1, 0, -1),   xtal::UnitCellCoord(2, 1, 0, 0),
+      xtal::UnitCellCoord(3, 1, 0, 0),    xtal::UnitCellCoord(2, 1, 0, 1),
+      xtal::UnitCellCoord(3, 1, 1, -1),   xtal::UnitCellCoord(2, 1, 1, 0),
+      xtal::UnitCellCoord(3, 1, 1, 0),    xtal::UnitCellCoord(2, 1, 1, 1)};
+
   m_orbit_neighborhood[23] = std::set<xtal::UnitCell>{
       xtal::UnitCell(-1, -1, 0), xtal::UnitCell(-1, 0, 0),
       xtal::UnitCell(0, -1, 0),  xtal::UnitCell(0, 1, 0),
       xtal::UnitCell(1, 0, 0),   xtal::UnitCell(1, 1, 0)};
+
+  m_orbit_site_neighborhood[23] = std::set<xtal::UnitCellCoord>{
+      xtal::UnitCellCoord(2, -1, -1, 0), xtal::UnitCellCoord(3, -1, -1, 0),
+      xtal::UnitCellCoord(2, -1, 0, 0),  xtal::UnitCellCoord(3, -1, 0, 0),
+      xtal::UnitCellCoord(2, 0, -1, 0),  xtal::UnitCellCoord(3, 0, -1, 0),
+      xtal::UnitCellCoord(2, 0, 1, 0),   xtal::UnitCellCoord(3, 0, 1, 0),
+      xtal::UnitCellCoord(2, 1, 0, 0),   xtal::UnitCellCoord(3, 1, 0, 0),
+      xtal::UnitCellCoord(2, 1, 1, 0),   xtal::UnitCellCoord(3, 1, 1, 0)};
 
   m_orbit_neighborhood[24] = std::set<xtal::UnitCell>{
       xtal::UnitCell(-1, -1, -1), xtal::UnitCell(-1, -1, 0),
@@ -10069,6 +10253,20 @@ LocalOccClexulatorZrOTest_Clexulator::LocalOccClexulatorZrOTest_Clexulator()
       xtal::UnitCell(1, 0, 1),    xtal::UnitCell(1, 1, -1),
       xtal::UnitCell(1, 1, 0),    xtal::UnitCell(1, 1, 1)};
 
+  m_orbit_site_neighborhood[24] = std::set<xtal::UnitCellCoord>{
+      xtal::UnitCellCoord(3, -1, -1, -1), xtal::UnitCellCoord(2, -1, -1, 0),
+      xtal::UnitCellCoord(3, -1, -1, 0),  xtal::UnitCellCoord(2, -1, -1, 1),
+      xtal::UnitCellCoord(3, -1, 0, -1),  xtal::UnitCellCoord(2, -1, 0, 0),
+      xtal::UnitCellCoord(3, -1, 0, 0),   xtal::UnitCellCoord(2, -1, 0, 1),
+      xtal::UnitCellCoord(3, 0, -1, -1),  xtal::UnitCellCoord(2, 0, -1, 0),
+      xtal::UnitCellCoord(3, 0, -1, 0),   xtal::UnitCellCoord(2, 0, -1, 1),
+      xtal::UnitCellCoord(3, 0, 1, -1),   xtal::UnitCellCoord(2, 0, 1, 0),
+      xtal::UnitCellCoord(3, 0, 1, 0),    xtal::UnitCellCoord(2, 0, 1, 1),
+      xtal::UnitCellCoord(3, 1, 0, -1),   xtal::UnitCellCoord(2, 1, 0, 0),
+      xtal::UnitCellCoord(3, 1, 0, 0),    xtal::UnitCellCoord(2, 1, 0, 1),
+      xtal::UnitCellCoord(3, 1, 1, -1),   xtal::UnitCellCoord(2, 1, 1, 0),
+      xtal::UnitCellCoord(3, 1, 1, 0),    xtal::UnitCellCoord(2, 1, 1, 1)};
+
   m_orbit_neighborhood[25] = std::set<xtal::UnitCell>{
       xtal::UnitCell(-2, -1, 0), xtal::UnitCell(-1, -1, 0),
       xtal::UnitCell(-1, 0, 0),  xtal::UnitCell(0, -1, 0),
@@ -10076,12 +10274,34 @@ LocalOccClexulatorZrOTest_Clexulator::LocalOccClexulatorZrOTest_Clexulator()
       xtal::UnitCell(1, 0, 0),   xtal::UnitCell(1, 1, 0),
       xtal::UnitCell(1, 2, 0)};
 
+  m_orbit_site_neighborhood[25] = std::set<xtal::UnitCellCoord>{
+      xtal::UnitCellCoord(2, -2, -1, 0), xtal::UnitCellCoord(3, -2, -1, 0),
+      xtal::UnitCellCoord(2, -1, -1, 0), xtal::UnitCellCoord(3, -1, -1, 0),
+      xtal::UnitCellCoord(2, -1, 0, 0),  xtal::UnitCellCoord(3, -1, 0, 0),
+      xtal::UnitCellCoord(2, 0, -1, 0),  xtal::UnitCellCoord(3, 0, -1, 0),
+      xtal::UnitCellCoord(2, 0, 1, 0),   xtal::UnitCellCoord(3, 0, 1, 0),
+      xtal::UnitCellCoord(2, 1, -1, 0),  xtal::UnitCellCoord(3, 1, -1, 0),
+      xtal::UnitCellCoord(2, 1, 0, 0),   xtal::UnitCellCoord(3, 1, 0, 0),
+      xtal::UnitCellCoord(2, 1, 1, 0),   xtal::UnitCellCoord(3, 1, 1, 0),
+      xtal::UnitCellCoord(2, 1, 2, 0),   xtal::UnitCellCoord(3, 1, 2, 0)};
+
   m_orbit_neighborhood[26] = std::set<xtal::UnitCell>{
       xtal::UnitCell(-1, -2, 0), xtal::UnitCell(-1, -1, 0),
       xtal::UnitCell(-1, 0, 0),  xtal::UnitCell(-1, 1, 0),
       xtal::UnitCell(0, -1, 0),  xtal::UnitCell(0, 1, 0),
       xtal::UnitCell(1, 0, 0),   xtal::UnitCell(1, 1, 0),
       xtal::UnitCell(2, 1, 0)};
+
+  m_orbit_site_neighborhood[26] = std::set<xtal::UnitCellCoord>{
+      xtal::UnitCellCoord(2, -1, -2, 0), xtal::UnitCellCoord(3, -1, -2, 0),
+      xtal::UnitCellCoord(2, -1, -1, 0), xtal::UnitCellCoord(3, -1, -1, 0),
+      xtal::UnitCellCoord(2, -1, 0, 0),  xtal::UnitCellCoord(3, -1, 0, 0),
+      xtal::UnitCellCoord(2, -1, 1, 0),  xtal::UnitCellCoord(3, -1, 1, 0),
+      xtal::UnitCellCoord(2, 0, -1, 0),  xtal::UnitCellCoord(3, 0, -1, 0),
+      xtal::UnitCellCoord(2, 0, 1, 0),   xtal::UnitCellCoord(3, 0, 1, 0),
+      xtal::UnitCellCoord(2, 1, 0, 0),   xtal::UnitCellCoord(3, 1, 0, 0),
+      xtal::UnitCellCoord(2, 1, 1, 0),   xtal::UnitCellCoord(3, 1, 1, 0),
+      xtal::UnitCellCoord(2, 2, 1, 0),   xtal::UnitCellCoord(3, 2, 1, 0)};
 
   m_orbit_neighborhood[27] = std::set<xtal::UnitCell>{
       xtal::UnitCell(-2, -1, 0), xtal::UnitCell(-1, -1, -1),
@@ -10093,6 +10313,17 @@ LocalOccClexulatorZrOTest_Clexulator::LocalOccClexulatorZrOTest_Clexulator()
       xtal::UnitCell(1, 1, -1),  xtal::UnitCell(1, 1, 1),
       xtal::UnitCell(1, 2, 0)};
 
+  m_orbit_site_neighborhood[27] = std::set<xtal::UnitCellCoord>{
+      xtal::UnitCellCoord(2, -2, -1, 0),  xtal::UnitCellCoord(3, -2, -1, 0),
+      xtal::UnitCellCoord(3, -1, -1, -1), xtal::UnitCellCoord(2, -1, -1, 1),
+      xtal::UnitCellCoord(3, -1, 0, -1),  xtal::UnitCellCoord(2, -1, 0, 1),
+      xtal::UnitCellCoord(3, 0, -1, -1),  xtal::UnitCellCoord(2, 0, -1, 1),
+      xtal::UnitCellCoord(3, 0, 1, -1),   xtal::UnitCellCoord(2, 0, 1, 1),
+      xtal::UnitCellCoord(2, 1, -1, 0),   xtal::UnitCellCoord(3, 1, -1, 0),
+      xtal::UnitCellCoord(3, 1, 0, -1),   xtal::UnitCellCoord(2, 1, 0, 1),
+      xtal::UnitCellCoord(3, 1, 1, -1),   xtal::UnitCellCoord(2, 1, 1, 1),
+      xtal::UnitCellCoord(2, 1, 2, 0),    xtal::UnitCellCoord(3, 1, 2, 0)};
+
   m_orbit_neighborhood[28] = std::set<xtal::UnitCell>{
       xtal::UnitCell(-1, -2, 0), xtal::UnitCell(-1, -1, -1),
       xtal::UnitCell(-1, -1, 1), xtal::UnitCell(-1, 0, -1),
@@ -10102,6 +10333,17 @@ LocalOccClexulatorZrOTest_Clexulator::LocalOccClexulatorZrOTest_Clexulator()
       xtal::UnitCell(1, 0, -1),  xtal::UnitCell(1, 0, 1),
       xtal::UnitCell(1, 1, -1),  xtal::UnitCell(1, 1, 1),
       xtal::UnitCell(2, 1, 0)};
+
+  m_orbit_site_neighborhood[28] = std::set<xtal::UnitCellCoord>{
+      xtal::UnitCellCoord(2, -1, -2, 0),  xtal::UnitCellCoord(3, -1, -2, 0),
+      xtal::UnitCellCoord(3, -1, -1, -1), xtal::UnitCellCoord(2, -1, -1, 1),
+      xtal::UnitCellCoord(3, -1, 0, -1),  xtal::UnitCellCoord(2, -1, 0, 1),
+      xtal::UnitCellCoord(2, -1, 1, 0),   xtal::UnitCellCoord(3, -1, 1, 0),
+      xtal::UnitCellCoord(3, 0, -1, -1),  xtal::UnitCellCoord(2, 0, -1, 1),
+      xtal::UnitCellCoord(3, 0, 1, -1),   xtal::UnitCellCoord(2, 0, 1, 1),
+      xtal::UnitCellCoord(3, 1, 0, -1),   xtal::UnitCellCoord(2, 1, 0, 1),
+      xtal::UnitCellCoord(3, 1, 1, -1),   xtal::UnitCellCoord(2, 1, 1, 1),
+      xtal::UnitCellCoord(2, 2, 1, 0),    xtal::UnitCellCoord(3, 2, 1, 0)};
 
   m_orbit_neighborhood[29] = std::set<xtal::UnitCell>{
       xtal::UnitCell(-1, -1, -1), xtal::UnitCell(-1, -1, 0),
@@ -10114,10 +10356,32 @@ LocalOccClexulatorZrOTest_Clexulator::LocalOccClexulatorZrOTest_Clexulator()
       xtal::UnitCell(1, 0, 1),    xtal::UnitCell(1, 1, -1),
       xtal::UnitCell(1, 1, 0),    xtal::UnitCell(1, 1, 1)};
 
+  m_orbit_site_neighborhood[29] = std::set<xtal::UnitCellCoord>{
+      xtal::UnitCellCoord(3, -1, -1, -1), xtal::UnitCellCoord(2, -1, -1, 0),
+      xtal::UnitCellCoord(3, -1, -1, 0),  xtal::UnitCellCoord(2, -1, -1, 1),
+      xtal::UnitCellCoord(3, -1, 0, -1),  xtal::UnitCellCoord(2, -1, 0, 0),
+      xtal::UnitCellCoord(3, -1, 0, 0),   xtal::UnitCellCoord(2, -1, 0, 1),
+      xtal::UnitCellCoord(3, 0, -1, -1),  xtal::UnitCellCoord(2, 0, -1, 0),
+      xtal::UnitCellCoord(3, 0, -1, 0),   xtal::UnitCellCoord(2, 0, -1, 1),
+      xtal::UnitCellCoord(3, 0, 1, -1),   xtal::UnitCellCoord(2, 0, 1, 0),
+      xtal::UnitCellCoord(3, 0, 1, 0),    xtal::UnitCellCoord(2, 0, 1, 1),
+      xtal::UnitCellCoord(3, 1, 0, -1),   xtal::UnitCellCoord(2, 1, 0, 0),
+      xtal::UnitCellCoord(3, 1, 0, 0),    xtal::UnitCellCoord(2, 1, 0, 1),
+      xtal::UnitCellCoord(3, 1, 1, -1),   xtal::UnitCellCoord(2, 1, 1, 0),
+      xtal::UnitCellCoord(3, 1, 1, 0),    xtal::UnitCellCoord(2, 1, 1, 1)};
+
   m_orbit_neighborhood[30] = std::set<xtal::UnitCell>{
       xtal::UnitCell(-1, -1, 0), xtal::UnitCell(-1, 0, 0),
       xtal::UnitCell(0, -1, 0),  xtal::UnitCell(0, 1, 0),
       xtal::UnitCell(1, 0, 0),   xtal::UnitCell(1, 1, 0)};
+
+  m_orbit_site_neighborhood[30] = std::set<xtal::UnitCellCoord>{
+      xtal::UnitCellCoord(2, -1, -1, 0), xtal::UnitCellCoord(3, -1, -1, 0),
+      xtal::UnitCellCoord(2, -1, 0, 0),  xtal::UnitCellCoord(3, -1, 0, 0),
+      xtal::UnitCellCoord(2, 0, -1, 0),  xtal::UnitCellCoord(3, 0, -1, 0),
+      xtal::UnitCellCoord(2, 0, 1, 0),   xtal::UnitCellCoord(3, 0, 1, 0),
+      xtal::UnitCellCoord(2, 1, 0, 0),   xtal::UnitCellCoord(3, 1, 0, 0),
+      xtal::UnitCellCoord(2, 1, 1, 0),   xtal::UnitCellCoord(3, 1, 1, 0)};
 
   m_orbit_neighborhood[31] = std::set<xtal::UnitCell>{
       xtal::UnitCell(-1, -1, -1), xtal::UnitCell(-1, -1, 1),
@@ -10127,10 +10391,26 @@ LocalOccClexulatorZrOTest_Clexulator::LocalOccClexulatorZrOTest_Clexulator()
       xtal::UnitCell(1, 0, -1),   xtal::UnitCell(1, 0, 1),
       xtal::UnitCell(1, 1, -1),   xtal::UnitCell(1, 1, 1)};
 
+  m_orbit_site_neighborhood[31] = std::set<xtal::UnitCellCoord>{
+      xtal::UnitCellCoord(3, -1, -1, -1), xtal::UnitCellCoord(2, -1, -1, 1),
+      xtal::UnitCellCoord(3, -1, 0, -1),  xtal::UnitCellCoord(2, -1, 0, 1),
+      xtal::UnitCellCoord(3, 0, -1, -1),  xtal::UnitCellCoord(2, 0, -1, 1),
+      xtal::UnitCellCoord(3, 0, 1, -1),   xtal::UnitCellCoord(2, 0, 1, 1),
+      xtal::UnitCellCoord(3, 1, 0, -1),   xtal::UnitCellCoord(2, 1, 0, 1),
+      xtal::UnitCellCoord(3, 1, 1, -1),   xtal::UnitCellCoord(2, 1, 1, 1)};
+
   m_orbit_neighborhood[32] = std::set<xtal::UnitCell>{
       xtal::UnitCell(-2, -1, 0), xtal::UnitCell(-1, -2, 0),
       xtal::UnitCell(-1, 1, 0),  xtal::UnitCell(1, -1, 0),
       xtal::UnitCell(1, 2, 0),   xtal::UnitCell(2, 1, 0)};
+
+  m_orbit_site_neighborhood[32] = std::set<xtal::UnitCellCoord>{
+      xtal::UnitCellCoord(2, -2, -1, 0), xtal::UnitCellCoord(3, -2, -1, 0),
+      xtal::UnitCellCoord(2, -1, -2, 0), xtal::UnitCellCoord(3, -1, -2, 0),
+      xtal::UnitCellCoord(2, -1, 1, 0),  xtal::UnitCellCoord(3, -1, 1, 0),
+      xtal::UnitCellCoord(2, 1, -1, 0),  xtal::UnitCellCoord(3, 1, -1, 0),
+      xtal::UnitCellCoord(2, 1, 2, 0),   xtal::UnitCellCoord(3, 1, 2, 0),
+      xtal::UnitCellCoord(2, 2, 1, 0),   xtal::UnitCellCoord(3, 2, 1, 0)};
 }
 
 LocalOccClexulatorZrOTest_Clexulator::~LocalOccClexulatorZrOTest_Clexulator() {
