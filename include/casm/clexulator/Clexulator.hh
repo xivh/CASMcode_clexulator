@@ -68,17 +68,44 @@ class Clexulator {
     return m_clex->param_key(_param_name);
   }
 
-  /// \brief The UnitCellCoord involved in calculating the basis functions,
+  /// \brief The UnitCell involved in calculating the basis functions,
   /// relative origin UnitCell
   const std::set<xtal::UnitCell> &neighborhood() const {
     return m_clex->neighborhood();
   }
 
-  /// \brief The UnitCellCoord involved in calculating the basis functions
+  /// \brief The UnitCell involved in calculating the basis functions
   /// for a particular orbit, relative origin UnitCell
   const std::set<xtal::UnitCell> &neighborhood(
       size_type linear_orbit_index) const {
     return m_clex->neighborhood(linear_orbit_index);
+  }
+
+  /// \brief The UnitCellCoord involved in calculating the basis functions,
+  /// relative origin UnitCell
+  const std::set<xtal::UnitCellCoord> &site_neighborhood() const {
+    throw std::runtime_error("TODO: Clexulator::site_neighborhood");
+  }
+
+  /// \brief The UnitCellCoord involved in calculating the basis functions
+  /// for a particular orbit, relative origin UnitCell
+  const std::set<xtal::UnitCellCoord> &site_neighborhood(
+      size_type linear_orbit_index) const {
+    throw std::runtime_error("TODO: Clexulator::site_neighborhood");
+  }
+
+  /// \brief The UnitCellCoord involved in calculating the basis functions
+  /// for a selection of orbits, relative origin UnitCell
+  std::set<xtal::UnitCellCoord> site_neighborhood(
+      unsigned int const *linear_orbit_index_begin,
+      unsigned int const *linear_orbit_index_end) const {
+    std::set<xtal::UnitCellCoord> result;
+    auto it = linear_orbit_index_begin;
+    for (; it != linear_orbit_index_end; ++it) {
+      std::set<xtal::UnitCellCoord> const &tmp = this->site_neighborhood(*it);
+      result.insert(tmp.begin(), tmp.end());
+    }
+    return result;
   }
 
   /// \brief The weight matrix used for ordering the neighbor list
