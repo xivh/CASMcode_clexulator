@@ -70,6 +70,25 @@ LocalCorrelations::LocalCorrelations(
   setZero();
 }
 
+/// \brief Reset internal pointer to DoF values - must have the same supercell
+void LocalCorrelations::reset_dof_values(ConfigDoFValues const *_dof_values) {
+  if (_dof_values == nullptr) {
+    throw std::runtime_error(
+        "Error in Correlations::reset: _dof_values == nullptr");
+  }
+  m_dof_values = _dof_values;
+}
+
+/// \brief Get internal pointer to DoF values
+ConfigDoFValues const *LocalCorrelations::get_dof_values() const {
+  return m_dof_values;
+}
+
+/// \brief Get internal pointer to a local clexulator
+Clexulator const *LocalCorrelations::clexulator(Index equivalent_index) const {
+  return &m_clexulator->at(equivalent_index);
+}
+
 /// \brief Set the internal correlations vector to zero
 void LocalCorrelations::setZero() { m_local_corr.setZero(); }
 

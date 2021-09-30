@@ -44,6 +44,15 @@ class Correlations {
                Clexulator const *clexulator,
                bool always_recalculate_delta_reference = true);
 
+  /// \brief Reset internal pointer to DoF values - must have the same supercell
+  void reset_dof_values(ConfigDoFValues const *_dof_values);
+
+  /// \brief Get internal pointer to DoF values
+  ConfigDoFValues const *get_dof_values() const;
+
+  /// \brief Get internal pointer to clexulator
+  Clexulator const *clexulator() const;
+
   /// \brief Set the internal correlations vector to zero
   void setZero();
 

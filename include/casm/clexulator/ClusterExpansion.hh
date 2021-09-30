@@ -2,28 +2,53 @@
 #define CASM_clexulator_ClusterExpansion
 
 #include <set>
-#include <vector>
 
-#include "casm/clexulator/Clexulator.hh"
+#include "casm/clexulator/Correlations.hh"
 #include "casm/clexulator/SparseCoefficients.hh"
 #include "casm/crystallography/UnitCellCoord.hh"
 
 namespace CASM {
 namespace clexulator {
 
-/// \brief Data needed to evaluate a cluster expansion (clex)
-struct ClusterExpansion {
-  /// \brief Clexulator used to evaluate correlations
-  Clexulator clexulator;
+/// \brief A cluster expansion calculator
+class ClusterExpansion {
+ public:
+  ClusterExpansion(Correlations const &_correlations,
+                   SparseCoefficients const &_coefficients);
+
+  /// \brief Reset pointer to configuration currently being calculated
+  void reset(ConfigDoFValues const *dof_values);
+
+  /// \brief Pointer to configuration currently being calculated
+  ConfigDoFValues const *get() const;
+
+  double intensive_value();
+
+  double extensive_value();
+
+  double occ_delta_value(Index linear_site_index, int new_occ);
+
+  double local_delta_value(DoFKey const &key, Index linear_site_index,
+                           Eigen::VectorXd const &new_value);
+
+  double global_delta_value(DoFKey const &key,
+                            Eigen::VectorXd const &new_value);
+
+  std::set<xtal::UnitCellCoord> required_update_neighborhood() const;
+
+ private:
+  /// \brief Used to evaluate correlations
+  Correlations m_correlations;
 
   /// \brief Non-zero expansion coefficients
-  SparseCoefficients coefficients;
-};
+  SparseCoefficients m_coefficients;
 
-/// \brief Return the set of sites for which a change in DoF results in a
-///     change in any cluster expansion value
-std::set<xtal::UnitCellCoord> make_required_update_neighborhood(
-    std::vector<ClusterExpansion> const &cluster_expansions);
+  /// \brief Non-zero eci indices begin iterator
+  unsigned int *m_corr_indices_begin;
+
+  /// \brief Non-zero eci indices end iterator
+  unsigned int *m_corr_indices_end;
+};
 
 }  // namespace clexulator
 }  // namespace CASM

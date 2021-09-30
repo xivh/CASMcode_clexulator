@@ -65,6 +65,23 @@ Correlations::Correlations(ConfigDoFValues const *dof_values,
   setZero();
 }
 
+/// \brief Reset internal pointer to DoF values - must have the same supercell
+void Correlations::reset_dof_values(ConfigDoFValues const *_dof_values) {
+  if (_dof_values == nullptr) {
+    throw std::runtime_error(
+        "Error in Correlations::reset: _dof_values == nullptr");
+  }
+  m_dof_values = _dof_values;
+}
+
+/// \brief Get internal pointer to DoF values
+ConfigDoFValues const *Correlations::get_dof_values() const {
+  return m_dof_values;
+}
+
+/// \brief Get internal pointer to clexulator
+Clexulator const *Correlations::clexulator() const { return m_clexulator; }
+
 /// \brief Set the internal correlations vector to zero
 void Correlations::setZero() {
   m_point_corr.setZero();
