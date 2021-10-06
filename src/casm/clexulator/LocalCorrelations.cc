@@ -21,17 +21,14 @@ namespace clexulator {
 /// \param clexulator Pointer to a vector of Clexulator used to calculate
 ///     correlations for equivalent local phenomenal clusters
 LocalCorrelations::LocalCorrelations(
-    ConfigDoFValues const *dof_values,
-    SuperNeighborList const *supercell_neighbor_list,
-    std::vector<Clexulator> const *clexulator)
-    : m_dof_values(dof_values),
+    std::shared_ptr<SuperNeighborList const> const &supercell_neighbor_list,
+    std::shared_ptr<std::vector<Clexulator> const> const &clexulator,
+    std::vector<unsigned int> const &correlation_indices,
+    ConfigDoFValues const *_dof_values)
+    : m_correlation_indices(correlation_indices),
+      m_dof_values(_dof_values),
       m_supercell_neighbor_list(supercell_neighbor_list),
       m_clexulator(clexulator) {
-  if (m_dof_values == nullptr) {
-    throw std::runtime_error(
-        "Error constructing LocalCorrelations: dof_values == nullptr");
-  }
-
   if (m_supercell_neighbor_list == nullptr) {
     throw std::runtime_error(
         "Error constructing LocalCorrelations: supercell_neighbor_list == "
@@ -57,21 +54,16 @@ LocalCorrelations::LocalCorrelations(
     }
   }
 
-  // construct m_all_correlation_indices
   int n = (*m_clexulator)[0].corr_size();
-  for (int i = 0; i < n; ++i) {
-    m_all_correlation_indices.push_back(i);
-  }
-  m_all_corr_indices_begin = m_all_correlation_indices.data();
-  m_all_corr_indices_end =
-      m_all_corr_indices_begin + m_all_correlation_indices.size();
+  m_corr_indices_begin = m_correlation_indices.data();
+  m_corr_indices_end = m_corr_indices_begin + m_correlation_indices.size();
 
   m_local_corr.resize(n);
-  setZero();
+  m_local_corr.setZero();
 }
 
 /// \brief Reset internal pointer to DoF values - must have the same supercell
-void LocalCorrelations::reset_dof_values(ConfigDoFValues const *_dof_values) {
+void LocalCorrelations::set(ConfigDoFValues const *_dof_values) {
   if (_dof_values == nullptr) {
     throw std::runtime_error(
         "Error in Correlations::reset: _dof_values == nullptr");
@@ -80,17 +72,16 @@ void LocalCorrelations::reset_dof_values(ConfigDoFValues const *_dof_values) {
 }
 
 /// \brief Get internal pointer to DoF values
-ConfigDoFValues const *LocalCorrelations::get_dof_values() const {
-  return m_dof_values;
-}
+ConfigDoFValues const *LocalCorrelations::get() const { return m_dof_values; }
 
-/// \brief Get internal pointer to a local clexulator
-Clexulator const *LocalCorrelations::clexulator(Index equivalent_index) const {
-  return &m_clexulator->at(equivalent_index);
+/// \brief Return the coordinates of sites (relative to the origin unit cell)
+///     where a change in DoF values requires this calculators values to be
+///     re-calculated.
+std::set<xtal::UnitCellCoord> LocalCorrelations::required_update_neighborhood(
+    Index equivalent_index) const {
+  return (*m_clexulator)[equivalent_index].site_neighborhood(
+      m_corr_indices_begin, m_corr_indices_end);
 }
-
-/// \brief Set the internal correlations vector to zero
-void LocalCorrelations::setZero() { m_local_corr.setZero(); }
 
 /// \brief Calculate and return local correlations
 ///
@@ -99,26 +90,14 @@ void LocalCorrelations::setZero() { m_local_corr.setZero(); }
 /// \param equivalent_index Index into the input vector of Clexulator,
 ///     specifies which of the equivalent phenomenal clusters associated with
 ///     the given unit cell to calculate local correlations about.
+///
+/// Notes:
+/// - Result is a vector of size clexulator->corr_size().
+/// - Constructor specifies which vector elements are defined.
+/// - Result is a reference to an internal Eigen::VectorXd. The reference is
+///   valid until the next time this method is called.
 Eigen::VectorXd const &LocalCorrelations::local(Index unitcell_index,
                                                 Index equivalent_index) {
-  return restricted_local(unitcell_index, equivalent_index,
-                          m_all_corr_indices_begin, m_all_corr_indices_end);
-}
-
-/// \brief Calculate and return restricted local correlations
-///
-/// \param unitcell_index Linear unitcell index associated with the phenomenal
-///     cluster about which local correlations are to be calculated
-/// \param equivalent_index Index into the input vector of Clexulator,
-///     specifies which of the equivalent phenomenal clusters associated with
-///     the given unit cell to calculate local correlations about.
-/// \param corr_indices_begin,corr_indices_end Iterators over indices of basis
-///     functions to be calculated
-///
-Eigen::VectorXd const &LocalCorrelations::restricted_local(
-    Index unitcell_index, Index equivalent_index,
-    unsigned int const *corr_indices_begin,
-    unsigned int const *corr_indices_end) {
   int n_unitcells = m_supercell_neighbor_list->n_unitcells();
 
   if (unitcell_index < 0 || unitcell_index >= n_unitcells) {
@@ -139,7 +118,7 @@ Eigen::VectorXd const &LocalCorrelations::restricted_local(
   auto const &unitcell_nlist = m_supercell_neighbor_list->sites(unitcell_index);
   (*m_clexulator)[equivalent_index].calc_restricted_global_corr_contribution(
       *m_dof_values, unitcell_nlist.data(), m_local_corr.data(),
-      corr_indices_begin, corr_indices_end);
+      m_corr_indices_begin, m_corr_indices_end);
   return m_local_corr;
 }
 

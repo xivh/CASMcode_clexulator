@@ -1,6 +1,7 @@
 #ifndef CASM_clexulator_LocalCorrelations
 #define CASM_clexulator_LocalCorrelations
 
+#include <set>
 #include <vector>
 
 #include "casm/crystallography/DoFDecl.hh"
@@ -8,6 +9,10 @@
 #include "casm/global/eigen.hh"
 
 namespace CASM {
+namespace xtal {
+class UnitCellCoord;
+}
+
 namespace clexulator {
 
 struct ConfigDoFValues;
@@ -22,37 +27,33 @@ class LocalCorrelations {
  public:
   /// \brief Construct a Correlations object to calculate local correlations
   /// for the pointed-to ConfigDoFValues object
-  LocalCorrelations(ConfigDoFValues const *dof_values,
-                    SuperNeighborList const *supercell_neighbor_list,
-                    std::vector<Clexulator> const *clexulator);
+  LocalCorrelations(
+      std::shared_ptr<SuperNeighborList const> const &supercell_neighbor_list,
+      std::shared_ptr<std::vector<Clexulator> const> const &clexulator,
+      std::vector<unsigned int> const &correlation_indices,
+      ConfigDoFValues const *_dof_values = nullptr);
 
   /// \brief Reset internal pointer to DoF values - must have the same supercell
-  void reset_dof_values(ConfigDoFValues const *_dof_values);
+  void set(ConfigDoFValues const *_dof_values);
 
   /// \brief Get internal pointer to DoF values
-  ConfigDoFValues const *get_dof_values() const;
+  ConfigDoFValues const *get() const;
 
-  /// \brief Get internal pointer to a local clexulator
-  Clexulator const *clexulator(Index equivalent_index) const;
-
-  /// \brief Set the internal correlations vector to zero
-  void setZero();
+  /// \brief Return the coordinates of sites (relative to the origin unit cell)
+  ///     where a change in DoF values requires this calculators values to be
+  ///     re-calculated.
+  std::set<xtal::UnitCellCoord> required_update_neighborhood(
+      Index equivalent_index) const;
 
   /// \brief Calculate and return local correlations
   Eigen::VectorXd const &local(Index unitcell_index, Index equivalent_index);
 
-  /// \brief Calculate and return restricted local correlations
-  Eigen::VectorXd const &restricted_local(
-      Index unitcell_index, Index equivalent_index,
-      unsigned int const *corr_indices_begin,
-      unsigned int const *corr_indices_end);
-
  private:
   /// Holds all correlation indices
-  std::vector<unsigned int> m_all_correlation_indices;
+  std::vector<unsigned int> m_correlation_indices;
 
-  unsigned int const *m_all_corr_indices_begin;
-  unsigned int const *m_all_corr_indices_end;
+  unsigned int const *m_corr_indices_begin;
+  unsigned int const *m_corr_indices_end;
 
   /// Holds last local correlation results
   Eigen::VectorXd m_local_corr;
@@ -61,11 +62,11 @@ class LocalCorrelations {
   ConfigDoFValues const *m_dof_values;
 
   /// SuperNeighborList to use
-  SuperNeighborList const *m_supercell_neighbor_list;
+  std::shared_ptr<SuperNeighborList const> m_supercell_neighbor_list;
 
   /// Clexulators to use (one for each symmetrically equivalent phenomenal
   /// cluster per unit cell)
-  std::vector<Clexulator> const *m_clexulator;
+  std::shared_ptr<std::vector<Clexulator> const> m_clexulator;
 };
 
 }  // namespace clexulator

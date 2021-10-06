@@ -21,8 +21,9 @@ namespace test {
 namespace {
 
 void run_local_correlations_checks(
-    TestConfiguration &config, std::vector<clexulator::Clexulator> &clexulator,
-    unsigned int const *begin, unsigned int const *end);
+    TestConfiguration &config,
+    std::shared_ptr<std::vector<clexulator::Clexulator> const> &clexulator,
+    std::vector<unsigned int> const &corr_indices);
 
 }  // namespace
 
@@ -44,10 +45,10 @@ class LocalOccClexulatorZrOTest : public test::TestLocalClexulatorBase {
 
     // loop over different basis sets
     for (auto const &bset_name : bset_names) {
-      EXPECT_EQ(this->clexulator[bset_name].size(), 2);
+      EXPECT_EQ(this->clexulator[bset_name]->size(), 2);
 
       // loop over clexulator for equivalent phenomenal clusters
-      for (auto &equiv_clexulator : this->clexulator[bset_name]) {
+      for (auto &equiv_clexulator : *this->clexulator[bset_name]) {
         EXPECT_EQ(equiv_clexulator.name(), clexulator_name);
         EXPECT_EQ(equiv_clexulator.nlist_size(), 53);
         EXPECT_EQ(equiv_clexulator.corr_size(), 33);
@@ -69,10 +70,8 @@ class LocalOccClexulatorZrOTest : public test::TestLocalClexulatorBase {
 
     for (auto const &bset_name : bset_names) {
       auto const &indices = corr_indices.at(bset_name);
-      auto begin = indices.data();
-      auto end = indices.data() + indices.size();
-      run_local_correlations_checks(config, this->clexulator[bset_name], begin,
-                                    end);
+      run_local_correlations_checks(config, this->clexulator[bset_name],
+                                    indices);
     }
   }
 };
@@ -92,16 +91,17 @@ namespace {
 ///     for `Correlations::has_point(l)`, where `b` is the sublattice index for
 ///     site index `l`.
 void run_local_correlations_checks(
-    TestConfiguration &config, std::vector<clexulator::Clexulator> &clexulator,
-    unsigned int const *begin, unsigned int const *end) {
-  clexulator::LocalCorrelations correlations(
-      &config.dof_values, &config.supercell_neighbor_list, &clexulator);
+    TestConfiguration &config,
+    std::shared_ptr<std::vector<clexulator::Clexulator> const> &clexulator,
+    std::vector<unsigned int> const &corr_indices) {
+  clexulator::LocalCorrelations correlations(config.supercell_neighbor_list,
+                                             clexulator, corr_indices,
+                                             &config.dof_values);
 
-  Index n_corr = clexulator[0].corr_size();
+  Index n_corr = (*clexulator)[0].corr_size();
 
   // -- local correlation checks --
   EXPECT_EQ(correlations.local(0, 0).size(), n_corr);
-  EXPECT_EQ(correlations.restricted_local(0, 0, begin, end).size(), n_corr);
 }
 
 }  // namespace

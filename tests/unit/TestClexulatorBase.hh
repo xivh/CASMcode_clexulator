@@ -52,7 +52,9 @@ class TestClexulatorBase : public testing::Test {
                link_path(RuntimeLibrary::default_casm_libdir().first) + " " +
                link_path(autotools::abs_libdir()) + " " + "-lcasm_clexulator "),
         tmpdir(),
-        clexulator(make_clexulator()) {}
+        clexulator(
+            std::make_shared<clexulator::Clexulator const>(make_clexulator())) {
+  }
 
   std::string clexulator_name;
   fs::path test_data_dir;
@@ -68,7 +70,7 @@ class TestClexulatorBase : public testing::Test {
   std::string compile_opt;
   std::string so_opt;
   TmpDir tmpdir;
-  clexulator::Clexulator clexulator;
+  std::shared_ptr<clexulator::Clexulator const> clexulator;
 
   clexulator::Clexulator make_clexulator() {
     // tmpdir.do_not_remove_on_destruction();

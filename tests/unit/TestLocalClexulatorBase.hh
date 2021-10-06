@@ -86,8 +86,11 @@ class TestLocalClexulatorBase : public testing::Test {
   // "bset.hop1", etc.
   std::vector<std::string> bset_names;
 
-  // clexulator[bset_name][equivalent_index] -> Clexulator
-  std::map<std::string, std::vector<clexulator::Clexulator> > clexulator;
+  // clexulator[bset_name] ->
+  //     std::shared_ptr<std::vector<clexulator::Clexulator> const>
+  std::map<std::string,
+           std::shared_ptr<std::vector<clexulator::Clexulator> const> >
+      clexulator;
 
   void make_clexulator() {
     // copy files to tmpdir for use
@@ -98,10 +101,13 @@ class TestLocalClexulatorBase : public testing::Test {
     }
 
     // make Clexulator
+    typedef std::vector<clexulator::Clexulator> clexvec;
     for (std::string const &bset_name : bset_names) {
-      clexulator[bset_name] = clexulator::make_local_clexulator(
-          clexulator_name, tmpdir.path() / "basis_sets" / ("bset." + bset_name),
-          prim_neighbor_list, compile_opt, so_opt);
+      clexulator[bset_name] =
+          std::make_shared<clexvec const>(clexulator::make_local_clexulator(
+              clexulator_name,
+              tmpdir.path() / "basis_sets" / ("bset." + bset_name),
+              prim_neighbor_list, compile_opt, so_opt));
     }
   }
 };

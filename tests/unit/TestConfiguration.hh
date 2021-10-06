@@ -26,8 +26,9 @@ struct TestConfiguration {
         local_dof_info(clexulator::make_local_dof_info(*prim)),
         dof_values(clexulator::make_default_config_dof_values(
             n_sublat, volume, global_dof_info, local_dof_info)),
-        supercell_neighbor_list(transformation_matrix_to_super,
-                                prim_neighbor_list) {}
+        supercell_neighbor_list(
+            std::make_shared<clexulator::SuperNeighborList const>(
+                transformation_matrix_to_super, prim_neighbor_list)) {}
 
   std::shared_ptr<xtal::BasicStructure const> prim;
   Eigen::Matrix3l transformation_matrix_to_super;
@@ -36,7 +37,7 @@ struct TestConfiguration {
   std::map<DoFKey, xtal::DoFSet> global_dof_info;
   std::map<DoFKey, std::vector<xtal::SiteDoFSet>> local_dof_info;
   clexulator::ConfigDoFValues dof_values;
-  clexulator::SuperNeighborList supercell_neighbor_list;
+  std::shared_ptr<clexulator::SuperNeighborList const> supercell_neighbor_list;
 };
 
 }  // namespace test

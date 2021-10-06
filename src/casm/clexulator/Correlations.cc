@@ -7,37 +7,32 @@ namespace CASM {
 
 namespace clexulator {
 
-/// \brief Construct a Correlations object
+/// \brief Constructor - calculate select correlation elements
 ///
-/// \param dof_values Pointer to the ConfigDoFValues to be used as input for
+/// \param supercell_neighbor_list Pointer to the neighbor list used as input
+///     to the Clexulator
+/// \param clexulator Pointer to the Clexulator used to calculate correlations
+/// \param correlation_indices Specifies the elements of the correlations
+///     vector that will be calculated. Correlation vectors will always be the
+///     size specified by clexulator->corr_size(), but elements not specified
+///     by `correlation_indices` will have undefined value.
+/// \param _dof_values Pointer to the ConfigDoFValues to be used as input for
 ///     calculating correlations. As with direct use of Clexulator, the
 ///     ConfigDoFValues object being used as input may be modified between
 ///     calls, but the pointers to the underlying global and local DoF value
 ///     vectors and matrices must remain valid (i.e. they must not be erased)
-///     or a new Correlations object should be used.
-/// \param supercell_neighbor_list Pointer to the neighbor list used as input
-///     to the Clexulator
-/// \param clexulator Pointer to the Clexulator used to calculate correlations
-/// \param always_recalculate_delta_reference If true, perform "safe"
-///     calculation of delta_corr values by always calculating the current
-///     correlations used as a reference for delta correlations. If false, do
-///     not re-calculate the current correlations used to calculate delta
-///     correlations, and instead use the extensive correlations calculated
-///     during the last call of `intensive`, `restricted_intensive`,
-///     `extensive`, or `restricted_extensive`.
-Correlations::Correlations(ConfigDoFValues const *dof_values,
-                           SuperNeighborList const *supercell_neighbor_list,
-                           Clexulator const *clexulator,
-                           bool always_recalculate_delta_reference)
-    : m_dof_values(dof_values),
+///     or a new Correlations object should be used. May be constructed with
+///     nullptr, then set later via `Correlations::set`.
+Correlations::Correlations(
+    std::shared_ptr<SuperNeighborList const> const &supercell_neighbor_list,
+    std::shared_ptr<Clexulator const> const &clexulator,
+    std::vector<unsigned int> const &correlation_indices,
+    ConfigDoFValues const *_dof_values)
+    : m_correlation_indices(correlation_indices),
+      m_dof_values(_dof_values),
       m_supercell_neighbor_list(supercell_neighbor_list),
       m_clexulator(clexulator),
-      m_always_recalculate_delta_reference(always_recalculate_delta_reference) {
-  if (m_dof_values == nullptr) {
-    throw std::runtime_error(
-        "Error constructing Correlations: dof_values == nullptr");
-  }
-
+      m_corr_size(m_clexulator->corr_size()) {
   if (m_supercell_neighbor_list == nullptr) {
     throw std::runtime_error(
         "Error constructing Correlations: supercell_neighbor_list == nullptr");
@@ -49,77 +44,107 @@ Correlations::Correlations(ConfigDoFValues const *dof_values,
   }
 
   // construct m_all_correlation_indices
-  int n = m_clexulator->corr_size();
-  for (int i = 0; i < n; ++i) {
-    m_all_correlation_indices.push_back(i);
-  }
-  m_all_corr_indices_begin = m_all_correlation_indices.data();
-  m_all_corr_indices_end =
-      m_all_corr_indices_begin + m_all_correlation_indices.size();
-
-  m_tcorr.resize(n);
-  m_point_corr.resize(n);
-  m_intensive_corr.resize(n);
-  m_extensive_corr.resize(n);
-  m_delta_corr.resize(n);
-  setZero();
+  m_corr_indices_begin = m_correlation_indices.data();
+  m_corr_indices_end = m_corr_indices_begin + m_correlation_indices.size();
 }
 
+/// \brief Constructor - calculate all correlation elements
+///
+/// \param supercell_neighbor_list Pointer to the neighbor list used as input
+///     to the Clexulator
+/// \param clexulator Pointer to the Clexulator used to calculate correlations
+/// \param _dof_values Pointer to the ConfigDoFValues to be used as input for
+///     calculating correlations. As with direct use of Clexulator, the
+///     ConfigDoFValues object being used as input may be modified between
+///     calls, but the pointers to the underlying global and local DoF value
+///     vectors and matrices must remain valid (i.e. they must not be erased)
+///     or a new Correlations object should be used. May be constructed with
+///     nullptr, then set later via `Correlations::set`.
+///
+/// Note:
+/// - This overload constructs an instance that will calculate all correlation
+/// vector elements.
+Correlations::Correlations(
+    std::shared_ptr<SuperNeighborList const> const &supercell_neighbor_list,
+    std::shared_ptr<Clexulator const> const &clexulator,
+    ConfigDoFValues const *_dof_values)
+    : Correlations(supercell_neighbor_list, clexulator,
+                   all_correlation_indices(clexulator->corr_size()),
+                   _dof_values) {}
+
 /// \brief Reset internal pointer to DoF values - must have the same supercell
-void Correlations::reset_dof_values(ConfigDoFValues const *_dof_values) {
+///
+/// \param _dof_values Pointer to the ConfigDoFValues to be used as input for
+///     calculating correlations. As with direct use of Clexulator, the
+///     ConfigDoFValues object being used as input may be modified between
+///     calls, but the pointers to the underlying global and local DoF value
+///     vectors and matrices must remain valid (i.e. they must not be erased)
+///     or a new Correlations object should be used.
+///
+void Correlations::set(ConfigDoFValues const *_dof_values) {
   if (_dof_values == nullptr) {
     throw std::runtime_error(
-        "Error in Correlations::reset: _dof_values == nullptr");
+        "Error in Correlations::set: _dof_values == nullptr");
   }
   m_dof_values = _dof_values;
 }
 
 /// \brief Get internal pointer to DoF values
-ConfigDoFValues const *Correlations::get_dof_values() const {
-  return m_dof_values;
-}
+ConfigDoFValues const *Correlations::get() const { return m_dof_values; }
 
-/// \brief Get internal pointer to clexulator
-Clexulator const *Correlations::clexulator() const { return m_clexulator; }
-
-/// \brief Set the internal correlations vector to zero
-void Correlations::setZero() {
-  m_point_corr.setZero();
-  m_intensive_corr.setZero();
-  m_extensive_corr.setZero();
-  m_delta_corr.setZero();
+/// \brief Get the neighborhood of sites where a change in DoF value requires
+///     an update of the correlation values
+std::set<xtal::UnitCellCoord> Correlations::required_update_neighborhood()
+    const {
+  return m_clexulator->site_neighborhood(m_corr_indices_begin,
+                                         m_corr_indices_end);
 }
 
 /// \brief Calculate and return intensive correlations
-Eigen::VectorXd const &Correlations::intensive() {
-  return restricted_intensive(m_all_corr_indices_begin, m_all_corr_indices_end);
-}
-
-/// \brief Calculate and return restricted intensive correlations
-Eigen::VectorXd const &Correlations::restricted_intensive(
-    unsigned int const *corr_indices_begin,
-    unsigned int const *corr_indices_end) {
-  restricted_extensive(corr_indices_begin, corr_indices_end);
+///
+/// \param extrinsic_correlations Extrinsic correlations, to be normalized
+///     by the number of unit cells in the supercell.
+///
+/// Notes:
+/// - Result is a vector of size clexulator->corr_size().
+/// - Constructor specifies which vector elements are defined.
+/// - Result is a reference to an internal Eigen::VectorXd. The reference is
+///   valid until the next time this method is called.
+Eigen::VectorXd const &Correlations::intensive(
+    Eigen::VectorXd const &extrinsic_correlations) {
+  if (m_intensive_corr.size() != m_corr_size) {
+    m_intensive_corr.resize(m_corr_size);
+    m_intensive_corr.setZero();
+  }
   double n_unitcells = (double)m_supercell_neighbor_list->n_unitcells();
-  for (auto it = corr_indices_begin; it != corr_indices_end; ++it) {
+  for (auto it = m_corr_indices_begin; it != m_corr_indices_end; ++it) {
     *(m_intensive_corr.data() + *it) =
-        *(m_extensive_corr.data() + *it) / n_unitcells;
+        *(extrinsic_correlations.data() + *it) / n_unitcells;
   }
   return m_intensive_corr;
 }
 
 /// \brief Calculate and return extensive correlations
+///
+/// \returns The basis function values summed over the entire configuration
+///
+/// Notes:
+/// - Result is a vector of size clexulator->corr_size().
+/// - Constructor specifies which vector elements are defined.
+/// - Result is a reference to an internal Eigen::VectorXd. The reference is
+///   valid until the next time this method is called.
 Eigen::VectorXd const &Correlations::extensive() {
-  return restricted_extensive(m_all_corr_indices_begin, m_all_corr_indices_end);
-}
-
-/// \brief Calculate and return restricted extensive correlations
-Eigen::VectorXd const &Correlations::restricted_extensive(
-    unsigned int const *corr_indices_begin,
-    unsigned int const *corr_indices_end) {
+  if (m_extensive_corr.size() != m_corr_size) {
+    m_extensive_corr.resize(m_corr_size);
+    m_extensive_corr.setZero();
+  }
+  if (m_tcorr.size() != m_corr_size) {
+    m_tcorr.resize(m_corr_size);
+    m_tcorr.setZero();
+  }
   int n_unitcells = m_supercell_neighbor_list->n_unitcells();
 
-  for (auto it = corr_indices_begin; it != corr_indices_end; ++it) {
+  for (auto it = m_corr_indices_begin; it != m_corr_indices_end; ++it) {
     *(m_extensive_corr.data() + *it) = 0.0;
   }
 
@@ -127,26 +152,31 @@ Eigen::VectorXd const &Correlations::restricted_extensive(
     // Fill up contributions
     m_clexulator->calc_restricted_global_corr_contribution(
         *m_dof_values, m_supercell_neighbor_list->sites(unitcell_index).data(),
-        m_tcorr.data(), corr_indices_begin, corr_indices_end);
+        m_tcorr.data(), m_corr_indices_begin, m_corr_indices_end);
 
-    for (auto it = corr_indices_begin; it != corr_indices_end; ++it) {
+    for (auto it = m_corr_indices_begin; it != m_corr_indices_end; ++it) {
       *(m_extensive_corr.data() + *it) += *(m_tcorr.data() + *it);
     }
   }
   return m_extensive_corr;
 }
 
-/// \brief Calculate and return the contribution from a particular unit cell
-Eigen::VectorXd const &Correlations::contribution(Index linear_unitcell_index) {
-  return restricted_contribution(
-      linear_unitcell_index, m_all_corr_indices_begin, m_all_corr_indices_end);
-}
-
-/// \brief Calculate and return the restricted contribution from a particular
+/// \brief Calculate and return the contribution from a particular
 /// unit cell
-Eigen::VectorXd const &Correlations::restricted_contribution(
-    Index linear_unitcell_index, unsigned int const *corr_indices_begin,
-    unsigned int const *corr_indices_end) {
+///
+/// \param linear_unitcell_index Linear unit cell index (as defined by a
+///     UnitCellIndexConverter) to calculate correlation contributions from
+///
+/// Notes:
+/// - Result is a vector of size clexulator->corr_size().
+/// - Constructor specifies which vector elements are defined.
+/// - Result is a reference to an internal Eigen::VectorXd. The reference is
+///   valid until the next time this method is called.
+Eigen::VectorXd const &Correlations::contribution(Index linear_unitcell_index) {
+  if (m_tcorr.size() != m_corr_size) {
+    m_tcorr.resize(m_corr_size);
+    m_tcorr.setZero();
+  }
   int n_unitcells = m_supercell_neighbor_list->n_unitcells();
 
   if (linear_unitcell_index >= n_unitcells) {
@@ -160,12 +190,17 @@ Eigen::VectorXd const &Correlations::restricted_contribution(
   auto const &unitcell_nlist =
       m_supercell_neighbor_list->sites(linear_unitcell_index);
   m_clexulator->calc_restricted_global_corr_contribution(
-      *m_dof_values, unitcell_nlist.data(), m_tcorr.data(), corr_indices_begin,
-      corr_indices_end);
+      *m_dof_values, unitcell_nlist.data(), m_tcorr.data(),
+      m_corr_indices_begin, m_corr_indices_end);
   return m_tcorr;
 }
 
 /// \brief Check if point correlations valid at specified point
+///
+/// \param linear_unitcell_index Linear site index (as defined by a
+///     UnitCellCoordIndexConverter)
+///
+/// \return True if there are point correlations associated with the given site
 bool Correlations::has_point(Index linear_site_index) const {
   if (linear_site_index < 0 ||
       linear_site_index >= m_supercell_neighbor_list->n_sites()) {
@@ -184,20 +219,38 @@ bool Correlations::has_point(Index linear_site_index) const {
   return true;
 }
 
-/// \brief Calculate and return correlations at specified point
-Eigen::VectorXd const &Correlations::point(Index linear_site_index) {
-  return restricted_point(linear_site_index, m_all_corr_indices_begin,
-                          m_all_corr_indices_end);
-}
+/// \brief Calculate and return correlations contributions from specified site
+///
+/// \param linear_site_index Linear site index (as defined by a
+///     UnitCellCoordIndexConverter) to calculate point correlations for.
+/// \param skip_if_unnecessary_for_occ_delta If true, skip calculating point
+///     correlations if they are not necessary for calculating `occ_delta`.
+///     This will be the case if the supercell is not too small
+///     (`supercell_neighbor_list->overlap() == false`).
+///
+/// \return Sum of all basis functions that include DoF from the specified site.
+///
+/// Notes:
+/// - Result is a vector of size clexulator->corr_size().
+/// - Constructor specifies which vector elements are defined.
+/// - Result is a reference to an internal Eigen::VectorXd. The reference is
+///   valid until any this method is called again.
+Eigen::VectorXd const &Correlations::point(
+    Index linear_site_index, bool skip_if_unnecessary_for_occ_delta) {
+  if (m_point_corr.size() != m_corr_size) {
+    m_point_corr.resize(m_corr_size);
+    m_point_corr.setZero();
+  }
 
-/// \brief Calculate and return restricted correlations at specified point
-Eigen::VectorXd const &Correlations::restricted_point(
-    Index linear_site_index, unsigned int const *corr_indices_begin,
-    unsigned int const *corr_indices_end) {
+  if (!m_supercell_neighbor_list->overlaps() &&
+      skip_if_unnecessary_for_occ_delta) {
+    return m_point_corr;
+  }
+
   if (linear_site_index < 0 ||
       linear_site_index >= m_supercell_neighbor_list->n_sites()) {
     std::stringstream msg;
-    msg << "Error in Correlations::restricted_point: "
+    msg << "Error in Correlations::point: "
         << "invalid linear_site_index.";
     throw std::runtime_error(msg.str());
   }
@@ -209,7 +262,7 @@ Eigen::VectorXd const &Correlations::restricted_point(
 
   if (neighbor_index == -1) {
     std::stringstream msg;
-    msg << "Error in Correlations::restricted_point: invalid linear_site_index."
+    msg << "Error in Correlations::point: invalid linear_site_index."
         << "No point correlations associated with the site.";
     throw std::runtime_error(msg.str());
   }
@@ -217,11 +270,11 @@ Eigen::VectorXd const &Correlations::restricted_point(
   auto const &unitcell_nlist = m_supercell_neighbor_list->sites(unitcell_index);
   m_clexulator->calc_restricted_point_corr(
       *m_dof_values, unitcell_nlist.data(), neighbor_index, m_point_corr.data(),
-      corr_indices_begin, corr_indices_end);
+      m_corr_indices_begin, m_corr_indices_end);
   return m_point_corr;
 }
 
-/// \brief Calculate and return extensive correlations
+/// \brief Calculate and return all point correlations, as a matrix
 ///
 /// \param include_all_sites If true, include a row for every site, even if
 /// there are no point correlations associated with that site (in which case
@@ -229,26 +282,11 @@ Eigen::VectorXd const &Correlations::restricted_point(
 /// sites from sublattices included in `PrimNeighborList::sublat_indices()`
 /// (rows are still ordered according to increasing site index).
 Eigen::MatrixXd Correlations::all_points(bool include_all_sites) {
-  return restricted_all_points(m_all_corr_indices_begin, m_all_corr_indices_end,
-                               include_all_sites);
-}
-
-/// \brief Calculate and return restricted extensive correlations
-///
-/// \param include_all_sites If true, include a row for every site, even if
-/// there are no point correlations associated with that site (in which case
-/// the row is all zeros). If false, only include rows are only included for
-/// sites from sublattices included in `PrimNeighborList::sublat_indices()`
-/// (rows are still ordered according to increasing site index).
-Eigen::MatrixXd Correlations::restricted_all_points(
-    unsigned int const *corr_indices_begin,
-    unsigned int const *corr_indices_end, bool include_all_sites) {
   Index n_unitcells = m_supercell_neighbor_list->n_unitcells();
-  Index n_corr = m_clexulator->corr_size();
   Index n_sites = m_supercell_neighbor_list->n_sites();
   Index n_rows =
       include_all_sites ? n_sites : n_unitcells * m_clexulator->n_point_corr();
-  Eigen::MatrixXd corr = Eigen::MatrixXd::Zero(n_rows, n_corr);
+  Eigen::MatrixXd corr = Eigen::MatrixXd::Zero(n_rows, m_corr_size);
   Index row_index = 0;
   for (Index l = 0; l < n_sites; l++) {
     if (m_supercell_neighbor_list->neighbor_index(l) == -1) {
@@ -258,8 +296,7 @@ Eigen::MatrixXd Correlations::restricted_all_points(
         continue;
       }
     } else {
-      corr.row(row_index) =
-          restricted_point(l, m_all_corr_indices_begin, m_all_corr_indices_end);
+      corr.row(row_index) = point(l);
       ++row_index;
     }
   }
@@ -283,20 +320,31 @@ std::vector<Index> Correlations::all_points_site_indices(
 }
 
 /// \brief Calculate and return change in (extensive) correlations due to an
-/// occupation change, restricted to specified correlations
+/// occupation change
 ///
-/// \returns Change in point correlations, relative to the extensive
-/// correlations with the current DoF values
+/// \param linear_site_index Linear site index (as defined by a
+///     UnitCellCoordIndexConverter) to calculate point correlations for.
+/// \param new_occ Occupation value to calculate the change in correlations for.
+/// \param reference_point_correlations The point correlations of the specified
+///     site before the change in occupation value. This value is not needed
+///     and ignored if the supercell is large enough (`supercell_neighbor_list-
+///     >overlap == false`).
+///
+/// \returns Change in extrinsic correlations, relative to
+///     `reference_point_correlations`
 ///
 /// Notes:
-/// - If constructed with `always_recalculate_delta_reference == false`, make
-/// sure to call `restricted_point(linear_site_index, corr_indices_begin,
-/// corr_indices_end)` to set the reference correlations before calling this
-/// method.
-Eigen::VectorXd const &Correlations::restricted_occ_delta(
+/// - Result is a vector of size clexulator->corr_size().
+/// - Constructor specifies which vector elements are defined.
+/// - Result is a reference to an internal Eigen::VectorXd. The reference is
+///   valid until any of this, `local_delta`, or `global_delta` is called.
+Eigen::VectorXd const &Correlations::occ_delta(
     Index linear_site_index, int new_occ,
-    unsigned int const *corr_indices_begin,
-    unsigned int const *corr_indices_end) {
+    Eigen::VectorXd const &reference_point_correlations) {
+  if (m_delta_corr.size() != m_corr_size) {
+    m_delta_corr.resize(m_corr_size);
+    m_delta_corr.setZero();
+  }
   Index unitcell_index =
       m_supercell_neighbor_list->unitcell_index(linear_site_index);
   int neighbor_index =
@@ -309,16 +357,9 @@ Eigen::VectorXd const &Correlations::restricted_occ_delta(
     int curr_occ = m_dof_values->occupation[linear_site_index];
     m_clexulator->calc_restricted_delta_point_corr(
         *m_dof_values, nlist_begin, neighbor_index, curr_occ, new_occ,
-        m_delta_corr.data(), corr_indices_begin, corr_indices_end);
+        m_delta_corr.data(), m_corr_indices_begin, m_corr_indices_end);
     return m_delta_corr;
   } else {
-    // Calculate initial point corr (set, use `m_point_corr`)
-    if (m_always_recalculate_delta_reference) {
-      m_clexulator->calc_restricted_point_corr(
-          *m_dof_values, nlist_begin, neighbor_index, m_point_corr.data(),
-          corr_indices_begin, corr_indices_end);
-    }
-
     // Get current value
     Eigen::VectorXi const &values = m_dof_values->occupation;
     int curr_occ = values[linear_site_index];
@@ -330,11 +371,12 @@ Eigen::VectorXd const &Correlations::restricted_occ_delta(
     // Calculate final point corr
     m_clexulator->calc_restricted_point_corr(
         *m_dof_values, nlist_begin, neighbor_index, m_delta_corr.data(),
-        corr_indices_begin, corr_indices_end);
+        m_corr_indices_begin, m_corr_indices_end);
 
     // dcorr = final - initial
-    for (auto it = corr_indices_begin; it != corr_indices_end; ++it) {
-      *(m_delta_corr.data() + *it) -= *(m_point_corr.data() + *it);
+    Eigen::VectorXd const &before = reference_point_correlations;
+    for (auto it = m_corr_indices_begin; it != m_corr_indices_end; ++it) {
+      *(m_delta_corr.data() + *it) -= *(before.data() + *it);
     }
 
     // Unapply change
@@ -344,20 +386,31 @@ Eigen::VectorXd const &Correlations::restricted_occ_delta(
 }
 
 /// \brief Calculate and return change in (extensive) correlations due to a
-/// local continuous DoF change, restricted to specified correlations
+/// local continuous DoF change
 ///
-/// \returns Change in point correlations, relative to the extensive
-/// correlations with the current DoF values
+/// \param key Specifies the type of DoF
+/// \param linear_site_index Linear site index (as defined by a
+///     UnitCellCoordIndexConverter) where the change occurs.
+/// \param new_value Final value to calculate the change in correlations for.
+/// \param reference_point_correlations The point correlations of the specified
+///     site before the change in value.
+///
+/// \returns Change in extrinsic correlations, relative to
+///     `reference_point_correlations`
 ///
 /// Notes:
-/// - If constructed with `always_recalculate_delta_reference == false`, make
-/// sure to call `restricted_point(linear_site_index, corr_indices_begin,
-/// corr_indices_end)` to set the reference correlations before calling this
-/// method.
-Eigen::VectorXd const &Correlations::restricted_local_delta(
+/// - Result is a vector of size clexulator->corr_size().
+/// - Constructor specifies which vector elements are defined.
+/// - Result is a reference to an internal Eigen::VectorXd. The reference is
+///   valid until any of this, `local_delta`, or `global_delta` is called.
+Eigen::VectorXd const &Correlations::local_delta(
     DoFKey const &key, Index linear_site_index,
-    Eigen::VectorXd const &new_value, unsigned int const *corr_indices_begin,
-    unsigned int const *corr_indices_end) {
+    Eigen::VectorXd const &new_value,
+    Eigen::VectorXd const &reference_point_correlations) {
+  if (m_delta_corr.size() != m_corr_size) {
+    m_delta_corr.resize(m_corr_size);
+    m_delta_corr.setZero();
+  }
   Index unitcell_index =
       m_supercell_neighbor_list->unitcell_index(linear_site_index);
   int neighbor_index =
@@ -365,13 +418,6 @@ Eigen::VectorXd const &Correlations::restricted_local_delta(
 
   auto const &nlist_sites = m_supercell_neighbor_list->sites(unitcell_index);
   long int const *nlist_begin = nlist_sites.data();
-
-  // Calculate initial point corr (set, use `m_point_corr`)
-  if (m_always_recalculate_delta_reference) {
-    m_clexulator->calc_restricted_point_corr(
-        *m_dof_values, nlist_begin, neighbor_index, m_point_corr.data(),
-        corr_indices_begin, corr_indices_end);
-  }
 
   // Get current value
   Eigen::MatrixXd const &values = m_dof_values->local_dof_values.at(key);
@@ -384,11 +430,12 @@ Eigen::VectorXd const &Correlations::restricted_local_delta(
   // Calculate after
   m_clexulator->calc_restricted_point_corr(
       *m_dof_values, nlist_begin, neighbor_index, m_delta_corr.data(),
-      corr_indices_begin, corr_indices_end);
+      m_corr_indices_begin, m_corr_indices_end);
 
   // dcorr = after - before
-  for (auto it = corr_indices_begin; it != corr_indices_end; ++it) {
-    *(m_delta_corr.data() + *it) -= *(m_tcorr.data() + *it);
+  Eigen::VectorXd const &before = reference_point_correlations;
+  for (auto it = m_corr_indices_begin; it != m_corr_indices_end; ++it) {
+    *(m_delta_corr.data() + *it) -= *(before.data() + *it);
   }
 
   // Unapply change
@@ -397,19 +444,32 @@ Eigen::VectorXd const &Correlations::restricted_local_delta(
 }
 
 /// \brief Calculate and return change in (extensive) correlations due to a
-/// global continuous DoF change, restricted to specified correlations
+/// global continuous DoF change
+///
+/// \param key Specifies the type of DoF
+/// \param new_value Final value to calculate the change in correlations for.
+/// \param reference_point_correlations The extrinsic correlations of before
+///     the change in value.
+///
+/// \returns Change in extrinsic correlations, relative to
+///     `reference_point_correlations`
 ///
 /// Notes:
-/// - If constructed with `always_recalculate_delta_reference == false`, make
-/// sure to call `restricted_extensive(linear_site_index, corr_indices_begin,
-/// corr_indices_end)` to set the reference correlations before calling this
-/// method.
-Eigen::VectorXd const &Correlations::restricted_global_delta(
+/// - Result is a vector of size clexulator->corr_size().
+/// - Constructor specifies which vector elements are defined.
+/// - Result is a reference to an internal Eigen::VectorXd. The reference is
+///   valid until any of this, `local_delta`, or `global_delta` is called.
+
+Eigen::VectorXd const &Correlations::global_delta(
     DoFKey const &key, Eigen::VectorXd const &new_value,
-    unsigned int const *corr_indices_begin,
-    unsigned int const *corr_indices_end) {
-  if (m_always_recalculate_delta_reference) {
-    restricted_extensive(corr_indices_begin, corr_indices_end);
+    Eigen::VectorXd const &reference_extrinsic_correlations) {
+  if (m_tcorr.size() != m_corr_size) {
+    m_tcorr.resize(m_corr_size);
+    m_tcorr.setZero();
+  }
+  if (m_delta_corr.size() != m_corr_size) {
+    m_delta_corr.resize(m_corr_size);
+    m_delta_corr.setZero();
   }
 
   // Get current value
@@ -424,7 +484,7 @@ Eigen::VectorXd const &Correlations::restricted_global_delta(
   // ----
   int n_unitcells = m_supercell_neighbor_list->n_unitcells();
 
-  for (auto it = corr_indices_begin; it != corr_indices_end; ++it) {
+  for (auto it = m_corr_indices_begin; it != m_corr_indices_end; ++it) {
     *(m_delta_corr.data() + *it) = 0.0;
   }
 
@@ -432,22 +492,31 @@ Eigen::VectorXd const &Correlations::restricted_global_delta(
     // Fill up contributions
     m_clexulator->calc_restricted_global_corr_contribution(
         *m_dof_values, m_supercell_neighbor_list->sites(unitcell_index).data(),
-        m_tcorr.data(), corr_indices_begin, corr_indices_end);
+        m_tcorr.data(), m_corr_indices_begin, m_corr_indices_end);
 
-    for (auto it = corr_indices_begin; it != corr_indices_end; ++it) {
+    for (auto it = m_corr_indices_begin; it != m_corr_indices_end; ++it) {
       *(m_delta_corr.data() + *it) += *(m_tcorr.data() + *it);
     }
   }
   // ----
 
   // dcorr = after - before
-  for (auto it = corr_indices_begin; it != corr_indices_end; ++it) {
-    *(m_delta_corr.data() + *it) -= *(m_extensive_corr.data() + *it);
+  Eigen::VectorXd const &before = reference_extrinsic_correlations;
+  for (auto it = m_corr_indices_begin; it != m_corr_indices_end; ++it) {
+    *(m_delta_corr.data() + *it) -= *(before.data() + *it);
   }
 
   // Unapply change
   mutable_value = curr_value;
   return m_delta_corr;
+}
+
+std::vector<unsigned int> all_correlation_indices(Index n) {
+  std::vector<unsigned int> corr_indices;
+  for (unsigned int i = 0; i < n; ++i) {
+    corr_indices.push_back(i);
+  }
+  return corr_indices;
 }
 
 }  // namespace clexulator

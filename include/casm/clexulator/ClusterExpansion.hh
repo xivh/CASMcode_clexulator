@@ -17,7 +17,7 @@ class ClusterExpansion {
                    SparseCoefficients const &_coefficients);
 
   /// \brief Reset pointer to configuration currently being calculated
-  void reset(ConfigDoFValues const *dof_values);
+  void set(ConfigDoFValues const *dof_values);
 
   /// \brief Pointer to configuration currently being calculated
   ConfigDoFValues const *get() const;
@@ -42,12 +42,6 @@ class ClusterExpansion {
 
   /// \brief Non-zero expansion coefficients
   SparseCoefficients m_coefficients;
-
-  /// \brief Non-zero eci indices begin iterator
-  unsigned int *m_corr_indices_begin;
-
-  /// \brief Non-zero eci indices end iterator
-  unsigned int *m_corr_indices_end;
 };
 
 }  // namespace clexulator

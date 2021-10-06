@@ -26,10 +26,11 @@ Eigen::Matrix3l _fcc_conventional_transf_mat() {
   return transf_mat;
 }
 
-void run_correlations_checks(TestConfiguration &config,
-                             clexulator::Clexulator &clexulator,
-                             unsigned int const *begin, unsigned int const *end,
-                             std::vector<bool> expected_has_point);
+void run_correlations_checks(
+    TestConfiguration &config,
+    std::shared_ptr<clexulator::Clexulator const> const &clexulator,
+    std::vector<unsigned int> const &corr_indices,
+    std::vector<bool> expected_has_point);
 
 }  // namespace
 
@@ -47,28 +48,31 @@ class OccClexulatorFCCTernaryTest : public test::TestClexulatorBase {
 
   void MakeClexulator_tests() {
     // Check constructed clexulator
-    EXPECT_EQ(clexulator.name(), clexulator_name);
-    EXPECT_EQ(clexulator.nlist_size(), 176);
-    EXPECT_EQ(clexulator.corr_size(), 75);
-    EXPECT_EQ(clexulator.n_point_corr(), 1);
-    EXPECT_EQ(clexulator.neighborhood().size(), 75);
+    std::cout << "here 0" << std::endl;
+    EXPECT_EQ(clexulator->name(), clexulator_name);
+    EXPECT_EQ(clexulator->nlist_size(), 176);
+    EXPECT_EQ(clexulator->corr_size(), 75);
+    EXPECT_EQ(clexulator->n_point_corr(), 1);
+    EXPECT_EQ(clexulator->neighborhood().size(), 75);
+    std::cout << "here 1" << std::endl;
   }
 
   void UseClexulator_tests() {
     // Check constructing, executing correlations calculations (does not check
     // accuracy of values, just execution without error)
 
+    std::cout << "here 2" << std::endl;
     test::TestConfiguration config(prim, _fcc_conventional_transf_mat(),
                                    prim_neighbor_list);
 
     // basis functions to evaluate for restricted calculations
     std::vector<unsigned int> corr_indices({0, 1, 2, 3, 4, 5});
-    auto begin = corr_indices.data();
-    auto end = corr_indices.data() + corr_indices.size();
 
     // sublattices that have point correlations
     std::vector<bool> expected_has_point({true});
-    run_correlations_checks(config, clexulator, begin, end, expected_has_point);
+    run_correlations_checks(config, clexulator, corr_indices,
+                            expected_has_point);
+    std::cout << "here 3" << std::endl;
   }
 };
 
@@ -91,11 +95,11 @@ class OccClexulatorZrOTest : public test::TestClexulatorBase {
 
   void MakeClexulator_tests() {
     // Check constructed clexulator
-    EXPECT_EQ(clexulator.name(), clexulator_name);
-    EXPECT_EQ(clexulator.nlist_size(), 53);
-    EXPECT_EQ(clexulator.corr_size(), 16);
-    EXPECT_EQ(clexulator.n_point_corr(), 2);
-    EXPECT_EQ(clexulator.neighborhood().size(), 27);
+    EXPECT_EQ(clexulator->name(), clexulator_name);
+    EXPECT_EQ(clexulator->nlist_size(), 53);
+    EXPECT_EQ(clexulator->corr_size(), 16);
+    EXPECT_EQ(clexulator->n_point_corr(), 2);
+    EXPECT_EQ(clexulator->neighborhood().size(), 27);
   }
 
   void UseClexulator_tests() {
@@ -105,12 +109,11 @@ class OccClexulatorZrOTest : public test::TestClexulatorBase {
 
     // basis functions to evaluate for restricted calculations
     std::vector<unsigned int> corr_indices({0, 1, 2, 3, 4, 5});
-    auto begin = corr_indices.data();
-    auto end = corr_indices.data() + corr_indices.size();
 
     // sublattices that have point correlations
     std::vector<bool> expected_has_point({false, false, true, true});
-    run_correlations_checks(config, clexulator, begin, end, expected_has_point);
+    run_correlations_checks(config, clexulator, corr_indices,
+                            expected_has_point);
   }
 };
 
@@ -128,33 +131,32 @@ namespace {
 /// \param expected_has_point `expected_has_point[b]` is the expected result
 ///     for `Correlations::has_point(l)`, where `b` is the sublattice index for
 ///     site index `l`.
-void run_correlations_checks(TestConfiguration &config,
-                             clexulator::Clexulator &clexulator,
-                             unsigned int const *begin, unsigned int const *end,
-                             std::vector<bool> expected_has_point) {
-  clexulator::Correlations correlations(
-      &config.dof_values, &config.supercell_neighbor_list, &clexulator);
+void run_correlations_checks(
+    TestConfiguration &config,
+    std::shared_ptr<clexulator::Clexulator const> const &clexulator,
+    std::vector<unsigned int> const &corr_indices,
+    std::vector<bool> expected_has_point) {
+  clexulator::Correlations correlations(config.supercell_neighbor_list,
+                                        clexulator, corr_indices,
+                                        &config.dof_values);
 
-  Index n_corr = clexulator.corr_size();
-  Index n_sites = config.supercell_neighbor_list.n_sites();
+  Index n_corr = clexulator->corr_size();
+  Index n_sites = config.supercell_neighbor_list->n_sites();
 
   // -- intensive, extensive, contribution checks --
-  EXPECT_EQ(correlations.intensive().size(), n_corr);
-  EXPECT_EQ(correlations.restricted_intensive(begin, end).size(), n_corr);
-  EXPECT_EQ(correlations.intensive().size(), n_corr);
-  EXPECT_EQ(correlations.restricted_intensive(begin, end).size(), n_corr);
+  auto const &e = correlations.extensive();
+  EXPECT_EQ(e.size(), n_corr);
+  EXPECT_EQ(correlations.intensive(e).size(), n_corr);
   EXPECT_EQ(correlations.contribution(0).size(), n_corr);
-  EXPECT_EQ(correlations.restricted_contribution(0, begin, end).size(), n_corr);
 
   // -- single point corr checks --
   Index expected_n_rows = 0;
   for (Index l = 0; l < n_sites; ++l) {
-    Index b = config.supercell_neighbor_list.sublat_index(l);
+    Index b = config.supercell_neighbor_list->sublat_index(l);
     EXPECT_EQ(correlations.has_point(l), expected_has_point[b]);
     if (correlations.has_point(l)) {
       ++expected_n_rows;
       EXPECT_EQ(correlations.point(l).size(), n_corr);
-      EXPECT_EQ(correlations.restricted_point(l, begin, end).size(), n_corr);
     }
   }
 
@@ -193,26 +195,19 @@ void run_correlations_checks(TestConfiguration &config,
   EXPECT_EQ(all_point_corr.cols(), n_corr);
   EXPECT_EQ(all_point_corr.rows(), point_corr_site_indices.size());
 
-  include_all_sites = true;
-  all_point_corr =
-      correlations.restricted_all_points(begin, end, include_all_sites);
-  EXPECT_EQ(all_point_corr.cols(), n_corr);
-  EXPECT_EQ(all_point_corr.rows(), n_sites);
-
-  include_all_sites = false;
-  all_point_corr =
-      correlations.restricted_all_points(begin, end, include_all_sites);
-  EXPECT_EQ(all_point_corr.cols(), n_corr);
-  EXPECT_EQ(all_point_corr.rows(), point_corr_site_indices.size());
-
   // -- delta correlations checks --
   Eigen::VectorXd delta_corr;
 
   if (config.dof_values.occupation.size()) {
     for (Index l = 0; l < n_sites; ++l) {
-      Index b = config.supercell_neighbor_list.sublat_index(l);
+      if (!correlations.has_point(l)) {
+        continue;
+      }
+      Index b = config.supercell_neighbor_list->sublat_index(l);
       for (int s = 0; s < config.prim->basis()[b].occupant_dof().size(); ++s) {
-        delta_corr = correlations.restricted_occ_delta(l, s, begin, end);
+        bool skip_if_unnecessary = true;
+        auto const &p = correlations.point(l, skip_if_unnecessary);
+        delta_corr = correlations.occ_delta(l, s, p);
         EXPECT_EQ(delta_corr.size(), n_corr);
       }
     }
