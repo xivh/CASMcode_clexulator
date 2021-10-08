@@ -41,7 +41,6 @@ class TestClexulatorBase : public testing::Test {
         meta(test_data_dir / "meta.json"),
         prim(std::make_shared<xtal::BasicStructure const>(
             read_prim(meta["prim"], TOL))),
-        prim_neighbor_list(read_prim_neighbor_list(meta["neighbor_list"])),
         compile_opt(
             RuntimeLibrary::default_cxx().first + " " +
             RuntimeLibrary::default_cxxflags().first + " " +
@@ -60,7 +59,7 @@ class TestClexulatorBase : public testing::Test {
   fs::path test_data_dir;
   jsonFile meta;
   std::shared_ptr<xtal::BasicStructure const> prim;
-  clexulator::PrimNeighborList prim_neighbor_list;
+  std::shared_ptr<clexulator::PrimNeighborList> prim_neighbor_list;
 
   // configure with (in order of priority):
   // - CASM_CXX, CXX, default="c++"

@@ -48,22 +48,19 @@ class OccClexulatorFCCTernaryTest : public test::TestClexulatorBase {
 
   void MakeClexulator_tests() {
     // Check constructed clexulator
-    std::cout << "here 0" << std::endl;
     EXPECT_EQ(clexulator->name(), clexulator_name);
     EXPECT_EQ(clexulator->nlist_size(), 176);
     EXPECT_EQ(clexulator->corr_size(), 75);
     EXPECT_EQ(clexulator->n_point_corr(), 1);
     EXPECT_EQ(clexulator->neighborhood().size(), 75);
-    std::cout << "here 1" << std::endl;
   }
 
   void UseClexulator_tests() {
     // Check constructing, executing correlations calculations (does not check
     // accuracy of values, just execution without error)
 
-    std::cout << "here 2" << std::endl;
     test::TestConfiguration config(prim, _fcc_conventional_transf_mat(),
-                                   prim_neighbor_list);
+                                   *prim_neighbor_list);
 
     // basis functions to evaluate for restricted calculations
     std::vector<unsigned int> corr_indices({0, 1, 2, 3, 4, 5});
@@ -72,7 +69,6 @@ class OccClexulatorFCCTernaryTest : public test::TestClexulatorBase {
     std::vector<bool> expected_has_point({true});
     run_correlations_checks(config, clexulator, corr_indices,
                             expected_has_point);
-    std::cout << "here 3" << std::endl;
   }
 };
 
@@ -105,7 +101,7 @@ class OccClexulatorZrOTest : public test::TestClexulatorBase {
   void UseClexulator_tests() {
     // Check correlations (checks running without errors, not values)
     test::TestConfiguration config(prim, Eigen::Matrix3l::Identity() * 2,
-                                   prim_neighbor_list);
+                                   *prim_neighbor_list);
 
     // basis functions to evaluate for restricted calculations
     std::vector<unsigned int> corr_indices({0, 1, 2, 3, 4, 5});

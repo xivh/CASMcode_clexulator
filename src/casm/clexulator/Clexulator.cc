@@ -3,6 +3,7 @@
 #include <filesystem>
 
 #include "casm/casm_io/Log.hh"
+#include "casm/casm_io/container/json_io.hh"
 #include "casm/clexulator/ClexParamPack.hh"
 #include "casm/system/RuntimeLibrary.hh"
 
@@ -65,9 +66,10 @@ std::shared_ptr<RuntimeLibrary> make_shared_runtime_lib(
 /// \param name Class name for the Clexulator, typically 'X_Clexulator', with X
 ///             referring to the system of interest (i.e. 'NiAl_Clexulator')
 /// \param dirpath Directory containing the source code and compiled object
-/// file. \param nlist, A PrimNeighborList to be updated to include the
-/// neighborhood
-///        of this Clexulator
+///     file.
+/// \param nlist, A PrimNeighborList to be updated to include the neighborhood
+///     of this Clexulator. Will be created using parameters written to the
+///     Clexulator if empty.
 /// \param compile_options Compilation options
 /// \param so_options Shared library compilation options
 ///
@@ -83,7 +85,8 @@ std::shared_ptr<RuntimeLibrary> make_shared_runtime_lib(
 /// library.
 ///
 Clexulator make_clexulator(std::string name, fs::path dirpath,
-                           PrimNeighborList &nlist, std::string compile_options,
+                           std::shared_ptr<PrimNeighborList> &nlist,
+                           std::string compile_options,
                            std::string so_options) {
   // Construct the RuntimeLibrary that will store the loaded clexulator library
   std::shared_ptr<RuntimeLibrary> lib;
@@ -107,23 +110,57 @@ Clexulator make_clexulator(std::string name, fs::path dirpath,
   std::unique_ptr<clexulator::BaseClexulator> clex(factory());
 
   // Check nlist has the right weight_matrix
-  if (nlist.weight_matrix() != clex->weight_matrix()) {
-    err_log() << "Error in Clexulator constructor: weight matrix of neighbor "
-                 "list does not match the weight matrix used to print the "
-                 "clexulator."
-              << std::endl;
-    err_log() << "nlist weight matrix: \n"
-              << nlist.weight_matrix() << std::endl;
-    err_log() << "clexulator weight matrix: \n"
-              << clex->weight_matrix() << std::endl;
-    throw std::runtime_error(
-        "Error in Clexulator constructor: weight matrix of neighbor list does "
-        "not match the weight matrix used to print the clexulator. Try 'casm "
-        "bset -uf'.");
+  if (nlist == nullptr) {
+    nlist = std::make_shared<PrimNeighborList>(
+        clex->weight_matrix(), clex->sublat_indices().begin(),
+        clex->sublat_indices().end(), clex->n_sublattices());
+  } else {
+    if (nlist->weight_matrix() != clex->weight_matrix()) {
+      err_log()
+          << "Error in Clexulator constructor: weight matrix of neighbor list "
+             "does not match the weight matrix used to print the clexulator."
+          << std::endl;
+      err_log() << "nlist weight matrix: \n"
+                << nlist->weight_matrix() << std::endl;
+      err_log() << "clexulator weight matrix: \n"
+                << clex->weight_matrix() << std::endl;
+      throw std::runtime_error(
+          "Error in Clexulator constructor: weight matrix of neighbor list "
+          "does not match the weight matrix used to print the clexulator.");
+    }
+    if (nlist->sublat_indices() != clex->sublat_indices()) {
+      jsonParser tjson;
+      err_log()
+          << "Error in Clexulator constructor: sublat_indices of neighbor list "
+             "does not match the sublat_indices used to print the clexulator."
+          << std::endl;
+      err_log() << "nlist sublat_indices: "
+                << to_json(nlist->sublat_indices(), tjson) << std::endl;
+      err_log() << "clexulator sublat_indices: \n"
+                << to_json(clex->sublat_indices(), tjson) << std::endl;
+      throw std::runtime_error(
+          "Error in Clexulator constructor: sublat_indices of neighbor list "
+          "does not match the sublat_indices used to print the clexulator. Try "
+          "'casm bset -uf'.");
+    }
+    if (nlist->n_sublattices() != clex->n_sublattices()) {
+      err_log()
+          << "Error in Clexulator constructor: n_sublattices of neighbor list "
+             "does not match the n_sublattices used to print the clexulator."
+          << std::endl;
+      err_log() << "nlist n_sublattices: \n"
+                << nlist->n_sublattices() << std::endl;
+      err_log() << "clexulator n_sublattices: \n"
+                << clex->n_sublattices() << std::endl;
+      throw std::runtime_error(
+          "Error in Clexulator constructor: n_sublattices of neighbor list "
+          "does not match the n_sublattices used to print the clexulator. Try "
+          "'casm bset -uf'.");
+    }
   }
 
   // Expand the given neighbor list as necessary
-  nlist.expand(clex->neighborhood().begin(), clex->neighborhood().end());
+  nlist->expand(clex->neighborhood().begin(), clex->neighborhood().end());
 
   return Clexulator(name, std::move(clex), lib);
 }
@@ -152,11 +189,10 @@ Clexulator make_clexulator(std::string name, fs::path dirpath,
 /// rather than construct another using this constructor which will re-load the
 /// library.
 ///
-std::vector<Clexulator> make_local_clexulator(std::string name,
-                                              fs::path dirpath,
-                                              PrimNeighborList &nlist,
-                                              std::string compile_options,
-                                              std::string so_options) {
+std::vector<Clexulator> make_local_clexulator(
+    std::string name, fs::path dirpath,
+    std::shared_ptr<PrimNeighborList> &nlist, std::string compile_options,
+    std::string so_options) {
   std::vector<Clexulator> result;
   Index i = 0;
   fs::path equiv_dir = dirpath / fs::path(std::to_string(i));

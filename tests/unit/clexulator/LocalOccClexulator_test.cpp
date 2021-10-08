@@ -61,7 +61,7 @@ class LocalOccClexulatorZrOTest : public test::TestLocalClexulatorBase {
   void UseClexulator_tests() {
     // Check correlations (checks running without errors, not values)
     test::TestConfiguration config(prim, Eigen::Matrix3l::Identity() * 2,
-                                   prim_neighbor_list);
+                                   *prim_neighbor_list);
 
     // basis functions to evaluate for restricted calculations
     std::map<std::string, std::vector<unsigned int>> corr_indices;
