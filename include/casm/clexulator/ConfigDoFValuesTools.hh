@@ -62,7 +62,7 @@ template <typename DoFSetType>
 Eigen::VectorXd global_from_standard_values(
     Eigen::VectorXd const &standard_values, DoFSetType const &dof_info);
 
-// ConfigDoFValues factor functions
+// ConfigDoFValues factory functions
 
 std::map<DoFKey, xtal::DoFSet> make_global_dof_info(
     xtal::BasicStructure const &basic_structure);
