@@ -100,6 +100,14 @@ std::set<xtal::UnitCellCoord> Correlations::required_update_neighborhood()
                                          m_corr_indices_end);
 }
 
+/// \brief Number of correlations
+Index Correlations::corr_size() const { return m_corr_size; }
+
+/// \brief The elements of the correlations vector that will be calculated.
+std::vector<unsigned int> const &Correlations::correlation_indices() const {
+  return m_correlation_indices;
+}
+
 /// \brief Calculate and return intensive correlations
 ///
 /// \param extrinsic_correlations Extrinsic correlations, to be normalized

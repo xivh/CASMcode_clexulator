@@ -63,6 +63,12 @@ class Correlations {
 
   // --- Correlations ---
 
+  /// \brief Number of correlations
+  Index corr_size() const;
+
+  /// \brief The elements of the correlations vector that will be calculated.
+  std::vector<unsigned int> const &correlation_indices() const;
+
   /// \brief Calculate and return intensive correlations
   Eigen::VectorXd const &intensive(
       Eigen::VectorXd const &extrinsic_correlations);
