@@ -6,7 +6,7 @@
 namespace CASM {
 
 template <typename T>
-struct InputParser;
+class InputParser;
 template <typename T>
 struct jsonConstructor;
 template <typename T>
@@ -14,7 +14,7 @@ struct jsonMake;
 class jsonParser;
 
 namespace clexulator {
-class ConfigDoFValues;
+struct ConfigDoFValues;
 }
 
 template <>

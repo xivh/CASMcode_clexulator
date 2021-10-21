@@ -1,6 +1,3 @@
-#ifndef CASM_clexulator_ConfigDoFValues_json_io
-#define CASM_clexulator_ConfigDoFValues_json_io
-
 #include "casm/clexulator/io/json/ConfigDoFValues_json_io.hh"
 
 #include "casm/casm_io/container/json_io.hh"
@@ -9,7 +6,6 @@
 
 namespace CASM {
 
-template <>
 std::unique_ptr<clexulator::ConfigDoFValues>
 jsonMake<clexulator::ConfigDoFValues>::make_from_json(jsonParser const &json) {
   InputParser<clexulator::ConfigDoFValues> parser(json);
@@ -22,10 +18,8 @@ jsonMake<clexulator::ConfigDoFValues>::make_from_json(jsonParser const &json) {
   return std::move(parser.value);
 }
 
-template <>
-clexulator::ConfigDoFValues
-jsonConstructor<clexulator::ConfigDoFValues>::from_json(
-    jsonParser const &json) {
+clexulator::ConfigDoFValues jsonConstructor<
+    clexulator::ConfigDoFValues>::from_json(jsonParser const &json) {
   InputParser<clexulator::ConfigDoFValues> parser(json);
 
   auto &log = CASM::log();
@@ -202,5 +196,3 @@ void from_json(clexulator::ConfigDoFValues &dof_values,
 }
 
 }  // namespace CASM
-
-#endif
