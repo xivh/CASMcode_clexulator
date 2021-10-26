@@ -13,14 +13,29 @@ namespace clexulator {
 /// \brief A cluster expansion calculator
 class ClusterExpansion {
  public:
-  ClusterExpansion(Correlations const &_correlations,
-                   SparseCoefficients const &_coefficients);
+  ClusterExpansion(
+      std::shared_ptr<SuperNeighborList const> const &_supercell_neighbor_list,
+      std::shared_ptr<Clexulator const> const &_clexulator,
+      SparseCoefficients const &_coefficients,
+      ConfigDoFValues const *_dof_values = nullptr);
 
   /// \brief Reset pointer to configuration currently being calculated
   void set(ConfigDoFValues const *dof_values);
 
   /// \brief Pointer to configuration currently being calculated
   ConfigDoFValues const *get() const;
+
+  /// \brief Get internal Correlations calculator
+  Correlations &correlations();
+
+  /// \brief Get internal Correlations calculator
+  Correlations const &correlations() const;
+
+  /// \brief Get internal SparseCoefficients
+  SparseCoefficients &coefficients();
+
+  /// \brief Get internal SparseCoefficients
+  SparseCoefficients const &coefficients() const;
 
   double intensive_value();
 

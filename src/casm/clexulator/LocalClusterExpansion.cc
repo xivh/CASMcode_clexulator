@@ -4,9 +4,12 @@ namespace CASM {
 namespace clexulator {
 
 LocalClusterExpansion::LocalClusterExpansion(
-    LocalCorrelations const &_correlations,
-    SparseCoefficients const &_coefficients)
-    : m_correlations(_correlations), m_coefficients(_coefficients) {}
+    std::shared_ptr<SuperNeighborList const> const &_supercell_neighbor_list,
+    std::shared_ptr<std::vector<Clexulator> const> const &_clexulator,
+    SparseCoefficients const &_coefficients, ConfigDoFValues const *_dof_values)
+    : m_correlations(_supercell_neighbor_list, _clexulator, _coefficients.index,
+                     _dof_values),
+      m_coefficients(_coefficients) {}
 
 /// \brief Reset pointer to configuration currently being calculated
 void LocalClusterExpansion::set(ConfigDoFValues const *dof_values) {
@@ -16,6 +19,26 @@ void LocalClusterExpansion::set(ConfigDoFValues const *dof_values) {
 /// \brief Pointer to configuration currently being calculated
 ConfigDoFValues const *LocalClusterExpansion::get() const {
   return m_correlations.get();
+}
+
+/// \brief Get internal LocalCorrelations calculator
+LocalCorrelations &LocalClusterExpansion::correlations() {
+  return m_correlations;
+}
+
+/// \brief Get internal LocalCorrelations calculator
+LocalCorrelations const &LocalClusterExpansion::correlations() const {
+  return m_correlations;
+}
+
+/// \brief Get internal SparseCoefficients
+SparseCoefficients &LocalClusterExpansion::coefficients() {
+  return m_coefficients;
+}
+
+/// \brief Get internal SparseCoefficients
+SparseCoefficients const &LocalClusterExpansion::coefficients() const {
+  return m_coefficients;
 }
 
 /// \brief Value at particular unit cell and phenomenal cluster

@@ -15,14 +15,29 @@ namespace clexulator {
 /// \brief A local cluster expansion calculator
 class LocalClusterExpansion {
  public:
-  LocalClusterExpansion(LocalCorrelations const &_correlations,
-                        SparseCoefficients const &_coefficients);
+  LocalClusterExpansion(
+      std::shared_ptr<SuperNeighborList const> const &_supercell_neighbor_list,
+      std::shared_ptr<std::vector<Clexulator> const> const &_clexulator,
+      SparseCoefficients const &_coefficients,
+      ConfigDoFValues const *_dof_values = nullptr);
 
   /// \brief Reset pointer to configuration currently being calculated
   void set(ConfigDoFValues const *dof_values);
 
   /// \brief Pointer to configuration currently being calculated
   ConfigDoFValues const *get() const;
+
+  /// \brief Get internal LocalCorrelations calculator
+  LocalCorrelations &correlations();
+
+  /// \brief Get internal LocalCorrelations calculator
+  LocalCorrelations const &correlations() const;
+
+  /// \brief Get internal SparseCoefficients
+  SparseCoefficients &coefficients();
+
+  /// \brief Get internal SparseCoefficients
+  SparseCoefficients const &coefficients() const;
 
   /// \brief Value at particular unit cell and phenomenal cluster
   double value(Index unitcell_index, Index equivalent_index);
