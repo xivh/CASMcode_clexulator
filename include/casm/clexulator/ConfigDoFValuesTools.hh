@@ -221,7 +221,7 @@ ConfigDoFValues make_default_standard_config_dof_values(
     std::string const &dof_type = pair.first;
     auto const &dof_info = pair.second;
     Index standard_dim = dof_info.basis().rows();
-    standard_values.local_dof_values.emplace(
+    standard_values.global_dof_values.emplace(
         dof_type, Eigen::VectorXd::Zero(standard_dim));
   }
 
@@ -249,8 +249,8 @@ ConfigDoFValues make_default_config_dof_values(
   for (auto const &pair : global_dof_info) {
     std::string const &dof_type = pair.first;
     auto const &dof_info = pair.second;
-    dof_values.local_dof_values.emplace(dof_type,
-                                        Eigen::VectorXd::Zero(dof_info.dim()));
+    dof_values.global_dof_values.emplace(dof_type,
+                                         Eigen::VectorXd::Zero(dof_info.dim()));
   }
 
   return dof_values;
@@ -290,7 +290,7 @@ ConfigDoFValues to_standard_values(
       throw std::runtime_error(msg.str());
     }
     auto const &dof_info = it->second;
-    standard_values.local_dof_values.emplace(
+    standard_values.global_dof_values.emplace(
         dof_type, global_to_standard_values(values, dof_info));
   }
 
@@ -331,7 +331,7 @@ ConfigDoFValues from_standard_values(
       throw std::runtime_error(msg.str());
     }
     auto const &dof_info = it->second;
-    dof_values.local_dof_values.emplace(
+    dof_values.global_dof_values.emplace(
         dof_type, global_from_standard_values(values, dof_info));
   }
 
