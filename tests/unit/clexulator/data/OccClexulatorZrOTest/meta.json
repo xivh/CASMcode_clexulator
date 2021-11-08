@@ -52,14 +52,5 @@
         }
       }
     }
-  },
-  "neighbor_list": {
-    "sublat_indices": [2, 3],
-    "weight_matrix" : [
-      [ 2, -1, 0 ],
-      [ -1, 2, 0 ],
-      [ 0, 0, 5 ]
-    ],
-    "n_sublattices": 4
   }
 }

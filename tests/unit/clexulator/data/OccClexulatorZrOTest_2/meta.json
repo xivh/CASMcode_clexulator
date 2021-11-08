@@ -40,13 +40,13 @@
         "params" : {
           "orbit_branch_specs" : {
             "2" : {
-              "max_length" : 6.010000000000
+              "max_length" : 9.00000000000
             },
             "3" : {
-              "max_length" : 4.140000000000
+              "max_length" : 7.00000000000
             },
             "4" : {
-              "max_length" : 4.140000000000
+              "max_length" : 6.00000000000
             }
           }
         }

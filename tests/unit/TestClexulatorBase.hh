@@ -18,21 +18,6 @@
 
 namespace test {
 
-namespace {
-clexulator::PrimNeighborList read_prim_neighbor_list(jsonParser const &json) {
-  Eigen::Matrix3l weight_matrix;
-  from_json(weight_matrix, json["weight_matrix"]);
-
-  std::set<int> sublat_indices;
-  from_json(sublat_indices, json["sublat_indices"]);
-
-  int n_sublattices = json["n_sublattices"].get<int>();
-
-  return clexulator::PrimNeighborList(weight_matrix, sublat_indices.begin(),
-                                      sublat_indices.end(), n_sublattices);
-}
-}  // namespace
-
 class TestClexulatorBase : public testing::Test {
  protected:
   TestClexulatorBase(std::string _clexulator_name, std::string _test_subdir)

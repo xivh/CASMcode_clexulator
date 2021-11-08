@@ -13,7 +13,7 @@ namespace test {
 TEST(ParseSparseCoefficients, ParseECIJsonTest) {
   // read example eci.json file and check
   fs::path eci_path =
-      test::data_dir("clexulator") / "OccClexulatorZrOTest" / "eci.json";
+      test::data_dir("clexulator") / "OccClexulatorZrOTest_2" / "eci.json";
   jsonParser json(eci_path);
   InputParser<clexulator::SparseCoefficients> parser(parse_eci_json, json);
   EXPECT_TRUE(parser.valid());
@@ -23,7 +23,7 @@ TEST(ParseSparseCoefficients, ParseECIJsonTest) {
 
 TEST(ParseSparseCoefficients, ParseCoeffJson) {
   fs::path coeff_path =
-      test::data_dir("clexulator") / "OccClexulatorZrOTest" / "coeff.json";
+      test::data_dir("clexulator") / "OccClexulatorZrOTest_2" / "coeff.json";
   jsonParser json(coeff_path);
   InputParser<clexulator::SparseCoefficients> parser(json);
   EXPECT_TRUE(parser.valid());
@@ -33,7 +33,7 @@ TEST(ParseSparseCoefficients, ParseCoeffJson) {
 
 TEST(ParseSparseCoefficients, ParseECIJsonTestAutomatic) {
   fs::path eci_path =
-      test::data_dir("clexulator") / "OccClexulatorZrOTest" / "eci.json";
+      test::data_dir("clexulator") / "OccClexulatorZrOTest_2" / "eci.json";
   jsonParser json(eci_path);
   InputParser<clexulator::SparseCoefficients> parser(json);
 
