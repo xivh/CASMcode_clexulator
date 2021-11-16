@@ -41,7 +41,14 @@ class ClusterExpansion {
 
   double extensive_value();
 
+  /// \brief Calculate change in cluster expansion value due to a single
+  ///     occupation change
   double occ_delta_value(Index linear_site_index, int new_occ);
+
+  /// \brief Calculate change in cluster expansion value due to a series of
+  ///     occupation changes
+  double occ_delta_value(std::vector<Index> const &linear_site_index,
+                         std::vector<int> const &new_occ);
 
   double local_delta_value(DoFKey const &key, Index linear_site_index,
                            Eigen::VectorXd const &new_value);

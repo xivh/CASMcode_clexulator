@@ -48,12 +48,22 @@ double ClusterExpansion::extensive_value() {
   return m_coefficients * m_correlations.extensive();
 }
 
+/// \brief Calculate change in cluster expansion value due to a single
+///     occupation change
 double ClusterExpansion::occ_delta_value(Index linear_site_index, int new_occ) {
   bool skip_if_unnecessary_for_occ_delta = true;
   auto const &p = m_correlations.point(linear_site_index,
                                        skip_if_unnecessary_for_occ_delta);
   return m_coefficients *
          m_correlations.occ_delta(linear_site_index, new_occ, p);
+}
+
+/// \brief Calculate change in cluster expansion value due to a series of
+///     occupation changes
+double ClusterExpansion::occ_delta_value(
+    std::vector<Index> const &linear_site_index,
+    std::vector<int> const &new_occ) {
+  return m_coefficients * m_correlations.occ_delta(linear_site_index, new_occ);
 }
 
 double ClusterExpansion::local_delta_value(DoFKey const &key,
