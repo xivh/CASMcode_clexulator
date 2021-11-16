@@ -5,6 +5,7 @@
 #include "casm/clexulator/ConfigDoFValuesTools_impl.hh"
 #include "casm/clexulator/NeighborList.hh"
 #include "casm/crystallography/BasicStructure.hh"
+#include "casm/crystallography/LinearIndexConverter.hh"
 
 using namespace CASM;
 
@@ -28,7 +29,9 @@ struct TestConfiguration {
             n_sublat, volume, global_dof_info, local_dof_info)),
         supercell_neighbor_list(
             std::make_shared<clexulator::SuperNeighborList const>(
-                transformation_matrix_to_super, prim_neighbor_list)) {}
+                transformation_matrix_to_super, prim_neighbor_list)),
+        unitcellcoord_index_converter(transformation_matrix_to_super,
+                                      prim->basis().size()) {}
 
   std::shared_ptr<xtal::BasicStructure const> prim;
   Eigen::Matrix3l transformation_matrix_to_super;
@@ -38,7 +41,20 @@ struct TestConfiguration {
   std::map<DoFKey, std::vector<xtal::SiteDoFSet>> local_dof_info;
   clexulator::ConfigDoFValues dof_values;
   std::shared_ptr<clexulator::SuperNeighborList const> supercell_neighbor_list;
+  xtal::UnitCellCoordIndexConverter unitcellcoord_index_converter;
+
+  std::vector<Index> linear_site_index(
+      std::vector<xtal::UnitCellCoord> const &unitcellcoord);
 };
+
+inline std::vector<Index> TestConfiguration::linear_site_index(
+    std::vector<xtal::UnitCellCoord> const &unitcellcoord) {
+  std::vector<Index> _linear_site_index;
+  for (xtal::UnitCellCoord const &value : unitcellcoord) {
+    _linear_site_index.push_back(unitcellcoord_index_converter(value));
+  }
+  return _linear_site_index;
+}
 
 }  // namespace test
 

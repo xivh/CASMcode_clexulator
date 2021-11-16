@@ -393,6 +393,92 @@ Eigen::VectorXd const &Correlations::occ_delta(
   }
 }
 
+/// \brief Calculate and return change in (extensive) correlations due to
+/// multiple occupation changes
+Eigen::VectorXd const &Correlations::occ_delta(
+    std::vector<Index> const &linear_site_index,
+    std::vector<int> const &new_occ) {
+  if (m_delta_corr.size() != m_corr_size) {
+    m_delta_corr.resize(m_corr_size);
+    m_delta_corr.setZero();
+  }
+  if (m_tcorr.size() != m_corr_size) {
+    m_tcorr.resize(m_corr_size);
+    m_tcorr.setZero();
+  }
+  if (m_curr_occ.size() < linear_site_index.size()) {
+    m_curr_occ.resize(linear_site_index.size());
+  }
+
+  Eigen::VectorXi const &values = m_dof_values->occupation;
+  Eigen::VectorXi &mutable_values = const_cast<Eigen::VectorXi &>(values);
+
+  // Initialize delta corr to 0.0
+  for (auto it = m_corr_indices_begin; it != m_corr_indices_end; ++it) {
+    *(m_delta_corr.data() + *it) = 0.0;
+  }
+
+  // For each occupation change...
+  for (Index i = 0; i < linear_site_index.size(); ++i) {
+    // Remember original occupant
+    Index l = linear_site_index[i];
+    int curr_occ = values[l];
+    m_curr_occ[i] = curr_occ;
+
+    // Get neighbor list info
+    Index unitcell_index = m_supercell_neighbor_list->unitcell_index(l);
+    int neighbor_index = m_supercell_neighbor_list->neighbor_index(l);
+    auto const &nlist_sites = m_supercell_neighbor_list->sites(unitcell_index);
+    long int const *nlist_begin = nlist_sites.data();
+
+    // If no neighborhood overlap, use delta point functions
+    if (!m_supercell_neighbor_list->overlaps()) {
+      // Calculate delta point corr
+      m_clexulator->calc_restricted_delta_point_corr(
+          *m_dof_values, nlist_begin, neighbor_index, curr_occ, new_occ[i],
+          m_tcorr.data(), m_corr_indices_begin, m_corr_indices_end);
+
+      // Increment by delta point corr
+      for (auto it = m_corr_indices_begin; it != m_corr_indices_end; ++it) {
+        *(m_delta_corr.data() + *it) += *(m_tcorr.data() + *it);
+      }
+
+      // Apply change (at the end we will unapply)
+      mutable_values[l] = new_occ[i];
+    } else {
+      // Else neighborhood overlaps, so calculate initial / final point corr
+
+      // Calculate initial point corr
+      m_clexulator->calc_restricted_point_corr(
+          *m_dof_values, nlist_begin, neighbor_index, m_tcorr.data(),
+          m_corr_indices_begin, m_corr_indices_end);
+
+      // Decrement by initial point corr
+      for (auto it = m_corr_indices_begin; it != m_corr_indices_end; ++it) {
+        *(m_delta_corr.data() + *it) -= *(m_tcorr.data() + *it);
+      }
+
+      // Apply change (at the end we will unapply)
+      mutable_values[l] = new_occ[i];
+
+      // Calculate final point corr
+      m_clexulator->calc_restricted_point_corr(
+          *m_dof_values, nlist_begin, neighbor_index, m_tcorr.data(),
+          m_corr_indices_begin, m_corr_indices_end);
+
+      // Increment by final point corr
+      for (auto it = m_corr_indices_begin; it != m_corr_indices_end; ++it) {
+        *(m_delta_corr.data() + *it) += *(m_tcorr.data() + *it);
+      }
+    }
+  }
+  // Unapply changes
+  for (Index i = 0; i < linear_site_index.size(); ++i) {
+    mutable_values[linear_site_index[i]] = m_curr_occ[i];
+  }
+  return m_delta_corr;
+}
+
 /// \brief Calculate and return change in (extensive) correlations due to a
 /// local continuous DoF change
 ///

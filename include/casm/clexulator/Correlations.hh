@@ -105,6 +105,11 @@ class Correlations {
       Index linear_site_index, int new_occ,
       Eigen::VectorXd const &reference_point_correlations);
 
+  /// \brief Calculate and return change in (extensive) correlations due to
+  /// multiple occupation changes
+  Eigen::VectorXd const &occ_delta(std::vector<Index> const &linear_site_index,
+                                   std::vector<int> const &new_occ);
+
   // --- Local continuous ---
 
   /// \brief Calculate and return change in (extensive) correlations due to a
@@ -143,6 +148,9 @@ class Correlations {
 
   /// Holds last delta correlation results
   Eigen::VectorXd m_delta_corr;
+
+  /// Holds temporary data for occ_delta method
+  std::vector<int> m_curr_occ;
 
   /// DoF values to use
   ConfigDoFValues const *m_dof_values;

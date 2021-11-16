@@ -111,11 +111,92 @@ class OccClexulatorZrOTest : public test::TestClexulatorBase {
     run_correlations_checks(config, clexulator, corr_indices,
                             expected_has_point);
   }
+
+  void OccDelta_tests() {
+    // Check correlations (checks running without errors, not values)
+    test::TestConfiguration config(prim, Eigen::Matrix3l::Identity() * 10,
+                                   *prim_neighbor_list);
+
+    // basis functions to evaluate for restricted calculations
+    std::vector<unsigned int> corr_indices({0, 1, 2, 3, 4, 5});
+
+    clexulator::Correlations correlations(config.supercell_neighbor_list,
+                                          clexulator, corr_indices,
+                                          &config.dof_values);
+
+    std::vector<Index> linear_site_index =
+        config.linear_site_index({{2, 0, 0, 0}, {3, 0, 0, 0}});
+    std::vector<int> new_occ = {1, 1};
+
+    Eigen::VectorXd point_corr;
+    Eigen::VectorXd delta_corr;
+    Eigen::VectorXd total_delta_corr;
+    Eigen::VectorXd expected_delta_corr(6);
+    Eigen::VectorXd expected_total_delta_corr(6);
+    {
+      point_corr = correlations.point(linear_site_index[0]);
+      delta_corr =
+          correlations.occ_delta(linear_site_index[0], new_occ[0], point_corr)
+              .head(6);
+      total_delta_corr = delta_corr;
+      expected_delta_corr << 0.0, 0.5, 0.0, 0.0, 0.0, 0.0;
+      EXPECT_TRUE(almost_equal(delta_corr, expected_delta_corr));
+    }
+
+    config.dof_values.occupation(linear_site_index[0]) = new_occ[0];
+    {
+      point_corr = correlations.point(linear_site_index[1]);
+      delta_corr =
+          correlations.occ_delta(linear_site_index[1], new_occ[1], point_corr)
+              .head(6);
+      total_delta_corr += delta_corr;
+      expected_delta_corr << 0.0, 0.5, 0.5, 0.0, 0.0, 0.0;
+      EXPECT_TRUE(almost_equal(delta_corr, expected_delta_corr));
+    }
+
+    expected_total_delta_corr << 0.0, 1.0, 0.5, 0.0, 0.0, 0.0;
+    EXPECT_TRUE(almost_equal(total_delta_corr, expected_total_delta_corr));
+  }
+
+  void MultiOccDelta_tests() {
+    // Check correlations (checks running without errors, not values)
+    test::TestConfiguration config(prim, Eigen::Matrix3l::Identity() * 10,
+                                   *prim_neighbor_list);
+
+    // basis functions to evaluate for restricted calculations
+    std::vector<unsigned int> corr_indices({0, 1, 2, 3, 4, 5});
+
+    clexulator::Correlations correlations(config.supercell_neighbor_list,
+                                          clexulator, corr_indices,
+                                          &config.dof_values);
+    Eigen::VectorXd delta_corr;
+    Eigen::VectorXd expected_delta_corr(6);
+    {
+      std::vector<xtal::UnitCellCoord> unitcellcoord = {{2, 0, 0, 0}};
+      std::vector<int> new_occ = {1};
+      delta_corr = correlations.occ_delta(
+          config.linear_site_index(unitcellcoord), new_occ);
+      expected_delta_corr << 0.0, 0.5, 0.0, 0.0, 0.0, 0.0;
+      EXPECT_TRUE(almost_equal(delta_corr, expected_delta_corr));
+    }
+
+    {
+      std::vector<xtal::UnitCellCoord> unitcellcoord = {{2, 0, 0, 0},
+                                                        {3, 0, 0, 0}};
+      std::vector<int> new_occ = {1, 1};
+      delta_corr = correlations.occ_delta(
+          config.linear_site_index(unitcellcoord), new_occ);
+      expected_delta_corr << 0.0, 1.0, 0.5, 0.0, 0.0, 0.0;
+      EXPECT_TRUE(almost_equal(delta_corr, expected_delta_corr));
+    }
+  }
 };
 
 TEST_F(OccClexulatorZrOTest, Tests) {
   MakeClexulator_tests();
   UseClexulator_tests();
+  OccDelta_tests();
+  MultiOccDelta_tests();
 }
 
 namespace {
