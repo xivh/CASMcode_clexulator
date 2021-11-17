@@ -118,23 +118,48 @@ class Clexulator {
     return m_clex->weight_matrix();
   }
 
-  void set_configdofvalues(ConfigDoFValues const &configdofvalues,
-                           bool force = false) const {
-    m_clex->set_configdofvalues(configdofvalues, force);
+  /// \brief Set the pointer to DoF values
+  ///
+  /// Notes:
+  /// - There is a small overhead that could be avoided by setting this
+  ///   manually only when the configuration being calculated is changed, but
+  ///   currently for safety this is called by the `calc_X` methods everytime
+  ///   and no savings are possible.
+  ///
+  void set_configdofvalues(ConfigDoFValues const &configdofvalues) const {
+    m_clex->set_configdofvalues(configdofvalues);
   }
 
-  /// \brief Calculate contribution to global correlations from one unit cell
+  /// \brief Calculate basis functions associated with one unit cell,
+  ///     normalized by the number of basis functions
   ///
-  /// \param _corr_begin Pointer to beginning of data structure where
+  /// Notes:
+  /// - For periodic cluster expansions, this is the contribution of one unit
+  ///   cell to the global correlations. The global correlations are the sum of
+  ///   this value over all unit cells, normalized by the number of unit cells.
+  /// - For local cluster expansions, this is the local correlations.
+  ///
+  /// \param dof_values ConfigDoFValues, the input configuration
+  /// \param nlist_begin Pointer to beginning of the neighbor list. For
+  ///     periodic cluster expansions, this is the neighbor list of the unit
+  ///     cell. For local cluster expansions, this is the neighbor list of the
+  ///     unit cell that the phenomenal cluster is associated with.
+  /// \param corr_begin Pointer to beginning of data structure where
   /// correlations are written
   ///
   /// Call using:
   /// \code
-  /// UnitCellCoord bijk(0,i,j,k);           // i,j,k of unit cell to get
-  /// contribution from int l_index = my_supercell.find(bijk); // Linear index
-  /// of site in Configuration
-  /// myclexulator.calc_global_corr_contribution(my_configdof,
-  /// my_supercell.get_nlist(l_index).begin(), correlation_array.begin());
+  /// // xtal::UnitCellIndexConverter can help get unitcell_index
+  /// Index unitcell_index = ...;
+  /// SuperNeighborList supercell_neighbor_list = ...;
+  ///
+  /// long int const *nlist_begin =
+  ///     supercell_neighbor_list.sites(unitcell_index);
+  /// Eigen::VectorXd corr;
+  /// corr.resize(myclexulator.corr_size());
+  /// corr.setZero();
+  /// myclexulator.calc_global_corr_contribution(
+  ///     my_configdof, nlist_begin, corr.data());
   /// \endcode
   ///
   void calc_global_corr_contribution(ConfigDoFValues const &dof_values,
@@ -145,19 +170,33 @@ class Clexulator {
     m_clex->calc_global_corr_contribution(corr_begin);
   }
 
-  /// \brief Calculate contribution to global correlations from one unit cell
+  /// \brief Calculate basis functions associated with one unit cell,
+  ///     normalized by the number of basis functions,
+  ///     writing results to parameter pack
   ///
-  /// \param _corr_begin Pointer to beginning of data structure where
-  /// correlations are written
+  /// Notes:
+  /// - This overload writes values to the ParamPack, but not to a correlations
+  ///   vector
+  /// - For periodic cluster expansions, this is the contribution of one unit
+  ///   cell to the global correlations. The global correlations are the sum of
+  ///   this value over all unit cells, normalized by the number of unit cells.
+  /// - For local cluster expansions, this is the local correlations.
+  ///
+  /// \param dof_values ConfigDoFValues, the input configuration
+  /// \param nlist_begin Pointer to beginning of the neighbor list. For
+  ///     periodic cluster expansions, this is the neighbor list of the unit
+  ///     cell. For local cluster expansions, this is the neighbor list of the
+  ///     unit cell that the phenomenal cluster is associated with.
   ///
   /// Call using:
   /// \code
-  /// UnitCellCoord bijk(0,i,j,k);           // i,j,k of unit cell to get
-  /// contribution from int l_index = my_supercell.find(bijk); // Linear index
-  /// of site in Configuration
-  /// myclexulator.calc_global_corr_contribution(my_configdof,
-  ///                                            my_supercell.get_nlist(l_index).begin(),
-  ///                                            my_supercell.get_nlist(l_index).end());
+  /// // xtal::UnitCellIndexConverter can help get unitcell_index
+  /// Index unitcell_index = ...;
+  /// SuperNeighborList supercell_neighbor_list = ...;
+  ///
+  /// long int const *nlist_begin =
+  ///     supercell_neighbor_list.sites(unitcell_index);
+  /// myclexulator.calc_global_corr_contribution(my_configdof, nlist_begin);
   /// \endcode
   ///
   void calc_global_corr_contribution(ConfigDoFValues const &dof_values,
@@ -167,24 +206,43 @@ class Clexulator {
     m_clex->calc_global_corr_contribution();
   }
 
-  /// \brief Calculate contribution to select global correlations from one unit
-  /// cell
+  /// \brief Calculate basis functions associated with one unit cell,
+  ///     normalized by the number of basis functions
   ///
-  /// \param _corr_begin Pointer to beginning of data structure where
-  /// correlations are written \param _corr_ind_begin,_corr_ind_end Pointers to
-  /// range indicating which correlations should be calculated
+  /// Notes:
+  /// - For periodic cluster expansions, this is the contribution of one unit
+  ///   cell to the global correlations. The global correlations are the sum of
+  ///   this value over all unit cells, normalized by the number of unit cells.
+  /// - For local cluster expansions, this is the local correlations.
+  ///
+  /// \param dof_values ConfigDoFValues, the input configuration
+  /// \param nlist_begin Pointer to beginning of the neighbor list. For
+  ///     periodic cluster expansions, this is the neighbor list of the unit
+  ///     cell. For local cluster expansions, this is the neighbor list of the
+  ///     unit cell that the phenomenal cluster is associated with.
+  /// \param corr_begin Pointer to beginning of data structure where
+  ///     correlations are written
+  /// \param corr_ind_begin,corr_ind_end Pointers to range indicating which
+  ///     correlations should be calculated
   ///
   /// Call using:
   /// \code
-  /// UnitCellCoord bijk(0,i,j,k);           // i,j,k of unit cell to get
-  /// contribution from int l_index = my_supercell.find(bijk); // Linear index
-  /// of site in Configuration std::vector<int> _corr_ind = {0, 2, 4, 6}; // Get
-  /// contribution to correlations 0, 2, 4, and 6
-  /// myclexulator.calc_restricted_global_corr_contribution(my_configdof,
-  ///                                                       my_supercell.get_nlist(l_index).begin(),
-  ///                                                       correlation_array.begin(),
-  ///                                                       _corr_ind.begin(),
-  ///                                                       _corr_ind.end());
+  /// // xtal::UnitCellIndexConverter can help get unitcell_index
+  /// Index unitcell_index = ...;
+  /// SuperNeighborList supercell_neighbor_list = ...;
+  ///
+  /// long int const *nlist_begin =
+  ///     supercell_neighbor_list.sites(unitcell_index);
+  /// Eigen::VectorXd corr;
+  /// corr.resize(myclexulator.corr_size());
+  /// corr.setZero();
+  /// // Get contribution to correlations 0, 2, 4, and 6
+  /// std::vector<unsigned int> corr_ind = {0, 2, 4, 6};
+  /// unsigned int const *corr_ind_begin = corr_ind.begin();
+  /// unsigned int const *corr_ind_end = corr_ind.begin();
+  /// myclexulator.calc_restricted_global_corr_contribution(
+  ///     my_configdof, nlist_begin, corr.data(),
+  ///     corr_ind_begin, corr_ind_end);
   /// \endcode
   ///
   void calc_restricted_global_corr_contribution(
@@ -197,18 +255,39 @@ class Clexulator {
                                                      corr_ind_end);
   }
 
-  /// \brief Calculate point correlations about basis site 'neighbor_ind'
+  /// \brief Calculate point correlations about one site
   ///
-  /// \brief neighbor_ind Basis site index about which to calculate correlations
-  /// \brief _corr_begin Pointer to beginning of data structure where
-  /// correlations are written
+  /// \param dof_values ConfigDoFValues, the input configuration
+  /// \param nlist_begin Pointer to beginning of the neighbor list. For
+  ///     periodic cluster expansions, this is the neighbor list of the unit
+  ///     cell containing the site. For local cluster expansions, this is the
+  ///     neighbor list of the unit cell that the phenomenal cluster is
+  ///     associated with.
+  /// \param neighbor_ind Index in the neighbor list of the site about which to
+  ///     calculate correlations. This can be obtained from the linear site
+  ///     index and the supercell neighbor list using:
+  ///         `supercell_neighbor_list->neighbor_index(linear_site_index)`,
+  ///     which have value -1 if the site is not in the neighbor list.
+  /// \param corr_begin Pointer to beginning of data structure where
+  ///     correlations are written
   ///
   /// Call using:
   /// \code
-  /// UnitCellCoord bijk(b,i,j,k);           // b,i,j,k of site to get point
-  /// correlations int l_index = my_supercell.find(bijk); // Linear index of
-  /// site in Configuration myclexulator.calc_point_corr(my_configdof,
-  /// my_supercell.get_nlist(l_index).begin(), b, correlation_array.begin());
+  /// // xtal::UnitCellCoordIndexConverter can help get linear_site_index
+  /// Index linear_site_index = ...;
+  /// SuperNeighborList supercell_neighbor_list = ...;
+  ///
+  /// Index unitcell_index =
+  ///     supercell_neighbor_list.unitcell_index(linear_site_index);
+  /// long int const *nlist_begin =
+  ///     supercell_neighbor_list.sites(unitcell_index);
+  /// int neighbor_ind =
+  ///     supercell_neighbor_list.neighbor_index(linear_site_index);
+  /// Eigen::VectorXd corr;
+  /// corr.resize(myclexulator.corr_size());
+  /// corr.setZero();
+  /// myclexulator.calc_point_corr(
+  ///     my_configdof, nlist_begin, neighbor_ind, corr.data());
   /// \endcode
   ///
   void calc_point_corr(ConfigDoFValues const &dof_values,
@@ -219,22 +298,47 @@ class Clexulator {
     m_clex->calc_point_corr(neighbor_ind, corr_begin);
   }
 
-  /// \brief Calculate select point correlations about basis site 'neighbor_ind'
+  /// \brief Calculate select point correlations one site
   ///
-  /// \brief neighbor_ind Basis site index about which to calculate correlations
-  /// \brief _corr_begin Pointer to beginning of data structure where
-  /// correlations are written \param _corr_ind_begin,_corr_ind_end Pointers to
-  /// range indicating which correlations should be calculated
+  /// \param dof_values ConfigDoFValues, the input configuration
+  /// \param nlist_begin Pointer to beginning of the neighbor list. For
+  ///     periodic cluster expansions, this is the neighbor list of the unit
+  ///     cell containing the site. For local cluster expansions, this is the
+  ///     neighbor list of the unit cell that the phenomenal cluster is
+  ///     associated with.
+  /// \param neighbor_ind Index in the neighbor list of the site about which to
+  ///     calculate correlations. This can be obtained from the linear site
+  ///     index and the supercell neighbor list using:
+  ///         `supercell_neighbor_list->neighbor_index(linear_site_index)`,
+  ///     which have value -1 if the site is not in the neighbor list.
+  /// \param corr_begin Pointer to beginning of data structure where
+  ///     correlations are written
+  /// \param corr_ind_begin,corr_ind_end Pointers to range indicating which
+  ///     correlations should be calculated
   ///
   /// Call using:
   /// \code
-  /// UnitCellCoord bijk(b,i,j,k);           // b,i,j,k of site to get point
-  /// correlations int l_index = my_supercell.find(bijk); // Linear index of
-  /// site in Configuration std::vector<int> _corr_ind = {0, 2, 4, 6}; // Get
-  /// contribution to correlations 0, 2, 4, and 6
-  /// myclexulator.calc_restricted_point_corr(my_configdof,
-  /// my_supercell.get_nlist(l_index).begin(), b, correlation_array.begin(),
-  /// _corr_ind.begin(), _corr_ind.end()); \endcode
+  /// // xtal::UnitCellCoordIndexConverter can help get linear_site_index
+  /// Index linear_site_index = ...;
+  /// SuperNeighborList supercell_neighbor_list = ...;
+  ///
+  /// Index unitcell_index =
+  ///     supercell_neighbor_list.unitcell_index(linear_site_index);
+  /// long int const *nlist_begin =
+  ///     supercell_neighbor_list.sites(unitcell_index);
+  /// int neighbor_ind =
+  ///     supercell_neighbor_list.neighbor_index(linear_site_index);
+  /// Eigen::VectorXd corr;
+  /// corr.resize(myclexulator.corr_size());
+  /// corr.setZero();
+  /// // Get contribution to correlations 0, 2, 4, and 6
+  /// std::vector<unsigned int> corr_ind = {0, 2, 4, 6};
+  /// unsigned int const *corr_ind_begin = corr_ind.begin();
+  /// unsigned int const *corr_ind_end = corr_ind.begin();
+  /// myclexulator.calc_restricted_point_corr(
+  ///     my_configdof, nlist_begin, neighbor_ind, corr.data(),
+  ///     corr_ind_begin, corr_ind_end);
+  /// \endcode
   ///
   void calc_restricted_point_corr(ConfigDoFValues const &dof_values,
                                   long int const *nlist_begin, int neighbor_ind,
@@ -250,19 +354,39 @@ class Clexulator {
   /// \brief Calculate the change in point correlations due to changing an
   /// occupant
   ///
-  /// \brief neighbor_ind Basis site index about which to calculate correlations
-  /// \brief occ_i,occ_f Initial and final occupant variable
-  /// \brief _corr_begin Pointer to beginning of data structure where difference
-  /// in correlations are written
+  /// \param dof_values ConfigDoFValues, the input configuration
+  /// \param nlist_begin Pointer to beginning of the neighbor list. For
+  ///     periodic cluster expansions, this is the neighbor list of the unit
+  ///     cell containing the site. For local cluster expansions, this is the
+  ///     neighbor list of the unit cell that the phenomenal cluster is
+  ///     associated with.
+  /// \param neighbor_ind Index in the neighbor list of the site about which to
+  ///     calculate correlations. This can be obtained from the linear site
+  ///     index and the supercell neighbor list using:
+  ///         `supercell_neighbor_list->neighbor_index(linear_site_index)`,
+  ///     which have value -1 if the site is not in the neighbor list.
+  /// \param occ_i,occ_f Initial and final occupant variable
+  /// \param corr_begin Pointer to beginning of data structure where difference
+  ///     in correlations are written
   ///
   /// Call using:
   /// \code
-  /// UnitCellCoord bijk(b,i,j,k);           // b,i,j,k of site to get delta
-  /// point correlations int l_index = my_supercell.find(bijk); // Linear index
-  /// of site in Configuration int occ_i=0, occ_f=1;  // Swap from occupant 0 to
-  /// occupant 1 myclexulator.calc_delta_point_corr(my_configdof,
-  /// my_supercell.get_nlist(l_index).begin(), b, occ_i, occ_f,
-  /// correlation_array.begin()); \endcode
+  /// // xtal::UnitCellCoordIndexConverter can help get linear_site_index
+  /// Index linear_site_index = ...;
+  /// SuperNeighborList supercell_neighbor_list = ...;
+  ///
+  /// Index unitcell_index =
+  ///     supercell_neighbor_list.unitcell_index(linear_site_index);
+  /// long int const *nlist_begin =
+  ///     supercell_neighbor_list.sites(unitcell_index);
+  /// int neighbor_ind =
+  ///     supercell_neighbor_list.neighbor_index(linear_site_index);
+  /// Eigen::VectorXd corr;
+  /// corr.resize(myclexulator.corr_size());
+  /// corr.setZero();
+  /// myclexulator.calc_delta_point_corr(
+  ///     my_configdof, nlist_begin, neighbor_ind, occ_i, occ_f, corr.data());
+  /// \endcode
   ///
   void calc_delta_point_corr(ConfigDoFValues const &dof_values,
                              long int const *nlist_begin, int neighbor_ind,
@@ -275,28 +399,45 @@ class Clexulator {
   /// \brief Calculate the change in select point correlations due to changing
   /// an occupant
   ///
-  /// \brief neighbor_ind Basis site index about which to calculate correlations
-  /// \brief occ_i,occ_f Initial and final occupant variable
-  /// \brief _corr_begin Pointer to beginning of data structure where difference
-  /// in correlations are written \param _corr_ind_begin,_corr_ind_end Pointers
-  /// to range indicating which correlations should be calculated
+  /// \param dof_values ConfigDoFValues, the input configuration
+  /// \param nlist_begin Pointer to beginning of the neighbor list. For
+  ///     periodic cluster expansions, this is the neighbor list of the unit
+  ///     cell containing the site. For local cluster expansions, this is the
+  ///     neighbor list of the unit cell that the phenomenal cluster is
+  ///     associated with.
+  /// \param neighbor_ind Index in the neighbor list of the site about which to
+  ///     calculate correlations. This can be obtained from the linear site
+  ///     index and the supercell neighbor list using:
+  ///         `supercell_neighbor_list->neighbor_index(linear_site_index)`,
+  ///     which have value -1 if the site is not in the neighbor list.
+  /// \param occ_i,occ_f Initial and final occupant variable
+  /// \param corr_begin Pointer to beginning of data structure where difference
+  ///     in correlations are written
+  /// \param corr_ind_begin,corr_ind_end Pointers to range indicating which
+  ///     correlations should be calculated
   ///
   /// Call using:
   /// \code
-  /// UnitCellCoord bijk(b,i,j,k);           // b,i,j,k of site to get delta
-  /// point correlations int l_index = my_supercell.find(bijk); // Linear index
-  /// of site in Configuration int occ_i=0, occ_f=1;  // Swap from occupant 0 to
-  /// occupant 1 std::vector<int> _corr_ind = {0, 2, 4, 6}; // Get contribution
-  /// to correlations 0, 2, 4, and 6
-  /// myclexulator.calc_restricted_delta_point_corr(my_configdof,
-  ///                                               my_supercell.get_nlist(l_index).begin(),
-  ///                                               b,
-  ///                                               occ_i,
-  ///                                               occ_f,
-  ///                                               correlation_array.begin(),
-  ///                                               correlation_array.end(),
-  ///                                               _corr_ind.begin(),
-  ///                                               _corr_ind.end());
+  /// // xtal::UnitCellCoordIndexConverter can help get linear_site_index
+  /// Index linear_site_index = ...;
+  /// SuperNeighborList supercell_neighbor_list = ...;
+  ///
+  /// Index unitcell_index =
+  ///     supercell_neighbor_list.unitcell_index(linear_site_index);
+  /// long int const *nlist_begin =
+  ///     supercell_neighbor_list.sites(unitcell_index);
+  /// int neighbor_ind =
+  ///     supercell_neighbor_list.neighbor_index(linear_site_index);
+  /// Eigen::VectorXd corr;
+  /// corr.resize(myclexulator.corr_size());
+  /// corr.setZero();
+  /// // Get contribution to correlations 0, 2, 4, and 6
+  /// std::vector<unsigned int> corr_ind = {0, 2, 4, 6};
+  /// unsigned int const *corr_ind_begin = corr_ind.begin();
+  /// unsigned int const *corr_ind_end = corr_ind.begin();
+  /// myclexulator.calc_restricted_delta_point_corr(
+  ///     my_configdof, nlist_begin, neighbor_ind, occ_i, occ_f, corr.data(),
+  ///     corr_ind_begin, corr_ind_end);
   /// \endcode
   ///
   void calc_restricted_delta_point_corr(ConfigDoFValues const &dof_values,

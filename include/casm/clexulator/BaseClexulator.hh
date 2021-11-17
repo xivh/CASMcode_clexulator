@@ -87,8 +87,10 @@ class BaseClexulator {
   /// \brief The total number of sublattices in the prim
   size_type n_sublattices() const { return m_n_sublattices; }
 
-  // Note: The following all require setting the DoFValues and NeighborList
-  // prior to use. This can be done with:
+  // Note: Calculation methods require setting pointers to the ConfigDoFValues
+  // data structures, and setting pointers to the neighbor list for the correct
+  // unit cell. Pointers will be set automatically, but there is a small amount
+  // of overhead to setting the ConfigDoFValues pointers. To
   //
   // myclexulatorbase.set_configdofvalues(myconfigdofvalues);
   // auto nlist_begin =
@@ -99,38 +101,32 @@ class BaseClexulator {
   ///
   /// \param _configdofvalues DoF values to be used as input to the basis
   ///      functions
-  /// \param _force
   ///
-  /// Notes:
-  /// - In the vast majority of cases this is handled by the `calc_X` method
-  void set_configdofvalues(ConfigDoFValues const &_configdofvalues,
-                           bool _force = false) const {
-    if (m_configdofvalues_ptr != &_configdofvalues || _force) {
-      m_configdofvalues_ptr = &_configdofvalues;
-      m_occ_ptr = _configdofvalues.occupation.data();
-      for (auto const &dof : m_local_dof_registry) {
-        auto it = _configdofvalues.local_dof_values.find(dof.first);
-        if (it == _configdofvalues.local_dof_values.end()) {
-          std::stringstream msg;
-          msg << "Clexulator error: ConfigDoFValues missing required local DoF "
-                 "type '"
-              << dof.first << "'";
-          throw std::runtime_error(msg.str());
-        }
-        m_local_dof_ptrs[dof.second] = &it->second;
+  void set_configdofvalues(ConfigDoFValues const &_configdofvalues) const {
+    m_configdofvalues_ptr = &_configdofvalues;
+    m_occ_ptr = _configdofvalues.occupation.data();
+    for (auto const &dof : m_local_dof_registry) {
+      auto it = _configdofvalues.local_dof_values.find(dof.first);
+      if (it == _configdofvalues.local_dof_values.end()) {
+        std::stringstream msg;
+        msg << "Clexulator error: ConfigDoFValues missing required local DoF "
+               "type '"
+            << dof.first << "'";
+        throw std::runtime_error(msg.str());
       }
+      m_local_dof_ptrs[dof.second] = &it->second;
+    }
 
-      for (auto const &dof : m_global_dof_registry) {
-        auto it = _configdofvalues.global_dof_values.find(dof.first);
-        if (it == _configdofvalues.global_dof_values.end()) {
-          std::stringstream msg;
-          msg << "Clexulator error: ConfigDoFValues missing required global "
-                 "DoF type '"
-              << dof.first << "'";
-          throw std::runtime_error(msg.str());
-        }
-        m_global_dof_ptrs[dof.second] = &it->second;
+    for (auto const &dof : m_global_dof_registry) {
+      auto it = _configdofvalues.global_dof_values.find(dof.first);
+      if (it == _configdofvalues.global_dof_values.end()) {
+        std::stringstream msg;
+        msg << "Clexulator error: ConfigDoFValues missing required global "
+               "DoF type '"
+            << dof.first << "'";
+        throw std::runtime_error(msg.str());
       }
+      m_global_dof_ptrs[dof.second] = &it->second;
     }
   }
 
@@ -192,9 +188,13 @@ class BaseClexulator {
                                               _corr_ind_end);
   }
 
-  /// \brief Calculate point correlations about basis site 'neighbor_ind'
+  /// \brief Calculate point correlations about one site
   ///
-  /// \param neighbor_ind Basis site index about which to calculate correlations
+  /// \param neighbor_ind Index in the neighbor list of the site about which to
+  ///     calculate correlations. For periodic cluster expansions, this can be
+  ///     obtained from the linear site index and the supercell neighbor list
+  ///     using:
+  ///         `supercell_neighbor_list->neighbor_index(linear_site_index)`.
   /// \param _corr_begin Pointer to beginning of data structure where
   /// correlations are written
   ///
@@ -202,10 +202,13 @@ class BaseClexulator {
     _calc_point_corr(neighbor_ind, _corr_begin);
   }
 
-  /// \brief Calculate select point correlations about basis site 'neighbor_ind'
+  /// \brief Calculate select point correlations about one site
   ///
-  /// \param neighbor_ind Neighbor within specified neighborhood about which to
-  ///     calculate correlations
+  /// \param neighbor_ind Index in the neighbor list of the site about which to
+  ///     calculate correlations. For periodic cluster expansions, this can be
+  ///     obtained from the linear site index and the supercell neighbor list
+  ///     using:
+  ///         `supercell_neighbor_list->neighbor_index(linear_site_index)`.
   /// \param _corr_begin Pointer to beginning of data structure where
   ///     correlations are written
   /// \param _corr_ind_begin,_corr_ind_end Pointers to range indicating which
@@ -221,7 +224,11 @@ class BaseClexulator {
   /// \brief Calculate the change in point correlations due to changing an
   /// occupant
   ///
-  /// \param neighbor_ind Basis site index about which to calculate correlations
+  /// \param neighbor_ind Index in the neighbor list of the site about which to
+  ///     calculate correlations. For periodic cluster expansions, this can be
+  ///     obtained from the linear site index and the supercell neighbor list
+  ///     using:
+  ///         `supercell_neighbor_list->neighbor_index(linear_site_index)`.
   /// \param occ_i,occ_f Initial and final occupant variable
   /// \param _corr_begin Pointer to beginning of data structure where difference
   /// in correlations are written
@@ -234,7 +241,11 @@ class BaseClexulator {
   /// \brief Calculate the change in select point correlations due to changing
   /// an occupant
   ///
-  /// \param neighbor_ind Basis site index about which to calculate correlations
+  /// \param neighbor_ind Index in the neighbor list of the site about which to
+  ///     calculate correlations. For periodic cluster expansions, this can be
+  ///     obtained from the linear site index and the supercell neighbor list
+  ///     using:
+  ///         `supercell_neighbor_list->neighbor_index(linear_site_index)`.
   /// \param occ_i,occ_f Initial and final occupant variable
   /// \param _corr_begin Pointer to beginning of data structure where difference
   /// in correlations are written \param _corr_ind_begin,_corr_ind_end Pointers
