@@ -29,7 +29,8 @@ namespace test {
 class OccZrOClexTest : public test::TestClexulatorBase {
  protected:
   OccZrOClexTest()
-      : TestClexulatorBase("ZrO_Clexulator", "OccClexulatorZrOTest_2") {
+      : TestClexulatorBase("ZrO_Clexulator", "default",
+                           "OccClexulatorZrOTest_2") {
     // can uncomment for debugging:
     tmpdir.do_not_remove_on_destruction();
   }

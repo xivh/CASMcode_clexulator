@@ -76,9 +76,9 @@
 **/
 
 /// \brief Returns a clexulator::BaseClexulator* owning a
-/// OccClexulatorZrOTest_Clexulator
+/// OccClexulatorZrOTest_Clexulator_default
 extern "C" CASM::clexulator::BaseClexulator *
-make_OccClexulatorZrOTest_Clexulator();
+make_OccClexulatorZrOTest_Clexulator_default();
 
 namespace CASM {
 namespace clexulator {
@@ -89,11 +89,12 @@ typedef BasicClexParamPack ParamPack;
 
 /****** GENERATED CLEXULATOR DEFINITION ******/
 
-class OccClexulatorZrOTest_Clexulator : public clexulator::BaseClexulator {
+class OccClexulatorZrOTest_Clexulator_default
+    : public clexulator::BaseClexulator {
  public:
-  OccClexulatorZrOTest_Clexulator();
+  OccClexulatorZrOTest_Clexulator_default();
 
-  ~OccClexulatorZrOTest_Clexulator();
+  ~OccClexulatorZrOTest_Clexulator_default();
 
   ClexParamPack const &param_pack() const override { return m_params; }
 
@@ -317,11 +318,13 @@ class OccClexulatorZrOTest_Clexulator : public clexulator::BaseClexulator {
   mutable ParamPack m_params;
 
   // typedef for method pointers of scalar type double
-  typedef double (OccClexulatorZrOTest_Clexulator::*BasisFuncPtr_0)() const;
+  typedef double (
+      OccClexulatorZrOTest_Clexulator_default::*BasisFuncPtr_0)() const;
 
   // typedef for method pointers
-  typedef double (OccClexulatorZrOTest_Clexulator::*DeltaBasisFuncPtr_0)(
-      int, int) const;
+  typedef double (
+      OccClexulatorZrOTest_Clexulator_default::*DeltaBasisFuncPtr_0)(int,
+                                                                     int) const;
 
   // array of pointers to member functions for calculating basis functions of
   // scalar type double
@@ -347,9 +350,9 @@ class OccClexulatorZrOTest_Clexulator : public clexulator::BaseClexulator {
   // ClexParamPack allocation for DoF occ
   ParamPack::Key m_occ_site_func_param_key;
 
-  /// \brief Clone the OccClexulatorZrOTest_Clexulator
+  /// \brief Clone the OccClexulatorZrOTest_Clexulator_default
   BaseClexulator *_clone() const override {
-    return new OccClexulatorZrOTest_Clexulator(*this);
+    return new OccClexulatorZrOTest_Clexulator_default(*this);
   }
 
   /// \brief Calculate contribution to global correlations from one unit cell
@@ -473,7 +476,8 @@ class OccClexulatorZrOTest_Clexulator : public clexulator::BaseClexulator {
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-OccClexulatorZrOTest_Clexulator::OccClexulatorZrOTest_Clexulator()
+OccClexulatorZrOTest_Clexulator_default::
+    OccClexulatorZrOTest_Clexulator_default()
     : BaseClexulator(53, 16, 2) {
   m_occ_func_2_0[0] = -0.0000000000, m_occ_func_2_0[1] = 1.0000000000;
 
@@ -484,169 +488,229 @@ OccClexulatorZrOTest_Clexulator::OccClexulatorZrOTest_Clexulator()
   m_corr_param_key = m_params.allocate("corr", corr_size(), 1, false);
 
   m_orbit_func_table_0[0] =
-      &OccClexulatorZrOTest_Clexulator::eval_bfunc_0_0<double>;
+      &OccClexulatorZrOTest_Clexulator_default::eval_bfunc_0_0<double>;
   m_orbit_func_table_0[1] =
-      &OccClexulatorZrOTest_Clexulator::eval_bfunc_1_0<double>;
+      &OccClexulatorZrOTest_Clexulator_default::eval_bfunc_1_0<double>;
   m_orbit_func_table_0[2] =
-      &OccClexulatorZrOTest_Clexulator::eval_bfunc_2_0<double>;
+      &OccClexulatorZrOTest_Clexulator_default::eval_bfunc_2_0<double>;
   m_orbit_func_table_0[3] =
-      &OccClexulatorZrOTest_Clexulator::eval_bfunc_3_0<double>;
+      &OccClexulatorZrOTest_Clexulator_default::eval_bfunc_3_0<double>;
   m_orbit_func_table_0[4] =
-      &OccClexulatorZrOTest_Clexulator::eval_bfunc_4_0<double>;
+      &OccClexulatorZrOTest_Clexulator_default::eval_bfunc_4_0<double>;
   m_orbit_func_table_0[5] =
-      &OccClexulatorZrOTest_Clexulator::eval_bfunc_5_0<double>;
+      &OccClexulatorZrOTest_Clexulator_default::eval_bfunc_5_0<double>;
   m_orbit_func_table_0[6] =
-      &OccClexulatorZrOTest_Clexulator::eval_bfunc_6_0<double>;
+      &OccClexulatorZrOTest_Clexulator_default::eval_bfunc_6_0<double>;
   m_orbit_func_table_0[7] =
-      &OccClexulatorZrOTest_Clexulator::eval_bfunc_7_0<double>;
+      &OccClexulatorZrOTest_Clexulator_default::eval_bfunc_7_0<double>;
   m_orbit_func_table_0[8] =
-      &OccClexulatorZrOTest_Clexulator::eval_bfunc_8_0<double>;
+      &OccClexulatorZrOTest_Clexulator_default::eval_bfunc_8_0<double>;
   m_orbit_func_table_0[9] =
-      &OccClexulatorZrOTest_Clexulator::eval_bfunc_9_0<double>;
+      &OccClexulatorZrOTest_Clexulator_default::eval_bfunc_9_0<double>;
   m_orbit_func_table_0[10] =
-      &OccClexulatorZrOTest_Clexulator::eval_bfunc_10_0<double>;
+      &OccClexulatorZrOTest_Clexulator_default::eval_bfunc_10_0<double>;
   m_orbit_func_table_0[11] =
-      &OccClexulatorZrOTest_Clexulator::eval_bfunc_11_0<double>;
+      &OccClexulatorZrOTest_Clexulator_default::eval_bfunc_11_0<double>;
   m_orbit_func_table_0[12] =
-      &OccClexulatorZrOTest_Clexulator::eval_bfunc_12_0<double>;
+      &OccClexulatorZrOTest_Clexulator_default::eval_bfunc_12_0<double>;
   m_orbit_func_table_0[13] =
-      &OccClexulatorZrOTest_Clexulator::eval_bfunc_13_0<double>;
+      &OccClexulatorZrOTest_Clexulator_default::eval_bfunc_13_0<double>;
   m_orbit_func_table_0[14] =
-      &OccClexulatorZrOTest_Clexulator::eval_bfunc_14_0<double>;
+      &OccClexulatorZrOTest_Clexulator_default::eval_bfunc_14_0<double>;
   m_orbit_func_table_0[15] =
-      &OccClexulatorZrOTest_Clexulator::eval_bfunc_15_0<double>;
+      &OccClexulatorZrOTest_Clexulator_default::eval_bfunc_15_0<double>;
 
   m_flower_func_table_0[0][0] =
-      &OccClexulatorZrOTest_Clexulator::zero_func<double>;
+      &OccClexulatorZrOTest_Clexulator_default::zero_func<double>;
   m_flower_func_table_0[0][1] =
-      &OccClexulatorZrOTest_Clexulator::site_eval_bfunc_1_0_at_0<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_1_0_at_0<
+          double>;
   m_flower_func_table_0[0][2] =
-      &OccClexulatorZrOTest_Clexulator::site_eval_bfunc_2_0_at_0<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_2_0_at_0<
+          double>;
   m_flower_func_table_0[0][3] =
-      &OccClexulatorZrOTest_Clexulator::site_eval_bfunc_3_0_at_0<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_3_0_at_0<
+          double>;
   m_flower_func_table_0[0][4] =
-      &OccClexulatorZrOTest_Clexulator::site_eval_bfunc_4_0_at_0<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_4_0_at_0<
+          double>;
   m_flower_func_table_0[0][5] =
-      &OccClexulatorZrOTest_Clexulator::site_eval_bfunc_5_0_at_0<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_5_0_at_0<
+          double>;
   m_flower_func_table_0[0][6] =
-      &OccClexulatorZrOTest_Clexulator::site_eval_bfunc_6_0_at_0<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_6_0_at_0<
+          double>;
   m_flower_func_table_0[0][7] =
-      &OccClexulatorZrOTest_Clexulator::site_eval_bfunc_7_0_at_0<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_7_0_at_0<
+          double>;
   m_flower_func_table_0[0][8] =
-      &OccClexulatorZrOTest_Clexulator::site_eval_bfunc_8_0_at_0<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_8_0_at_0<
+          double>;
   m_flower_func_table_0[0][9] =
-      &OccClexulatorZrOTest_Clexulator::site_eval_bfunc_9_0_at_0<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_9_0_at_0<
+          double>;
   m_flower_func_table_0[0][10] =
-      &OccClexulatorZrOTest_Clexulator::site_eval_bfunc_10_0_at_0<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_10_0_at_0<
+          double>;
   m_flower_func_table_0[0][11] =
-      &OccClexulatorZrOTest_Clexulator::site_eval_bfunc_11_0_at_0<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_11_0_at_0<
+          double>;
   m_flower_func_table_0[0][12] =
-      &OccClexulatorZrOTest_Clexulator::site_eval_bfunc_12_0_at_0<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_12_0_at_0<
+          double>;
   m_flower_func_table_0[0][13] =
-      &OccClexulatorZrOTest_Clexulator::site_eval_bfunc_13_0_at_0<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_13_0_at_0<
+          double>;
   m_flower_func_table_0[0][14] =
-      &OccClexulatorZrOTest_Clexulator::site_eval_bfunc_14_0_at_0<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_14_0_at_0<
+          double>;
   m_flower_func_table_0[0][15] =
-      &OccClexulatorZrOTest_Clexulator::site_eval_bfunc_15_0_at_0<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_15_0_at_0<
+          double>;
 
   m_flower_func_table_0[1][0] =
-      &OccClexulatorZrOTest_Clexulator::zero_func<double>;
+      &OccClexulatorZrOTest_Clexulator_default::zero_func<double>;
   m_flower_func_table_0[1][1] =
-      &OccClexulatorZrOTest_Clexulator::site_eval_bfunc_1_0_at_1<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_1_0_at_1<
+          double>;
   m_flower_func_table_0[1][2] =
-      &OccClexulatorZrOTest_Clexulator::site_eval_bfunc_2_0_at_1<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_2_0_at_1<
+          double>;
   m_flower_func_table_0[1][3] =
-      &OccClexulatorZrOTest_Clexulator::site_eval_bfunc_3_0_at_1<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_3_0_at_1<
+          double>;
   m_flower_func_table_0[1][4] =
-      &OccClexulatorZrOTest_Clexulator::site_eval_bfunc_4_0_at_1<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_4_0_at_1<
+          double>;
   m_flower_func_table_0[1][5] =
-      &OccClexulatorZrOTest_Clexulator::site_eval_bfunc_5_0_at_1<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_5_0_at_1<
+          double>;
   m_flower_func_table_0[1][6] =
-      &OccClexulatorZrOTest_Clexulator::site_eval_bfunc_6_0_at_1<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_6_0_at_1<
+          double>;
   m_flower_func_table_0[1][7] =
-      &OccClexulatorZrOTest_Clexulator::site_eval_bfunc_7_0_at_1<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_7_0_at_1<
+          double>;
   m_flower_func_table_0[1][8] =
-      &OccClexulatorZrOTest_Clexulator::site_eval_bfunc_8_0_at_1<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_8_0_at_1<
+          double>;
   m_flower_func_table_0[1][9] =
-      &OccClexulatorZrOTest_Clexulator::site_eval_bfunc_9_0_at_1<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_9_0_at_1<
+          double>;
   m_flower_func_table_0[1][10] =
-      &OccClexulatorZrOTest_Clexulator::site_eval_bfunc_10_0_at_1<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_10_0_at_1<
+          double>;
   m_flower_func_table_0[1][11] =
-      &OccClexulatorZrOTest_Clexulator::site_eval_bfunc_11_0_at_1<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_11_0_at_1<
+          double>;
   m_flower_func_table_0[1][12] =
-      &OccClexulatorZrOTest_Clexulator::site_eval_bfunc_12_0_at_1<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_12_0_at_1<
+          double>;
   m_flower_func_table_0[1][13] =
-      &OccClexulatorZrOTest_Clexulator::site_eval_bfunc_13_0_at_1<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_13_0_at_1<
+          double>;
   m_flower_func_table_0[1][14] =
-      &OccClexulatorZrOTest_Clexulator::site_eval_bfunc_14_0_at_1<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_14_0_at_1<
+          double>;
   m_flower_func_table_0[1][15] =
-      &OccClexulatorZrOTest_Clexulator::site_eval_bfunc_15_0_at_1<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_15_0_at_1<
+          double>;
 
   m_delta_func_table_0[0][0] =
-      &OccClexulatorZrOTest_Clexulator::zero_func<double>;
+      &OccClexulatorZrOTest_Clexulator_default::zero_func<double>;
   m_delta_func_table_0[0][1] =
-      &OccClexulatorZrOTest_Clexulator::site_deval_bfunc_1_0_at_0<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_1_0_at_0<
+          double>;
   m_delta_func_table_0[0][2] =
-      &OccClexulatorZrOTest_Clexulator::site_deval_bfunc_2_0_at_0<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_2_0_at_0<
+          double>;
   m_delta_func_table_0[0][3] =
-      &OccClexulatorZrOTest_Clexulator::site_deval_bfunc_3_0_at_0<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_3_0_at_0<
+          double>;
   m_delta_func_table_0[0][4] =
-      &OccClexulatorZrOTest_Clexulator::site_deval_bfunc_4_0_at_0<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_4_0_at_0<
+          double>;
   m_delta_func_table_0[0][5] =
-      &OccClexulatorZrOTest_Clexulator::site_deval_bfunc_5_0_at_0<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_5_0_at_0<
+          double>;
   m_delta_func_table_0[0][6] =
-      &OccClexulatorZrOTest_Clexulator::site_deval_bfunc_6_0_at_0<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_6_0_at_0<
+          double>;
   m_delta_func_table_0[0][7] =
-      &OccClexulatorZrOTest_Clexulator::site_deval_bfunc_7_0_at_0<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_7_0_at_0<
+          double>;
   m_delta_func_table_0[0][8] =
-      &OccClexulatorZrOTest_Clexulator::site_deval_bfunc_8_0_at_0<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_8_0_at_0<
+          double>;
   m_delta_func_table_0[0][9] =
-      &OccClexulatorZrOTest_Clexulator::site_deval_bfunc_9_0_at_0<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_9_0_at_0<
+          double>;
   m_delta_func_table_0[0][10] =
-      &OccClexulatorZrOTest_Clexulator::site_deval_bfunc_10_0_at_0<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_10_0_at_0<
+          double>;
   m_delta_func_table_0[0][11] =
-      &OccClexulatorZrOTest_Clexulator::site_deval_bfunc_11_0_at_0<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_11_0_at_0<
+          double>;
   m_delta_func_table_0[0][12] =
-      &OccClexulatorZrOTest_Clexulator::site_deval_bfunc_12_0_at_0<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_12_0_at_0<
+          double>;
   m_delta_func_table_0[0][13] =
-      &OccClexulatorZrOTest_Clexulator::site_deval_bfunc_13_0_at_0<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_13_0_at_0<
+          double>;
   m_delta_func_table_0[0][14] =
-      &OccClexulatorZrOTest_Clexulator::site_deval_bfunc_14_0_at_0<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_14_0_at_0<
+          double>;
   m_delta_func_table_0[0][15] =
-      &OccClexulatorZrOTest_Clexulator::site_deval_bfunc_15_0_at_0<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_15_0_at_0<
+          double>;
 
   m_delta_func_table_0[1][0] =
-      &OccClexulatorZrOTest_Clexulator::zero_func<double>;
+      &OccClexulatorZrOTest_Clexulator_default::zero_func<double>;
   m_delta_func_table_0[1][1] =
-      &OccClexulatorZrOTest_Clexulator::site_deval_bfunc_1_0_at_1<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_1_0_at_1<
+          double>;
   m_delta_func_table_0[1][2] =
-      &OccClexulatorZrOTest_Clexulator::site_deval_bfunc_2_0_at_1<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_2_0_at_1<
+          double>;
   m_delta_func_table_0[1][3] =
-      &OccClexulatorZrOTest_Clexulator::site_deval_bfunc_3_0_at_1<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_3_0_at_1<
+          double>;
   m_delta_func_table_0[1][4] =
-      &OccClexulatorZrOTest_Clexulator::site_deval_bfunc_4_0_at_1<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_4_0_at_1<
+          double>;
   m_delta_func_table_0[1][5] =
-      &OccClexulatorZrOTest_Clexulator::site_deval_bfunc_5_0_at_1<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_5_0_at_1<
+          double>;
   m_delta_func_table_0[1][6] =
-      &OccClexulatorZrOTest_Clexulator::site_deval_bfunc_6_0_at_1<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_6_0_at_1<
+          double>;
   m_delta_func_table_0[1][7] =
-      &OccClexulatorZrOTest_Clexulator::site_deval_bfunc_7_0_at_1<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_7_0_at_1<
+          double>;
   m_delta_func_table_0[1][8] =
-      &OccClexulatorZrOTest_Clexulator::site_deval_bfunc_8_0_at_1<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_8_0_at_1<
+          double>;
   m_delta_func_table_0[1][9] =
-      &OccClexulatorZrOTest_Clexulator::site_deval_bfunc_9_0_at_1<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_9_0_at_1<
+          double>;
   m_delta_func_table_0[1][10] =
-      &OccClexulatorZrOTest_Clexulator::site_deval_bfunc_10_0_at_1<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_10_0_at_1<
+          double>;
   m_delta_func_table_0[1][11] =
-      &OccClexulatorZrOTest_Clexulator::site_deval_bfunc_11_0_at_1<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_11_0_at_1<
+          double>;
   m_delta_func_table_0[1][12] =
-      &OccClexulatorZrOTest_Clexulator::site_deval_bfunc_12_0_at_1<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_12_0_at_1<
+          double>;
   m_delta_func_table_0[1][13] =
-      &OccClexulatorZrOTest_Clexulator::site_deval_bfunc_13_0_at_1<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_13_0_at_1<
+          double>;
   m_delta_func_table_0[1][14] =
-      &OccClexulatorZrOTest_Clexulator::site_deval_bfunc_14_0_at_1<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_14_0_at_1<
+          double>;
   m_delta_func_table_0[1][15] =
-      &OccClexulatorZrOTest_Clexulator::site_deval_bfunc_15_0_at_1<double>;
+      &OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_15_0_at_1<
+          double>;
 
   m_weight_matrix.row(0) << 2, -1, 0;
   m_weight_matrix.row(1) << -1, 2, 0;
@@ -997,12 +1061,13 @@ OccClexulatorZrOTest_Clexulator::OccClexulatorZrOTest_Clexulator()
       xtal::UnitCellCoord(3, 1, 1, 0),    xtal::UnitCellCoord(2, 1, 1, 1)};
 }
 
-OccClexulatorZrOTest_Clexulator::~OccClexulatorZrOTest_Clexulator() {
+OccClexulatorZrOTest_Clexulator_default::
+    ~OccClexulatorZrOTest_Clexulator_default() {
   // nothing here for now
 }
 
 /// \brief Calculate contribution to global correlations from one unit cell
-void OccClexulatorZrOTest_Clexulator::_calc_global_corr_contribution(
+void OccClexulatorZrOTest_Clexulator_default::_calc_global_corr_contribution(
     double *corr_begin) const {
   _calc_global_corr_contribution();
   for (size_type i = 0; i < corr_size(); i++) {
@@ -1012,7 +1077,8 @@ void OccClexulatorZrOTest_Clexulator::_calc_global_corr_contribution(
 }
 
 /// \brief Calculate contribution to global correlations from one unit cell
-void OccClexulatorZrOTest_Clexulator::_calc_global_corr_contribution() const {
+void OccClexulatorZrOTest_Clexulator_default::_calc_global_corr_contribution()
+    const {
   m_params.pre_eval();
   {
     _global_prepare<double>();
@@ -1026,9 +1092,10 @@ void OccClexulatorZrOTest_Clexulator::_calc_global_corr_contribution() const {
 
 /// \brief Calculate contribution to select global correlations from one unit
 /// cell
-void OccClexulatorZrOTest_Clexulator::_calc_restricted_global_corr_contribution(
-    double *corr_begin, size_type const *ind_list_begin,
-    size_type const *ind_list_end) const {
+void OccClexulatorZrOTest_Clexulator_default::
+    _calc_restricted_global_corr_contribution(
+        double *corr_begin, size_type const *ind_list_begin,
+        size_type const *ind_list_end) const {
   _calc_restricted_global_corr_contribution(ind_list_begin, ind_list_end);
   for (; ind_list_begin < ind_list_end; ind_list_begin++) {
     *(corr_begin + *ind_list_begin) = ParamPack::Val<double>::get(
@@ -1038,8 +1105,9 @@ void OccClexulatorZrOTest_Clexulator::_calc_restricted_global_corr_contribution(
 
 /// \brief Calculate contribution to select global correlations from one unit
 /// cell
-void OccClexulatorZrOTest_Clexulator::_calc_restricted_global_corr_contribution(
-    size_type const *ind_list_begin, size_type const *ind_list_end) const {
+void OccClexulatorZrOTest_Clexulator_default::
+    _calc_restricted_global_corr_contribution(
+        size_type const *ind_list_begin, size_type const *ind_list_end) const {
   m_params.pre_eval();
   {
     _global_prepare<double>();
@@ -1053,7 +1121,7 @@ void OccClexulatorZrOTest_Clexulator::_calc_restricted_global_corr_contribution(
 }
 
 /// \brief Calculate point correlations about basis site 'nlist_ind'
-void OccClexulatorZrOTest_Clexulator::_calc_point_corr(
+void OccClexulatorZrOTest_Clexulator_default::_calc_point_corr(
     int nlist_ind, double *corr_begin) const {
   _calc_point_corr(nlist_ind);
   for (size_type i = 0; i < corr_size(); i++) {
@@ -1063,7 +1131,8 @@ void OccClexulatorZrOTest_Clexulator::_calc_point_corr(
 }
 
 /// \brief Calculate point correlations about basis site 'nlist_ind'
-void OccClexulatorZrOTest_Clexulator::_calc_point_corr(int nlist_ind) const {
+void OccClexulatorZrOTest_Clexulator_default::_calc_point_corr(
+    int nlist_ind) const {
   m_params.pre_eval();
   {
     _point_prepare<double>(nlist_ind);
@@ -1077,7 +1146,7 @@ void OccClexulatorZrOTest_Clexulator::_calc_point_corr(int nlist_ind) const {
 }
 
 /// \brief Calculate select point correlations about basis site 'nlist_ind'
-void OccClexulatorZrOTest_Clexulator::_calc_restricted_point_corr(
+void OccClexulatorZrOTest_Clexulator_default::_calc_restricted_point_corr(
     int nlist_ind, double *corr_begin, size_type const *ind_list_begin,
     size_type const *ind_list_end) const {
   _calc_restricted_point_corr(nlist_ind, ind_list_begin, ind_list_end);
@@ -1088,7 +1157,7 @@ void OccClexulatorZrOTest_Clexulator::_calc_restricted_point_corr(
 }
 
 /// \brief Calculate select point correlations about basis site 'nlist_ind'
-void OccClexulatorZrOTest_Clexulator::_calc_restricted_point_corr(
+void OccClexulatorZrOTest_Clexulator_default::_calc_restricted_point_corr(
     int nlist_ind, size_type const *ind_list_begin,
     size_type const *ind_list_end) const {
   m_params.pre_eval();
@@ -1105,7 +1174,7 @@ void OccClexulatorZrOTest_Clexulator::_calc_restricted_point_corr(
 
 /// \brief Calculate the change in point correlations due to changing an
 /// occupant
-void OccClexulatorZrOTest_Clexulator::_calc_delta_point_corr(
+void OccClexulatorZrOTest_Clexulator_default::_calc_delta_point_corr(
     int nlist_ind, int occ_i, int occ_f, double *corr_begin) const {
   _calc_delta_point_corr(nlist_ind, occ_i, occ_f);
   for (size_type i = 0; i < corr_size(); i++) {
@@ -1116,9 +1185,8 @@ void OccClexulatorZrOTest_Clexulator::_calc_delta_point_corr(
 
 /// \brief Calculate the change in point correlations due to changing an
 /// occupant
-void OccClexulatorZrOTest_Clexulator::_calc_delta_point_corr(int nlist_ind,
-                                                             int occ_i,
-                                                             int occ_f) const {
+void OccClexulatorZrOTest_Clexulator_default::_calc_delta_point_corr(
+    int nlist_ind, int occ_i, int occ_f) const {
   m_params.pre_eval();
   {
     _point_prepare<double>(nlist_ind);
@@ -1133,7 +1201,7 @@ void OccClexulatorZrOTest_Clexulator::_calc_delta_point_corr(int nlist_ind,
 
 /// \brief Calculate the change in select point correlations due to changing an
 /// occupant
-void OccClexulatorZrOTest_Clexulator::_calc_restricted_delta_point_corr(
+void OccClexulatorZrOTest_Clexulator_default::_calc_restricted_delta_point_corr(
     int nlist_ind, int occ_i, int occ_f, double *corr_begin,
     size_type const *ind_list_begin, size_type const *ind_list_end) const {
   _calc_restricted_delta_point_corr(nlist_ind, occ_i, occ_f, ind_list_begin,
@@ -1146,7 +1214,7 @@ void OccClexulatorZrOTest_Clexulator::_calc_restricted_delta_point_corr(
 
 /// \brief Calculate the change in select point correlations due to changing an
 /// occupant
-void OccClexulatorZrOTest_Clexulator::_calc_restricted_delta_point_corr(
+void OccClexulatorZrOTest_Clexulator_default::_calc_restricted_delta_point_corr(
     int nlist_ind, int occ_i, int occ_f, size_type const *ind_list_begin,
     size_type const *ind_list_end) const {
   m_params.pre_eval();
@@ -1163,7 +1231,8 @@ void OccClexulatorZrOTest_Clexulator::_calc_restricted_delta_point_corr(
 }
 
 template <typename Scalar>
-void OccClexulatorZrOTest_Clexulator::_point_prepare(int nlist_ind) const {
+void OccClexulatorZrOTest_Clexulator_default::_point_prepare(
+    int nlist_ind) const {
   switch (nlist_ind) {
     case 0:
       if (m_params.eval_mode(m_occ_site_func_param_key) != ParamPack::READ) {
@@ -1292,7 +1361,7 @@ void OccClexulatorZrOTest_Clexulator::_point_prepare(int nlist_ind) const {
   }
 }
 template <typename Scalar>
-void OccClexulatorZrOTest_Clexulator::_global_prepare() const {
+void OccClexulatorZrOTest_Clexulator_default::_global_prepare() const {
   if (m_params.eval_mode(m_occ_site_func_param_key) != ParamPack::READ) {
     ParamPack::Val<Scalar>::set(m_params, m_occ_site_func_param_key, 0, 0,
                                 eval_occ_func_2_0(0));
@@ -1383,7 +1452,7 @@ void OccClexulatorZrOTest_Clexulator::_global_prepare() const {
 
 // Basis functions for empty cluster:
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::eval_bfunc_0_0() const {
+Scalar OccClexulatorZrOTest_Clexulator_default::eval_bfunc_0_0() const {
   return 1;
 }
 
@@ -1392,27 +1461,29 @@ Scalar OccClexulatorZrOTest_Clexulator::eval_bfunc_0_0() const {
 
 ****/
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::eval_bfunc_1_0() const {
+Scalar OccClexulatorZrOTest_Clexulator_default::eval_bfunc_1_0() const {
   return (occ_func_2_0(0) + occ_func_2_0(1)) / 2.;
 }
 
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_1_0_at_0() const {
+Scalar OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_1_0_at_0()
+    const {
   return (occ_func_2_0(0)) / 2.;
 }
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_1_0_at_1() const {
+Scalar OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_1_0_at_1()
+    const {
   return (occ_func_2_0(1)) / 2.;
 }
 
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_1_0_at_0(
+Scalar OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_1_0_at_0(
     int occ_i, int occ_f) const {
   return (m_occ_func_2_0[occ_f] - m_occ_func_2_0[occ_i]) * (1) / 2.;
 }
 
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_1_0_at_1(
+Scalar OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_1_0_at_1(
     int occ_i, int occ_f) const {
   return (m_occ_func_3_0[occ_f] - m_occ_func_3_0[occ_i]) * (1) / 2.;
 }
@@ -1424,34 +1495,36 @@ Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_1_0_at_1(
 
 ****/
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::eval_bfunc_2_0() const {
+Scalar OccClexulatorZrOTest_Clexulator_default::eval_bfunc_2_0() const {
   return (occ_func_2_0(0) * occ_func_3_0(1) +
           occ_func_2_0(1) * occ_func_3_0(16)) /
          2.;
 }
 
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_2_0_at_0() const {
+Scalar OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_2_0_at_0()
+    const {
   return (occ_func_2_0(0) * occ_func_3_0(1) +
           occ_func_2_0(15) * occ_func_3_0(0)) /
          2.;
 }
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_2_0_at_1() const {
+Scalar OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_2_0_at_1()
+    const {
   return (occ_func_2_0(0) * occ_func_3_0(1) +
           occ_func_2_0(1) * occ_func_3_0(16)) /
          2.;
 }
 
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_2_0_at_0(
+Scalar OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_2_0_at_0(
     int occ_i, int occ_f) const {
   return (m_occ_func_2_0[occ_f] - m_occ_func_2_0[occ_i]) *
          (occ_func_3_0(1) + occ_func_2_0(15)) / 2.;
 }
 
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_2_0_at_1(
+Scalar OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_2_0_at_1(
     int occ_i, int occ_f) const {
   return (m_occ_func_3_0[occ_f] - m_occ_func_3_0[occ_i]) *
          (occ_func_2_0(0) + occ_func_3_0(16)) / 2.;
@@ -1464,7 +1537,7 @@ Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_2_0_at_1(
 
 ****/
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::eval_bfunc_3_0() const {
+Scalar OccClexulatorZrOTest_Clexulator_default::eval_bfunc_3_0() const {
   return (occ_func_2_0(0) * occ_func_2_0(8) +
           occ_func_2_0(11) * occ_func_2_0(1) +
           occ_func_2_0(1) * occ_func_2_0(13) +
@@ -1475,7 +1548,8 @@ Scalar OccClexulatorZrOTest_Clexulator::eval_bfunc_3_0() const {
 }
 
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_3_0_at_0() const {
+Scalar OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_3_0_at_0()
+    const {
   return (occ_func_2_0(0) * occ_func_2_0(8) +
           occ_func_2_0(6) * occ_func_2_0(0) +
           occ_func_2_0(12) * occ_func_2_0(0) +
@@ -1485,7 +1559,8 @@ Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_3_0_at_0() const {
          6.;
 }
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_3_0_at_1() const {
+Scalar OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_3_0_at_1()
+    const {
   return (occ_func_2_0(11) * occ_func_2_0(1) +
           occ_func_2_0(1) * occ_func_2_0(5) +
           occ_func_2_0(1) * occ_func_2_0(13) +
@@ -1496,7 +1571,7 @@ Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_3_0_at_1() const {
 }
 
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_3_0_at_0(
+Scalar OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_3_0_at_0(
     int occ_i, int occ_f) const {
   return (m_occ_func_2_0[occ_f] - m_occ_func_2_0[occ_i]) *
          (occ_func_2_0(8) + occ_func_2_0(6) + occ_func_2_0(12) +
@@ -1505,7 +1580,7 @@ Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_3_0_at_0(
 }
 
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_3_0_at_1(
+Scalar OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_3_0_at_1(
     int occ_i, int occ_f) const {
   return (m_occ_func_3_0[occ_f] - m_occ_func_3_0[occ_i]) *
          (occ_func_2_0(11) + occ_func_2_0(5) + occ_func_2_0(13) +
@@ -1520,7 +1595,7 @@ Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_3_0_at_1(
 
 ****/
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::eval_bfunc_4_0() const {
+Scalar OccClexulatorZrOTest_Clexulator_default::eval_bfunc_4_0() const {
   return (occ_func_2_0(0) * occ_func_3_0(51) +
           occ_func_2_0(1) * occ_func_3_0(8) +
           occ_func_2_0(1) * occ_func_3_0(10) +
@@ -1537,7 +1612,8 @@ Scalar OccClexulatorZrOTest_Clexulator::eval_bfunc_4_0() const {
 }
 
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_4_0_at_0() const {
+Scalar OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_4_0_at_0()
+    const {
   return (occ_func_2_0(0) * occ_func_3_0(51) +
           occ_func_2_0(7) * occ_func_3_0(0) +
           occ_func_2_0(5) * occ_func_3_0(0) +
@@ -1553,7 +1629,8 @@ Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_4_0_at_0() const {
          12.;
 }
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_4_0_at_1() const {
+Scalar OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_4_0_at_1()
+    const {
   return (occ_func_2_0(32) * occ_func_3_0(1) +
           occ_func_2_0(1) * occ_func_3_0(8) +
           occ_func_2_0(1) * occ_func_3_0(10) +
@@ -1570,7 +1647,7 @@ Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_4_0_at_1() const {
 }
 
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_4_0_at_0(
+Scalar OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_4_0_at_0(
     int occ_i, int occ_f) const {
   return (m_occ_func_2_0[occ_f] - m_occ_func_2_0[occ_i]) *
          (occ_func_3_0(51) + occ_func_2_0(7) + occ_func_2_0(5) +
@@ -1581,7 +1658,7 @@ Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_4_0_at_0(
 }
 
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_4_0_at_1(
+Scalar OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_4_0_at_1(
     int occ_i, int occ_f) const {
   return (m_occ_func_3_0[occ_f] - m_occ_func_3_0[occ_i]) *
          (occ_func_2_0(32) + occ_func_3_0(8) + occ_func_3_0(10) +
@@ -1598,34 +1675,36 @@ Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_4_0_at_1(
 
 ****/
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::eval_bfunc_5_0() const {
+Scalar OccClexulatorZrOTest_Clexulator_default::eval_bfunc_5_0() const {
   return (occ_func_2_0(0) * occ_func_2_0(16) +
           occ_func_2_0(1) * occ_func_2_0(17)) /
          2.;
 }
 
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_5_0_at_0() const {
+Scalar OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_5_0_at_0()
+    const {
   return (occ_func_2_0(0) * occ_func_2_0(16) +
           occ_func_2_0(14) * occ_func_2_0(0)) /
          2.;
 }
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_5_0_at_1() const {
+Scalar OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_5_0_at_1()
+    const {
   return (occ_func_2_0(1) * occ_func_2_0(17) +
           occ_func_2_0(15) * occ_func_2_0(1)) /
          2.;
 }
 
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_5_0_at_0(
+Scalar OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_5_0_at_0(
     int occ_i, int occ_f) const {
   return (m_occ_func_2_0[occ_f] - m_occ_func_2_0[occ_i]) *
          (occ_func_2_0(16) + occ_func_2_0(14)) / 2.;
 }
 
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_5_0_at_1(
+Scalar OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_5_0_at_1(
     int occ_i, int occ_f) const {
   return (m_occ_func_3_0[occ_f] - m_occ_func_3_0[occ_i]) *
          (occ_func_2_0(17) + occ_func_2_0(15)) / 2.;
@@ -1638,7 +1717,7 @@ Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_5_0_at_1(
 
 ****/
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::eval_bfunc_6_0() const {
+Scalar OccClexulatorZrOTest_Clexulator_default::eval_bfunc_6_0() const {
   return (occ_func_2_0(0) * occ_func_2_0(28) +
           occ_func_2_0(1) * occ_func_2_0(27) +
           occ_func_2_0(1) * occ_func_2_0(25) +
@@ -1649,7 +1728,8 @@ Scalar OccClexulatorZrOTest_Clexulator::eval_bfunc_6_0() const {
 }
 
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_6_0_at_0() const {
+Scalar OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_6_0_at_0()
+    const {
   return (occ_func_2_0(0) * occ_func_2_0(28) +
           occ_func_2_0(18) * occ_func_2_0(0) +
           occ_func_2_0(24) * occ_func_2_0(0) +
@@ -1659,7 +1739,8 @@ Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_6_0_at_0() const {
          6.;
 }
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_6_0_at_1() const {
+Scalar OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_6_0_at_1()
+    const {
   return (occ_func_2_0(1) * occ_func_2_0(27) +
           occ_func_2_0(21) * occ_func_2_0(1) +
           occ_func_2_0(1) * occ_func_2_0(25) +
@@ -1670,7 +1751,7 @@ Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_6_0_at_1() const {
 }
 
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_6_0_at_0(
+Scalar OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_6_0_at_0(
     int occ_i, int occ_f) const {
   return (m_occ_func_2_0[occ_f] - m_occ_func_2_0[occ_i]) *
          (occ_func_2_0(28) + occ_func_2_0(18) + occ_func_2_0(24) +
@@ -1679,7 +1760,7 @@ Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_6_0_at_0(
 }
 
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_6_0_at_1(
+Scalar OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_6_0_at_1(
     int occ_i, int occ_f) const {
   return (m_occ_func_3_0[occ_f] - m_occ_func_3_0[occ_i]) *
          (occ_func_2_0(27) + occ_func_2_0(21) + occ_func_2_0(25) +
@@ -1696,7 +1777,7 @@ Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_6_0_at_1(
 
 ****/
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::eval_bfunc_7_0() const {
+Scalar OccClexulatorZrOTest_Clexulator_default::eval_bfunc_7_0() const {
   return (occ_func_2_0(0) * occ_func_2_0(8) * occ_func_2_0(12) +
           occ_func_2_0(11) * occ_func_2_0(1) * occ_func_2_0(13) +
           occ_func_2_0(10) * occ_func_2_0(12) * occ_func_2_0(0) +
@@ -1705,7 +1786,8 @@ Scalar OccClexulatorZrOTest_Clexulator::eval_bfunc_7_0() const {
 }
 
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_7_0_at_0() const {
+Scalar OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_7_0_at_0()
+    const {
   return (occ_func_2_0(0) * occ_func_2_0(8) * occ_func_2_0(12) +
           occ_func_2_0(6) * occ_func_2_0(0) * occ_func_2_0(10) +
           occ_func_2_0(2) * occ_func_2_0(4) * occ_func_2_0(0) +
@@ -1715,7 +1797,8 @@ Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_7_0_at_0() const {
          4.;
 }
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_7_0_at_1() const {
+Scalar OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_7_0_at_1()
+    const {
   return (occ_func_2_0(11) * occ_func_2_0(1) * occ_func_2_0(13) +
           occ_func_2_0(1) * occ_func_2_0(5) * occ_func_2_0(9) +
           occ_func_2_0(7) * occ_func_2_0(3) * occ_func_2_0(1) +
@@ -1726,7 +1809,7 @@ Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_7_0_at_1() const {
 }
 
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_7_0_at_0(
+Scalar OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_7_0_at_0(
     int occ_i, int occ_f) const {
   return (m_occ_func_2_0[occ_f] - m_occ_func_2_0[occ_i]) *
          (occ_func_2_0(8) * occ_func_2_0(12) +
@@ -1739,7 +1822,7 @@ Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_7_0_at_0(
 }
 
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_7_0_at_1(
+Scalar OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_7_0_at_1(
     int occ_i, int occ_f) const {
   return (m_occ_func_3_0[occ_f] - m_occ_func_3_0[occ_i]) *
          (occ_func_2_0(11) * occ_func_2_0(13) +
@@ -1760,7 +1843,7 @@ Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_7_0_at_1(
 
 ****/
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::eval_bfunc_8_0() const {
+Scalar OccClexulatorZrOTest_Clexulator_default::eval_bfunc_8_0() const {
   return (occ_func_2_0(0) * occ_func_3_0(1) * occ_func_2_0(8) +
           occ_func_2_0(11) * occ_func_3_0(48) * occ_func_2_0(1) +
           occ_func_2_0(1) * occ_func_3_0(16) * occ_func_2_0(13) +
@@ -1789,7 +1872,8 @@ Scalar OccClexulatorZrOTest_Clexulator::eval_bfunc_8_0() const {
 }
 
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_8_0_at_0() const {
+Scalar OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_8_0_at_0()
+    const {
   return (occ_func_2_0(0) * occ_func_3_0(1) * occ_func_2_0(8) +
           occ_func_2_0(6) * occ_func_3_0(7) * occ_func_2_0(0) +
           occ_func_2_0(15) * occ_func_3_0(0) * occ_func_2_0(35) +
@@ -1829,7 +1913,8 @@ Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_8_0_at_0() const {
          24.;
 }
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_8_0_at_1() const {
+Scalar OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_8_0_at_1()
+    const {
   return (occ_func_2_0(0) * occ_func_3_0(1) * occ_func_2_0(8) +
           occ_func_2_0(11) * occ_func_3_0(48) * occ_func_2_0(1) +
           occ_func_2_0(1) * occ_func_3_0(16) * occ_func_2_0(5) +
@@ -1870,7 +1955,7 @@ Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_8_0_at_1() const {
 }
 
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_8_0_at_0(
+Scalar OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_8_0_at_0(
     int occ_i, int occ_f) const {
   return (m_occ_func_2_0[occ_f] - m_occ_func_2_0[occ_i]) *
          (occ_func_3_0(1) * occ_func_2_0(8) +
@@ -1913,7 +1998,7 @@ Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_8_0_at_0(
 }
 
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_8_0_at_1(
+Scalar OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_8_0_at_1(
     int occ_i, int occ_f) const {
   return (m_occ_func_3_0[occ_f] - m_occ_func_3_0[occ_i]) *
          (occ_func_2_0(0) * occ_func_2_0(8) +
@@ -1964,7 +2049,7 @@ Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_8_0_at_1(
 
 ****/
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::eval_bfunc_9_0() const {
+Scalar OccClexulatorZrOTest_Clexulator_default::eval_bfunc_9_0() const {
   return (occ_func_2_0(0) * occ_func_2_0(8) * occ_func_3_0(51) +
           occ_func_2_0(11) * occ_func_2_0(1) * occ_func_3_0(12) +
           occ_func_2_0(1) * occ_func_2_0(13) * occ_func_3_0(10) +
@@ -1981,7 +2066,8 @@ Scalar OccClexulatorZrOTest_Clexulator::eval_bfunc_9_0() const {
 }
 
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_9_0_at_0() const {
+Scalar OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_9_0_at_0()
+    const {
   return (occ_func_2_0(0) * occ_func_2_0(8) * occ_func_3_0(51) +
           occ_func_2_0(6) * occ_func_2_0(0) * occ_func_3_0(47) +
           occ_func_2_0(7) * occ_func_2_0(3) * occ_func_3_0(0) +
@@ -2003,7 +2089,8 @@ Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_9_0_at_0() const {
          12.;
 }
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_9_0_at_1() const {
+Scalar OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_9_0_at_1()
+    const {
   return (occ_func_2_0(32) * occ_func_2_0(36) * occ_func_3_0(1) +
           occ_func_2_0(11) * occ_func_2_0(1) * occ_func_3_0(12) +
           occ_func_2_0(1) * occ_func_2_0(5) * occ_func_3_0(8) +
@@ -2026,7 +2113,7 @@ Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_9_0_at_1() const {
 }
 
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_9_0_at_0(
+Scalar OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_9_0_at_0(
     int occ_i, int occ_f) const {
   return (m_occ_func_2_0[occ_f] - m_occ_func_2_0[occ_i]) *
          (occ_func_2_0(8) * occ_func_3_0(51) +
@@ -2051,7 +2138,7 @@ Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_9_0_at_0(
 }
 
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_9_0_at_1(
+Scalar OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_9_0_at_1(
     int occ_i, int occ_f) const {
   return (m_occ_func_3_0[occ_f] - m_occ_func_3_0[occ_i]) *
          (occ_func_2_0(32) * occ_func_2_0(36) +
@@ -2084,7 +2171,7 @@ Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_9_0_at_1(
 
 ****/
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::eval_bfunc_10_0() const {
+Scalar OccClexulatorZrOTest_Clexulator_default::eval_bfunc_10_0() const {
   return (occ_func_2_0(0) * occ_func_2_0(8) * occ_func_3_0(13) +
           occ_func_2_0(11) * occ_func_2_0(1) * occ_func_3_0(52) +
           occ_func_2_0(1) * occ_func_2_0(13) * occ_func_3_0(48) +
@@ -2101,7 +2188,8 @@ Scalar OccClexulatorZrOTest_Clexulator::eval_bfunc_10_0() const {
 }
 
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_10_0_at_0() const {
+Scalar OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_10_0_at_0()
+    const {
   return (occ_func_2_0(0) * occ_func_2_0(8) * occ_func_3_0(13) +
           occ_func_2_0(6) * occ_func_2_0(0) * occ_func_3_0(11) +
           occ_func_2_0(39) * occ_func_2_0(31) * occ_func_3_0(0) +
@@ -2123,7 +2211,8 @@ Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_10_0_at_0() const {
          12.;
 }
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_10_0_at_1() const {
+Scalar OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_10_0_at_1()
+    const {
   return (occ_func_2_0(2) * occ_func_2_0(4) * occ_func_3_0(1) +
           occ_func_2_0(11) * occ_func_2_0(1) * occ_func_3_0(52) +
           occ_func_2_0(1) * occ_func_2_0(5) * occ_func_3_0(44) +
@@ -2146,7 +2235,7 @@ Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_10_0_at_1() const {
 }
 
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_10_0_at_0(
+Scalar OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_10_0_at_0(
     int occ_i, int occ_f) const {
   return (m_occ_func_2_0[occ_f] - m_occ_func_2_0[occ_i]) *
          (occ_func_2_0(8) * occ_func_3_0(13) +
@@ -2171,7 +2260,7 @@ Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_10_0_at_0(
 }
 
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_10_0_at_1(
+Scalar OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_10_0_at_1(
     int occ_i, int occ_f) const {
   return (m_occ_func_3_0[occ_f] - m_occ_func_3_0[occ_i]) *
          (occ_func_2_0(2) * occ_func_2_0(4) +
@@ -2206,7 +2295,7 @@ Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_10_0_at_1(
 
 ****/
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::eval_bfunc_11_0() const {
+Scalar OccClexulatorZrOTest_Clexulator_default::eval_bfunc_11_0() const {
   return (occ_func_2_0(0) * occ_func_3_0(1) * occ_func_2_0(12) *
               occ_func_3_0(13) +
           occ_func_2_0(1) * occ_func_3_0(16) * occ_func_2_0(9) *
@@ -2223,7 +2312,8 @@ Scalar OccClexulatorZrOTest_Clexulator::eval_bfunc_11_0() const {
 }
 
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_11_0_at_0() const {
+Scalar OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_11_0_at_0()
+    const {
   return (occ_func_2_0(0) * occ_func_3_0(1) * occ_func_2_0(12) *
               occ_func_3_0(13) +
           occ_func_2_0(2) * occ_func_3_0(3) * occ_func_2_0(0) *
@@ -2251,7 +2341,8 @@ Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_11_0_at_0() const {
          6.;
 }
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_11_0_at_1() const {
+Scalar OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_11_0_at_1()
+    const {
   return (occ_func_2_0(0) * occ_func_3_0(1) * occ_func_2_0(12) *
               occ_func_3_0(13) +
           occ_func_2_0(2) * occ_func_3_0(3) * occ_func_2_0(0) *
@@ -2280,7 +2371,7 @@ Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_11_0_at_1() const {
 }
 
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_11_0_at_0(
+Scalar OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_11_0_at_0(
     int occ_i, int occ_f) const {
   return (m_occ_func_2_0[occ_f] - m_occ_func_2_0[occ_i]) *
          (occ_func_3_0(1) * occ_func_2_0(12) * occ_func_3_0(13) +
@@ -2299,7 +2390,7 @@ Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_11_0_at_0(
 }
 
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_11_0_at_1(
+Scalar OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_11_0_at_1(
     int occ_i, int occ_f) const {
   return (m_occ_func_3_0[occ_f] - m_occ_func_3_0[occ_i]) *
          (occ_func_2_0(0) * occ_func_2_0(12) * occ_func_3_0(13) +
@@ -2328,7 +2419,7 @@ Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_11_0_at_1(
 
 ****/
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::eval_bfunc_12_0() const {
+Scalar OccClexulatorZrOTest_Clexulator_default::eval_bfunc_12_0() const {
   return (occ_func_2_0(0) * occ_func_3_0(1) * occ_func_2_0(10) *
               occ_func_2_0(12) +
           occ_func_2_0(1) * occ_func_3_0(16) * occ_func_2_0(13) *
@@ -2357,7 +2448,8 @@ Scalar OccClexulatorZrOTest_Clexulator::eval_bfunc_12_0() const {
 }
 
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_12_0_at_0() const {
+Scalar OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_12_0_at_0()
+    const {
   return (occ_func_2_0(0) * occ_func_3_0(1) * occ_func_2_0(10) *
               occ_func_2_0(12) +
           occ_func_2_0(4) * occ_func_3_0(5) * occ_func_2_0(0) *
@@ -2409,7 +2501,8 @@ Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_12_0_at_0() const {
          12.;
 }
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_12_0_at_1() const {
+Scalar OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_12_0_at_1()
+    const {
   return (occ_func_2_0(0) * occ_func_3_0(1) * occ_func_2_0(10) *
               occ_func_2_0(12) +
           occ_func_2_0(1) * occ_func_3_0(16) * occ_func_2_0(13) *
@@ -2462,7 +2555,7 @@ Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_12_0_at_1() const {
 }
 
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_12_0_at_0(
+Scalar OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_12_0_at_0(
     int occ_i, int occ_f) const {
   return (m_occ_func_2_0[occ_f] - m_occ_func_2_0[occ_i]) *
          (occ_func_3_0(1) * occ_func_2_0(10) * occ_func_2_0(12) +
@@ -2493,7 +2586,7 @@ Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_12_0_at_0(
 }
 
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_12_0_at_1(
+Scalar OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_12_0_at_1(
     int occ_i, int occ_f) const {
   return (m_occ_func_3_0[occ_f] - m_occ_func_3_0[occ_i]) *
          (occ_func_2_0(0) * occ_func_2_0(10) * occ_func_2_0(12) +
@@ -2534,7 +2627,7 @@ Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_12_0_at_1(
 
 ****/
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::eval_bfunc_13_0() const {
+Scalar OccClexulatorZrOTest_Clexulator_default::eval_bfunc_13_0() const {
   return (occ_func_2_0(0) * occ_func_2_0(8) * occ_func_2_0(12) *
               occ_func_3_0(13) +
           occ_func_2_0(11) * occ_func_2_0(1) * occ_func_2_0(13) *
@@ -2563,7 +2656,8 @@ Scalar OccClexulatorZrOTest_Clexulator::eval_bfunc_13_0() const {
 }
 
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_13_0_at_0() const {
+Scalar OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_13_0_at_0()
+    const {
   return (occ_func_2_0(0) * occ_func_2_0(8) * occ_func_2_0(12) *
               occ_func_3_0(13) +
           occ_func_2_0(6) * occ_func_2_0(0) * occ_func_2_0(10) *
@@ -2615,7 +2709,8 @@ Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_13_0_at_0() const {
          12.;
 }
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_13_0_at_1() const {
+Scalar OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_13_0_at_1()
+    const {
   return (occ_func_2_0(2) * occ_func_2_0(4) * occ_func_2_0(0) *
               occ_func_3_0(1) +
           occ_func_2_0(11) * occ_func_2_0(1) * occ_func_2_0(13) *
@@ -2668,7 +2763,7 @@ Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_13_0_at_1() const {
 }
 
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_13_0_at_0(
+Scalar OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_13_0_at_0(
     int occ_i, int occ_f) const {
   return (m_occ_func_2_0[occ_f] - m_occ_func_2_0[occ_i]) *
          (occ_func_2_0(8) * occ_func_2_0(12) * occ_func_3_0(13) +
@@ -2699,7 +2794,7 @@ Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_13_0_at_0(
 }
 
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_13_0_at_1(
+Scalar OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_13_0_at_1(
     int occ_i, int occ_f) const {
   return (m_occ_func_3_0[occ_f] - m_occ_func_3_0[occ_i]) *
          (occ_func_2_0(2) * occ_func_2_0(4) * occ_func_2_0(0) +
@@ -2740,7 +2835,7 @@ Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_13_0_at_1(
 
 ****/
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::eval_bfunc_14_0() const {
+Scalar OccClexulatorZrOTest_Clexulator_default::eval_bfunc_14_0() const {
   return (occ_func_2_0(0) * occ_func_3_0(43) * occ_func_2_0(8) *
               occ_func_3_0(51) +
           occ_func_2_0(11) * occ_func_3_0(0) * occ_func_2_0(1) *
@@ -2769,7 +2864,8 @@ Scalar OccClexulatorZrOTest_Clexulator::eval_bfunc_14_0() const {
 }
 
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_14_0_at_0() const {
+Scalar OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_14_0_at_0()
+    const {
   return (occ_func_2_0(0) * occ_func_3_0(43) * occ_func_2_0(8) *
               occ_func_3_0(51) +
           occ_func_2_0(6) * occ_func_3_0(15) * occ_func_2_0(0) *
@@ -2821,7 +2917,8 @@ Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_14_0_at_0() const {
          12.;
 }
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_14_0_at_1() const {
+Scalar OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_14_0_at_1()
+    const {
   return (occ_func_2_0(40) * occ_func_3_0(1) * occ_func_2_0(16) *
               occ_func_3_0(11) +
           occ_func_2_0(32) * occ_func_3_0(5) * occ_func_2_0(36) *
@@ -2874,7 +2971,7 @@ Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_14_0_at_1() const {
 }
 
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_14_0_at_0(
+Scalar OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_14_0_at_0(
     int occ_i, int occ_f) const {
   return (m_occ_func_2_0[occ_f] - m_occ_func_2_0[occ_i]) *
          (occ_func_3_0(43) * occ_func_2_0(8) * occ_func_3_0(51) +
@@ -2905,7 +3002,7 @@ Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_14_0_at_0(
 }
 
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_14_0_at_1(
+Scalar OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_14_0_at_1(
     int occ_i, int occ_f) const {
   return (m_occ_func_3_0[occ_f] - m_occ_func_3_0[occ_i]) *
          (occ_func_2_0(40) * occ_func_2_0(16) * occ_func_3_0(11) +
@@ -2946,7 +3043,7 @@ Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_14_0_at_1(
 
 ****/
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::eval_bfunc_15_0() const {
+Scalar OccClexulatorZrOTest_Clexulator_default::eval_bfunc_15_0() const {
   return (occ_func_2_0(0) * occ_func_2_0(8) * occ_func_3_0(9) *
               occ_func_3_0(13) +
           occ_func_2_0(11) * occ_func_2_0(1) * occ_func_3_0(16) *
@@ -2975,7 +3072,8 @@ Scalar OccClexulatorZrOTest_Clexulator::eval_bfunc_15_0() const {
 }
 
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_15_0_at_0() const {
+Scalar OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_15_0_at_0()
+    const {
   return (occ_func_2_0(0) * occ_func_2_0(8) * occ_func_3_0(9) *
               occ_func_3_0(13) +
           occ_func_2_0(6) * occ_func_2_0(0) * occ_func_3_0(1) *
@@ -3027,7 +3125,8 @@ Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_15_0_at_0() const {
          12.;
 }
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_15_0_at_1() const {
+Scalar OccClexulatorZrOTest_Clexulator_default::site_eval_bfunc_15_0_at_1()
+    const {
   return (occ_func_2_0(6) * occ_func_2_0(0) * occ_func_3_0(1) *
               occ_func_3_0(11) +
           occ_func_2_0(2) * occ_func_2_0(4) * occ_func_3_0(5) *
@@ -3080,7 +3179,7 @@ Scalar OccClexulatorZrOTest_Clexulator::site_eval_bfunc_15_0_at_1() const {
 }
 
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_15_0_at_0(
+Scalar OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_15_0_at_0(
     int occ_i, int occ_f) const {
   return (m_occ_func_2_0[occ_f] - m_occ_func_2_0[occ_i]) *
          (occ_func_2_0(8) * occ_func_3_0(9) * occ_func_3_0(13) +
@@ -3111,7 +3210,7 @@ Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_15_0_at_0(
 }
 
 template <typename Scalar>
-Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_15_0_at_1(
+Scalar OccClexulatorZrOTest_Clexulator_default::site_deval_bfunc_15_0_at_1(
     int occ_i, int occ_f) const {
   return (m_occ_func_3_0[occ_f] - m_occ_func_3_0[occ_i]) *
          (occ_func_2_0(6) * occ_func_2_0(0) * occ_func_3_0(11) +
@@ -3146,8 +3245,9 @@ Scalar OccClexulatorZrOTest_Clexulator::site_deval_bfunc_15_0_at_1(
 
 extern "C" {
 /// \brief Returns a clexulator::BaseClexulator* owning a
-/// OccClexulatorZrOTest_Clexulator
-CASM::clexulator::BaseClexulator *make_OccClexulatorZrOTest_Clexulator() {
-  return new CASM::clexulator::OccClexulatorZrOTest_Clexulator();
+/// OccClexulatorZrOTest_Clexulator_default
+CASM::clexulator::BaseClexulator *
+make_OccClexulatorZrOTest_Clexulator_default() {
+  return new CASM::clexulator::OccClexulatorZrOTest_Clexulator_default();
 }
 }

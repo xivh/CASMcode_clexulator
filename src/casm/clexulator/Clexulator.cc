@@ -63,8 +63,10 @@ std::shared_ptr<RuntimeLibrary> make_shared_runtime_lib(
 
 /// \brief Clexulator factory function
 ///
-/// \param name Class name for the Clexulator, typically 'X_Clexulator', with X
-///             referring to the system of interest (i.e. 'NiAl_Clexulator')
+/// \param name Class name for the Clexulator, typically
+///     'X_Clexulator_<basis_set_name>', with X referring to the system (i.e.
+///     'NiAl'), and `<basis_set_name>` being an identifier that distringuishes
+///     different choices of basis set (i.e. `default` or `large`).
 /// \param dirpath Directory containing the source code and compiled object
 ///     file.
 /// \param nlist, A PrimNeighborList to be updated to include the neighborhood
@@ -73,10 +75,11 @@ std::shared_ptr<RuntimeLibrary> make_shared_runtime_lib(
 /// \param compile_options Compilation options
 /// \param so_options Shared library compilation options
 ///
-/// If 'name' is 'X_Clexulator', and 'dirpath' is '/path/to':
-/// - Looks for '/path/to/X_Clexulator.so' and tries to load it.
-/// - If not found, looks for 'path/to/X_Clexulator.cc' and tries to compile and
-/// load it.
+/// If 'name' is 'X_Clexulator_<basis_set_name>', and 'dirpath' is '/path/to':
+/// - Looks for '/path/to/X_Clexulator_<basis_set_name>.so' and tries to load
+///   it.
+/// - If not found, looks for 'path/to/X_Clexulator_<basis_set_name>.cc' and
+///   tries to compile and load it.
 /// - If unsuccesful, will throw std::runtime_error.
 ///
 /// The Clexulator has shared ownership of the loaded library,
@@ -167,21 +170,25 @@ Clexulator make_clexulator(std::string name, fs::path dirpath,
 
 /// \brief Local Clexulator factory function
 ///
-/// \param name Class name for the Clexulator, typically 'X_Clexulator', with X
-///             referring to the system of interest (i.e. 'NiAl_Clexulator')
+/// \param name Class name for the Clexulator, typically
+///     'X_Clexulator_<basis_set_name>', with X referring to the system (i.e.
+///     'NiAl'), and `<basis_set_name>` being an identifier that distringuishes
+///     different choices of basis set (i.e. `default` or `large`).
 /// \param dirpath Directory containing numbered subdirectories (i.e. '0', '1',
 ///     '2', ...) containing local Clexulator source files (i.e.
-///     'NiAl_Clexulator.cc')
+///     'NiAl_Clexulator_<basis_set_name>_<index>.cc')
 /// \param nlist, A PrimNeighborList to be updated to include the
 ///     neighborhood of this Clexulator
 /// \param compile_options Compilation options
 /// \param so_options Shared library compilation options
 ///
-/// If 'name' is 'X_Clexulator', and 'dirpath' is '/path/to', then for `<i> =
-/// 0, 1, ...` for which `path/to/<i>/X_Clexulator.cc' exists, this method will:
-/// - Look for '/path/to/<i>/X_Clexulator.so' and try to load it.
-/// - If not found, look for 'path/to/<i>/X_Clexulator.cc' and try to
-///   compile and load it.
+/// If 'name' is 'X_Clexulator_<basis_set_name>', and 'dirpath' is '/path/to',
+/// then for `<i> = 0, 1, ...` for which
+/// `path/to/<i>/X_Clexulator_<basis_set_name>_<i>.cc' exists, this method will:
+/// - Look for '/path/to/<i>/X_Clexulator_<basis_set_name>_<i>.so' and try to
+///   load it.
+/// - If not found, look for 'path/to/<i>/X_Clexulator_<basis_set_name>_<i>.cc'
+///   and try to compile and load it.
 /// - If unsuccesful, will throw std::runtime_error.
 ///
 /// The Clexulator has shared ownership of the loaded library,
@@ -197,11 +204,12 @@ std::vector<Clexulator> make_local_clexulator(
   Index i = 0;
   fs::path equiv_dir = dirpath / fs::path(std::to_string(i));
   while (fs::exists(equiv_dir)) {
-    if (!fs::exists(equiv_dir / (name + ".cc"))) {
+    std::string equiv_name = name + "_" + std::to_string(i);
+    if (!fs::exists(equiv_dir / (equiv_name + ".cc"))) {
       break;
     }
-    result.push_back(
-        make_clexulator(name, equiv_dir, nlist, compile_options, so_options));
+    result.push_back(make_clexulator(equiv_name, equiv_dir, nlist,
+                                     compile_options, so_options));
     ++i;
     equiv_dir = dirpath / fs::path(std::to_string(i));
   }

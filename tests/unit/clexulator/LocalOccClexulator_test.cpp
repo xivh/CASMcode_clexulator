@@ -34,7 +34,7 @@ class LocalOccClexulatorZrOTest : public test::TestLocalClexulatorBase {
  protected:
   LocalOccClexulatorZrOTest()
       : TestLocalClexulatorBase("LocalOccClexulatorZrOTest_Clexulator",
-                                "LocalOccClexulatorZrOTest", {"hop0", "hop1"}) {
+                                {"hop0", "hop1"}, "LocalOccClexulatorZrOTest") {
     // can uncomment for debugging:
     // tmpdir.do_not_remove_on_destruction();
   }
@@ -48,12 +48,16 @@ class LocalOccClexulatorZrOTest : public test::TestLocalClexulatorBase {
       EXPECT_EQ(this->clexulator[bset_name]->size(), 2);
 
       // loop over clexulator for equivalent phenomenal clusters
+      Index i = 0;
       for (auto &equiv_clexulator : *this->clexulator[bset_name]) {
-        EXPECT_EQ(equiv_clexulator.name(), clexulator_name);
+        EXPECT_EQ(
+            equiv_clexulator.name(),
+            clexulator_basename + "_" + bset_name + "_" + std::to_string(i));
         EXPECT_EQ(equiv_clexulator.nlist_size(), 53);
         EXPECT_EQ(equiv_clexulator.corr_size(), 33);
         EXPECT_EQ(equiv_clexulator.n_point_corr(), 53);
         EXPECT_EQ(equiv_clexulator.neighborhood().size(), 26);
+        ++i;
       }
     }
   }

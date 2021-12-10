@@ -40,7 +40,7 @@ void run_correlations_checks(
 class OccClexulatorFCCTernaryTest : public test::TestClexulatorBase {
  protected:
   OccClexulatorFCCTernaryTest()
-      : TestClexulatorBase("OccClexulatorTest_Clexulator",
+      : TestClexulatorBase("OccClexulatorTest_Clexulator", "default",
                            "OccClexulatorFCCTernaryTest") {
     // can uncomment for debugging:
     // tmpdir.do_not_remove_on_destruction();
@@ -83,7 +83,7 @@ TEST_F(OccClexulatorFCCTernaryTest, Tests) {
 class OccClexulatorZrOTest : public test::TestClexulatorBase {
  protected:
   OccClexulatorZrOTest()
-      : TestClexulatorBase("OccClexulatorZrOTest_Clexulator",
+      : TestClexulatorBase("OccClexulatorZrOTest_Clexulator", "default",
                            "OccClexulatorZrOTest") {
     // can uncomment for debugging:
     // tmpdir.do_not_remove_on_destruction();

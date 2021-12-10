@@ -20,8 +20,11 @@ namespace test {
 
 class TestClexulatorBase : public testing::Test {
  protected:
-  TestClexulatorBase(std::string _clexulator_name, std::string _test_subdir)
-      : clexulator_name(_clexulator_name),
+  TestClexulatorBase(std::string _clexulator_basename, std::string _bset_name,
+                     std::string _test_subdir)
+      : clexulator_basename(_clexulator_basename),
+        bset_name(_bset_name),
+        clexulator_name(clexulator_basename + "_" + bset_name),
         test_data_dir(test::data_dir("clexulator") / _test_subdir),
         meta(test_data_dir / "meta.json"),
         prim(std::make_shared<xtal::BasicStructure const>(
@@ -40,6 +43,8 @@ class TestClexulatorBase : public testing::Test {
             std::make_shared<clexulator::Clexulator const>(make_clexulator())) {
   }
 
+  std::string clexulator_basename;
+  std::string bset_name;
   std::string clexulator_name;
   fs::path test_data_dir;
   jsonFile meta;
@@ -60,8 +65,9 @@ class TestClexulatorBase : public testing::Test {
     // tmpdir.do_not_remove_on_destruction();
 
     std::string src_filename = clexulator_name + ".cc";
-    fs::copy_file(test_data_dir / "basis_sets" / "bset.default" / src_filename,
-                  tmpdir.path() / src_filename);
+    fs::copy_file(
+        test_data_dir / "basis_sets" / ("bset." + bset_name) / src_filename,
+        tmpdir.path() / src_filename);
 
     return clexulator::make_clexulator(clexulator_name, tmpdir.path(),
                                        prim_neighbor_list, compile_opt, so_opt);

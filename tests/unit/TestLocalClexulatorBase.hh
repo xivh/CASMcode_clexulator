@@ -36,16 +36,23 @@ clexulator::PrimNeighborList read_local_prim_neighbor_list(
 
 void copy_local_clexulator(fs::path src_basis_sets_dir,
                            fs::path dest_basis_sets_dir, std::string bset_name,
-                           std::string clexulator_name);
+                           std::string clexulator_basename);
 
 }  // namespace
 
 class TestLocalClexulatorBase : public testing::Test {
  protected:
-  TestLocalClexulatorBase(std::string _clexulator_name,
-                          std::string _test_subdir,
-                          std::vector<std::string> const &_bset_names)
-      : clexulator_name(_clexulator_name),
+  /// \brief Constructor
+  ///
+  /// \param _clexulator_basename Ex: ZrO_Clexulator (excludes basis set name)
+  /// \param _test_subdir Where to read test data from
+  /// \param _bset_names Names for each local basis set (i.e. `{"hop0",
+  ///     "hop1"}`)
+  TestLocalClexulatorBase(std::string _clexulator_basename,
+                          std::vector<std::string> const &_bset_names,
+                          std::string _test_subdir)
+      : clexulator_basename(_clexulator_basename),
+        bset_names(_bset_names),
         test_data_dir(test::data_dir("clexulator") / _test_subdir),
         meta(test_data_dir / "meta.json"),
         prim(std::make_shared<xtal::BasicStructure const>(
@@ -61,12 +68,16 @@ class TestLocalClexulatorBase : public testing::Test {
                link_path(RuntimeLibrary::default_casm_libdir().first) + " " +
                link_path(autotools::abs_libdir()) + " " + "-lcasm_clexulator "),
         tmpdir(),
-        bset_names(_bset_names),
         clexulator() {
     make_clexulator();
   }
 
-  std::string clexulator_name;
+  std::string clexulator_basename;
+
+  // i.e. {"hop0", "hop1"} to read local clexulators from "bset.hop0",
+  // "bset.hop1", etc.
+  std::vector<std::string> bset_names;
+
   fs::path test_data_dir;
   jsonFile meta;
   std::shared_ptr<xtal::BasicStructure const> prim;
@@ -81,10 +92,6 @@ class TestLocalClexulatorBase : public testing::Test {
   std::string so_opt;
   TmpDir tmpdir;
 
-  // i.e. {"hop0", "hop1"} to read local clexulators from "bset.hop0",
-  // "bset.hop1", etc.
-  std::vector<std::string> bset_names;
-
   // clexulator[bset_name] ->
   //     std::shared_ptr<std::vector<clexulator::Clexulator> const>
   std::map<std::string,
@@ -96,7 +103,7 @@ class TestLocalClexulatorBase : public testing::Test {
     for (std::string const &bset_name : bset_names) {
       copy_local_clexulator(test_data_dir / "basis_sets",
                             tmpdir.path() / "basis_sets", bset_name,
-                            clexulator_name);
+                            clexulator_basename);
     }
 
     // make Clexulator
@@ -104,7 +111,7 @@ class TestLocalClexulatorBase : public testing::Test {
     for (std::string const &bset_name : bset_names) {
       clexulator[bset_name] =
           std::make_shared<clexvec const>(clexulator::make_local_clexulator(
-              clexulator_name,
+              clexulator_basename + "_" + bset_name,
               tmpdir.path() / "basis_sets" / ("bset." + bset_name),
               prim_neighbor_list, compile_opt, so_opt));
     }
@@ -115,14 +122,15 @@ namespace {
 
 void copy_local_clexulator(fs::path src_basis_sets_dir,
                            fs::path dest_basis_sets_dir, std::string bset_name,
-                           std::string clexulator_name) {
-  std::string src_filename = clexulator_name + ".cc";
+                           std::string clexulator_basename) {
   fs::path src_dir = src_basis_sets_dir / (std::string("bset.") + bset_name);
   fs::path dest_dir = dest_basis_sets_dir / (std::string("bset.") + bset_name);
 
   Index i = 0;
   fs::path equiv_dir = fs::path(std::to_string(i));
   while (fs::exists(src_dir / equiv_dir)) {
+    std::string src_filename =
+        clexulator_basename + "_" + bset_name + "_" + std::to_string(i) + ".cc";
     if (!fs::exists(src_dir / equiv_dir / src_filename)) {
       break;
     }
