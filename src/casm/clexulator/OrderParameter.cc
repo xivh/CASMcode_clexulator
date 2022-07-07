@@ -290,8 +290,8 @@ Eigen::VectorXd const &OrderParameter::value() {
 
 /// \brief Calculate and return change in order parameter value due to
 ///     an occupation change, relative to the current ConfigDoFValues
-Eigen::VectorXd const &OrderParameter::occ_delta(Index linear_site_index,
-                                                 Index new_occ) {
+Eigen::VectorXd const &OrderParameter::occ_delta_value(Index linear_site_index,
+                                                       Index new_occ) {
   Index N_images = m_supercell_to_dof_space_sites[linear_site_index].size();
   if (N_images) {
     if (m_occ_values == nullptr) {
@@ -316,7 +316,7 @@ Eigen::VectorXd const &OrderParameter::occ_delta(Index linear_site_index,
 
 /// \brief Calculate and return change in order parameter value due to
 ///     a local DoF change, relative to the current ConfigDoFValues
-Eigen::VectorXd const &OrderParameter::local_delta(
+Eigen::VectorXd const &OrderParameter::local_delta_value(
     Index linear_site_index, Eigen::VectorXd const &new_value) {
   Index N_images = m_supercell_to_dof_space_sites[linear_site_index].size();
   if (N_images) {
@@ -346,9 +346,8 @@ Eigen::VectorXd const &OrderParameter::local_delta(
 
 /// \brief Calculate and return change in order parameter value due to
 ///     a local DoF change, relative to the current ConfigDoFValues
-Eigen::VectorXd const &OrderParameter::local_delta(Index linear_site_index,
-                                                   Index dof_component,
-                                                   double new_value) {
+Eigen::VectorXd const &OrderParameter::local_delta_value(
+    Index linear_site_index, Index dof_component, double new_value) {
   Index N_images = m_supercell_to_dof_space_sites[linear_site_index].size();
   if (N_images) {
     if (m_local_dof_values == nullptr) {
@@ -374,7 +373,7 @@ Eigen::VectorXd const &OrderParameter::local_delta(Index linear_site_index,
 
 /// \brief Calculate and return change in order parameter value due to
 ///     a global DoF change, relative to the current ConfigDoFValues
-Eigen::VectorXd const &OrderParameter::global_delta(
+Eigen::VectorXd const &OrderParameter::global_delta_value(
     Eigen::VectorXd const &new_value) {
   if (m_global_dof_values == nullptr) {
     throw std::runtime_error(
@@ -386,8 +385,8 @@ Eigen::VectorXd const &OrderParameter::global_delta(
 
 /// \brief Calculate and return change in order parameter value due to
 ///     a global DoF change, relative to the current ConfigDoFValues
-Eigen::VectorXd const &OrderParameter::global_delta(Index dof_component,
-                                                    double new_value) {
+Eigen::VectorXd const &OrderParameter::global_delta_value(Index dof_component,
+                                                          double new_value) {
   if (m_global_dof_values == nullptr) {
     throw std::runtime_error(
         "Error in OrderParameter: ConfigDoFValues not set");

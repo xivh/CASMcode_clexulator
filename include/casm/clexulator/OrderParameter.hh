@@ -39,25 +39,28 @@ class OrderParameter {
 
   /// \brief Calculate and return change in order parameter value due to
   ///     an occupation change, relative to the current ConfigDoFValues
-  Eigen::VectorXd const &occ_delta(Index linear_site_index, Index new_occ);
+  Eigen::VectorXd const &occ_delta_value(Index linear_site_index,
+                                         Index new_occ);
 
   /// \brief Calculate and return change in order parameter value due to
   ///     a local DoF change, relative to the current ConfigDoFValues
-  Eigen::VectorXd const &local_delta(Index linear_site_index,
-                                     Eigen::VectorXd const &new_value);
+  Eigen::VectorXd const &local_delta_value(Index linear_site_index,
+                                           Eigen::VectorXd const &new_value);
 
   /// \brief Calculate and return change in order parameter value due to
   ///     a local DoF change, relative to the current ConfigDoFValues
-  Eigen::VectorXd const &local_delta(Index linear_site_index,
-                                     Index dof_component, double new_value);
+  Eigen::VectorXd const &local_delta_value(Index linear_site_index,
+                                           Index dof_component,
+                                           double new_value);
 
   /// \brief Calculate and return change in order parameter value due to
   ///     a global DoF change, relative to the current ConfigDoFValues
-  Eigen::VectorXd const &global_delta(Eigen::VectorXd const &new_value);
+  Eigen::VectorXd const &global_delta_value(Eigen::VectorXd const &new_value);
 
   /// \brief Calculate and return change in order parameter value due to
   ///     a global DoF change, relative to the current ConfigDoFValues
-  Eigen::VectorXd const &global_delta(Index dof_component, double new_value);
+  Eigen::VectorXd const &global_delta_value(Index dof_component,
+                                            double new_value);
 
  private:
   /// Supercell transformation matrix corresponding to internal data
