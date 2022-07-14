@@ -127,7 +127,9 @@ std::vector<std::vector<Index>> make_commensurate_supercell_site_converter(
 OrderParameter::OrderParameter(DoFSpace const &dof_space)
     : m_supercell_T(Eigen::Matrix3l::Zero()),
       m_dof_space(dof_space),
-      m_is_occ(m_dof_space.dof_key == "occ") {}
+      m_is_occ(m_dof_space.dof_key == "occ"),
+      m_delta_value(Eigen::VectorXd(m_dof_space.subspace_dim)),
+      m_multisite_delta_value(Eigen::VectorXd(m_dof_space.subspace_dim)) {}
 
 /// \brief Calculate and return order parameter value
 ///
@@ -312,6 +314,34 @@ Eigen::VectorXd const &OrderParameter::occ_delta_value(Index linear_site_index,
     m_delta_value.setZero();
   }
   return m_delta_value;
+}
+
+/// \brief Calculate change in order parameter value due to a
+///     series of occupation changes
+Eigen::VectorXd const &OrderParameter::occ_delta_value(
+    std::vector<Index> const &linear_site_index,
+    std::vector<int> const &new_occ) {
+  // we need to store the current occupation and modify it to calculate a
+  // multi-site delta we'll revert the occupation to its original values before
+  // leaving...
+  Eigen::VectorXi &occupation = const_cast<Eigen::VectorXi &>(*m_occ_values);
+  if (m_tmp_occ.size() < new_occ.size()) {
+    m_tmp_occ.resize(new_occ.size());
+  }
+  // calculate delta
+  m_multisite_delta_value.setZero();
+  for (Index i = 0; i < linear_site_index.size(); ++i) {
+    Index l = linear_site_index[i];
+    m_multisite_delta_value += this->occ_delta_value(l, new_occ[i]);
+    // store original occupation
+    m_tmp_occ[i] = occupation(l);
+    occupation(l) = new_occ[i];
+  }
+  // revert occupation
+  for (Index i = 0; i < linear_site_index.size(); ++i) {
+    occupation(linear_site_index[i]) = m_tmp_occ[i];
+  }
+  return m_multisite_delta_value;
 }
 
 /// \brief Calculate and return change in order parameter value due to
