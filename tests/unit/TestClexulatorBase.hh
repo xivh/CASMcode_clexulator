@@ -43,6 +43,26 @@ class TestClexulatorBase : public testing::Test {
             std::make_shared<clexulator::Clexulator const>(make_clexulator())) {
   }
 
+  TestClexulatorBase(std::string _clexulator_basename, std::string _bset_name,
+                     std::string _test_subdir, bool wait)
+      : clexulator_basename(_clexulator_basename),
+        bset_name(_bset_name),
+        clexulator_name(clexulator_basename + "_" + bset_name),
+        test_data_dir(test::data_dir("clexulator") / _test_subdir),
+        meta(test_data_dir / "meta.json"),
+        prim(std::make_shared<xtal::BasicStructure const>(
+            read_prim(meta["prim"], TOL))),
+        compile_opt(
+            RuntimeLibrary::default_cxx().first + " " +
+            RuntimeLibrary::default_cxxflags().first + " " +
+            include_path(RuntimeLibrary::default_casm_includedir().first) +
+            " " + include_path(autotools::abs_includedir())),
+        so_opt(RuntimeLibrary::default_cxx().first + " " +
+               RuntimeLibrary::default_soflags().first + " " +
+               link_path(RuntimeLibrary::default_casm_libdir().first) + " " +
+               link_path(autotools::abs_libdir()) + " " + "-lcasm_clexulator "),
+        tmpdir() {}
+
   std::string clexulator_basename;
   std::string bset_name;
   std::string clexulator_name;

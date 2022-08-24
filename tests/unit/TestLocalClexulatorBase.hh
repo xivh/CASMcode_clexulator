@@ -18,28 +18,6 @@
 
 namespace test {
 
-namespace {
-
-clexulator::PrimNeighborList read_local_prim_neighbor_list(
-    jsonParser const &json) {
-  Eigen::Matrix3l weight_matrix;
-  from_json(weight_matrix, json["weight_matrix"]);
-
-  std::set<int> sublat_indices;
-  from_json(sublat_indices, json["sublat_indices"]);
-
-  int n_sublattices = json["n_sublattices"].get<int>();
-
-  return clexulator::PrimNeighborList(weight_matrix, sublat_indices.begin(),
-                                      sublat_indices.end(), n_sublattices);
-}
-
-void copy_local_clexulator(fs::path src_basis_sets_dir,
-                           fs::path dest_basis_sets_dir, std::string bset_name,
-                           std::string clexulator_basename);
-
-}  // namespace
-
 class TestLocalClexulatorBase : public testing::Test {
  protected:
   /// \brief Constructor
@@ -71,6 +49,34 @@ class TestLocalClexulatorBase : public testing::Test {
         clexulator() {
     make_clexulator();
   }
+
+  /// \brief Constructor
+  ///
+  /// \param _clexulator_basename Ex: ZrO_Clexulator (excludes basis set name)
+  /// \param _test_subdir Where to read test data from
+  /// \param _bset_names Names for each local basis set (i.e. `{"hop0",
+  ///     "hop1"}`)
+  TestLocalClexulatorBase(std::string _clexulator_basename,
+                          std::vector<std::string> const &_bset_names,
+                          std::string _test_subdir, bool wait)
+      : clexulator_basename(_clexulator_basename),
+        bset_names(_bset_names),
+        test_data_dir(test::data_dir("clexulator") / _test_subdir),
+        meta(test_data_dir / "meta.json"),
+        prim(std::make_shared<xtal::BasicStructure const>(
+            read_prim(meta["prim"], TOL))),
+        prim_neighbor_list(),
+        compile_opt(
+            RuntimeLibrary::default_cxx().first + " " +
+            RuntimeLibrary::default_cxxflags().first + " " +
+            include_path(RuntimeLibrary::default_casm_includedir().first) +
+            " " + include_path(autotools::abs_includedir())),
+        so_opt(RuntimeLibrary::default_cxx().first + " " +
+               RuntimeLibrary::default_soflags().first + " " +
+               link_path(RuntimeLibrary::default_casm_libdir().first) + " " +
+               link_path(autotools::abs_libdir()) + " " + "-lcasm_clexulator "),
+        tmpdir(),
+        clexulator() {}
 
   std::string clexulator_basename;
 
@@ -116,33 +122,51 @@ class TestLocalClexulatorBase : public testing::Test {
               prim_neighbor_list, compile_opt, so_opt));
     }
   }
+
+  void copy_local_clexulator(fs::path src_basis_sets_dir,
+                             fs::path dest_basis_sets_dir,
+                             std::string bset_name,
+                             std::string clexulator_basename) {
+    fs::path src_dir = src_basis_sets_dir / (std::string("bset.") + bset_name);
+    fs::path dest_dir =
+        dest_basis_sets_dir / (std::string("bset.") + bset_name);
+    std::cout << "dest_dir: " << dest_dir << std::endl;
+
+    fs::copy_options copy_options = fs::copy_options::skip_existing;
+
+    // equivalents
+    Index i = 0;
+    fs::path equiv_dir = fs::path(std::to_string(i));
+    while (fs::exists(src_dir / equiv_dir)) {
+      std::string src_filename = clexulator_basename + "_" + bset_name + "_" +
+                                 std::to_string(i) + ".cc";
+      if (!fs::exists(src_dir / equiv_dir / src_filename)) {
+        break;
+      }
+      fs::create_directories(dest_dir / equiv_dir);
+      fs::copy_file(src_dir / equiv_dir / src_filename,
+                    dest_dir / equiv_dir / src_filename, copy_options);
+      ++i;
+      equiv_dir = fs::path(std::to_string(i));
+    }
+
+    // prototype
+    std::string src_filename;
+    src_filename = clexulator_basename + "_" + bset_name + ".cc";
+    std::cout << "f: " << src_dir / src_filename << std::endl;
+    if (fs::exists(src_dir / src_filename)) {
+      fs::copy_file(src_dir / src_filename, dest_dir / src_filename,
+                    copy_options);
+    }
+
+    src_filename = "equivalents_info.json";
+    if (fs::exists(src_dir / src_filename)) {
+      fs::copy_file(src_dir / src_filename, dest_dir / src_filename,
+                    copy_options);
+    }
+  }
 };
 
-namespace {
-
-void copy_local_clexulator(fs::path src_basis_sets_dir,
-                           fs::path dest_basis_sets_dir, std::string bset_name,
-                           std::string clexulator_basename) {
-  fs::path src_dir = src_basis_sets_dir / (std::string("bset.") + bset_name);
-  fs::path dest_dir = dest_basis_sets_dir / (std::string("bset.") + bset_name);
-
-  Index i = 0;
-  fs::path equiv_dir = fs::path(std::to_string(i));
-  while (fs::exists(src_dir / equiv_dir)) {
-    std::string src_filename =
-        clexulator_basename + "_" + bset_name + "_" + std::to_string(i) + ".cc";
-    if (!fs::exists(src_dir / equiv_dir / src_filename)) {
-      break;
-    }
-    fs::create_directories(dest_dir / equiv_dir);
-    fs::copy_file(src_dir / equiv_dir / src_filename,
-                  dest_dir / equiv_dir / src_filename);
-    ++i;
-    equiv_dir = fs::path(std::to_string(i));
-  }
-}
-
-}  // namespace
 }  // namespace test
 
 #endif
