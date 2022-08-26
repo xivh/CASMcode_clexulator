@@ -38,6 +38,9 @@ class OccZrOClexTest : public test::TestClexulatorBase {
   clexulator::SparseCoefficients coefficients;
   std::unique_ptr<clexulator::ClusterExpansion> clex;
 
+  std::vector<clexulator::SparseCoefficients> multicoeffs;
+  std::unique_ptr<clexulator::MultiClusterExpansion> multiclex;
+
   void ReadEciJson_tests() {
     fs::path eci_path =
         test::data_dir("clexulator") / "OccClexulatorZrOTest_2" / "eci.json";
@@ -60,6 +63,31 @@ class OccZrOClexTest : public test::TestClexulatorBase {
     EXPECT_EQ(parser.value->value.size(), 33);
 
     coefficients = *parser.value;
+  }
+  void ReadMultiCoeffJson_tests() {
+    multicoeffs.clear();
+
+    {
+      fs::path eci_path = test::data_dir("clexulator") /
+                          "OccClexulatorZrOTest_2" / "coeff_0.json";
+      jsonParser json(eci_path);
+      InputParser<clexulator::SparseCoefficients> parser(json);
+      EXPECT_TRUE(parser.valid());
+      EXPECT_EQ(parser.value->index.size(), 1);
+      EXPECT_EQ(parser.value->value.size(), 1);
+      multicoeffs.push_back(*parser.value);
+    }
+
+    {
+      fs::path eci_path = test::data_dir("clexulator") /
+                          "OccClexulatorZrOTest_2" / "coeff_1.json";
+      jsonParser json(eci_path);
+      InputParser<clexulator::SparseCoefficients> parser(json);
+      EXPECT_TRUE(parser.valid());
+      EXPECT_EQ(parser.value->index.size(), 2);
+      EXPECT_EQ(parser.value->value.size(), 2);
+      multicoeffs.push_back(*parser.value);
+    }
   }
 
   /// Explicitly pass the `parse_eci_json` function
@@ -136,6 +164,36 @@ class OccZrOClexTest : public test::TestClexulatorBase {
     dof_values_2.occupation(16) = 1;
     check_intensive_value(expected_value);
   }
+
+  void MakeMultiClex_tests() {
+    // Check correlations (checks running without errors, not values)
+    Eigen::Matrix3l T = Eigen::Matrix3l::Identity() * 2;
+    test::TestConfiguration config(prim, T, *prim_neighbor_list);
+
+    multiclex = notstd::make_unique<clexulator::MultiClusterExpansion>(
+        config.supercell_neighbor_list, clexulator, multicoeffs);
+    EXPECT_EQ(multiclex->coefficients().size(), 2);
+
+    multiclex->set(&config.dof_values);
+    // default config
+    {
+      Eigen::VectorXd const &values = multiclex->intensive_value();
+      EXPECT_EQ(values.size(), 2);
+      EXPECT_TRUE(CASM::almost_equal(values(0), 1.0));
+      EXPECT_TRUE(CASM::almost_equal(values(1), 1.0));
+    }
+
+    // all Va-O sites filled with O
+    for (Index l = 16; l < 32; ++l) {
+      config.dof_values.occupation(l) = 1;
+    }
+    {
+      Eigen::VectorXd const &values = multiclex->intensive_value();
+      EXPECT_EQ(values.size(), 2);
+      EXPECT_TRUE(CASM::almost_equal(values(0), 1.0));
+      EXPECT_TRUE(CASM::almost_equal(values(1), 2.0));
+    }
+  }
 };
 
 TEST_F(OccZrOClexTest, Tests) {
@@ -155,6 +213,11 @@ TEST_F(OccZrOClexTest, Tests) {
   {
     ReadEciExplicitJson_tests();
     MakeClex_tests();
+  }
+
+  {
+    ReadMultiCoeffJson_tests();
+    MakeMultiClex_tests();
   }
 }
 
