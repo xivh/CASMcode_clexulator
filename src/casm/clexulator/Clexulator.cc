@@ -37,24 +37,33 @@ void print_runtime_lib_options_help(std::ostream &sout) {
 std::shared_ptr<RuntimeLibrary> make_shared_runtime_lib(
     std::string filename_base, std::string compile_options,
     std::string so_options, std::string compile_msg) {
-  log().compiling<Log::standard>(filename_base + ".cc");
-  log().begin_lap();
-  log() << compile_msg << std::endl;
+  auto &log = compile_log();
+  bool write_status_messages = false;
+  if (!fs::exists(filename_base + ".so")) {
+    write_status_messages = true;
+  }
+  if (write_status_messages) {
+    log.compiling<Log::standard>(filename_base + ".cc");
+    log.begin_lap();
+    log << compile_msg << std::endl;
+  }
   try {
     std::shared_ptr<RuntimeLibrary> result = std::make_shared<RuntimeLibrary>(
         filename_base, compile_options, so_options);
-    log() << "compile time: " << log().lap_time() << " (s)\n" << std::endl;
+    if (write_status_messages) {
+      log << "compile time: " << log.lap_time() << " (s)\n" << std::endl;
+    }
     return result;
   } catch (runtime_lib_compile_error &e) {
     e.print(err_log());
-    print_runtime_lib_options_help(log());
+    print_runtime_lib_options_help(log);
     throw;
   } catch (runtime_lib_shared_error &e) {
     e.print(err_log());
-    print_runtime_lib_options_help(log());
+    print_runtime_lib_options_help(log);
     throw;
   } catch (std::exception &e) {
-    print_runtime_lib_options_help(log());
+    print_runtime_lib_options_help(log);
     throw;
   }
 }
@@ -98,9 +107,10 @@ Clexulator make_clexulator(std::string name, fs::path dirpath,
         (dirpath / name).string(), compile_options, so_options,
         "compile time depends on how many basis functions are included");
   } catch (std::exception &e) {
-    log() << "Clexulator construction failed: could not construct runtime "
-             "library."
-          << std::endl;
+    compile_log()
+        << "Clexulator construction failed: could not construct runtime "
+           "library."
+        << std::endl;
     throw;
   }
 

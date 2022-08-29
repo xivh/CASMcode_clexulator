@@ -2,6 +2,7 @@
 #define CASM_clexulator_Clexulator
 #include <cstddef>
 
+#include "casm/casm_io/Log.hh"
 #include "casm/clexulator/BaseClexulator.hh"
 #include "casm/clexulator/ConfigDoFValues.hh"
 #include "casm/clexulator/NeighborList.hh"
@@ -457,6 +458,16 @@ class Clexulator {
   notstd::cloneable_ptr<clexulator::BaseClexulator> m_clex;
   std::shared_ptr<RuntimeLibrary> m_lib;
 };
+
+/// \brief Default log for compilation info output
+///
+/// Initially this writes to `std::cout`, but it can be reset.
+///
+/// \relates Log
+inline Log &compile_log() {
+  static Log log{std::cout};
+  return log;
+}
 
 /// \brief Clexulator factory function
 Clexulator make_clexulator(std::string name, fs::path dirpath,
