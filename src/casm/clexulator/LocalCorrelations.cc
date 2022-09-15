@@ -7,19 +7,22 @@ namespace CASM {
 
 namespace clexulator {
 
-/// \brief Construct a LocalCorrelations object to calculate local correlations
-/// for the pointed-to ConfigDoFValues object
+/// \brief Constructor - calculate select correlation elements
 ///
+/// \param supercell_neighbor_list Pointer to the neighbor list used as input
+///     to the Clexulator
+/// \param clexulator Pointer to a vector of Clexulator used to calculate
+///     correlations for equivalent local phenomenal clusters
+/// \param correlation_indices Specifies the elements of the correlations
+///     vector that will be calculated. Correlation vectors will always be the
+///     size specified by clexulator->corr_size(), but elements not specified
+///     by `correlation_indices` will have undefined value.
 /// \param dof_values Pointer to the ConfigDoFValues to be used as input for
 ///     calculating correlations. As with direct use of Clexulator, the
 ///     ConfigDoFValues object being used as input may be modified between
 ///     calls, but the pointers to the underlying global and local DoF value
 ///     vectors and matrices must remain valid (i.e. they must not be erased)
 ///     or a new LocalCorrelations object should be used.
-/// \param supercell_neighbor_list Pointer to the neighbor list used as input
-///     to the Clexulator
-/// \param clexulator Pointer to a vector of Clexulator used to calculate
-///     correlations for equivalent local phenomenal clusters
 LocalCorrelations::LocalCorrelations(
     std::shared_ptr<SuperNeighborList const> const &supercell_neighbor_list,
     std::shared_ptr<std::vector<Clexulator> const> const &clexulator,
@@ -61,6 +64,25 @@ LocalCorrelations::LocalCorrelations(
   m_local_corr.resize(n);
   m_local_corr.setZero();
 }
+
+/// \brief Constructor - calculate all correlation elements
+///
+/// \param supercell_neighbor_list Pointer to the neighbor list used as input
+///     to the Clexulator
+/// \param clexulator Pointer to a vector of Clexulator used to calculate
+///     correlations for equivalent local phenomenal clusters
+/// \param dof_values Pointer to the ConfigDoFValues to be used as input for
+///     calculating correlations. As with direct use of Clexulator, the
+///     ConfigDoFValues object being used as input may be modified between
+///     calls, but the pointers to the underlying global and local DoF value
+///     vectors and matrices must remain valid (i.e. they must not be erased)
+///     or a new LocalCorrelations object should be used.
+LocalCorrelations::LocalCorrelations(
+    std::shared_ptr<SuperNeighborList const> const &supercell_neighbor_list,
+    std::shared_ptr<std::vector<Clexulator> const> const &clexulator,
+    ConfigDoFValues const *_dof_values)
+    : LocalCorrelations(supercell_neighbor_list, clexulator,
+                        all_correlation_indices(clexulator), _dof_values) {}
 
 /// \brief Reset internal pointer to DoF values - must have the same supercell
 void LocalCorrelations::set(ConfigDoFValues const *_dof_values) {
@@ -120,6 +142,21 @@ Eigen::VectorXd const &LocalCorrelations::local(Index unitcell_index,
       *m_dof_values, unitcell_nlist.data(), m_local_corr.data(),
       m_corr_indices_begin, m_corr_indices_end);
   return m_local_corr;
+}
+
+/// \brief Return the vector [0, 1, 2, ... corr_size-1]
+std::vector<unsigned int> all_correlation_indices(
+    std::shared_ptr<std::vector<Clexulator> const> const &clexulator) {
+  if (clexulator->size() == 0) {
+    throw std::runtime_error("Error: empty local clexulator vector");
+  }
+  Index n = clexulator->begin()->corr_size();
+
+  std::vector<unsigned int> corr_indices;
+  for (unsigned int i = 0; i < n; ++i) {
+    corr_indices.push_back(i);
+  }
+  return corr_indices;
 }
 
 }  // namespace clexulator

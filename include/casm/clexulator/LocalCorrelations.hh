@@ -25,12 +25,17 @@ class SuperNeighborList;
 ///
 class LocalCorrelations {
  public:
-  /// \brief Construct a Correlations object to calculate local correlations
-  /// for the pointed-to ConfigDoFValues object
+  /// \brief Constructor - calculate select correlation elements
   LocalCorrelations(
       std::shared_ptr<SuperNeighborList const> const &supercell_neighbor_list,
       std::shared_ptr<std::vector<Clexulator> const> const &clexulator,
       std::vector<unsigned int> const &correlation_indices,
+      ConfigDoFValues const *_dof_values = nullptr);
+
+  /// \brief Constructor - calculate all correlation elements
+  LocalCorrelations(
+      std::shared_ptr<SuperNeighborList const> const &supercell_neighbor_list,
+      std::shared_ptr<std::vector<Clexulator> const> const &clexulator,
       ConfigDoFValues const *_dof_values = nullptr);
 
   /// \brief Reset internal pointer to DoF values - must have the same supercell
@@ -68,6 +73,10 @@ class LocalCorrelations {
   /// cluster per unit cell)
   std::shared_ptr<std::vector<Clexulator> const> m_clexulator;
 };
+
+/// \brief Return the vector [0, 1, 2, ... corr_size-1]
+std::vector<unsigned int> all_correlation_indices(
+    std::shared_ptr<std::vector<Clexulator> const> const &clexulator);
 
 }  // namespace clexulator
 }  // namespace CASM
