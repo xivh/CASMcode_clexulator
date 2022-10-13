@@ -106,13 +106,6 @@ DoFSpace make_local_dof_space(
     std::optional<std::set<Index>> sites = std::nullopt,
     std::optional<Eigen::MatrixXd> basis = std::nullopt);
 
-/// \brief Set DoF values from a coordinate in the DoFSpace basis
-///     (continuous DoF only)
-void set_dof_value(ConfigDoFValues &dof_values,
-                   Eigen::Matrix3l const &transformation_matrix_to_super,
-                   DoFSpace const &dof_space,
-                   Eigen::VectorXd const &dof_space_coordinate);
-
 /// \brief Return dimension of DoFSpace
 Index get_dof_space_dimension(
     DoFKey dof_key, xtal::BasicStructure const &prim,
@@ -200,6 +193,38 @@ struct VectorSpaceMixingInfo {
   std::vector<Index> axes_mixed_with_subspace;
   bool are_axes_mixed_with_subspace = true;
 };
+
+/// \brief Return DoF values as a unrolled coordinate in the prim basis
+Eigen::VectorXd get_dof_vector_value(
+    ConfigDoFValues const &dof_values,
+    Eigen::Matrix3l const &transformation_matrix_to_super,
+    DoFSpace const &dof_space);
+
+/// Return `config` DoF value as a coordinate in the DoFSpace basis
+Eigen::VectorXd get_normal_coordinate(
+    ConfigDoFValues const &dof_values,
+    Eigen::Matrix3l const &transformation_matrix_to_super,
+    DoFSpace const &dof_space);
+
+/// \brief Return DoF value in the DoFSpace basis of the subset of the
+/// configuration located at a particular coordinate
+Eigen::VectorXd get_normal_coordinate_at(
+    ConfigDoFValues const &dof_values, DoFSpace const &dof_space,
+    DoFSpaceIndexConverter const &index_converter,
+    xtal::UnitCell integral_lattice_coordinate);
+
+/// \brief Return mean DoF value of configuration in the DoFSpace basis
+Eigen::VectorXd get_mean_normal_coordinate(
+    ConfigDoFValues const &dof_values,
+    Eigen::Matrix3l const &transformation_matrix_to_super,
+    DoFSpace const &dof_space);
+
+/// \brief Set DoF values from a coordinate in the DoFSpace basis
+///     (continuous DoF only)
+void set_dof_value(ConfigDoFValues &dof_values,
+                   Eigen::Matrix3l const &transformation_matrix_to_super,
+                   DoFSpace const &dof_space,
+                   Eigen::VectorXd const &dof_space_coordinate);
 
 }  // namespace clexulator
 }  // namespace CASM

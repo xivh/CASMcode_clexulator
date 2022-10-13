@@ -3,6 +3,8 @@
 #include "casm/clexulator/ConfigDoFValues.hh"
 #include "casm/clexulator/ConfigDoFValuesTools_impl.hh"
 #include "casm/crystallography/AnisoValTraits.hh"
+#include "casm/crystallography/Superlattice.hh"
+#include "casm/crystallography/SymTools.hh"
 
 namespace CASM {
 namespace clexulator {
@@ -223,57 +225,6 @@ DoFSpace make_local_dof_space(
     std::optional<Eigen::MatrixXd> basis) {
   return make_dof_space(dof_key, prim, transformation_matrix_to_super, sites,
                         basis);
-}
-
-/// \brief Set DoF values from a coordinate in the DoFSpace basis
-///     (continuous DoF only)
-///
-/// \param dof_values DoF values being set
-/// \param transformation_matrix_to_super Specifies the supercell
-///     the dof_values are associated with. Has no effect for global
-///     DoF.
-/// \param dof_space DoFSpace defining the coordinate
-/// \param dof_space_coordinate The coordinate in the DoFSpace basis
-///
-/// \throws If `dof_space` is an occupation DoFSpace
-void set_dof_value(ConfigDoFValues &dof_values,
-                   Eigen::Matrix3l const &transformation_matrix_to_super,
-                   DoFSpace const &dof_space,
-                   Eigen::VectorXd const &dof_space_coordinate) {
-  using namespace DoFSpace_impl;
-  throw_if_invalid_dof_space(transformation_matrix_to_super, dof_space);
-
-  if (dof_space_coordinate.size() != dof_space.subspace_dim) {
-    std::stringstream msg;
-    msg << "Error in set_dof_value: DoF space coordinate size ("
-        << dof_space_coordinate.size() << ") != # basis axes ("
-        << dof_space.subspace_dim << ").";
-    throw std::runtime_error(msg.str());
-  }
-
-  auto const &dof_key = dof_space.dof_key;
-  auto const &basis = dof_space.basis;
-
-  if (dof_space.is_global) {
-    dof_values.global_dof_values.at(dof_key) = basis * dof_space_coordinate;
-  } else {
-    if (dof_key == "occ") {
-      std::stringstream msg;
-      msg << "Error: set_dof_value is not supported for occupation."
-          << std::endl;
-      throw std::runtime_error(msg.str());
-    }
-
-    auto &matrix_values = dof_values.local_dof_values.at(dof_key);
-    Eigen::VectorXd vector_values = basis * dof_space_coordinate;
-
-    auto const &axis_dof_component = dof_space.axis_info.dof_component.value();
-    auto const &axis_site_index = dof_space.axis_info.site_index.value();
-    for (Index i = 0; i < dof_space.dim; ++i) {
-      matrix_values(axis_dof_component[i], axis_site_index[i]) =
-          vector_values[i];
-    }
-  }
 }
 
 /// \brief Return dimension of DoFSpace
@@ -579,6 +530,277 @@ VectorSpaceMixingInfo::VectorSpaceMixingInfo(
 
   if (axes_mixed_with_subspace.size() == 0) {
     are_axes_mixed_with_subspace = false;
+  }
+}
+
+/// \brief Return DoF values as a unrolled coordinate in the prim basis
+///
+/// \param dof_values The DoF values to select and unroll
+/// \param transformation_matrix_to_super Specifies the supercell
+///     the dof_values are associated with. Has no effect for global
+///     DoF.
+/// \param dof_space DoFSpace defining the coordinate
+///
+Eigen::VectorXd get_dof_vector_value(
+    ConfigDoFValues const &dof_values,
+    Eigen::Matrix3l const &transformation_matrix_to_super,
+    DoFSpace const &dof_space) {
+  using namespace DoFSpace_impl;
+  throw_if_invalid_dof_space(transformation_matrix_to_super, dof_space);
+
+  auto const &dof_key = dof_space.dof_key;
+
+  if (AnisoValTraits(dof_key).global()) {
+    return dof_values.global_dof_values.at(dof_key);
+  } else {
+    Index dim = dof_space.dim;
+    auto const &axis_dof_component = dof_space.axis_info.dof_component.value();
+    auto const &axis_site_index = dof_space.axis_info.site_index.value();
+
+    if (dof_key == "occ") {
+      Eigen::VectorXi occ_values = Eigen::VectorXi::Zero(dim);
+      for (Index i = 0; i < dim; ++i) {
+        Index l = axis_site_index[i];
+        occ_values[i] = (dof_values.occupation(l) == axis_dof_component[i]);
+      }
+      return occ_values.cast<double>();
+    } else {
+      Eigen::VectorXd vector_values = Eigen::VectorXd::Zero(dim);
+      Eigen::MatrixXd const &matrix_values =
+          dof_values.local_dof_values.at(dof_key);
+
+      for (Index i = 0; i < dim; ++i) {
+        Index l = axis_site_index[i];
+        vector_values[i] = matrix_values(axis_dof_component[i], l);
+      }
+      return vector_values;
+    }
+  }
+}
+
+/// \brief Return DoF values as a coordinate in the DoFSpace basis
+///
+/// This method may be used for global DoF or local DoF values if config and
+/// dof_space have the same supercell. Otherwise use
+/// `get_mean_normal_coordinate` or `get_normal_coordinate_at`
+///
+/// The following relations apply:
+///
+///     standard_dof_values = dof_set.basis * prim_dof_values
+///     prim_dof_values = dof_space.basis * normal_coordinate
+///
+/// \throws If dof_space is local and defined for a different supercell than
+/// config
+///
+/// TODO: handle DoF values not in the basis subspace
+Eigen::VectorXd get_normal_coordinate(
+    ConfigDoFValues const &dof_values,
+    Eigen::Matrix3l const &transformation_matrix_to_super,
+    DoFSpace const &dof_space) {
+  using namespace DoFSpace_impl;
+  throw_if_invalid_dof_space(transformation_matrix_to_super, dof_space);
+
+  auto const &dof_key = dof_space.dof_key;
+
+  if (AnisoValTraits(dof_key).global()) {
+    auto const &vector_values = dof_values.global_dof_values.at(dof_key);
+    return dof_space.basis_inv * vector_values;
+  } else {
+    Index dim = dof_space.dim;
+    auto const &axis_dof_component = dof_space.axis_info.dof_component.value();
+    auto const &axis_site_index = dof_space.axis_info.site_index.value();
+
+    if (dof_key == "occ") {
+      Eigen::VectorXi occ_values = Eigen::VectorXi::Zero(dim);
+      for (Index i = 0; i < dim; ++i) {
+        Index l = axis_site_index[i];
+        occ_values[i] = (dof_values.occupation(l) == axis_dof_component[i]);
+      }
+      return dof_space.basis_inv * occ_values.cast<double>();
+    } else {
+      Eigen::VectorXd vector_values = Eigen::VectorXd::Zero(dim);
+      Eigen::MatrixXd const &matrix_values =
+          dof_values.local_dof_values.at(dof_key);
+
+      for (Index i = 0; i < dim; ++i) {
+        Index l = axis_site_index[i];
+        vector_values[i] = matrix_values(axis_dof_component[i], l);
+      }
+      return dof_space.basis_inv * vector_values;
+    }
+  }
+}
+
+/// \brief Return DoF value in the DoFSpace basis of the subset of the
+/// configuration located at a particular coordinate
+///
+/// This method may be used for local DoF values at a particular location in a
+/// configuration. It may be used even if config and dof_space do not have the
+/// same supercell, in order to construct an average as if being evalauted in a
+/// commensurate supercell.
+///
+/// The following relations apply:
+///
+///     standard_dof_values = dof_set.basis() * prim_dof_values
+///     prim_dof_values = dof_space.basis() * normal_coordinate
+///
+/// \throws If dof_space.dof_key() is a global DoF type.
+///
+Eigen::VectorXd get_normal_coordinate_at(
+    ConfigDoFValues const &dof_values, DoFSpace const &dof_space,
+    DoFSpaceIndexConverter const &index_converter,
+    xtal::UnitCell integral_lattice_coordinate) {
+  auto const &dof_key = dof_space.dof_key;
+
+  if (AnisoValTraits(dof_key).global()) {
+    std::stringstream msg;
+    msg << "Error: get_normal_coordinate_at is not valid for dof type '"
+        << dof_key << "'" << std::endl;
+    throw std::runtime_error(msg.str());
+  } else {
+    Index dim = dof_space.dim;
+    auto const &axis_dof_component = dof_space.axis_info.dof_component.value();
+    auto const &axis_site_index = dof_space.axis_info.site_index.value();
+
+    if (dof_key == "occ") {
+      Eigen::VectorXi occ_values = Eigen::VectorXi::Zero(dim);
+      for (Index i = 0; i < dim; ++i) {
+        Index l = index_converter.supercell_site_index(
+            axis_site_index[i], integral_lattice_coordinate);
+        occ_values[i] = (dof_values.occupation(l) == axis_dof_component[i]);
+      }
+      Eigen::VectorXd prim_dof_values = occ_values.cast<double>();
+      return dof_space.basis_inv * prim_dof_values;
+
+    } else {
+      Eigen::VectorXd vector_values = Eigen::VectorXd::Zero(dim);
+      Eigen::MatrixXd const &matrix_values =
+          dof_values.local_dof_values.at(dof_key);
+
+      for (Index i = 0; i < dim; ++i) {
+        Index l = index_converter.supercell_site_index(
+            axis_site_index[i], integral_lattice_coordinate);
+        vector_values[i] = matrix_values(axis_dof_component[i], l);
+      }
+      return dof_space.basis_inv * vector_values;
+    }
+  }
+}
+
+/// \brief Return mean DoF value of configuration in the DoFSpace basis
+///
+/// This method may be used for global or local DoF values. For local DoF
+/// values it determines the commensurate supercell for the config and
+/// dof_space supercells and calls `get_normal_coordinate_at` repeatedly as if
+/// the mutually commensurate supercell had been constructed and filled with
+/// `dof_values` in order to calculate a mean normal coordinate value.
+///
+/// The following relations apply:
+///
+///     standard_dof_values = dof_set.basis * prim_dof_values
+///     prim_dof_values = dof_space.basis * normal_coordinate
+///
+/// \throws If dof_space.dof_key is a global DoF type.
+///
+Eigen::VectorXd get_mean_normal_coordinate(
+    ConfigDoFValues const &dof_values,
+    Eigen::Matrix3l const &transformation_matrix_to_super,
+    DoFSpace const &dof_space) {
+  xtal::Superlattice config_superlattice(dof_space.prim->lattice(),
+                                         transformation_matrix_to_super);
+
+  auto const &dof_key = dof_space.dof_key;
+  auto const &basis = dof_space.basis;
+
+  if (AnisoValTraits(dof_key).global()) {
+    auto const &vector_values = dof_values.global_dof_values.at(dof_key);
+    return dof_space.basis_inv * vector_values;
+  } else {
+    Index dim = dof_space.dim;
+    xtal::Lattice const &P = config_superlattice.prim_lattice();
+    Eigen::Matrix3l T = dof_space.transformation_matrix_to_super.value();
+
+    xtal::Lattice dof_space_supercell_lattice = xtal::make_superlattice(P, T);
+    std::vector<xtal::Lattice> lattices(
+        {config_superlattice.superlattice(), dof_space_supercell_lattice});
+    xtal::Lattice commensurate_supercell_lattice =
+        xtal::make_commensurate_superduperlattice(lattices.begin(),
+                                                  lattices.end());
+
+    /// Create UnitCellIndexConverter that counts over tilings of
+    /// dof_space_supercell_lattice into commensurate_supercell_lattice
+    xtal::Superlattice superlattice{dof_space_supercell_lattice,
+                                    commensurate_supercell_lattice};
+    xtal::UnitCellIndexConverter sub_supercell_coordinates{
+        superlattice.transformation_matrix_to_super()};
+    Index N = sub_supercell_coordinates.total_sites();
+    Index N_sublat = dof_space.prim->basis().size();
+    xtal::UnitCellCoordIndexConverter unitcellcoord_index_converter(
+        config_superlattice.transformation_matrix_to_super(), N_sublat);
+
+    DoFSpaceIndexConverter index_converter{unitcellcoord_index_converter,
+                                           dof_space};
+
+    Eigen::VectorXd normal_coordinate_sum = Eigen::VectorXd::Zero(dim);
+    for (Index i = 0; i < N; ++i) {
+      // to get UnitCell lattice coordinate in config, need to multiply by T
+      xtal::UnitCell ijk = T * sub_supercell_coordinates(i);
+      normal_coordinate_sum +=
+          get_normal_coordinate_at(dof_values, dof_space, index_converter, ijk);
+    }
+    Eigen::VectorXd mean_normal_coordinate_sum = normal_coordinate_sum / N;
+    return mean_normal_coordinate_sum;
+  }
+}
+
+/// \brief Set DoF values from a coordinate in the DoFSpace basis
+///     (continuous DoF only)
+///
+/// \param dof_values DoF values being set
+/// \param transformation_matrix_to_super Specifies the supercell
+///     the dof_values are associated with. Has no effect for global
+///     DoF.
+/// \param dof_space DoFSpace defining the coordinate
+/// \param dof_space_coordinate The coordinate in the DoFSpace basis
+///
+/// \throws If `dof_space` is an occupation DoFSpace
+void set_dof_value(ConfigDoFValues &dof_values,
+                   Eigen::Matrix3l const &transformation_matrix_to_super,
+                   DoFSpace const &dof_space,
+                   Eigen::VectorXd const &dof_space_coordinate) {
+  using namespace DoFSpace_impl;
+  throw_if_invalid_dof_space(transformation_matrix_to_super, dof_space);
+
+  if (dof_space_coordinate.size() != dof_space.subspace_dim) {
+    std::stringstream msg;
+    msg << "Error in set_dof_value: DoF space coordinate size ("
+        << dof_space_coordinate.size() << ") != # basis axes ("
+        << dof_space.subspace_dim << ").";
+    throw std::runtime_error(msg.str());
+  }
+
+  auto const &dof_key = dof_space.dof_key;
+  auto const &basis = dof_space.basis;
+
+  if (dof_space.is_global) {
+    dof_values.global_dof_values.at(dof_key) = basis * dof_space_coordinate;
+  } else {
+    if (dof_key == "occ") {
+      std::stringstream msg;
+      msg << "Error: set_dof_value is not supported for occupation."
+          << std::endl;
+      throw std::runtime_error(msg.str());
+    }
+
+    auto &matrix_values = dof_values.local_dof_values.at(dof_key);
+    Eigen::VectorXd vector_values = basis * dof_space_coordinate;
+
+    auto const &axis_dof_component = dof_space.axis_info.dof_component.value();
+    auto const &axis_site_index = dof_space.axis_info.site_index.value();
+    for (Index i = 0; i < dof_space.dim; ++i) {
+      matrix_values(axis_dof_component[i], axis_site_index[i]) =
+          vector_values[i];
+    }
   }
 }
 
