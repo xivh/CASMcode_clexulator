@@ -2,6 +2,7 @@
 #define CASM_clexulator_ClusterExpansion
 
 #include <map>
+#include <memory>
 #include <set>
 
 #include "casm/clexulator/Correlations.hh"

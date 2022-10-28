@@ -1,5 +1,7 @@
 #include "casm/clexulator/io/json/DoFSpace_json_io.hh"
 
+#include <optional>
+
 #include "casm/casm_io/container/json_io.hh"
 #include "casm/casm_io/json/InputParser_impl.hh"
 #include "casm/casm_io/json/optional.hh"

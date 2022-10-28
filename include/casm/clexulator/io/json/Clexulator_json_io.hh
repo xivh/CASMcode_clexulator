@@ -2,6 +2,7 @@
 #define CASM_clexulator_Clexulator_json_io
 
 #include <memory>
+#include <vector>
 
 namespace CASM {
 template <typename T>

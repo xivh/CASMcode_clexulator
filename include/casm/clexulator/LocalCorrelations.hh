@@ -1,6 +1,7 @@
 #ifndef CASM_clexulator_LocalCorrelations
 #define CASM_clexulator_LocalCorrelations
 
+#include <memory>
 #include <set>
 #include <vector>
 

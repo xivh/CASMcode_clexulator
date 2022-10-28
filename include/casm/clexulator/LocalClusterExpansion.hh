@@ -1,6 +1,7 @@
 #ifndef CASM_clexulator_LocalClusterExpansion
 #define CASM_clexulator_LocalClusterExpansion
 
+#include <memory>
 #include <set>
 #include <vector>
 
