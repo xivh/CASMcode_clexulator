@@ -814,6 +814,8 @@ def main():
             "directory": "tests/unit/clexulator",
             "ldadd": [
                 "libcasm_clexulator.la",
+                "-lcasm_global",
+                "-lcasm_crystallography",
             ],
         }
     ])
