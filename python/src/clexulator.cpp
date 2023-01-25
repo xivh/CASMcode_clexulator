@@ -13,6 +13,8 @@
 #include "casm/casm_io/json/jsonParser.hh"
 #include "casm/clexulator/Clexulator.hh"
 #include "casm/clexulator/ConfigDoFValuesTools_impl.hh"
+#include "casm/clexulator/Correlations.hh"
+#include "casm/clexulator/LocalCorrelations.hh"
 #include "casm/clexulator/NeighborList.hh"
 #include "casm/clexulator/io/json/Clexulator_json_io.hh"
 
@@ -64,15 +66,20 @@ std::shared_ptr<PrimNeighborListWrapper> make_prim_neighbor_list(
 std::shared_ptr<clexulator::SuperNeighborList> make_super_neighbor_list(
     Eigen::Matrix3l const &transformation_matrix_to_super,
     PrimNeighborListWrapper const &wrapper) {
+  if (wrapper.prim_neighbor_list == nullptr) {
+    throw std::runtime_error(
+        "Error in make_super_neighbor_list: prim_neighbor_list is not "
+        "initialized");
+  }
   return std::make_shared<clexulator::SuperNeighborList>(
       transformation_matrix_to_super, *wrapper.prim_neighbor_list);
 }
 
-clexulator::Clexulator make_empty_clexulator() {
-  return clexulator::Clexulator();
+std::shared_ptr<clexulator::Clexulator> make_empty_clexulator() {
+  return std::make_shared<clexulator::Clexulator>();
 }
 
-clexulator::Clexulator make_clexulator(
+std::shared_ptr<clexulator::Clexulator> make_clexulator(
     std::string source, std::shared_ptr<PrimNeighborListWrapper> wrapper,
     std::optional<std::string> compile_options,
     std::optional<std::string> so_options) {
@@ -89,10 +96,21 @@ clexulator::Clexulator make_clexulator(
   std::runtime_error error_if_invalid{
       "Error in libcasm.clexulator.make_clexulator"};
   report_and_throw_if_invalid(parser, CASM::log(), error_if_invalid);
-  return std::move(*parser.value);
+  return std::make_shared<clexulator::Clexulator>(std::move(*parser.value));
 }
 
-std::vector<clexulator::Clexulator> make_local_clexulator(
+struct LocalClexulatorWrapper {
+  std::shared_ptr<std::vector<clexulator::Clexulator>> local_clexulator;
+};
+
+std::shared_ptr<LocalClexulatorWrapper> make_empty_local_clexulator() {
+  auto lclex_wrapper = std::make_shared<LocalClexulatorWrapper>();
+  lclex_wrapper->local_clexulator =
+      std::make_shared<std::vector<clexulator::Clexulator>>();
+  return lclex_wrapper;
+}
+
+std::shared_ptr<LocalClexulatorWrapper> make_local_clexulator(
     std::string source, std::shared_ptr<PrimNeighborListWrapper> wrapper,
     std::optional<std::string> compile_options,
     std::optional<std::string> so_options) {
@@ -110,7 +128,12 @@ std::vector<clexulator::Clexulator> make_local_clexulator(
   std::runtime_error error_if_invalid{
       "Error in libcasm.clexulator.make_local_clexulator"};
   report_and_throw_if_invalid(parser, CASM::log(), error_if_invalid);
-  return std::move(*parser.value);
+
+  auto lclex_wrapper = std::make_shared<LocalClexulatorWrapper>();
+  lclex_wrapper->local_clexulator =
+      std::make_shared<std::vector<clexulator::Clexulator>>(
+          std::move(*parser.value));
+  return lclex_wrapper;
 }
 
 }  // namespace CASMpy
@@ -174,6 +197,16 @@ PYBIND11_MODULE(_clexulator, m) {
           "Set the site occupation value on site `l` to value `s`. Values are "
           "not checked for validity.")
       .def(
+          "global_dof_keys",
+          [](clexulator::ConfigDoFValues const &dof_values) {
+            std::vector<std::string> keys;
+            for (auto const &dof : dof_values.global_dof_values) {
+              keys.push_back(dof.first);
+            }
+            return keys;
+          },
+          "Returns global DoF keys.")
+      .def(
           "global_dof_values",
           [](clexulator::ConfigDoFValues const &dof_values, std::string key) {
             return dof_values.global_dof_values.at(key);
@@ -186,7 +219,25 @@ PYBIND11_MODULE(_clexulator, m) {
             dof_values.global_dof_values.at(key) = value;
           },
           py::arg("key"), py::arg("value"),
-          "Set global DoF values of type `key`.")
+          "Set global DoF values of type `key`. Key must already exist.")
+      .def(
+          "insert_or_assign_global_dof_values",
+          [](clexulator::ConfigDoFValues &dof_values, std::string key,
+             Eigen::VectorXd const &value) {
+            dof_values.global_dof_values.insert_or_assign(key, value);
+          },
+          py::arg("key"), py::arg("value"),
+          "Insert or assign global DoF values of type `key`.")
+      .def(
+          "local_dof_keys",
+          [](clexulator::ConfigDoFValues const &dof_values) {
+            std::vector<std::string> keys;
+            for (auto const &dof : dof_values.local_dof_values) {
+              keys.push_back(dof.first);
+            }
+            return keys;
+          },
+          "Returns local DoF keys.")
       .def(
           "local_dof_values",
           [](clexulator::ConfigDoFValues const &dof_values, std::string key) {
@@ -200,7 +251,15 @@ PYBIND11_MODULE(_clexulator, m) {
             dof_values.local_dof_values.at(key) = value;
           },
           py::arg("key"), py::arg("value"),
-          "Set local DoF values of type `key`.")
+          "Set local DoF values of type `key`. Key must already exist.")
+      .def(
+          "insert_or_assign_local_dof_values",
+          [](clexulator::ConfigDoFValues &dof_values, std::string key,
+             Eigen::MatrixXd const &value) {
+            dof_values.local_dof_values.insert_or_assign(key, value);
+          },
+          py::arg("key"), py::arg("value"),
+          "Insert or assign local DoF values of type `key`.")
       .def(
           "local_dof_site_value",
           [](clexulator::ConfigDoFValues const &dof_values, std::string key,
@@ -214,7 +273,8 @@ PYBIND11_MODULE(_clexulator, m) {
             dof_values.local_dof_values.at(key).col(l) = site_dof_value;
           },
           py::arg("key"), py::arg("l"), py::arg("site_dof_value"),
-          "Set the local DoF values of type `key` on site `l`.")
+          "Set the local DoF values of type `key` on site `l`. Key must "
+          "already exist.")
       .def(
           "set",
           [](clexulator::ConfigDoFValues &self,
@@ -281,6 +341,7 @@ PYBIND11_MODULE(_clexulator, m) {
   py::class_<PrimNeighborListWrapper, std::shared_ptr<PrimNeighborListWrapper>>(
       m, "PrimNeighborList", R"pbdoc(
       A neighbor list, generated for a Prim, relative to the origin unit cell.
+
       The PrimNeighborList defines indices to use to reference a site relative
       to a particular unit cell. These can be used to write functions of site
       degrees of freedom (DoF) in terms of a local environment that do not
@@ -363,6 +424,8 @@ PYBIND11_MODULE(_clexulator, m) {
   py::class_<clexulator::SuperNeighborList,
              std::shared_ptr<clexulator::SuperNeighborList>>(
       m, "SuperNeighborList", R"pbdoc(
+      A supercell-specific neighbor list
+
       Given a PrimNeighborList, the SuperNeighborList gives the associated
       linear site indices for a particular supercell, for each unit cell in
       the supercell.
@@ -387,7 +450,10 @@ PYBIND11_MODULE(_clexulator, m) {
            py::arg("prim_neighbor_list"));
 
   //
-  py::class_<clexulator::Clexulator>(m, "Clexulator", R"pbdoc(
+  py::class_<clexulator::Clexulator, std::shared_ptr<clexulator::Clexulator>>(
+      m, "Clexulator", R"pbdoc(
+      Evaluate basis set functions
+
       CASM generates code for very efficient calculation of basis functions.
       This source code may be compiled, linked, and used at runtime via Clexulator.
       )pbdoc")
@@ -396,7 +462,41 @@ PYBIND11_MODULE(_clexulator, m) {
           Construct an empty Clexulator
 
           Use the factory functions :func:`~libcasm.clexulator.make_clexulator` or :func:`~libcasm.clexulator.make_local_clexulator` to construct Clexulator from source code.
-          )pbdoc");
+          )pbdoc")
+      .def(
+          "n_functions",
+          [](clexulator::Clexulator const &clexulator) {
+            return clexulator.corr_size();
+          },
+          "Return the number of basis functions");
+
+  //
+  py::class_<LocalClexulatorWrapper, std::shared_ptr<LocalClexulatorWrapper>>(
+      m, "LocalClexulator", R"pbdoc(
+      Evaluate local basis set functions
+
+      CASM generates code for very efficient calculation of basis functions.
+      This source code may be compiled, linked, and used at runtime via Clexulator.
+      The LocalClexulator contains one Clexulator for each equivalent local basis set.
+      )pbdoc")
+      .def(py::init(&make_empty_local_clexulator),
+           R"pbdoc(
+          Construct an empty LocalClexulator
+
+          Use the factory functions :func:`~libcasm.clexulator.make_clexulator` or :func:`~libcasm.clexulator.make_local_clexulator` to construct Clexulator from source code.
+          )pbdoc")
+      .def(
+          "n_functions",
+          [](LocalClexulatorWrapper const &wrapper) {
+            return wrapper.local_clexulator->at(0).corr_size();
+          },
+          "Return the number of basis functions")
+      .def(
+          "n_equivalents",
+          [](LocalClexulatorWrapper const &wrapper) {
+            return wrapper.local_clexulator->size();
+          },
+          "Return the number of equivalent local basis sets");
 
   m.def("make_clexulator", &make_clexulator,
         R"pbdoc(
@@ -444,6 +544,10 @@ PYBIND11_MODULE(_clexulator, m) {
                   tries to find "ccasm" or "casm" executables on PATH and
                   checks relative locations
 
+      Returns
+      -------
+      clexulator: Clexulator
+          The Clexulator.
 
       )pbdoc",
         py::arg("source"), py::arg("prim_neighbor_list"),
@@ -498,16 +602,122 @@ PYBIND11_MODULE(_clexulator, m) {
 
       Returns
       -------
-      local_clexulator: list[Clexulator]
+      local_clexulator: LocalClexulator
           A list containing the local Clexulator, one for each
           symmetrically equivalent local basis set.
-
-          TODO: read "equivalents_info.json" to describe the equivalents.
 
       )pbdoc",
         py::arg("source"), py::arg("prim_neighbor_list"),
         py::arg("compile_options") = std::nullopt,
         py::arg("so_options") = std::nullopt);
+
+  m.def(
+      "calc_intensive_correlations",
+      [](std::shared_ptr<clexulator::Clexulator> const &clexulator,
+         clexulator::ConfigDoFValues const &config_dof_values,
+         std::shared_ptr<clexulator::SuperNeighborList const> const
+             &supercell_neighbor_list,
+         std::optional<std::vector<unsigned int>> indices) {
+        if (!clexulator->initialized()) {
+          throw std::runtime_error(
+              "Error in calc_intensive_correlations: clexulator is not "
+              "initialized");
+        }
+        if (indices.has_value()) {
+          clexulator::Correlations f(supercell_neighbor_list, clexulator,
+                                     *indices, &config_dof_values);
+          return f.intensive(f.extensive());
+        } else {
+          clexulator::Correlations f(supercell_neighbor_list, clexulator,
+                                     &config_dof_values);
+          return f.intensive(f.extensive());
+        }
+      },
+      R"pbdoc(
+      Calculate intensive correlations
+
+      This method is safe and easy to use, but may be slower than using
+      the :class:`~libcasm.clexulator.Correlations` class directly.
+
+      Parameters
+      ----------
+      clexulator: Clexulator
+          The Clexulator used to evaluate basis functions
+      config_dof_values: ConfigDoFValues
+          Configuration degree of freedom (DoF) values input to the basis functions.
+      supercell_neighbor_list: SuperNeighborList
+          The SuperNeighborList for the supercell consistent with `config_dof_values`.
+      indices: Optional[list[int]] = None
+          If provided, only calculate the basis functions with corresponding
+          indices. The same size correlation array is always returned, but other
+          values will be of undefined value.
+      Returns
+      -------
+      intensive_correlations: np.ndarray
+          The correlations, normalized per unit cell.
+
+      )pbdoc",
+      py::arg("supercell_neighbor_list"), py::arg("clexulator"),
+      py::arg("config_dof_values"), py::arg("indices") = std::nullopt);
+
+  m.def(
+      "calc_local_correlations",
+      [](LocalClexulatorWrapper const &wrapper,
+         clexulator::ConfigDoFValues const &config_dof_values,
+         std::shared_ptr<clexulator::SuperNeighborList const> const
+             &supercell_neighbor_list,
+         Index unitcell_index, Index equivalent_index,
+         std::optional<std::vector<unsigned int>> indices) {
+        if (wrapper.local_clexulator->size() == 0) {
+          throw std::runtime_error(
+              "Error in calc_local_correlations: local_clexulator is not "
+              "initialized");
+        }
+        if (indices.has_value()) {
+          clexulator::LocalCorrelations f(supercell_neighbor_list,
+                                          wrapper.local_clexulator, *indices,
+                                          &config_dof_values);
+          return f.local(unitcell_index, equivalent_index);
+        } else {
+          clexulator::LocalCorrelations f(supercell_neighbor_list,
+                                          wrapper.local_clexulator,
+                                          &config_dof_values);
+          return f.local(unitcell_index, equivalent_index);
+        }
+      },
+      R"pbdoc(
+      Calculate local correlations
+
+      This method is safe and easy to use, but may be slower than using
+      the :class:`~libcasm.clexulator.LocalCorrelations` class directly.
+
+      Parameters
+      ----------
+      local_clexulator: LocalClexulator
+          The LocalClexulator used to evaluate local basis functions
+      config_dof_values: ConfigDoFValues
+          Configuration degree of freedom (DoF) values input to the basis functions.
+      supercell_neighbor_list: SuperNeighborList
+          The SuperNeighborList for the supercell consistent with `config_dof_values`.
+      unitcell_index: int
+          Linear unit cell index specifying in which unit cell to evaluate the
+          local correlations.
+      equivalent_index: int
+          Index indicating which of the symmetrically local cluster basis sets
+          to evaluate.
+      indices: Optional[list[int]] = None
+          If provided, only calculate the basis functions with corresponding
+          indices. The same size correlation array is always returned, but other
+          values will be of undefined value.
+      Returns
+      -------
+      local_correlations: np.ndarray
+          The local correlations.
+
+      )pbdoc",
+      py::arg("supercell_neighbor_list"), py::arg("local_clexulator"),
+      py::arg("config_dof_values"), py::arg("unitcell_index"),
+      py::arg("equivalent_index"), py::arg("indices") = std::nullopt);
 
 #ifdef VERSION_INFO
   m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);
