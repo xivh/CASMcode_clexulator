@@ -41,6 +41,7 @@ SparseCoefficients const &ClusterExpansion::coefficients() const {
 
 double ClusterExpansion::intensive_value() {
   auto const &e = m_correlations.extensive();
+  std::cout << m_correlations.intensive(e) << std::endl;
   return m_coefficients * m_correlations.intensive(e);
 }
 

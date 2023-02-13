@@ -11,11 +11,14 @@
 #include "casm/casm_io/Log.hh"
 #include "casm/casm_io/json/InputParser_impl.hh"
 #include "casm/casm_io/json/jsonParser.hh"
+#include "casm/clexulator/BaseClexulator.hh"
 #include "casm/clexulator/Clexulator.hh"
+#include "casm/clexulator/ClusterExpansion.hh"
 #include "casm/clexulator/ConfigDoFValuesTools_impl.hh"
 #include "casm/clexulator/Correlations.hh"
 #include "casm/clexulator/LocalCorrelations.hh"
 #include "casm/clexulator/NeighborList.hh"
+#include "casm/clexulator/SparseCoefficients.hh"
 #include "casm/clexulator/io/json/Clexulator_json_io.hh"
 
 #define STRINGIFY(x) #x
@@ -60,6 +63,7 @@ std::shared_ptr<PrimNeighborListWrapper> make_prim_neighbor_list(
   wrapper->prim_neighbor_list = std::make_shared<clexulator::PrimNeighborList>(
       weight_matrix.value(), _sublattice_indices.begin(),
       _sublattice_indices.end(), total_n_sublattice.value());
+  std::cout << wrapper->prim_neighbor_list->size() << "  size  " << std::endl;
   return wrapper;
 }
 
@@ -136,6 +140,16 @@ std::shared_ptr<LocalClexulatorWrapper> make_local_clexulator(
   return lclex_wrapper;
 }
 
+std::shared_ptr<clexulator::ClusterExpansion> make_cluster_expansion(
+    std::shared_ptr<clexulator::SuperNeighborList const> const
+        &supercell_neighbor_list,
+    std::shared_ptr<clexulator::Clexulator const> const &_clexulator,
+    clexulator::SparseCoefficients const &_coefficients,
+    clexulator::ConfigDoFValues const *_dof_values) {
+  return std::make_shared<clexulator::ClusterExpansion>(
+      clexulator::ClusterExpansion(supercell_neighbor_list, _clexulator,
+                                   _coefficients, _dof_values));
+}
 }  // namespace CASMpy
 
 PYBIND11_DECLARE_HOLDER_TYPE(T, std::shared_ptr<T>);
@@ -468,8 +482,31 @@ PYBIND11_MODULE(_clexulator, m) {
           [](clexulator::Clexulator const &clexulator) {
             return clexulator.corr_size();
           },
-          "Return the number of basis functions");
-
+          "Return the number of basis functions")
+      .def(
+          "n_point_corr",
+          [](clexulator::Clexulator const &clexulator) {
+            return clexulator.n_point_corr();
+          },
+          "Return point correlations")
+      .def(
+          "weight_matrix",
+          [](clexulator::Clexulator const &clexulator) {
+            return clexulator.weight_matrix();
+          },
+          "Weight matrix used for ordering the neighbor list")
+      .def(
+          "n_sublattices",
+          [](clexulator::Clexulator const &clexulator) {
+            return clexulator.n_sublattices();
+          },
+          "Total number of sublattices in the Prim")
+      .def(
+          "sublat_indices",
+          [](clexulator::Clexulator const &clexulator) {
+            return clexulator.sublat_indices();
+          },
+          "Sublat indices in the Prim");
   //
   py::class_<LocalClexulatorWrapper, std::shared_ptr<LocalClexulatorWrapper>>(
       m, "LocalClexulator", R"pbdoc(
@@ -718,6 +755,20 @@ PYBIND11_MODULE(_clexulator, m) {
       py::arg("supercell_neighbor_list"), py::arg("local_clexulator"),
       py::arg("config_dof_values"), py::arg("unitcell_index"),
       py::arg("equivalent_index"), py::arg("indices") = std::nullopt);
+
+  py::class_<clexulator::SparseCoefficients>(m, "SparseCoefficients", R"pbdoc(
+ 	Container for non-zero expansion coefficientts
+  )pbdoc")
+      .def(py::init<>())
+      .def_readwrite("index", &clexulator::SparseCoefficients::index)
+      .def_readwrite("value", &clexulator::SparseCoefficients::value);
+
+  py::class_<clexulator::ClusterExpansion,
+             std::shared_ptr<clexulator::ClusterExpansion>>(m,
+                                                            "ClusterExpansion")
+      .def(py::init<>(&make_cluster_expansion))
+      .def("intensive_value", &clexulator::ClusterExpansion::intensive_value)
+      .def("extensive_value", &clexulator::ClusterExpansion::extensive_value);
 
 #ifdef VERSION_INFO
   m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);
