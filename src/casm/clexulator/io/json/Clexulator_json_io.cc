@@ -7,6 +7,24 @@
 namespace CASM {
 namespace clexulator {
 
+namespace {
+
+fs::path resolve_path(fs::path p, std::vector<fs::path> search_path) {
+  fs::path resolved_path;
+  if (fs::exists(p)) {
+    return p;
+  } else {
+    for (fs::path root : search_path) {
+      if (fs::exists(root / p)) {
+        return root / p;
+      }
+    }
+  }
+  return p;
+}
+
+}  // namespace
+
 /// \param parser An InputParser, as genrated by
 ///     `InputParser::subparse<std::shared_ptr<Clexulator>>` or one of the other
 ///     `subparse` methods.
@@ -26,11 +44,12 @@ namespace clexulator {
 ///     Options used to compile the Clexulator shared object file, if it is not
 ///     yet compiled. Example: "g++ -shared -L/path/to/lib -lcasm_clexulator "
 void parse(InputParser<Clexulator> &parser,
-           std::shared_ptr<PrimNeighborList> &prim_neighbor_list) {
+           std::shared_ptr<PrimNeighborList> &prim_neighbor_list,
+           std::vector<fs::path> search_path) {
   // parse "source"
   std::string _clexulator_src;
   parser.require(_clexulator_src, "source");
-  fs::path clexulator_src(_clexulator_src);
+  fs::path clexulator_src = resolve_path(_clexulator_src, search_path);
   if (!fs::exists(clexulator_src)) {
     parser.insert_error("source", "Error: \"source\" file does not exist.");
   }
@@ -124,11 +143,12 @@ void parse(InputParser<Clexulator> &parser,
 ///     Options used to compile the Clexulator shared object file, if it is not
 ///     yet compiled. Example: "g++ -shared -L/path/to/lib -lcasm_clexulator "
 void parse(InputParser<std::vector<Clexulator>> &parser,
-           std::shared_ptr<PrimNeighborList> &prim_neighbor_list) {
+           std::shared_ptr<PrimNeighborList> &prim_neighbor_list,
+           std::vector<fs::path> search_path) {
   // parse "source"
   std::string _clexulator_src;
   parser.require(_clexulator_src, "source");
-  fs::path clexulator_src(_clexulator_src);
+  fs::path clexulator_src = resolve_path(_clexulator_src, search_path);
 
   if (!fs::exists(clexulator_src)) {
     parser.insert_error("source", "Error: \"source\" file does not exist.");
