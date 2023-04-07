@@ -711,7 +711,6 @@ Eigen::VectorXd get_mean_normal_coordinate(
                                          transformation_matrix_to_super);
 
   auto const &dof_key = dof_space.dof_key;
-  auto const &basis = dof_space.basis;
 
   if (AnisoValTraits(dof_key).global()) {
     auto const &vector_values = dof_values.global_dof_values.at(dof_key);
