@@ -304,7 +304,7 @@ ConfigDoFValues from_standard_values(
     std::map<DoFKey, GlobalDoFSetType> const &global_dof_info,
     std::map<DoFKey, std::vector<LocalDoFSetType>> const &local_dof_info) {
   ConfigDoFValues dof_values;
-  dof_values.occupation = dof_values.occupation;
+  dof_values.occupation = standard_values.occupation;
 
   for (auto const &pair : standard_values.local_dof_values) {
     std::string const &dof_type = pair.first;

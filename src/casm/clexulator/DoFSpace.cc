@@ -109,10 +109,11 @@ DoFSpace::DoFSpace(
                                   transformation_matrix_to_super, sites)),
       basis(_basis.has_value() ? _basis.value()
                                : Eigen::MatrixXd::Identity(dim, dim)),
-      basis_inv(basis.transpose()
-                    .colPivHouseholderQr()
-                    .solve(Eigen::MatrixXd::Identity(dim, dim))
-                    .transpose()),
+      basis_inv(
+          basis.transpose()
+              .colPivHouseholderQr()
+              .solve(Eigen::MatrixXd::Identity(basis.cols(), basis.cols()))
+              .transpose()),
       subspace_dim(basis.cols()),
       axis_info(std::move(_axis_info)) {
   if (is_global) {
@@ -710,7 +711,6 @@ Eigen::VectorXd get_mean_normal_coordinate(
                                          transformation_matrix_to_super);
 
   auto const &dof_key = dof_space.dof_key;
-  auto const &basis = dof_space.basis;
 
   if (AnisoValTraits(dof_key).global()) {
     auto const &vector_values = dof_values.global_dof_values.at(dof_key);

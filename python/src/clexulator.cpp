@@ -16,10 +16,13 @@
 #include "casm/clexulator/ClusterExpansion.hh"
 #include "casm/clexulator/ConfigDoFValuesTools_impl.hh"
 #include "casm/clexulator/Correlations.hh"
+#include "casm/clexulator/DoFSpace.hh"
 #include "casm/clexulator/LocalCorrelations.hh"
 #include "casm/clexulator/NeighborList.hh"
+#include "casm/clexulator/OrderParameter.hh"
 #include "casm/clexulator/SparseCoefficients.hh"
 #include "casm/clexulator/io/json/Clexulator_json_io.hh"
+#include "casm/clexulator/io/json/DoFSpace_json_io.hh"
 
 #define STRINGIFY(x) #x
 #define MACRO_STRINGIFY(x) STRINGIFY(x)
@@ -150,6 +153,17 @@ std::shared_ptr<clexulator::ClusterExpansion> make_cluster_expansion(
       clexulator::ClusterExpansion(supercell_neighbor_list, _clexulator,
                                    _coefficients, _dof_values));
 }
+
+std::shared_ptr<clexulator::DoFSpace> make_dof_space(
+    std::string const &dof_key,
+    std::shared_ptr<xtal::BasicStructure const> const &prim,
+    std::optional<Eigen::Matrix3l> transformation_matrix_to_super,
+    std::optional<std::set<Index>> sites,
+    std::optional<Eigen::MatrixXd> basis) {
+  return std::make_shared<clexulator::DoFSpace>(
+      dof_key, prim, transformation_matrix_to_super, sites, basis);
+}
+
 }  // namespace CASMpy
 
 PYBIND11_DECLARE_HOLDER_TYPE(T, std::shared_ptr<T>);
@@ -502,6 +516,12 @@ PYBIND11_MODULE(_clexulator, m) {
           },
           "Total number of sublattices in the Prim")
       .def(
+          "nlist_size",
+          [](clexulator::Clexulator const &clexulator) {
+            return clexulator.nlist_size();
+          },
+          "Total number of sublattices in the Prim")
+      .def(
           "sublat_indices",
           [](clexulator::Clexulator const &clexulator) {
             return clexulator.sublat_indices();
@@ -769,6 +789,125 @@ PYBIND11_MODULE(_clexulator, m) {
       .def(py::init<>(&make_cluster_expansion))
       .def("intensive_value", &clexulator::ClusterExpansion::intensive_value)
       .def("extensive_value", &clexulator::ClusterExpansion::extensive_value);
+  //
+  py::class_<clexulator::DoFSpace, std::shared_ptr<clexulator::DoFSpace>>(
+      m, "DoFSpace", R"pbdoc(
+      Specify a degree of freedom (DoF) space.
+
+      A DoFSpace defines a subset of the allowed degrees of freedom (DoF).
+      A choice of basis, :math:`Q`, with column basis vectors :math:`q_i`, spanning
+      the space or a subspace provides a definition for order parameters,
+      according to :math:`Q \eta = x`, where :math:`x` are DoF values in the prim
+      basis.
+      )pbdoc")
+      .def(py::init(&make_dof_space),
+           R"pbdoc(
+          Construct a DoFSpace
+
+          Parameters
+          ----------
+          dof_key: str
+              A string indicating which DoF type (e.g., "disp", "Hstrain", "occ")
+          xtal_prim : libcasm.xtal.Prim
+              A :class:`~libcasm.xtal.Prim`
+          transformation_matrix_to_super : array_like, shape=(3,3), dtype=int
+              Specifies the supercell for a local DoF space. Ignored for global DoF. The transformation matrix, T, relating the superstructure lattice vectors, S, defining the DoF space to the unit structure lattice vectors, L, according to S = L @ T, where S and L are shape=(3,3)  matrices with lattice vectors as columns.
+          site_indices : Optional[list[int]] = None
+              A set of linear index of sites in the supercell to be included in a local DoF space. Ignored for global DoF. If dof_key specifies a local DoF and this does not have a value, all sites in the supercell are included.
+          basis : Optional[array_like] = None
+              Allows specifying a subspace of the space determined from dof_key, and for local DoF, transformation_matrix_to_super and sites. The rows of `basis` correspond to prim DoF basis axes. If this does not have a value, the standard basis (identify matrix of appropriate dimension) is used.
+          )pbdoc",
+           py::arg("dof_key"), py::arg("xtal_prim"),
+           py::arg("transformation_matrix_to_super") = std::nullopt,
+           py::arg("site_indices") = std::nullopt,
+           py::arg("basis") = std::nullopt)
+      .def_static(
+          "from_dict",
+          [](const nlohmann::json &data,
+             std::shared_ptr<xtal::BasicStructure const> const &prim)
+              -> std::shared_ptr<clexulator::DoFSpace> {
+            jsonParser json{data};
+            InputParser<clexulator::DoFSpace> parser(json, prim);
+            std::runtime_error error_if_invalid{
+                "Error in libcasm.clexulator.DoFSpace.from_dict"};
+            report_and_throw_if_invalid(parser, CASM::log(), error_if_invalid);
+            return std::make_shared<clexulator::DoFSpace>(
+                std::move(*parser.value));
+          },
+          R"pbdoc(
+          Construct DoFSpace from a Python dict
+
+          Parameters
+          ----------
+          data : dict
+              The serialized OccSystem. Expected format:
+
+                  dof: string
+                      A string indicating which DoF type (e.g., "disp", "Hstrain", "occ")
+                  transformation_matrix_to_supercell: Optional[list[list[float]]
+                      Specifies the supercell for a local DoF space. Ignored for global DoF. The transformation matrix, T, relating the superstructure lattice vectors, S, defining the DoF space to the unit structure lattice vectors, L, according to S = L @ T, where S and L are shape=(3,3)  matrices with lattice vectors as columns.
+                  sites: Optional[list[int]]
+                      A set of linear index of sites in the supercell to be included in a local DoF space. Ignored for global DoF. If dof_key specifies a local DoF and this does not have a value, all sites in the supercell are included.
+                  basis: list[list[float]]
+                      DoFSpace basis vectors (i.e. basis[i] is the i-th column of the basis matrix :math:`Q`).
+
+          xtal_prim : libcasm.xtal.Prim
+              A :class:`~libcasm.xtal.Prim`
+
+          Returns
+          -------
+          dof_space : libcasm.clexulator.DoFSpace
+              The DoFSpace
+          )pbdoc",
+          py::arg("data"), py::arg("xtal_prim"))
+      .def(
+          "to_dict",
+          [](clexulator::DoFSpace const &m) -> nlohmann::json {
+            jsonParser json;
+            to_json(m, json);
+            return static_cast<nlohmann::json>(json);
+          },
+          "Represent the DoFSpace as a Python dict.");
+
+  //
+  m.def(
+      "calc_order_parameters",
+      [](std::shared_ptr<clexulator::DoFSpace> const &dof_space,
+         clexulator::ConfigDoFValues const &config_dof_values,
+         xtal::BasicStructure const &xtal_prim,
+         Eigen::Matrix3l const &transformation_matrix_to_super)
+          -> Eigen::VectorXd {
+        clexulator::OrderParameter f(*dof_space);
+        xtal::UnitCellCoordIndexConverter index_converter(
+            transformation_matrix_to_super, xtal_prim.basis().size());
+        return f(transformation_matrix_to_super, index_converter,
+                 &config_dof_values);
+      },
+      R"pbdoc(
+      Calculate order parameters
+
+      This method is safe and easy to use, but may be slower than using
+      the :class:`~libcasm.clexulator.OrderParameter` class directly.
+
+      Parameters
+      ----------
+      dof_space: ~libcasm.clexulator.DoFSpace
+          The DoFSpace defining the order parameter basis
+      config_dof_values: ConfigDoFValues
+          Configuration degree of freedom (DoF) values input
+      xtal_prim : libcasm.xtal.Prim
+          A :class:`~libcasm.xtal.Prim`
+      transformation_matrix_to_super : array_like, shape=(3,3), dtype=int
+          Specifies the supercell that config_dof_values is defined in.
+
+      Returns
+      -------
+      order_parameters: np.ndarray
+          A vector with the calculated order parameters.
+
+      )pbdoc",
+      py::arg("dof_space"), py::arg("config_dof_values"), py::arg("xtal_prim"),
+      py::arg("transformation_matrix_to_super"));
 
 #ifdef VERSION_INFO
   m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);
