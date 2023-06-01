@@ -3,7 +3,7 @@ libcasm-clexulator: The Python interface to the CASM clexulator library
 =======================================================================
 
 The libcasm-clexulator package is a Python interface to the
-classes and methods in the CASM clexulator C++ libraries.
+classes and methods in the CASM clexulator C++ library.
 This includes:
 
 - A data structures for representing degrees of freedom (DoF) in
