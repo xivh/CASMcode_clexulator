@@ -66,7 +66,6 @@ std::shared_ptr<PrimNeighborListWrapper> make_prim_neighbor_list(
   wrapper->prim_neighbor_list = std::make_shared<clexulator::PrimNeighborList>(
       weight_matrix.value(), _sublattice_indices.begin(),
       _sublattice_indices.end(), total_n_sublattice.value());
-  std::cout << wrapper->prim_neighbor_list->size() << "  size  " << std::endl;
   return wrapper;
 }
 
@@ -788,7 +787,13 @@ PYBIND11_MODULE(_clexulator, m) {
                                                             "ClusterExpansion")
       .def(py::init<>(&make_cluster_expansion))
       .def("intensive_value", &clexulator::ClusterExpansion::intensive_value)
-      .def("extensive_value", &clexulator::ClusterExpansion::extensive_value);
+      .def("extensive_value", &clexulator::ClusterExpansion::extensive_value)
+      .def("local_delta_value",
+           &clexulator::ClusterExpansion::local_delta_value)
+      .def("set", &clexulator::ClusterExpansion::set)
+      .def("global_delta_value",
+           &clexulator::ClusterExpansion::global_delta_value);
+
   //
   py::class_<clexulator::DoFSpace, std::shared_ptr<clexulator::DoFSpace>>(
       m, "DoFSpace", R"pbdoc(
