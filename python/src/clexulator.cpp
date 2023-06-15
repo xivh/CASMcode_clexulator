@@ -18,8 +18,11 @@
 #include "casm/clexulator/LocalCorrelations.hh"
 #include "casm/clexulator/NeighborList.hh"
 #include "casm/clexulator/OrderParameter.hh"
+#include "casm/clexulator/SparseCoefficients.hh"
 #include "casm/clexulator/io/json/Clexulator_json_io.hh"
+#include "casm/clexulator/io/json/ConfigDoFValues_json_io.hh"
 #include "casm/clexulator/io/json/DoFSpace_json_io.hh"
+#include "casm/clexulator/io/json/SparseCoefficients_json_io.hh"
 
 #define STRINGIFY(x) #x
 #define MACRO_STRINGIFY(x) STRINGIFY(x)
@@ -293,6 +296,56 @@ PYBIND11_MODULE(_clexulator, m) {
           [](clexulator::ConfigDoFValues &self,
              clexulator::ConfigDoFValues const &other) { self = other; },
           "Assign all values from other", py::arg("other"))
+      .def_static(
+          "from_dict",
+          [](const nlohmann::json &data) {
+            jsonParser json{data};
+            InputParser<clexulator::ConfigDoFValues> parser(json);
+            std::runtime_error error_if_invalid{
+                "Error in libcasm.clexulator.ConfigDoFValues.from_dict"};
+            report_and_throw_if_invalid(parser, CASM::log(), error_if_invalid);
+            return std::move(*parser.value);
+          },
+          R"pbdoc(
+          Construct ConfigDoFValues from a Python dict
+
+          Notes
+          -----
+          - This function does not convert ConfigDoFValues between prim and standard bases, it reads values as they are.
+          - Conversions, if necessary, must be done after construction using:
+
+              - :func:`~libcasm.clexulator.from_standard_values`: Copy ConfigDoFValues and convert from the standard basis to the prim basis.
+              - :func:`~libcasm.clexulator.to_standard_values`: Copy ConfigDoFValues and convert from the prim basis to the standard basis.
+
+          - For a description of the format, see `ConfigDoF JSON object`_
+
+          .. _`ConfigDoF JSON object`: https://prisms-center.github.io/CASMcode_docs/formats/casm/clex/Configuration/#configdof-json-object
+
+          )pbdoc",
+          py::arg("data"))
+      .def(
+          "to_dict",
+          [](clexulator::ConfigDoFValues const &values) {
+            jsonParser json;
+            to_json(values, json);
+            return static_cast<nlohmann::json>(json);
+          },
+          R"pbdoc(
+          Represent ConfigDoFValues as a Python dict
+
+          Notes
+          -----
+          - This function does not convert ConfigDoFValues between prim and standard bases, it writes values as they are.
+          - Conversions, if necessary, must be done beforehand using:
+
+              - :func:`~libcasm.clexulator.from_standard_values`: Copy ConfigDoFValues and convert from the standard basis to the prim basis.
+              - :func:`~libcasm.clexulator.to_standard_values`: Copy ConfigDoFValues and convert from the prim basis to the standard basis.
+
+          - For a description of the format, see `ConfigDoF JSON object`_
+
+          .. _`ConfigDoF JSON object`: https://prisms-center.github.io/CASMcode_docs/formats/casm/clex/Configuration/#configdof-json-object
+
+          )pbdoc")
       .def("__copy__",
            [](clexulator::ConfigDoFValues const &self) {
              return clexulator::ConfigDoFValues(self);
@@ -334,7 +387,7 @@ PYBIND11_MODULE(_clexulator, m) {
             dof_values, dof_info.n_sublat, n_unitcells,
             dof_info.global_dof_info, dof_info.local_dof_info);
       },
-      "Copy of ConfigDoFValues and convert from the prim basis to the standard "
+      "Copy ConfigDoFValues and convert from the prim basis to the standard "
       "basis.",
       py::arg("dof_values"), py::arg("xtal_prim"), py::arg("n_unitcells"));
 
@@ -347,7 +400,7 @@ PYBIND11_MODULE(_clexulator, m) {
             dof_values, dof_info.n_sublat, n_unitcells,
             dof_info.global_dof_info, dof_info.local_dof_info);
       },
-      "Copy of ConfigDoFValues and convert from the standard basis to the prim "
+      "Copy ConfigDoFValues and convert from the standard basis to the prim "
       "basis.",
       py::arg("dof_values"), py::arg("xtal_prim"), py::arg("n_unitcells"));
 
@@ -851,6 +904,92 @@ PYBIND11_MODULE(_clexulator, m) {
       )pbdoc",
       py::arg("dof_space"), py::arg("config_dof_values"), py::arg("xtal_prim"),
       py::arg("transformation_matrix_to_super"));
+
+  py::class_<clexulator::SparseCoefficients>(m, "SparseCoefficients", R"pbdoc(
+      Container for non-zero expansion coefficients
+      )pbdoc")
+      .def(py::init<std::vector<unsigned int>, std::vector<double>>(), R"pbdoc(
+          Parameters
+          ----------
+          index: List[int]
+              Indices of basis functions with non-zero coefficients
+          value: List[float]
+              Expansion coefficients, for the basis functions specified by `index`
+          )pbdoc",
+           py::arg("index") = std::vector<unsigned int>(),
+           py::arg("value") = std::vector<double>())
+      .def_readwrite("index", &clexulator::SparseCoefficients::index, R"pbdoc(
+          List[int]: Indices of basis functions with non-zero coefficients
+          )pbdoc")
+      .def_readwrite("value", &clexulator::SparseCoefficients::index, R"pbdoc(
+          List[float]: Expansion coefficients, for the basis functions specified by `index`
+          )pbdoc")
+      .def_static(
+          "from_data",
+          [](const nlohmann::json &data) {
+            jsonParser json{data};
+            InputParser<clexulator::SparseCoefficients> parser(json);
+            std::runtime_error error_if_invalid{
+                "Error in libcasm.clexulator.SparseCoefficients.from_dict"};
+            report_and_throw_if_invalid(parser, CASM::log(), error_if_invalid);
+            return std::move(*parser.value);
+          },
+          R"pbdoc(
+          Construct SparseCoefficients from a JSON-serializeable representation
+
+          Notes
+          -----
+          - Accepts CASM v1 format (`{"orbits": [...]}`) if "orbits" is present
+          - Otherwise, assumes CASM v2 format (`[[index, value], ...]`)
+
+          )pbdoc",
+          py::arg("data"))
+      .def(
+          "to_data",
+          [](clexulator::SparseCoefficients const &values) {
+            jsonParser json;
+            to_json(values, json);
+            return static_cast<nlohmann::json>(json);
+          },
+          R"pbdoc(
+          Represent SparseCoefficients as a JSON-serializeable list
+
+          Returns
+          -------
+          data:
+              A list of [index, value] pairs (`[[index, value], ...]`).
+
+          )pbdoc")
+      .def(
+          "__mul__",
+          [](clexulator::SparseCoefficients const &self,
+             Eigen::VectorXd const &correlations) {
+            return self * correlations;
+          },
+          R"pbdoc(
+          Evaluate cluster expansion value given coefficients and correlations
+
+          Parameters
+          ----------
+          self: SparseCoefficients
+              The expansion coefficients
+          correlations: np.ndarray
+              The correlations, of size matching the total number of basis functions, so there are values associated with both zero and non-zero expansion coefficients.
+
+          Returns
+          -------
+          value:
+              The result of multiplying coefficients by correlation values and summing.
+
+          )pbdoc",
+          py::arg("correlations"))
+      .def("__copy__",
+           [](clexulator::SparseCoefficients const &self) {
+             return clexulator::SparseCoefficients(self);
+           })
+      .def("__deepcopy__", [](clexulator::SparseCoefficients const &self) {
+        return clexulator::SparseCoefficients(self);
+      });
 
 #ifdef VERSION_INFO
   m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);
