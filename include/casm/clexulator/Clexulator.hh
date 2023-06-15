@@ -119,6 +119,14 @@ class Clexulator {
     return m_clex->weight_matrix();
   }
 
+  /// \brief Return sublat_indices
+  const std::set<int> &sublat_indices() const {
+    return m_clex->sublat_indices();
+  }
+
+  /// \brief Return n_sublattices
+  size_type n_sublattices() const { return m_clex->n_sublattices(); }
+
   /// \brief Set the pointer to DoF values
   ///
   /// Notes:
