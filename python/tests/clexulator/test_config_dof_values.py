@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 from libcasm.clexulator import ConfigDoFValues, make_default_config_dof_values
 import libcasm.xtal as xtal
 import libcasm.xtal.prims as xtal_prims
@@ -43,12 +44,36 @@ def test_occupation():
     dof_values = ConfigDoFValues()
 
     occupation_in = np.array([1, 0, 0, 0], dtype=int)
+    # this sets using a copy
     dof_values.set_occupation(occupation_in)
+
     occupation_out = dof_values.occupation()
     assert np.allclose(occupation_in, occupation_out)
 
+    # so this has no effect
+    occupation_in[0] = 2
+    assert dof_values.occ(0) == 1
+
+    # but this does
     dof_values.set_occ(0, 2)
     assert dof_values.occ(0) == 2
+
+
+def test_occupation_2():
+    dof_values = ConfigDoFValues()
+
+    occupation_in = np.array([1, 0, 0, 0], dtype=int)
+    dof_values.set_occupation(occupation_in)
+
+    # this returns a const reference np.ndarray (writeable==False,owndata==False)
+    # so occupation_out should be ready-only
+    occupation_out = dof_values.occupation()
+    assert np.allclose(occupation_in, occupation_out)
+    with pytest.raises(ValueError):
+        occupation_out[0] = 2
+    assert dof_values.occ(0) == 1
+    assert occupation_out.flags.writeable == False
+    assert occupation_out.flags.owndata == False
 
 
 def test_copy_config_dof_values():
