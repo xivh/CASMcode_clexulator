@@ -67,6 +67,6 @@ To only skip 'very_slow' tests, marked with `@pytest.mark.very_slow`, do:
 Formatting
 ==========
 
-Use yapf. From CASMcode_clexulator/python do:
+Use black. From CASMcode_clexulator/python do:
 
-    yapf -ir .
+    black .
