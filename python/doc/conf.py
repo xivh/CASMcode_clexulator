@@ -32,7 +32,7 @@ autoclass_content = "both"
 autosummary_generate = True
 autosummary_imported_members = True
 numpydoc_show_class_members = False
-# autodoc_typehints = 'both'
+autodoc_typehints = "description"
 autodoc_typehints_format = "short"
 python_use_unqualified_type_names = True
 autodoc_inherit_docstrings = False
@@ -42,6 +42,10 @@ intersphinx_mapping = {
     "xtal": (
         "../../../../../CASMcode_crystallography/python/doc/_build/html",
         ("../../../CASMcode_crystallography/python/doc/_build/html/objects.inv", None),
+    ),
+    "configuration": (
+        "../../../../../CASMcode_configuration/python/doc/_build/html",
+        ("../../../CASMcode_configuration/python/doc/_build/html/objects.inv", None),
     ),
 }
 

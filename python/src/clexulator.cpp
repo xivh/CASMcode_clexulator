@@ -1405,7 +1405,8 @@ PYBIND11_MODULE(_clexulator, m) {
       .def(
           "multi_occ_delta_value",
           [](clexulator::ClusterExpansion &x,
-             std::vector<Index> linear_site_index, std::vector<int> new_occ) {
+             std::vector<Index> const &linear_site_index,
+             std::vector<int> const &new_occ) {
             return x.occ_delta_value(linear_site_index, new_occ);
           },
           R"pbdoc(
@@ -1472,7 +1473,7 @@ PYBIND11_MODULE(_clexulator, m) {
       m, "MultiClusterExpansion", R"pbdoc(
       A cluster expansion calculator
 
-      MultiClusterExpansion is similar to :class:`~libcasm.clexulator.ClusterExpansion`, but includes multiple :class:`~libcasm.clexulator.SparseCoefficients` so that multiple cluster expansions can be evaluated using the same cluster expansion basis functions.
+      MultiClusterExpansion is similar to :class:`~libcasm.clexulator.ClusterExpansion`, but includes multiple :class:`~libcasm.clexulator.SparseCoefficients`. When multiple cluster expansions use the same basis set, it can be used to simplify evaluating them all with a single evaluation of the basis functions.
 
       )pbdoc")
       .def(py::init<>(&make_multi_cluster_expansion), R"pbdoc(
@@ -1501,7 +1502,7 @@ PYBIND11_MODULE(_clexulator, m) {
           Returns
           -------
           value : np.ndarray
-              Cluster expansion values, per unit cell, as a const reference. The i-th element is the value of the i-th cluster expansion. Referred to values remain fixed until the next time a calcutor function is called.
+              Cluster expansion values, per unit cell, as a const reference. The i-th element is the value of the i-th cluster expansion. Referred to values remain fixed until the next time a calculator function is called.
           )pbdoc")
       .def("extensive_value",
            &clexulator::MultiClusterExpansion::extensive_value, R"pbdoc(
@@ -1510,7 +1511,7 @@ PYBIND11_MODULE(_clexulator, m) {
           Returns
           -------
           value : np.ndarray
-              Cluster expansion values, as a const reference. The i-th element is the value of the i-th cluster expansion. Referred to values remain fixed until the next time a calcutor function is called.
+              Cluster expansion values, as a const reference. The i-th element is the value of the i-th cluster expansion. Referred to values remain fixed until the next time a calculator function is called.
           )pbdoc")
       .def(
           "occ_delta_value",
@@ -1531,14 +1532,14 @@ PYBIND11_MODULE(_clexulator, m) {
           Returns
           -------
           delta_value : np.ndarray
-              Change in cluster expansion values, as a const reference. The i-th element is the change in the i-th cluster expansion. Referred to values remain fixed until the next time a calcutor function is called.
+              Change in cluster expansion values, as a const reference. The i-th element is the change in the i-th cluster expansion. Referred to values remain fixed until the next time a calculator function is called.
           )pbdoc",
           py::arg("linear_site_index"), py::arg("new_occ"))
       .def(
           "multi_occ_delta_value",
           [](clexulator::MultiClusterExpansion &x,
-             std::vector<Index> linear_site_index,
-             std::vector<int> new_occ) -> Eigen::VectorXd const & {
+             std::vector<Index> const &linear_site_index,
+             std::vector<int> const &new_occ) -> Eigen::VectorXd const & {
             return x.occ_delta_value(linear_site_index, new_occ);
           },
           py::return_value_policy::reference_internal, R"pbdoc(
@@ -1556,7 +1557,7 @@ PYBIND11_MODULE(_clexulator, m) {
           Returns
           -------
           delta_value : np.ndarray
-              Change in cluster expansion values, as a const reference. The i-th element is the change in the i-th cluster expansion. Referred to values remain fixed until the next time a calcutor function is called.
+              Change in cluster expansion values, as a const reference. The i-th element is the change in the i-th cluster expansion. Referred to values remain fixed until the next time a calculator function is called.
           )pbdoc",
           py::arg("linear_site_index"), py::arg("new_occ"))
       .def("local_delta_value",
@@ -1576,7 +1577,7 @@ PYBIND11_MODULE(_clexulator, m) {
           Returns
           -------
           delta_value : np.ndarray
-              Change in cluster expansion values, as a const reference. The i-th element is the change in the i-th cluster expansion. Referred to values remain fixed until the next time a calcutor function is called.
+              Change in cluster expansion values, as a const reference. The i-th element is the change in the i-th cluster expansion. Referred to values remain fixed until the next time a calculator function is called.
           )pbdoc",
            py::arg("key"), py::arg("linear_site_index"), py::arg("new_value"))
       .def("global_delta_value",
@@ -1594,7 +1595,7 @@ PYBIND11_MODULE(_clexulator, m) {
           Returns
           -------
           delta_value : np.ndarray
-              Change in cluster expansion values, as a const reference. The i-th element is the change in the i-th cluster expansion. Referred to values remain fixed until the next time a calcutor function is called.
+              Change in cluster expansion values, as a const reference. The i-th element is the change in the i-th cluster expansion. Referred to values remain fixed until the next time a calculator function is called.
           )pbdoc",
            py::arg("key"), py::arg("new_value"))
       .def(
@@ -1703,7 +1704,7 @@ PYBIND11_MODULE(_clexulator, m) {
       m, "MultiLocalClusterExpansion", R"pbdoc(
       A local cluster expansion calculator
 
-      MultieLocalClusterExpansion is similar to :class:`~libcasm.clexulator.LocalClusterExpansion`, but includes multiple :class:`~libcasm.clexulator.SparseCoefficients` so that multiple local cluster expansions can be evaluated using the same cluster expansion basis functions.
+      MultiLocalClusterExpansion is similar to :class:`~libcasm.clexulator.LocalClusterExpansion`, but includes multiple :class:`~libcasm.clexulator.SparseCoefficients`. When multiple local cluster expansions use the same basis set, it can be used to simplify evaluating them all with a single evaluation of the basis functions.
 
       )pbdoc")
       .def(py::init<>(&make_multi_local_cluster_expansion), R"pbdoc(
@@ -1740,7 +1741,7 @@ PYBIND11_MODULE(_clexulator, m) {
           Returns
           -------
           value : np.ndarray
-              Cluster expansion values, as a const reference. The i-th element is the value of the i-th cluster expansion. Referred to values remain fixed until the next time a calcutor function is called.
+              Cluster expansion values, as a const reference. The i-th element is the value of the i-th cluster expansion. Referred to values remain fixed until the next time a calculator function is called.
           )pbdoc",
            py::arg("unitcell_index"), py::arg("equivalent_index"))
       .def(
@@ -1859,6 +1860,230 @@ PYBIND11_MODULE(_clexulator, m) {
             return static_cast<nlohmann::json>(json);
           },
           "Represent the DoFSpace as a Python dict.");
+
+  py::class_<clexulator::OrderParameter,
+             std::shared_ptr<clexulator::OrderParameter>>(m, "OrderParameter",
+                                                          R"pbdoc(
+      An order parameter calculator
+
+      OrderParameter calculates:
+
+      - the value of an order parameter
+      - the change in the value of an order parameter given changes in degree of freedom (DoF) values
+
+      To calculate the order parameter value, OrderParameter uses:
+
+      - :class:`~libcasm.clexulator.DoFSpace`: to specify the order parameter basis
+      - :class:`~libcasm.xtal.SiteIndexConverter`: to perform index conversions
+      - :class:`~libcasm.clexulator.ConfigDoFValues`: OrderParameter is given a pointer to a ConfigDoFValues instance and calculates the order parameters using the current state of the DoF values
+
+      Examples
+      --------
+
+      For usage examples, see the section :ref:`Evaluating order parameters <order-parameters-index>`.
+
+      Notes
+      -----
+
+      - An OrderParameter is set to calculate order parameters in one supercell at a time, using the appropriate :class:`~libcasm.xtal.SiteIndexConverter`. This can be set using the call operator or the :func:`~libcasm.clexulator.OrderParameter.update` method.
+      - Order parameters are calculated for a :class:`~libcasm.clexulator.ConfigDoFValues` instance that can be given at construction or using using the call operator, the :func:`~libcasm.clexulator.OrderParameter.update` method, or the :func:`~libcasm.clexulator.ClusterExpansion.set` method.
+
+        - The :class:`~libcasm.clexulator.ConfigDoFValues` must be constructed consistent with the :class:`~libcasm.xtal.SiteIndexConverter`.
+        - Once set by any method, OrderParameter maintains a non-owning pointer to that :class:`~libcasm.clexulator.ConfigDoFValues` instance.
+        - The :class:`~libcasm.clexulator.ConfigDoFValues` can then be modified externally and subsequent calls of OrderParameter methods will use the current DoF values.
+
+      )pbdoc")
+      .def(py::init<clexulator::DoFSpace const &>(), R"pbdoc(
+          Construct an OrderParameter
+
+          Parameters
+          ----------
+          dof_space: ~libcasm.clexulator.DoFSpace
+              The DoFSpace defining the order parameter basis
+          )pbdoc",
+           py::arg("dof_space"))
+      .def(
+          "update",
+          [](clexulator::OrderParameter &m,
+             Eigen::Matrix3l const &transformation_matrix_to_super,
+             xtal::UnitCellCoordIndexConverter const &supercell_index_converter,
+             clexulator::ConfigDoFValues const *dof_values) {
+            m.update(transformation_matrix_to_super, supercell_index_converter,
+                     dof_values);
+          },
+          R"pbdoc(
+          Set internal data to calculate order parameters in a particular supercell
+
+          Parameters
+          ----------
+          transformation_matrix_to_super : array_like, shape=(3,3), dtype=int
+              Specifies the supercell that config_dof_values is defined in.
+          site_index_converter : ~libcasm.xtal.SiteIndexConverter
+              Index converter for the specified supercell.
+          config_dof_values: ConfigDoFValues
+              Configuration degree of freedom (DoF) values input.
+              A :class:`~libcasm.xtal.Prim`
+
+          )pbdoc",
+          py::arg("transformation_matrix_to_super"),
+          py::arg("site_index_converter"), py::arg("config_dof_values"))
+      .def("set", &clexulator::OrderParameter::set, R"pbdoc(
+          Set the :class:`~libcasm.clexulator.ConfigDoFValues` instance OrderParameter uses to calculate the order parameter value. OrderParameter maintains a pointer to the underlying data, which must have a lifetime as long as OrderParameter is used to calculate with its data.
+          )pbdoc",
+           py::arg("config_dof_values"))
+      .def("value", &clexulator::OrderParameter::value,
+           R"pbdoc(
+          Calculate the current order parameter value
+
+          Returns
+          -------
+          value : np.ndarray
+              The order parameter values, as a const reference. Referred to values remain fixed until the next time a calculator function is called.
+          )pbdoc")
+      // occ DoF
+      .def(
+          "occ_delta_value",
+          [](clexulator::OrderParameter &m, Index linear_site_index,
+             Index new_occ) -> Eigen::VectorXd const & {
+            return m.occ_delta_value(linear_site_index, new_occ);
+          },
+          py::return_value_policy::reference_internal,
+          R"pbdoc(
+          Calculate and return the change in order parameter value due to an occupation change
+
+          Parameters
+          ----------
+          linear_site_index: int
+              Linear site index (as defined by a :class:`~libcasm.xtal.SiteIndexConverter`) where the occupant DoF value are changed.
+          new_occ: int
+              The value the occupant DoF is changed to.
+
+          Returns
+          -------
+          delta_value : np.ndarray
+              The change in order parameter values, as a const reference. Referred to values remain fixed until the next time a calculator function is called.
+          )pbdoc",
+          py::arg("linear_site_index"), py::arg("new_occ"))
+      .def(
+          "multi_occ_delta_value",
+          [](clexulator::OrderParameter &m,
+             std::vector<Index> const &linear_site_index,
+             std::vector<int> const &new_occ) -> Eigen::VectorXd const & {
+            return m.occ_delta_value(linear_site_index, new_occ);
+          },
+          py::return_value_policy::reference_internal,
+          R"pbdoc(
+          Calculate and return the change in order parameter value due to multiple occupation changes
+
+          Parameters
+          ----------
+          linear_site_index: List[int]
+              Linear site indices (as defined by a :class:`~libcasm.xtal.SiteIndexConverter`) where occupant DoF values are changed.
+          new_occ: List[int]
+              The values the occupant DoF are changed to.
+
+          Returns
+          -------
+          delta_value : np.ndarray
+              The change in order parameter values, as a const reference. Referred to values remain fixed until the next time a calculator function is called.
+          )pbdoc",
+          py::arg("linear_site_index"), py::arg("new_occ"))
+      // local DoF
+      .def(
+          "local_delta_value",
+          [](clexulator::OrderParameter &m, Index linear_site_index,
+             Eigen::VectorXd const &new_value) -> Eigen::VectorXd const & {
+            return m.local_delta_value(linear_site_index, new_value);
+          },
+          py::return_value_policy::reference_internal,
+          R"pbdoc(
+          Calculate and return change in order parameter value due to a local DoF change
+
+          Parameters
+          ----------
+          linear_site_index: int
+              Linear site indices (as defined by a :class:`~libcasm.xtal.SiteIndexConverter`) where the local DoF value is changed.
+          new_value: np.ndarray
+              The value the local DoF is changed to.
+
+          Returns
+          -------
+          delta_value : np.ndarray
+              The change in order parameter values, as a const reference. Referred to values remain fixed until the next time a calculator function is called.
+          )pbdoc",
+          py::arg("linear_site_index"), py::arg("new_value"))
+      .def(
+          "local_component_delta_value",
+          [](clexulator::OrderParameter &m, Index linear_site_index,
+             Index dof_component, double new_value) -> Eigen::VectorXd const & {
+            return m.local_delta_value(linear_site_index, dof_component,
+                                       new_value);
+          },
+          py::return_value_policy::reference_internal,
+          R"pbdoc(
+          Calculate and return change in order parameter value due to a change in a local DoF component
+
+          Parameters
+          ----------
+          linear_site_index: int
+              Linear site indices (as defined by a :class:`~libcasm.xtal.SiteIndexConverter`) where the local DoF value is changed.
+          dof_component: int
+              Index of the the local DoF component that is changed.
+          new_value: float
+              The value the local DoF component is changed to.
+
+          Returns
+          -------
+          delta_value : np.ndarray
+              The change in order parameter values, as a const reference. Referred to values remain fixed until the next time a calculator function is called.
+          )pbdoc",
+          py::arg("linear_site_index"), py::arg("dof_component"),
+          py::arg("new_value"))
+      // global DoF
+      .def(
+          "global_delta_value",
+          [](clexulator::OrderParameter &m,
+             Eigen::VectorXd const &new_value) -> Eigen::VectorXd const & {
+            return m.global_delta_value(new_value);
+          },
+          py::return_value_policy::reference_internal,
+          R"pbdoc(
+          Calculate and return change in order parameter value due to a global DoF change
+
+          Parameters
+          ----------
+          new_value: np.ndarray
+              The value the global DoF is changed to.
+
+          Returns
+          -------
+          delta_value : np.ndarray
+              The change in order parameter values, as a const reference. Referred to values remain fixed until the next time a calculator function is called.
+          )pbdoc",
+          py::arg("new_value"))
+      .def(
+          "global_component_delta_value",
+          [](clexulator::OrderParameter &m, Index dof_component,
+             double new_value) -> Eigen::VectorXd const & {
+            return m.global_delta_value(dof_component, new_value);
+          },
+          py::return_value_policy::reference_internal,
+          R"pbdoc(
+          Calculate and return change in order parameter value due to a change in a global DoF component
+
+          Parameters
+          ----------
+          dof_component: int
+              Index of the the global DoF component that is changed.
+          new_value: float
+              The value the global DoF component is changed to.
+
+          Returns
+          -------
+          delta_value : np.ndarray
+              The change in order parameter values, as a const reference. Referred to values remain fixed until the next time a calculator function is called.
+          )pbdoc",
+          py::arg("dof_component"), py::arg("new_value"));
 
   //
   m.def(
