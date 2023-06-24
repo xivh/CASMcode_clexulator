@@ -39,7 +39,7 @@ struct DoFSpace {
   DoFKey const dof_key;
 
   /// Store if dof_key names a global DoF type vs local DoF type
-  bool is_global;
+  bool const is_global;
 
   /// Shared prim
   std::shared_ptr<xtal::BasicStructure const> const prim;

@@ -383,9 +383,9 @@ DoFSpace exclude_homogeneous_mode_space(DoFSpace const &dof_space) {
     null_space = homogeneous_mode_space.transpose().fullPivLu().kernel();
   }
 
-  return DoFSpace{dof_space.dof_key, dof_space.prim,
-                  dof_space.transformation_matrix_to_super, dof_space.sites,
-                  null_space};
+  return make_dof_space(dof_space.dof_key, dof_space.prim,
+                        dof_space.transformation_matrix_to_super,
+                        dof_space.sites, null_space);
 }
 
 /// \brief Removes the homogeneous mode space from the DoFSpace basis
@@ -544,9 +544,9 @@ DoFSpace exclude_default_occ_modes(DoFSpace const &dof_space) {
   }
 
   // Construct with only non-zero columns
-  return DoFSpace(dof_space.dof_key, dof_space.prim,
-                  dof_space.transformation_matrix_to_super, dof_space.sites,
-                  tbasis.leftCols(non_zero_cols));
+  return make_dof_space(dof_space.dof_key, dof_space.prim,
+                        dof_space.transformation_matrix_to_super,
+                        dof_space.sites, tbasis.leftCols(non_zero_cols));
 }
 
 VectorSpaceMixingInfo::VectorSpaceMixingInfo(
