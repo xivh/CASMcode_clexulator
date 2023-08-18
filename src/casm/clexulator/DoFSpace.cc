@@ -383,9 +383,9 @@ DoFSpace exclude_homogeneous_mode_space(DoFSpace const &dof_space) {
     null_space = homogeneous_mode_space.transpose().fullPivLu().kernel();
   }
 
-  return DoFSpace{dof_space.dof_key, dof_space.prim,
-                  dof_space.transformation_matrix_to_super, dof_space.sites,
-                  null_space};
+  return make_dof_space(dof_space.dof_key, dof_space.prim,
+                        dof_space.transformation_matrix_to_super,
+                        dof_space.sites, null_space);
 }
 
 /// \brief Removes the homogeneous mode space from the DoFSpace basis
@@ -505,6 +505,48 @@ Eigen::MatrixXd make_homogeneous_mode_space(DoFSpace const &dof_space) {
   }
 
   return homogeneous_mode_space;
+}
+
+/// Removes the default occupation modes from the DoFSpace basis
+DoFSpace exclude_default_occ_modes(DoFSpace const &dof_space) {
+  if (dof_space.dof_key != "occ") {
+    throw std::runtime_error(
+        "Error in exclude_default_occ_modes: Not occupation DoF");
+  }
+
+  // Copy current basis
+  Eigen::MatrixXd basis = dof_space.basis;
+
+  if (!dof_space.axis_info.dof_component.has_value()) {
+    throw std::runtime_error(
+        "Error in exclude_default_occ_modes: no dof_component");
+  }
+
+  // Set entries to zero which correspond to dof_component == 0 (default occ)
+  std::vector<Index> const &axis_dof_component =
+      *dof_space.axis_info.dof_component;
+  for (Index i = 0; i < basis.rows(); ++i) {
+    for (Index j = 0; j < basis.cols(); ++j) {
+      if (axis_dof_component[i] == 0) {
+        basis(i, j) = 0.0;
+      }
+    }
+  }
+
+  // Copy non-zero columns
+  Eigen::MatrixXd tbasis(basis.rows(), basis.cols());
+  Index non_zero_cols = 0;
+  for (Index j = 0; j < basis.cols(); ++j) {
+    if (!almost_zero(basis.col(j))) {
+      tbasis.col(non_zero_cols) = basis.col(j);
+      ++non_zero_cols;
+    }
+  }
+
+  // Construct with only non-zero columns
+  return make_dof_space(dof_space.dof_key, dof_space.prim,
+                        dof_space.transformation_matrix_to_super,
+                        dof_space.sites, tbasis.leftCols(non_zero_cols));
 }
 
 VectorSpaceMixingInfo::VectorSpaceMixingInfo(

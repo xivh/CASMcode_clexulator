@@ -39,7 +39,7 @@ struct DoFSpace {
   DoFKey const dof_key;
 
   /// Store if dof_key names a global DoF type vs local DoF type
-  bool is_global;
+  bool const is_global;
 
   /// Shared prim
   std::shared_ptr<xtal::BasicStructure const> const prim;
@@ -164,6 +164,9 @@ DoFSpace exclude_homogeneous_mode_space(DoFSpace const &dof_space);
 
 /// \brief Make the homogeneous mode space of a local DoFSpace
 Eigen::MatrixXd make_homogeneous_mode_space(DoFSpace const &dof_space);
+
+/// Removes the default occupation modes from the DoFSpace basis
+DoFSpace exclude_default_occ_modes(DoFSpace const &dof_space);
 
 /// \brief A struct which gives out the mixing information of given
 /// `column_vector_space` and a subspace

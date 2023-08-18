@@ -105,6 +105,20 @@ std::set<xtal::UnitCellCoord> LocalCorrelations::required_update_neighborhood(
       m_corr_indices_begin, m_corr_indices_end);
 }
 
+/// \brief Number of correlations
+Index LocalCorrelations::corr_size() const {
+  if (m_clexulator->size() == 0) {
+    throw std::runtime_error("Error: empty local clexulator vector");
+  }
+  return m_clexulator->begin()->corr_size();
+}
+
+/// \brief The elements of the correlations vector that will be calculated.
+std::vector<unsigned int> const &LocalCorrelations::correlation_indices()
+    const {
+  return m_correlation_indices;
+}
+
 /// \brief Calculate and return local correlations
 ///
 /// \param unitcell_index Linear unitcell index associated with the phenomenal

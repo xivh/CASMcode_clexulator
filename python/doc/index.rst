@@ -6,11 +6,10 @@ The libcasm-clexulator package is a Python interface to the
 classes and methods in the CASM clexulator C++ library.
 This includes:
 
-- A data structures for representing degrees of freedom (DoF) in
-  a configuration.
-- Neighbor list construction
-- Classes and methods for evaluating cluster expansion basis
-  functions, cluster expansions, and order parameters
+- A data structure for representing degrees of freedom (DoF) in
+  a configuration
+- Methods for evaluating cluster expansion basis functions and cluster expansion values
+- Methods for evaluating order parameters
 
 Documentation
 =============

@@ -11,15 +11,21 @@
 #include "casm/casm_io/Log.hh"
 #include "casm/casm_io/json/InputParser_impl.hh"
 #include "casm/casm_io/json/jsonParser.hh"
+#include "casm/clexulator/BaseClexulator.hh"
 #include "casm/clexulator/Clexulator.hh"
+#include "casm/clexulator/ClusterExpansion.hh"
 #include "casm/clexulator/ConfigDoFValuesTools_impl.hh"
 #include "casm/clexulator/Correlations.hh"
 #include "casm/clexulator/DoFSpace.hh"
+#include "casm/clexulator/LocalClusterExpansion.hh"
 #include "casm/clexulator/LocalCorrelations.hh"
 #include "casm/clexulator/NeighborList.hh"
 #include "casm/clexulator/OrderParameter.hh"
+#include "casm/clexulator/SparseCoefficients.hh"
 #include "casm/clexulator/io/json/Clexulator_json_io.hh"
+#include "casm/clexulator/io/json/ConfigDoFValues_json_io.hh"
 #include "casm/clexulator/io/json/DoFSpace_json_io.hh"
+#include "casm/clexulator/io/json/SparseCoefficients_json_io.hh"
 
 #define STRINGIFY(x) #x
 #define MACRO_STRINGIFY(x) STRINGIFY(x)
@@ -139,6 +145,82 @@ std::shared_ptr<LocalClexulatorWrapper> make_local_clexulator(
   return lclex_wrapper;
 }
 
+std::shared_ptr<clexulator::Correlations> make_correlations(
+    std::shared_ptr<clexulator::SuperNeighborList const> const
+        &supercell_neighbor_list,
+    std::shared_ptr<clexulator::Clexulator const> const &clexulator,
+    clexulator::ConfigDoFValues const *dof_values,
+    std::optional<std::vector<unsigned int>> correlation_indices) {
+  if (correlation_indices.has_value()) {
+    return std::make_shared<clexulator::Correlations>(
+        supercell_neighbor_list, clexulator, correlation_indices.value(),
+        dof_values);
+  } else {
+    return std::make_shared<clexulator::Correlations>(supercell_neighbor_list,
+                                                      clexulator, dof_values);
+  }
+}
+
+std::shared_ptr<clexulator::LocalCorrelations> make_local_correlations(
+    std::shared_ptr<clexulator::SuperNeighborList const> const
+        &supercell_neighbor_list,
+    std::shared_ptr<LocalClexulatorWrapper> const &local_clexulator_wrapper,
+    clexulator::ConfigDoFValues const *dof_values,
+    std::optional<std::vector<unsigned int>> correlation_indices) {
+  if (correlation_indices.has_value()) {
+    return std::make_shared<clexulator::LocalCorrelations>(
+        supercell_neighbor_list, local_clexulator_wrapper->local_clexulator,
+        correlation_indices.value(), dof_values);
+  } else {
+    return std::make_shared<clexulator::LocalCorrelations>(
+        supercell_neighbor_list, local_clexulator_wrapper->local_clexulator,
+        dof_values);
+  }
+}
+
+std::shared_ptr<clexulator::ClusterExpansion> make_cluster_expansion(
+    std::shared_ptr<clexulator::SuperNeighborList const> const
+        &supercell_neighbor_list,
+    std::shared_ptr<clexulator::Clexulator const> const &clexulator,
+    clexulator::SparseCoefficients const &coefficients,
+    clexulator::ConfigDoFValues const *dof_values) {
+  return std::make_shared<clexulator::ClusterExpansion>(
+      supercell_neighbor_list, clexulator, coefficients, dof_values);
+}
+
+std::shared_ptr<clexulator::MultiClusterExpansion> make_multi_cluster_expansion(
+    std::shared_ptr<clexulator::SuperNeighborList const> const
+        &supercell_neighbor_list,
+    std::shared_ptr<clexulator::Clexulator const> const &clexulator,
+    std::vector<clexulator::SparseCoefficients> const &coefficients,
+    clexulator::ConfigDoFValues const *dof_values) {
+  return std::make_shared<clexulator::MultiClusterExpansion>(
+      supercell_neighbor_list, clexulator, coefficients, dof_values);
+}
+
+std::shared_ptr<clexulator::LocalClusterExpansion> make_local_cluster_expansion(
+    std::shared_ptr<clexulator::SuperNeighborList const> const
+        &supercell_neighbor_list,
+    std::shared_ptr<LocalClexulatorWrapper> const &local_clexulator_wrapper,
+    clexulator::SparseCoefficients const &coefficients,
+    clexulator::ConfigDoFValues const *dof_values) {
+  return std::make_shared<clexulator::LocalClusterExpansion>(
+      supercell_neighbor_list, local_clexulator_wrapper->local_clexulator,
+      coefficients, dof_values);
+}
+
+std::shared_ptr<clexulator::MultiLocalClusterExpansion>
+make_multi_local_cluster_expansion(
+    std::shared_ptr<clexulator::SuperNeighborList const> const
+        &supercell_neighbor_list,
+    std::shared_ptr<LocalClexulatorWrapper> const &local_clexulator_wrapper,
+    std::vector<clexulator::SparseCoefficients> const &coefficients,
+    clexulator::ConfigDoFValues const *dof_values) {
+  return std::make_shared<clexulator::MultiLocalClusterExpansion>(
+      supercell_neighbor_list, local_clexulator_wrapper->local_clexulator,
+      coefficients, dof_values);
+}
+
 std::shared_ptr<clexulator::DoFSpace> make_dof_space(
     std::string const &dof_key,
     std::shared_ptr<xtal::BasicStructure const> const &prim,
@@ -182,25 +264,26 @@ PYBIND11_MODULE(_clexulator, m) {
           )pbdoc")
       .def(
           "occupation",
-          [](clexulator::ConfigDoFValues const &dof_values) {
-            return dof_values.occupation;
-          },
+          [](clexulator::ConfigDoFValues const &dof_values)
+              -> Eigen::VectorXi const & { return dof_values.occupation; },
+          py::return_value_policy::reference_internal,
           "Returns the site occupation values, as indices into the allowed "
-          "occupants on the corresponding basis site.")
+          "occupants on the corresponding basis site, as a const reference.")
       .def(
           "set_occupation",
           [](clexulator::ConfigDoFValues &dof_values,
-             Eigen::VectorXi const &occupation) {
+             Eigen::Ref<Eigen::VectorXi const> occupation) {
             return dof_values.occupation = occupation;
           },
-          "Sets the site occupation values.")
+          "Sets the site occupation values, using a copy.")
       .def(
           "occ",
-          [](clexulator::ConfigDoFValues const &dof_values, Index l) {
+          [](clexulator::ConfigDoFValues const &dof_values, Index l) -> int {
             return dof_values.occupation(l);
           },
           py::arg("l"),
-          "Returns the site occupation value on the specified site.")
+          "Returns the site occupation value on the specified site, using a "
+          "copy.")
       .def(
           "set_occ",
           [](clexulator::ConfigDoFValues &dof_values, Index l, int s) {
@@ -221,26 +304,29 @@ PYBIND11_MODULE(_clexulator, m) {
           "Returns global DoF keys.")
       .def(
           "global_dof_values",
-          [](clexulator::ConfigDoFValues const &dof_values, std::string key) {
+          [](clexulator::ConfigDoFValues const &dof_values,
+             std::string key) -> Eigen::VectorXd const & {
             return dof_values.global_dof_values.at(key);
           },
-          py::arg("key"), "Returns global DoF values of type `key`.")
+          py::return_value_policy::reference_internal, py::arg("key"),
+          "Returns global DoF values of type `key`, as a const reference.")
       .def(
           "set_global_dof_values",
           [](clexulator::ConfigDoFValues &dof_values, std::string key,
-             Eigen::VectorXd const &value) {
+             Eigen::Ref<Eigen::VectorXd const> value) {
             dof_values.global_dof_values.at(key) = value;
           },
           py::arg("key"), py::arg("value"),
-          "Set global DoF values of type `key`. Key must already exist.")
+          "Set global DoF values of type `key`, using a copy. Key must already "
+          "exist.")
       .def(
           "insert_or_assign_global_dof_values",
           [](clexulator::ConfigDoFValues &dof_values, std::string key,
-             Eigen::VectorXd const &value) {
+             Eigen::Ref<Eigen::VectorXd const> value) {
             dof_values.global_dof_values.insert_or_assign(key, value);
           },
           py::arg("key"), py::arg("value"),
-          "Insert or assign global DoF values of type `key`.")
+          "Insert or assign global DoF values of type `key`, using a copy.")
       .def(
           "local_dof_keys",
           [](clexulator::ConfigDoFValues const &dof_values) {
@@ -253,46 +339,100 @@ PYBIND11_MODULE(_clexulator, m) {
           "Returns local DoF keys.")
       .def(
           "local_dof_values",
-          [](clexulator::ConfigDoFValues const &dof_values, std::string key) {
+          [](clexulator::ConfigDoFValues const &dof_values,
+             std::string key) -> Eigen::MatrixXd const & {
             return dof_values.local_dof_values.at(key);
           },
-          py::arg("key"), "Returns local DoF values of type `key`.")
+          py::return_value_policy::reference_internal, py::arg("key"),
+          "Returns local DoF values of type `key`, as a const reference.")
       .def(
           "set_local_dof_values",
           [](clexulator::ConfigDoFValues &dof_values, std::string key,
-             Eigen::MatrixXd const &value) {
+             Eigen::Ref<Eigen::MatrixXd const> value) {
             dof_values.local_dof_values.at(key) = value;
           },
           py::arg("key"), py::arg("value"),
-          "Set local DoF values of type `key`. Key must already exist.")
+          "Set local DoF values of type `key`, using a copy. Key must already "
+          "exist.")
       .def(
           "insert_or_assign_local_dof_values",
           [](clexulator::ConfigDoFValues &dof_values, std::string key,
-             Eigen::MatrixXd const &value) {
+             Eigen::Ref<Eigen::MatrixXd const> value) {
             dof_values.local_dof_values.insert_or_assign(key, value);
           },
           py::arg("key"), py::arg("value"),
-          "Insert or assign local DoF values of type `key`.")
+          "Insert or assign local DoF values of type `key`, using a copy.")
       .def(
           "local_dof_site_value",
           [](clexulator::ConfigDoFValues const &dof_values, std::string key,
              Index l) { return dof_values.local_dof_values.at(key).col(l); },
           py::arg("key"), py::arg("l"),
-          "Returns local DoF values of type `key` on site `l`.")
+          "Returns local DoF values of type `key` on site `l`, using a copy.")
       .def(
           "set_local_dof_site_value",
           [](clexulator::ConfigDoFValues &dof_values, std::string key, Index l,
-             Eigen::VectorXd const &site_dof_value) {
+             Eigen::Ref<Eigen::VectorXd const> site_dof_value) {
             dof_values.local_dof_values.at(key).col(l) = site_dof_value;
           },
           py::arg("key"), py::arg("l"), py::arg("site_dof_value"),
-          "Set the local DoF values of type `key` on site `l`. Key must "
+          "Set the local DoF values of type `key` on site `l`, using a copy. "
+          "Key must "
           "already exist.")
       .def(
           "set",
           [](clexulator::ConfigDoFValues &self,
              clexulator::ConfigDoFValues const &other) { self = other; },
-          "Assign all values from other", py::arg("other"))
+          "Assign all values from other, using copy", py::arg("other"))
+      .def_static(
+          "from_dict",
+          [](const nlohmann::json &data) {
+            jsonParser json{data};
+            InputParser<clexulator::ConfigDoFValues> parser(json);
+            std::runtime_error error_if_invalid{
+                "Error in libcasm.clexulator.ConfigDoFValues.from_dict"};
+            report_and_throw_if_invalid(parser, CASM::log(), error_if_invalid);
+            return std::move(*parser.value);
+          },
+          R"pbdoc(
+          Construct ConfigDoFValues from a Python dict
+
+          Notes
+          -----
+          - This function does not convert ConfigDoFValues between prim and standard bases, it reads values as they are.
+          - Conversions, if necessary, must be done after construction using:
+
+              - :func:`~libcasm.clexulator.from_standard_values`: Copy ConfigDoFValues and convert from the standard basis to the prim basis.
+              - :func:`~libcasm.clexulator.to_standard_values`: Copy ConfigDoFValues and convert from the prim basis to the standard basis.
+
+          - For a description of the format, see `ConfigDoF JSON object`_
+
+          .. _`ConfigDoF JSON object`: https://prisms-center.github.io/CASMcode_docs/formats/casm/clex/Configuration/#configdof-json-object
+
+          )pbdoc",
+          py::arg("data"))
+      .def(
+          "to_dict",
+          [](clexulator::ConfigDoFValues const &values) {
+            jsonParser json;
+            to_json(values, json);
+            return static_cast<nlohmann::json>(json);
+          },
+          R"pbdoc(
+          Represent ConfigDoFValues as a Python dict
+
+          Notes
+          -----
+          - This function does not convert ConfigDoFValues between prim and standard bases, it writes values as they are.
+          - Conversions, if necessary, must be done beforehand using:
+
+              - :func:`~libcasm.clexulator.from_standard_values`: Copy ConfigDoFValues and convert from the standard basis to the prim basis.
+              - :func:`~libcasm.clexulator.to_standard_values`: Copy ConfigDoFValues and convert from the prim basis to the standard basis.
+
+          - For a description of the format, see `ConfigDoF JSON object`_
+
+          .. _`ConfigDoF JSON object`: https://prisms-center.github.io/CASMcode_docs/formats/casm/clex/Configuration/#configdof-json-object
+
+          )pbdoc")
       .def("__copy__",
            [](clexulator::ConfigDoFValues const &self) {
              return clexulator::ConfigDoFValues(self);
@@ -334,7 +474,7 @@ PYBIND11_MODULE(_clexulator, m) {
             dof_values, dof_info.n_sublat, n_unitcells,
             dof_info.global_dof_info, dof_info.local_dof_info);
       },
-      "Copy of ConfigDoFValues and convert from the prim basis to the standard "
+      "Copy ConfigDoFValues and convert from the prim basis to the standard "
       "basis.",
       py::arg("dof_values"), py::arg("xtal_prim"), py::arg("n_unitcells"));
 
@@ -347,7 +487,7 @@ PYBIND11_MODULE(_clexulator, m) {
             dof_values, dof_info.n_sublat, n_unitcells,
             dof_info.global_dof_info, dof_info.local_dof_info);
       },
-      "Copy of ConfigDoFValues and convert from the standard basis to the prim "
+      "Copy ConfigDoFValues and convert from the standard basis to the prim "
       "basis.",
       py::arg("dof_values"), py::arg("xtal_prim"), py::arg("n_unitcells"));
 
@@ -430,10 +570,16 @@ PYBIND11_MODULE(_clexulator, m) {
               Cartesian coordinates, subject to the `max_element_value`.
           )pbdoc",
                   py::arg("lattice_column_vector_matrix"),
-                  py::arg("max_element_value") = 10,
-                  py::arg("tol") = CASM::TOL);
+                  py::arg("max_element_value") = 10, py::arg("tol") = CASM::TOL)
+      .def(
+          "sublattice_indices",
+          [](PrimNeighborListWrapper const &x) {
+            return x.prim_neighbor_list->sublat_indices();
+          },
+          R"pbdoc(
+          Indices of sublattices included in the neighbor list.
+        )pbdoc");
 
-  //
   py::class_<clexulator::SuperNeighborList,
              std::shared_ptr<clexulator::SuperNeighborList>>(
       m, "SuperNeighborList", R"pbdoc(
@@ -460,9 +606,18 @@ PYBIND11_MODULE(_clexulator, m) {
 
           )pbdoc",
            py::arg("transformation_matrix_to_super"),
-           py::arg("prim_neighbor_list"));
+           py::arg("prim_neighbor_list"))
+      .def("overlaps", &clexulator::SuperNeighborList::overlaps,
+           R"pbdoc(
+          Returns true if periodic images of the neighbor list overlap
 
-  //
+          Returns
+          -------
+          result: PrimNeighborList
+              If periodic images of the neighborhood overlap, Clexulator 'delta' values must be calculated from the difference between final and initial point values.
+
+          )pbdoc");
+
   py::class_<clexulator::Clexulator, std::shared_ptr<clexulator::Clexulator>>(
       m, "Clexulator", R"pbdoc(
       Evaluate basis set functions
@@ -474,15 +629,44 @@ PYBIND11_MODULE(_clexulator, m) {
            R"pbdoc(
           Construct an empty Clexulator
 
-          Use the factory functions :func:`~libcasm.clexulator.make_clexulator` or :func:`~libcasm.clexulator.make_local_clexulator` to construct Clexulator from source code.
+          Use the factory function :func:`~libcasm.clexulator.make_clexulator` to construct Clexulator from a clexulator source code file.
           )pbdoc")
       .def(
           "n_functions",
           [](clexulator::Clexulator const &clexulator) {
             return clexulator.corr_size();
           },
-          "Return the number of basis functions");
-
+          "Return the number of basis functions")
+      .def(
+          "n_point_corr",
+          [](clexulator::Clexulator const &clexulator) {
+            return clexulator.n_point_corr();
+          },
+          "Return point correlations")
+      .def(
+          "weight_matrix",
+          [](clexulator::Clexulator const &clexulator) {
+            return clexulator.weight_matrix();
+          },
+          "Weight matrix used for ordering the neighbor list")
+      .def(
+          "n_sublattices",
+          [](clexulator::Clexulator const &clexulator) {
+            return clexulator.n_sublattices();
+          },
+          "Total number of sublattices in the Prim")
+      .def(
+          "nlist_size",
+          [](clexulator::Clexulator const &clexulator) {
+            return clexulator.nlist_size();
+          },
+          "Total number of sublattices in the Prim")
+      .def(
+          "sublat_indices",
+          [](clexulator::Clexulator const &clexulator) {
+            return clexulator.sublat_indices();
+          },
+          "Sublat indices in the Prim");
   //
   py::class_<LocalClexulatorWrapper, std::shared_ptr<LocalClexulatorWrapper>>(
       m, "LocalClexulator", R"pbdoc(
@@ -496,7 +680,7 @@ PYBIND11_MODULE(_clexulator, m) {
            R"pbdoc(
           Construct an empty LocalClexulator
 
-          Use the factory functions :func:`~libcasm.clexulator.make_clexulator` or :func:`~libcasm.clexulator.make_local_clexulator` to construct Clexulator from source code.
+          Use the factory function :func:`~libcasm.clexulator.make_local_clexulator` to construct LocalClexulator from clexulator source code files.
           )pbdoc")
       .def(
           "n_functions",
@@ -569,19 +753,19 @@ PYBIND11_MODULE(_clexulator, m) {
 
   m.def("make_local_clexulator", &make_local_clexulator,
         R"pbdoc(
-      Construct local Clexulators, if necessary compiling from source code
+      Construct a :class:`~libcasm.clexulator.LocalClexulator`, if necessary compiling from source code
 
       Parameters
       ----------
       source: str
-          Path to a prototype local Clexulator source file.
+          Path to a prototype local clexulator source file. Clexulator source files for symmetric equivalents are expected to be found relative to the prototype file.
 
       prim_neighbor_list: PrimNeighborList
           The PrimNeighborList is expanded as necessary for use with
           the Clexulator.
 
       compile_options: str = None
-          Options used to compile the Clexulator source file, if it is not yet
+          Options used to compile the clexulator source files, if it they are not yet
           compiled. Example: "g++ -O3 -Wall -fPIC --std=c++17 -I/path/to/include".
           The default values can be configured with:
 
@@ -597,7 +781,7 @@ PYBIND11_MODULE(_clexulator, m) {
                   checks relative locations
 
       so_options: str = None
-          Options used to compile the Clexulator shared object file, if it is not
+          Options used to compile the clexulator shared object files, if they are not
           yet compiled. Example: "g++ -shared -L/path/to/lib -lcasm_clexulator "
 
           The default values can be configured with:
@@ -616,8 +800,8 @@ PYBIND11_MODULE(_clexulator, m) {
       Returns
       -------
       local_clexulator: LocalClexulator
-          A list containing the local Clexulator, one for each
-          symmetrically equivalent local basis set.
+          A :class:`~libcasm.clexulator.LocalClexulator` that allows evaluating
+          the symmetrically equivalent local basis sets.
 
       )pbdoc",
         py::arg("source"), py::arg("prim_neighbor_list"),
@@ -664,6 +848,7 @@ PYBIND11_MODULE(_clexulator, m) {
           If provided, only calculate the basis functions with corresponding
           indices. The same size correlation array is always returned, but other
           values will be of undefined value.
+
       Returns
       -------
       intensive_correlations: np.ndarray
@@ -732,12 +917,876 @@ PYBIND11_MODULE(_clexulator, m) {
       py::arg("config_dof_values"), py::arg("unitcell_index"),
       py::arg("equivalent_index"), py::arg("indices") = std::nullopt);
 
-  //
+  py::class_<clexulator::Correlations,
+             std::shared_ptr<clexulator::Correlations>>(m, "Correlations",
+                                                        R"pbdoc(
+      Correlations calculator
+
+      )pbdoc")
+      .def(py::init<>(&make_correlations), R"pbdoc(
+          Constructor
+
+          Parameters
+          ----------
+          supercell_neighbor_list: :class:`~libcasm.clexulator.SuperNeighborList`
+              The :class:`~libcasm.clexulator.SuperNeighborList` for the supercell consistent with `config_dof_values`.
+          clexulator: :class:`~libcasm.clexulator.Clexulator`
+              The :class:`~libcasm.clexulator.Clexulator` used to evaluate basis functions
+          config_dof_values: ConfigDoFValues
+              Configuration degree of freedom (DoF) values input to the basis functions. The Correlations instance stores a pointer to the underlying data, which must have a lifetime as long as ClusterExpansion is used to calculate with its data.
+          indices: Optional[list[int]] = None
+              If provided, only calculate the basis functions with corresponding
+              indices. The same size correlation array is always returned, but other
+              values will be of undefined value.
+
+          )pbdoc",
+           py::arg("supercell_neighbor_list"), py::arg("clexulator"),
+           py::arg("config_dof_values"), py::arg("indices") = std::nullopt)
+      .def("set", &clexulator::Correlations::set, R"pbdoc(
+          Set the :class:`~libcasm.clexulator.ConfigDoFValues` instance LocalCorrelations uses to calculate the local correlations. LocalCorrelations maintains a pointer to the underlying data, which must have a lifetime as long as LocalCorrelations is used to calculate with its data.
+          )pbdoc")
+      .def("corr_size", &clexulator::Correlations::corr_size, R"pbdoc(
+          Number of correlations.
+          )pbdoc")
+      .def("indices", &clexulator::Correlations::correlation_indices,
+           py::return_value_policy::reference_internal, R"pbdoc(
+          The elements of the correlations vector that will be calculated.
+          )pbdoc")
+      .def("required_update_neighborhood",
+           &clexulator::Correlations::required_update_neighborhood, R"pbdoc(
+          The coordinates of sites (relative to the origin unit cell) where a change in DoF values requires a local cluster expansions's values to be re-calculated.
+
+          Parameters
+          ----------
+          equivalent_index: int
+              Index indicating which of the symmetrically local cluster basis sets to get the neighborhood for.
+          )pbdoc")
+      .def("extensive", &clexulator::Correlations::extensive,
+           py::return_value_policy::reference_internal, R"pbdoc(
+          Calculate and return extensive correlations, as const reference.
+
+          Returns
+          -------
+          value : np.ndarray
+              Extensive correlations (per supercell). The same size correlation array is always returned, but if this instance was constructed with the indices of specific basis functions to calculate other values will be of undefined value.
+          )pbdoc")
+      .def("intensive", &clexulator::Correlations::intensive,
+           py::return_value_policy::reference_internal, R"pbdoc(
+          Calculate and return intensive correlations, as const reference.
+
+          Parameters
+          ----------
+          extensive_correlations: np.ndarray
+              Extensive correlations (per supercell), to be normalized by the number of unit cells in the supercell.
+
+          Returns
+          -------
+          value : np.ndarray
+              Intensive correlations  (per unit cell). The same size correlation array is always returned, but if this instance was constructed with the indices of specific basis functions to calculate other values will be of undefined value.
+          )pbdoc",
+           py::arg("extensive_correlations"))
+      .def("contribution", &clexulator::Correlations::contribution,
+           py::return_value_policy::reference_internal, R"pbdoc(
+          Calculate and return the contribution from a particular unit cell, as const reference.
+
+          Parameters
+          ----------
+          linear_unitcell_index: int
+              Linear unit cell index (as defined by a :class:`~libcasm.xtal.UnitCellIndexConverter`) to calculate correlation contributions from
+
+          Returns
+          -------
+          value : np.ndarray
+              Correlation contribution from a single unit cell. The same size correlation array is always returned, but if this instance was constructed with the indices of specific basis functions to calculate other values will be of undefined value.
+          )pbdoc",
+           py::arg("linear_unitcell_index"))
+      .def("has_point", &clexulator::Correlations::has_point,
+           py::return_value_policy::reference_internal, R"pbdoc(
+          Calculate and return the contribution from a particular unit cell, as const reference.
+
+          Parameters
+          ----------
+          linear_site_index: int
+              Linear site index (as defined by a :class:`~libcasm.xtal.SiteIndexConverter`).
+
+          Returns
+          -------
+          result : bool
+              True if point correlations can be calculated valid at specified site.
+          )pbdoc",
+           py::arg("linear_unitcell_index"))
+      .def("point", &clexulator::Correlations::point,
+           py::return_value_policy::reference_internal, R"pbdoc(
+          Calculate and return the correlations at specified point, as const reference.
+
+          Parameters
+          ----------
+          linear_site_index: int
+              Linear site index (as defined by a :class:`~libcasm.xtal.SiteIndexConverter`).
+          skip_if_unnecessary_for_occ_delta: bool = False
+              If true, skip calculating point correlations if they are not necessary for calculating :func:`~libcasm.clexulator.Correlations.occ_delta`. This will be the case if the supercell is not too small (`supercell_neighbor_list.overlaps() == False`).
+
+          Returns
+          -------
+          result : np.ndarray
+              Sum of all basis functions that include DoF from the specified site, as const reference.
+          )pbdoc",
+           py::arg("linear_site_index"),
+           py::arg("skip_if_unnecessary_for_occ_delta"))
+      .def("all_points", &clexulator::Correlations::all_points, R"pbdoc(
+          Calculate and return all point correlations, as a matrix
+
+          Parameters
+          ----------
+          include_all_sites: bool = true
+              If true, include a row for every site, even if there are no point correlations associated with that site (in which case the row is all zeros). If false, only include rows are only included for sites from sublattices included in :func:`~libcasm.clexulator.PrimNeighborList.sublattice_indices()` (rows are still ordered according to increasing site index).
+
+          Returns
+          -------
+          result : np.ndarray
+              All point correlations, as rows of a matrix.
+          )pbdoc",
+           py::arg("include_all_sites"))
+      .def("all_points_site_indices",
+           &clexulator::Correlations::all_points_site_indices, R"pbdoc(
+          Return the site index corresponding to each row of the matrix returned by `all_points`
+
+          Parameters
+          ----------
+          include_all_sites: bool = true
+              If true, include a row for every site, even if there are no point correlations associated with that site (in which case the row is all zeros). If false, only include rows are only included for sites from sublattices included in :func:`~libcasm.clexulator.PrimNeighborList.sublattice_indices()` (rows are still ordered according to increasing site index).
+
+          Returns
+          -------
+          result : List[int]
+              The site index corresponding to each row of the matrix returned by `all_points`.
+          )pbdoc",
+           py::arg("include_all_sites"))
+      .def(
+          "occ_delta",
+          [](clexulator::Correlations &x, Index linear_site_index, int new_occ,
+             Eigen::VectorXd const &reference_point_correlations)
+              -> Eigen::VectorXd const & {
+            return x.occ_delta(linear_site_index, new_occ,
+                               reference_point_correlations);
+          },
+          py::return_value_policy::reference_internal, R"pbdoc(
+          Calculate and return change in (extensive) correlations due to an occupation change
+
+          Parameters
+          ----------
+          linear_site_index: int
+              Linear site indices (as defined by a :class:`~libcasm.xtal.SiteIndexConverter`) where occupant DoF values are changed.
+          new_occ: int
+              The value the occupant DoF is changed to.
+          reference_point_correlations: np.ndarray
+              The point correlations of the specified site before the change in occupation value. This value is not needed and ignored if the supercell is large enough (`supercell_neighbor_list.overlaps() == False`).
+
+          Returns
+          -------
+          delta_value : np.ndarray
+              Change in extensive correlations, relative to `reference_point_correlations`.
+          )pbdoc",
+          py::arg("linear_site_index"), py::arg("new_occ"),
+          py::arg("reference_point_correlations"))
+      .def(
+          "multi_occ_delta",
+          [](clexulator::Correlations &x,
+             std::vector<Index> const &linear_site_index,
+             std::vector<int> const &new_occ) -> Eigen::VectorXd const & {
+            return x.occ_delta(linear_site_index, new_occ);
+          },
+          py::return_value_policy::reference_internal, R"pbdoc(
+          Calculate and return change in (extensive) correlations due to multiple occupation changes
+
+          Parameters
+          ----------
+          linear_site_index: List[int]
+              Linear site indices (as defined by a :class:`~libcasm.xtal.SiteIndexConverter`) where occupant DoF values are changed.
+          new_occ: List[int]
+              The value the occupant DoF are changed to.
+
+          Returns
+          -------
+          delta_value : np.ndarray
+              Change in extensive correlations due to specified occupant changes.
+          )pbdoc",
+          py::arg("linear_site_index"), py::arg("new_occ"))
+      .def("local_delta", &clexulator::Correlations::local_delta,
+           py::return_value_policy::reference_internal, R"pbdoc(
+          Calculate and return change in (extensive) correlations due to a local DoF change
+
+          Parameters
+          ----------
+          key: str
+              Specifies the type of DoF
+          linear_site_index: int
+              Linear site indices (as defined by a :class:`~libcasm.xtal.SiteIndexConverter`) where occupant DoF values are changed.
+          new_value: np.ndarray
+              The value the local DoF is changed to on the specified site, in the prim basis.
+          reference_point_correlations: np.ndarray
+              The point correlations of the specified site before the change in local DoF value.
+
+          Returns
+          -------
+          delta_value : np.ndarray
+              Change in extensive correlations, relative to `reference_point_correlations`.
+          )pbdoc",
+           py::arg("key"), py::arg("linear_site_index"), py::arg("new_value"),
+           py::arg("reference_point_correlations"))
+      .def("global_delta", &clexulator::Correlations::global_delta,
+           py::return_value_policy::reference_internal, R"pbdoc(
+          Calculate and return change in (extensive) correlations due to a global DoF change
+
+          Parameters
+          ----------
+          key: str
+              Specifies the type of DoF
+          new_value: np.ndarray
+              The value the global DoF is changed to, in the prim basis.
+          reference_extensive_correlations: np.ndarray
+              The extensive correlations before the change in global DoF value.
+
+          Returns
+          -------
+          delta_value : np.ndarray
+              Change in extensive correlations, relative to `reference_extensive_correlations`.
+          )pbdoc",
+           py::arg("key"), py::arg("new_value"),
+           py::arg("`reference_extensive_correlations"));
+
+  py::class_<clexulator::LocalCorrelations,
+             std::shared_ptr<clexulator::LocalCorrelations>>(
+      m, "LocalCorrelations", R"pbdoc(
+      Local correlations calculator
+
+      )pbdoc")
+      .def(py::init<>(&make_local_correlations), R"pbdoc(
+          Constructor
+
+          Parameters
+          ----------
+          supercell_neighbor_list: :class:`~libcasm.clexulator.SuperNeighborList`
+              The :class:`~libcasm.clexulator.SuperNeighborList` for the supercell consistent with `config_dof_values`.
+          clexulator: :class:`~libcasm.clexulator.LocalClexulator`
+              The :class:`~libcasm.clexulator.LocalClexulator` used to evaluate basis functions
+          config_dof_values: ConfigDoFValues
+              Configuration degree of freedom (DoF) values input to the basis functions. The LocalCorrelations instance stores a pointer to the underlying data, which must have a lifetime as long as ClusterExpansion is used to calculate with its data.
+          indices: Optional[list[int]] = None
+              If provided, only calculate the basis functions with corresponding
+              indices. The same size correlation array is always returned, but other
+              values will be of undefined value.
+
+          )pbdoc",
+           py::arg("supercell_neighbor_list"), py::arg("clexulator"),
+           py::arg("config_dof_values"), py::arg("indices") = std::nullopt)
+      .def("set", &clexulator::LocalCorrelations::set, R"pbdoc(
+          Set the :class:`~libcasm.clexulator.ConfigDoFValues` instance LocalCorrelations uses to calculate the local correlations. LocalCorrelations maintains a pointer to the underlying data, which must have a lifetime as long as LocalCorrelations is used to calculate with its data.
+          )pbdoc")
+      .def("corr_size", &clexulator::LocalCorrelations::corr_size, R"pbdoc(
+          Number of correlations.
+          )pbdoc")
+      .def("indices", &clexulator::LocalCorrelations::correlation_indices,
+           py::return_value_policy::reference_internal, R"pbdoc(
+          The elements of the correlations vector that will be calculated.
+          )pbdoc")
+      .def("required_update_neighborhood",
+           &clexulator::LocalCorrelations::required_update_neighborhood,
+           R"pbdoc(
+          The coordinates of sites (relative to the origin unit cell) where a change in DoF values requires a local cluster expansions's values to be re-calculated.
+
+          Parameters
+          ----------
+          equivalent_index: int
+              Index indicating which of the symmetrically local cluster basis sets to get the neighborhood for.
+          )pbdoc")
+      .def("value", &clexulator::LocalCorrelations::local, R"pbdoc(
+          Calculate the local correlations
+
+          Parameters
+          ----------
+          unitcell_index: int
+              Linear unit cell index specifying in which unit cell to evaluate the
+              local correlations.
+          equivalent_index: int
+              Index indicating which of the symmetrically local cluster basis sets
+              to evaluate.
+
+          Returns
+          -------
+          value : np.ndarray
+              Local correlations. The same size correlation array is always returned, but if this instance was constructed with the indices of specific basis functions to calculate other values will be of undefined value.
+          )pbdoc",
+           py::return_value_policy::reference_internal,
+           py::arg("unitcell_index"), py::arg("equivalent_index"));
+
+  py::class_<clexulator::SparseCoefficients>(m, "SparseCoefficients", R"pbdoc(
+    Container for non-zero expansion coefficients
+
+    Notes
+    -----
+
+    - SparseCoefficients may be copied with `copy.copy` or `copy.deepcopy`.
+    - The multiplication operator can be used with SparseCoefficients and a vector of correlations:
+
+      .. code-block:: Python
+
+          >>> import numpy as np
+          >>> from libcasm.clexulator import SparseCoefficients
+          >>> coeff = SparseCoefficients(index=[0, 2], value=[1.1, -0.3])
+          >>> correlations = np.array([0.1, 0.1, 0.1, 0.1])
+          >>> print(coeff * correlations)
+          0.08
+          >>> correlations = np.array([0.0, 0.1, 0.1, 0.1])
+          >>> print(coeff * correlations)
+          -0.03
+
+    )pbdoc")
+      .def(py::init<std::vector<unsigned int>, std::vector<double>>(), R"pbdoc(
+        Parameters
+        ----------
+        index: List[int]
+            Indices of basis functions with non-zero coefficients
+        value: List[float]
+            Expansion coefficients, for the basis functions specified by `index`
+        )pbdoc",
+           py::arg("index") = std::vector<unsigned int>(),
+           py::arg("value") = std::vector<double>())
+      .def_readwrite("index", &clexulator::SparseCoefficients::index, R"pbdoc(
+        List[int]: Indices of basis functions with non-zero coefficients
+        )pbdoc")
+      .def_readwrite("value", &clexulator::SparseCoefficients::index, R"pbdoc(
+        List[float]: Expansion coefficients, for the basis functions specified by `index`
+        )pbdoc")
+      .def_static(
+          "from_data",
+          [](const nlohmann::json &data) {
+            jsonParser json{data};
+            InputParser<clexulator::SparseCoefficients> parser(json);
+            std::runtime_error error_if_invalid{
+                "Error in libcasm.clexulator.SparseCoefficients.from_dict"};
+            report_and_throw_if_invalid(parser, CASM::log(), error_if_invalid);
+            return std::move(*parser.value);
+          },
+          R"pbdoc(
+        Construct SparseCoefficients from a JSON-serializeable representation
+
+        Notes
+        -----
+        - Accepts CASM v1 format (`{"orbits": [...]}`) if "orbits" is present
+        - Otherwise, assumes CASM v2 format (`[[index, value], ...]`)
+
+        )pbdoc",
+          py::arg("data"))
+      .def(
+          "to_data",
+          [](clexulator::SparseCoefficients const &values) {
+            jsonParser json;
+            to_json(values, json);
+            return static_cast<nlohmann::json>(json);
+          },
+          R"pbdoc(
+        Represent SparseCoefficients as a JSON-serializeable list
+
+        Returns
+        -------
+        data:
+            A list of [index, value] pairs (`[[index, value], ...]`).
+
+        )pbdoc")
+      .def(
+          "__mul__",
+          [](clexulator::SparseCoefficients const &self,
+             Eigen::VectorXd const &correlations) {
+            return self * correlations;
+          },
+          R"pbdoc(
+        Evaluate cluster expansion value given coefficients and correlations
+
+        Parameters
+        ----------
+        self: SparseCoefficients
+            The expansion coefficients
+        correlations: np.ndarray
+            The correlations, of size matching the total number of basis functions, so there are values associated with both zero and non-zero expansion coefficients.
+
+        Returns
+        -------
+        value:
+            The result of multiplying coefficients by correlation values and summing.
+
+        )pbdoc",
+          py::arg("correlations"))
+      .def("__copy__",
+           [](clexulator::SparseCoefficients const &self) {
+             return clexulator::SparseCoefficients(self);
+           })
+      .def("__deepcopy__", [](clexulator::SparseCoefficients const &self) {
+        return clexulator::SparseCoefficients(self);
+      });
+
+  py::class_<clexulator::ClusterExpansion,
+             std::shared_ptr<clexulator::ClusterExpansion>>(
+      m, "ClusterExpansion", R"pbdoc(
+      A cluster expansion calculator
+
+      ClusterExpansion calculates:
+
+      - the value of a cluster expansion
+      - the change in the value of a cluster expansion given changes in degree of freedom (DoF) values
+
+      To calculate the cluster expansion value, ClusterExpansion uses:
+
+      - :class:`~libcasm.clexulator.Clexulator`: which evaluates cluster expansion basis functions
+      - :class:`~libcasm.clexulator.SuperNeighborList`: which allows Clexulator to find the correct neighbors degree of freedom (DoF) values for each basis function
+      - :class:`~libcasm.clexulator.SparseCoefficients`: which provides cluster expansion coefficients
+      - :class:`~libcasm.clexulator.ConfigDoFValues`: ClusterExpansion is given a pointer to a ConfigDoFValues instance and calculates the cluster expansion using the current state of the DoF values
+
+      Examples
+      --------
+
+      For usage examples, see the section :ref:`Evaluating a cluster expansion <cluster-expansion-index>`.
+
+      Notes
+      -----
+
+      - One ClusterExpansion instance is needed to calculate the cluster expansion in each distinct supercell, using the appropriate :class:`~libcasm.clexulator.SuperNeighborList` at construction.
+
+      - The cluster expansion is calculated for a :class:`~libcasm.clexulator.ConfigDoFValues` instance that can be given at construction or using the :func:`~libcasm.clexulator.ClusterExpansion.set` method.
+        - If using the :func:`~libcasm.clexulator.ClusterExpansion.set` method, the :class:`~libcasm.clexulator.ConfigDoFValues` must be constructed consistent with the :class:`~libcasm.clexulator.SuperNeighborList`.
+        - Once set by either method, ClusterExpansion maintains a non-owning pointer to that :class:`~libcasm.clexulator.ConfigDoFValues` instance.
+        - The :class:`~libcasm.clexulator.ConfigDoFValues` can then be modified externally and subsequent calls of ClusterExpansion methods will use the current DoF values.
+
+      )pbdoc")
+      .def(py::init<>(&make_cluster_expansion), R"pbdoc(
+          Construct a ClusterExpansion
+
+          Parameters
+          ----------
+          supercell_neighbor_list: :class:`~libcasm.clexulator.SuperNeighborList`
+              The :class:`~libcasm.clexulator.SuperNeighborList` for the supercell consistent with `config_dof_values`.
+          clexulator: :class:`~libcasm.clexulator.Clexulator`
+              The :class:`~libcasm.clexulator.Clexulator` used to evaluate basis functions
+          coefficients: SparseCoefficients
+              Cluster expansions coefficients used to evaluate the cluster expansion. An internal :class:`~libcasm.clexulator.Correlations` calculator is set to only evaluate the cluster basis functions with non-zero coefficients.
+          config_dof_values: :class:`~libcasm.clexulator.ConfigDoFValues`
+              Configuration degree of freedom (DoF) values input to the basis functions. The ClusterExpansion instance stores a pointer to the underlying data, which must have a lifetime as long as ClusterExpansion is used to calculate with its data.
+          )pbdoc",
+           py::arg("supercell_neighbor_list"), py::arg("clexulator"),
+           py::arg("coefficients"), py::arg("config_dof_values"))
+      .def("set", &clexulator::ClusterExpansion::set, R"pbdoc(
+          Set the :class:`~libcasm.clexulator.ConfigDoFValues` instance ClusterExpansion uses to calculate the cluster expansion value. ClusterExpansion maintains a pointer to the underlying data, which must have a lifetime as long as ClusterExpansion is used to calculate with its data.
+          )pbdoc")
+      .def("intensive_value", &clexulator::ClusterExpansion::intensive_value,
+           R"pbdoc(
+          float: Calculate the cluster expansion value per unit cell
+          )pbdoc")
+      .def("extensive_value", &clexulator::ClusterExpansion::extensive_value,
+           R"pbdoc(
+          float: Calculate the cluster expansion value
+          )pbdoc")
+      .def(
+          "occ_delta_value",
+          [](clexulator::ClusterExpansion &x, Index linear_site_index,
+             int new_occ) {
+            return x.occ_delta_value(linear_site_index, new_occ);
+          },
+          R"pbdoc(
+          Calculate the change in cluster expansion value due to a change in an occupant DoF value
+
+          Parameters
+          ----------
+          linear_site_index: int
+              Linear site index where an occupant DoF value is changed.
+          new_occ: int
+             The value the occupant DoF is changed to.
+          )pbdoc",
+          py::arg("linear_site_index"), py::arg("new_occ"))
+      .def(
+          "multi_occ_delta_value",
+          [](clexulator::ClusterExpansion &x,
+             std::vector<Index> const &linear_site_index,
+             std::vector<int> const &new_occ) {
+            return x.occ_delta_value(linear_site_index, new_occ);
+          },
+          R"pbdoc(
+          Calculate the change in cluster expansion value due to a change in multiple occupant DoF values
+
+          Parameters
+          ----------
+          key: str
+              The type of local DoF that is changed.
+          linear_site_index: List[int]
+              Linear site indices where occupant DoF values are changed.
+          new_occ: List[int]
+             The value the occupant DoF are changed to.
+          )pbdoc",
+          py::arg("linear_site_index"), py::arg("new_occ"))
+      .def("local_delta_value",
+           &clexulator::ClusterExpansion::local_delta_value, R"pbdoc(
+          Calculate the change in cluster expansion value due to a change in a local DoF value
+
+          Parameters
+          ----------
+          key: str
+              The type of local DoF that is changed.
+          linear_site_index: int
+              Linear site index where a local DoF value is changed.
+          new_value: array_like
+             The value the local DoF is changed to, in the prim basis.
+          )pbdoc",
+           py::arg("key"), py::arg("linear_site_index"), py::arg("new_value"))
+      .def("global_delta_value",
+           &clexulator::ClusterExpansion::global_delta_value, R"pbdoc(
+          Calculate the change in cluster expansion value due to a change in a global DoF value
+
+          Parameters
+          ----------
+          key: str
+              The type of global DoF that is changed.
+          new_value: array_like
+             The value the global DoF is changed to, in the prim basis.
+          )pbdoc",
+           py::arg("key"), py::arg("new_value"))
+      .def(
+          "correlations",
+          [](clexulator::ClusterExpansion &x) -> clexulator::Correlations & {
+            return x.correlations();
+          },
+          py::return_value_policy::reference_internal, R"pbdoc(
+          The :class:`~libcasm.clexulator.Correlations` used internally to calculate correlations, as a reference.
+          )pbdoc")
+      .def(
+          "coefficients",
+          [](clexulator::ClusterExpansion &x)
+              -> clexulator::SparseCoefficients & { return x.coefficients(); },
+          py::return_value_policy::reference_internal, R"pbdoc(
+          The :class:`~libcasm.clexulator.SparseCoefficients` used internally to calculate the cluster expansion value, as a reference.
+          )pbdoc")
+      .def("required_update_neighborhood",
+           &clexulator::ClusterExpansion::required_update_neighborhood, R"pbdoc(
+         The coordinates of sites (relative to the origin unit cell) where a change in DoF values requires this calculator's values to be re-calculated.
+         )pbdoc");
+
+  py::class_<clexulator::MultiClusterExpansion,
+             std::shared_ptr<clexulator::MultiClusterExpansion>>(
+      m, "MultiClusterExpansion", R"pbdoc(
+      A cluster expansion calculator
+
+      MultiClusterExpansion is similar to :class:`~libcasm.clexulator.ClusterExpansion`, but includes multiple :class:`~libcasm.clexulator.SparseCoefficients`. When multiple cluster expansions use the same basis set, it can be used to simplify evaluating them all with a single evaluation of the basis functions.
+
+      )pbdoc")
+      .def(py::init<>(&make_multi_cluster_expansion), R"pbdoc(
+          Construct a MultiClusterExpansion
+
+          Parameters
+          ----------
+          supercell_neighbor_list: :class:`~libcasm.clexulator.SuperNeighborList`
+              The :class:`~libcasm.clexulator.SuperNeighborList` for the supercell consistent with `config_dof_values`.
+          clexulator: :class:`~libcasm.clexulator.Clexulator`
+              The :class:`~libcasm.clexulator.Clexulator` used to evaluate basis functions
+          coefficients: List[SparseCoefficients]
+              Cluster expansions coefficients used to evaluate the cluster expansions. An internal :class:`~libcasm.clexulator.Correlations` calculator is set to only evaluate the cluster basis functions corresponding to at least one non-zero coefficient.
+          config_dof_values: :class:`~libcasm.clexulator.ConfigDoFValues`
+              Configuration degree of freedom (DoF) values input to the basis functions. The MultiClusterExpansion instance stores a pointer to the underlying data, which must have a lifetime as long as MultiClusterExpansion is used to calculate with its data.
+          )pbdoc",
+           py::arg("supercell_neighbor_list"), py::arg("clexulator"),
+           py::arg("coefficients"), py::arg("config_dof_values"))
+      .def("set", &clexulator::MultiClusterExpansion::set, R"pbdoc(
+          Set the :class:`~libcasm.clexulator.ConfigDoFValues` instance ClusterExpansion uses to calculate the cluster expansion value. ClusterExpansion maintains a pointer to the underlying data, which must have a lifetime as long as ClusterExpansion is used to calculate with its data.
+          )pbdoc")
+      .def("intensive_value",
+           &clexulator::MultiClusterExpansion::intensive_value, R"pbdoc(
+          Calculate the cluster expansion values per unit cell
+
+          Returns
+          -------
+          value : np.ndarray
+              Cluster expansion values, per unit cell, as a const reference. The i-th element is the value of the i-th cluster expansion. Referred to values remain fixed until the next time a calculator function is called.
+          )pbdoc")
+      .def("extensive_value",
+           &clexulator::MultiClusterExpansion::extensive_value, R"pbdoc(
+          Calculate the cluster expansion values
+
+          Returns
+          -------
+          value : np.ndarray
+              Cluster expansion values, as a const reference. The i-th element is the value of the i-th cluster expansion. Referred to values remain fixed until the next time a calculator function is called.
+          )pbdoc")
+      .def(
+          "occ_delta_value",
+          [](clexulator::MultiClusterExpansion &x, Index linear_site_index,
+             int new_occ) -> Eigen::VectorXd const & {
+            return x.occ_delta_value(linear_site_index, new_occ);
+          },
+          py::return_value_policy::reference_internal, R"pbdoc(
+          Calculate the change in cluster expansion values due to a change in an occupant DoF value
+
+          Parameters
+          ----------
+          linear_site_index: int
+              Linear site index where an occupant DoF value is changed.
+          new_occ: int
+             The value the occupant DoF is changed to.
+
+          Returns
+          -------
+          delta_value : np.ndarray
+              Change in cluster expansion values, as a const reference. The i-th element is the change in the i-th cluster expansion. Referred to values remain fixed until the next time a calculator function is called.
+          )pbdoc",
+          py::arg("linear_site_index"), py::arg("new_occ"))
+      .def(
+          "multi_occ_delta_value",
+          [](clexulator::MultiClusterExpansion &x,
+             std::vector<Index> const &linear_site_index,
+             std::vector<int> const &new_occ) -> Eigen::VectorXd const & {
+            return x.occ_delta_value(linear_site_index, new_occ);
+          },
+          py::return_value_policy::reference_internal, R"pbdoc(
+          Calculate the change in cluster expansion values due to a change in multiple occupant DoF values
+
+          Parameters
+          ----------
+          key: str
+              The type of local DoF that is changed.
+          linear_site_index: List[int]
+              Linear site indices where occupant DoF values are changed.
+          new_occ: List[int]
+             The value the occupant DoF are changed to.
+
+          Returns
+          -------
+          delta_value : np.ndarray
+              Change in cluster expansion values, as a const reference. The i-th element is the change in the i-th cluster expansion. Referred to values remain fixed until the next time a calculator function is called.
+          )pbdoc",
+          py::arg("linear_site_index"), py::arg("new_occ"))
+      .def("local_delta_value",
+           &clexulator::MultiClusterExpansion::local_delta_value,
+           py::return_value_policy::reference_internal, R"pbdoc(
+          Calculate the change in cluster expansion values due to a change in a local DoF value
+
+          Parameters
+          ----------
+          key: str
+              The type of local DoF that is changed.
+          linear_site_index: int
+              Linear site index where a local DoF value is changed.
+          new_value: array_like
+             The value the local DoF is changed to, in the prim basis.
+
+          Returns
+          -------
+          delta_value : np.ndarray
+              Change in cluster expansion values, as a const reference. The i-th element is the change in the i-th cluster expansion. Referred to values remain fixed until the next time a calculator function is called.
+          )pbdoc",
+           py::arg("key"), py::arg("linear_site_index"), py::arg("new_value"))
+      .def("global_delta_value",
+           &clexulator::MultiClusterExpansion::global_delta_value,
+           py::return_value_policy::reference_internal, R"pbdoc(
+          Calculate the change in cluster expansion value due to a change in a global DoF value
+
+          Parameters
+          ----------
+          key: str
+              The type of global DoF that is changed.
+          new_value: array_like
+             The value the global DoF is changed to, in the prim basis.
+
+          Returns
+          -------
+          delta_value : np.ndarray
+              Change in cluster expansion values, as a const reference. The i-th element is the change in the i-th cluster expansion. Referred to values remain fixed until the next time a calculator function is called.
+          )pbdoc",
+           py::arg("key"), py::arg("new_value"))
+      .def(
+          "correlations",
+          [](clexulator::MultiClusterExpansion &x)
+              -> clexulator::Correlations & { return x.correlations(); },
+          py::return_value_policy::reference_internal, R"pbdoc(
+          The :class:`~libcasm.clexulator.LocalCorrelations` used internally to calculate correlations
+          )pbdoc")
+      .def(
+          "size",
+          [](clexulator::MultiClusterExpansion &x) {
+            return x.coefficients().size();
+          },
+          py::return_value_policy::reference_internal, R"pbdoc(
+          The number of cluster expansions calculated.
+          )pbdoc")
+      .def(
+          "coefficients",
+          [](clexulator::MultiClusterExpansion &x,
+             int i) -> clexulator::SparseCoefficients & {
+            return x.coefficients()[i];
+          },
+          py::return_value_policy::reference_internal, R"pbdoc(
+          The :class:`~libcasm.clexulator.SparseCoefficients` used internally to calculate the i-th cluster expansion value.
+          )pbdoc",
+          py::arg("i"))
+      .def("required_update_neighborhood",
+           &clexulator::MultiClusterExpansion::required_update_neighborhood,
+           R"pbdoc(
+         The coordinates of sites (relative to the origin unit cell) where a change in DoF values requires this calculator's values to be re-calculated.
+         )pbdoc");
+
+  py::class_<clexulator::LocalClusterExpansion,
+             std::shared_ptr<clexulator::LocalClusterExpansion>>(
+      m, "LocalClusterExpansion", R"pbdoc(
+      A local cluster expansion calculator
+
+      LocalClusterExpansion is similar to :class:`~libcasm.clexulator.ClusterExpansion`, but uses a :class:`~libcasm.clexulator.LocalCorrelations` instance to calculate local cluster expansion basis functions.
+
+      )pbdoc")
+      .def(py::init<>(&make_local_cluster_expansion), R"pbdoc(
+          Construct a LocalClusterExpansion
+
+          Parameters
+          ----------
+          supercell_neighbor_list: :class:`~libcasm.clexulator.SuperNeighborList`
+              The :class:`~libcasm.clexulator.SuperNeighborList` for the supercell consistent with `config_dof_values`.
+          clexulator: :class:`~libcasm.clexulator.Clexulator`
+              The :class:`~libcasm.clexulator.Clexulator` used to evaluate basis functions
+          coefficients: :class:`~libcasm.clexulator.SparseCoefficients`
+              Cluster expansions coefficients used to evaluate the cluster expansion. An internal :class:`~libcasm.clexulator.LocalCorrelations` calculator is set to only evaluate the cluster basis functions with non-zero coefficients.
+          config_dof_values: :class:`~libcasm.clexulator.ConfigDoFValues`
+              Configuration degree of freedom (DoF) values input to the basis functions. The LocalClusterExpansion instance stores a pointer to the underlying data, which must have a lifetime as long as LocalClusterExpansion is used to calculate with its data.
+          )pbdoc",
+           py::arg("supercell_neighbor_list"), py::arg("clexulator"),
+           py::arg("coefficients"), py::arg("config_dof_values"))
+      .def("set", &clexulator::LocalClusterExpansion::set, R"pbdoc(
+          Set the :class:`~libcasm.clexulator.ConfigDoFValues` instance LocalClusterExpansion uses to calculate the local cluster expansion value. LocalClusterExpansion maintains a pointer to the underlying data, which must have a lifetime as long as LocalClusterExpansion is used to calculate with its data.
+          )pbdoc")
+      .def("value", &clexulator::LocalClusterExpansion::value, R"pbdoc(
+          Calculate the local cluster expansion value
+
+          Parameters
+          ----------
+          unitcell_index: int
+              Linear unit cell index specifying in which unit cell to evaluate the
+              local correlations.
+          equivalent_index: int
+              Index indicating which of the symmetrically local cluster basis sets
+              to evaluate.
+
+          Returns
+          -------
+          value : float
+              Local cluster expansion value.
+          )pbdoc",
+           py::arg("unitcell_index"), py::arg("equivalent_index"))
+      .def(
+          "correlations",
+          [](clexulator::LocalClusterExpansion &x)
+              -> clexulator::LocalCorrelations & { return x.correlations(); },
+          py::return_value_policy::reference_internal, R"pbdoc(
+         The :class:`~libcasm.clexulator.LocalCorrelations` used internally to calculate correlations, as a reference.
+         )pbdoc")
+      .def(
+          "coefficients",
+          [](clexulator::LocalClusterExpansion &x)
+              -> clexulator::SparseCoefficients & { return x.coefficients(); },
+          py::return_value_policy::reference_internal, R"pbdoc(
+         The List[:class:`~libcasm.clexulator.SparseCoefficients`] used internally to calculate cluster expansion values, as a reference.
+         )pbdoc")
+      .def("required_update_neighborhood",
+           &clexulator::LocalClusterExpansion::required_update_neighborhood,
+           R"pbdoc(
+          The coordinates of sites (relative to the origin unit cell) where a change in DoF values requires a local cluster expansions's values to be re-calculated.
+
+          Parameters
+          ----------
+          equivalent_index: int
+              Index indicating which of the symmetrically local cluster basis sets to get the neighborhood for.
+         )pbdoc");
+
+  py::class_<clexulator::MultiLocalClusterExpansion,
+             std::shared_ptr<clexulator::MultiLocalClusterExpansion>>(
+      m, "MultiLocalClusterExpansion", R"pbdoc(
+      A local cluster expansion calculator
+
+      MultiLocalClusterExpansion is similar to :class:`~libcasm.clexulator.LocalClusterExpansion`, but includes multiple :class:`~libcasm.clexulator.SparseCoefficients`. When multiple local cluster expansions use the same basis set, it can be used to simplify evaluating them all with a single evaluation of the basis functions.
+
+      )pbdoc")
+      .def(py::init<>(&make_multi_local_cluster_expansion), R"pbdoc(
+          Construct a MultiLocalClusterExpansion
+
+          Parameters
+          ----------
+          supercell_neighbor_list: :class:`~libcasm.clexulator.SuperNeighborList`
+              The :class:`~libcasm.clexulator.SuperNeighborList` for the supercell consistent with `config_dof_values`.
+          clexulator: :class:`~libcasm.clexulator.LocalClexulator`
+              The :class:`~libcasm.clexulator.LocalClexulator` used to evaluate basis functions
+          coefficients: List[:class:`~libcasm.clexulator.SparseCoefficients`]
+              Cluster expansions coefficients used to evaluate the cluster expansion. Internal :class:`~libcasm.clexulator.LocalCorrelations` calculators are set to only evaluate the cluster basis functions corresponding to at least one non-zero coefficient.
+          config_dof_values: :class:`~libcasm.clexulator.ConfigDoFValues`
+              Configuration degree of freedom (DoF) values input to the basis functions. The MultiLocalClusterExpansion instance stores a pointer to the underlying data, which must have a lifetime as long as MultiLocalClusterExpansion is used to calculate with its data.
+          )pbdoc",
+           py::arg("supercell_neighbor_list"), py::arg("clexulator"),
+           py::arg("coefficients"), py::arg("config_dof_values"))
+      .def("set", &clexulator::MultiLocalClusterExpansion::set, R"pbdoc(
+          Set the :class:`~libcasm.clexulator.ConfigDoFValues` instance LocalClusterExpansion uses to calculate the local cluster expansion value. LocalClusterExpansion maintains a pointer to the underlying data, which must have a lifetime as long as LocalClusterExpansion is used to calculate with its data.
+          )pbdoc")
+      .def("value", &clexulator::MultiLocalClusterExpansion::values, R"pbdoc(
+          Calculate the local cluster expansion value
+
+          Parameters
+          ----------
+          unitcell_index: int
+              Linear unit cell index specifying in which unit cell to evaluate the
+              local correlations.
+          equivalent_index: int
+              Index indicating which of the symmetrically local cluster basis sets
+              to evaluate.
+
+          Returns
+          -------
+          value : np.ndarray
+              Cluster expansion values, as a const reference. The i-th element is the value of the i-th cluster expansion. Referred to values remain fixed until the next time a calculator function is called.
+          )pbdoc",
+           py::arg("unitcell_index"), py::arg("equivalent_index"))
+      .def(
+          "correlations",
+          [](clexulator::MultiLocalClusterExpansion &x)
+              -> clexulator::LocalCorrelations & { return x.correlations(); },
+          py::return_value_policy::reference_internal, R"pbdoc(
+          The :class:`~libcasm.clexulator.LocalCorrelations` used internally to calculate correlations, as a reference.
+          )pbdoc")
+      .def(
+          "size",
+          [](clexulator::MultiClusterExpansion &x) {
+            return x.coefficients().size();
+          },
+          py::return_value_policy::reference_internal, R"pbdoc(
+          The number of local cluster expansions calculated.
+          )pbdoc")
+      .def(
+          "coefficients",
+          [](clexulator::MultiLocalClusterExpansion &x,
+             int i) -> clexulator::SparseCoefficients & {
+            return x.coefficients()[i];
+          },
+          py::return_value_policy::reference_internal, R"pbdoc(
+          The :class:`~libcasm.clexulator.SparseCoefficients` used internally to calculate the i-th cluster expansion values, as a reference.
+          )pbdoc")
+      .def(
+          "required_update_neighborhood",
+          &clexulator::MultiLocalClusterExpansion::required_update_neighborhood,
+          R"pbdoc(
+          The coordinates of sites (relative to the origin unit cell) where a change in DoF values requires a local cluster expansions's values to be re-calculated.
+
+          Parameters
+          ----------
+          equivalent_index: int
+              Index indicating which of the symmetrically local cluster basis sets
+              to get the neighborhood for.
+          )pbdoc");
+
+  // DoFSpace
   py::class_<clexulator::DoFSpace, std::shared_ptr<clexulator::DoFSpace>>(
       m, "DoFSpace", R"pbdoc(
       Specify a degree of freedom (DoF) space.
 
-      A DoFSpace defines a subset of the allowed degrees of freedom (DoF).
+      A DoFSpace defines a subset of the space of allowed degrees of freedom (DoF) values.
       A choice of basis, :math:`Q`, with column basis vectors :math:`q_i`, spanning
       the space or a subspace provides a definition for order parameters,
       according to :math:`Q \eta = x`, where :math:`x` are DoF values in the prim
@@ -811,6 +1860,230 @@ PYBIND11_MODULE(_clexulator, m) {
             return static_cast<nlohmann::json>(json);
           },
           "Represent the DoFSpace as a Python dict.");
+
+  py::class_<clexulator::OrderParameter,
+             std::shared_ptr<clexulator::OrderParameter>>(m, "OrderParameter",
+                                                          R"pbdoc(
+      An order parameter calculator
+
+      OrderParameter calculates:
+
+      - the value of an order parameter
+      - the change in the value of an order parameter given changes in degree of freedom (DoF) values
+
+      To calculate the order parameter value, OrderParameter uses:
+
+      - :class:`~libcasm.clexulator.DoFSpace`: to specify the order parameter basis
+      - :class:`~libcasm.xtal.SiteIndexConverter`: to perform index conversions
+      - :class:`~libcasm.clexulator.ConfigDoFValues`: OrderParameter is given a pointer to a ConfigDoFValues instance and calculates the order parameters using the current state of the DoF values
+
+      Examples
+      --------
+
+      For usage examples, see the section :ref:`Evaluating order parameters <order-parameters-index>`.
+
+      Notes
+      -----
+
+      - An OrderParameter is set to calculate order parameters in one supercell at a time, using the appropriate :class:`~libcasm.xtal.SiteIndexConverter`. This can be set using the call operator or the :func:`~libcasm.clexulator.OrderParameter.update` method.
+      - Order parameters are calculated for a :class:`~libcasm.clexulator.ConfigDoFValues` instance that can be given at construction or using using the call operator, the :func:`~libcasm.clexulator.OrderParameter.update` method, or the :func:`~libcasm.clexulator.ClusterExpansion.set` method.
+
+        - The :class:`~libcasm.clexulator.ConfigDoFValues` must be constructed consistent with the :class:`~libcasm.xtal.SiteIndexConverter`.
+        - Once set by any method, OrderParameter maintains a non-owning pointer to that :class:`~libcasm.clexulator.ConfigDoFValues` instance.
+        - The :class:`~libcasm.clexulator.ConfigDoFValues` can then be modified externally and subsequent calls of OrderParameter methods will use the current DoF values.
+
+      )pbdoc")
+      .def(py::init<clexulator::DoFSpace const &>(), R"pbdoc(
+          Construct an OrderParameter
+
+          Parameters
+          ----------
+          dof_space: ~libcasm.clexulator.DoFSpace
+              The DoFSpace defining the order parameter basis
+          )pbdoc",
+           py::arg("dof_space"))
+      .def(
+          "update",
+          [](clexulator::OrderParameter &m,
+             Eigen::Matrix3l const &transformation_matrix_to_super,
+             xtal::UnitCellCoordIndexConverter const &supercell_index_converter,
+             clexulator::ConfigDoFValues const *dof_values) {
+            m.update(transformation_matrix_to_super, supercell_index_converter,
+                     dof_values);
+          },
+          R"pbdoc(
+          Set internal data to calculate order parameters in a particular supercell
+
+          Parameters
+          ----------
+          transformation_matrix_to_super : array_like, shape=(3,3), dtype=int
+              Specifies the supercell that config_dof_values is defined in.
+          site_index_converter : ~libcasm.xtal.SiteIndexConverter
+              Index converter for the specified supercell.
+          config_dof_values: ConfigDoFValues
+              Configuration degree of freedom (DoF) values input.
+              A :class:`~libcasm.xtal.Prim`
+
+          )pbdoc",
+          py::arg("transformation_matrix_to_super"),
+          py::arg("site_index_converter"), py::arg("config_dof_values"))
+      .def("set", &clexulator::OrderParameter::set, R"pbdoc(
+          Set the :class:`~libcasm.clexulator.ConfigDoFValues` instance OrderParameter uses to calculate the order parameter value. OrderParameter maintains a pointer to the underlying data, which must have a lifetime as long as OrderParameter is used to calculate with its data.
+          )pbdoc",
+           py::arg("config_dof_values"))
+      .def("value", &clexulator::OrderParameter::value,
+           R"pbdoc(
+          Calculate the current order parameter value
+
+          Returns
+          -------
+          value : np.ndarray
+              The order parameter values, as a const reference. Referred to values remain fixed until the next time a calculator function is called.
+          )pbdoc")
+      // occ DoF
+      .def(
+          "occ_delta_value",
+          [](clexulator::OrderParameter &m, Index linear_site_index,
+             Index new_occ) -> Eigen::VectorXd const & {
+            return m.occ_delta_value(linear_site_index, new_occ);
+          },
+          py::return_value_policy::reference_internal,
+          R"pbdoc(
+          Calculate and return the change in order parameter value due to an occupation change
+
+          Parameters
+          ----------
+          linear_site_index: int
+              Linear site index (as defined by a :class:`~libcasm.xtal.SiteIndexConverter`) where the occupant DoF value are changed.
+          new_occ: int
+              The value the occupant DoF is changed to.
+
+          Returns
+          -------
+          delta_value : np.ndarray
+              The change in order parameter values, as a const reference. Referred to values remain fixed until the next time a calculator function is called.
+          )pbdoc",
+          py::arg("linear_site_index"), py::arg("new_occ"))
+      .def(
+          "multi_occ_delta_value",
+          [](clexulator::OrderParameter &m,
+             std::vector<Index> const &linear_site_index,
+             std::vector<int> const &new_occ) -> Eigen::VectorXd const & {
+            return m.occ_delta_value(linear_site_index, new_occ);
+          },
+          py::return_value_policy::reference_internal,
+          R"pbdoc(
+          Calculate and return the change in order parameter value due to multiple occupation changes
+
+          Parameters
+          ----------
+          linear_site_index: List[int]
+              Linear site indices (as defined by a :class:`~libcasm.xtal.SiteIndexConverter`) where occupant DoF values are changed.
+          new_occ: List[int]
+              The values the occupant DoF are changed to.
+
+          Returns
+          -------
+          delta_value : np.ndarray
+              The change in order parameter values, as a const reference. Referred to values remain fixed until the next time a calculator function is called.
+          )pbdoc",
+          py::arg("linear_site_index"), py::arg("new_occ"))
+      // local DoF
+      .def(
+          "local_delta_value",
+          [](clexulator::OrderParameter &m, Index linear_site_index,
+             Eigen::VectorXd const &new_value) -> Eigen::VectorXd const & {
+            return m.local_delta_value(linear_site_index, new_value);
+          },
+          py::return_value_policy::reference_internal,
+          R"pbdoc(
+          Calculate and return change in order parameter value due to a local DoF change
+
+          Parameters
+          ----------
+          linear_site_index: int
+              Linear site indices (as defined by a :class:`~libcasm.xtal.SiteIndexConverter`) where the local DoF value is changed.
+          new_value: np.ndarray
+              The value the local DoF is changed to.
+
+          Returns
+          -------
+          delta_value : np.ndarray
+              The change in order parameter values, as a const reference. Referred to values remain fixed until the next time a calculator function is called.
+          )pbdoc",
+          py::arg("linear_site_index"), py::arg("new_value"))
+      .def(
+          "local_component_delta_value",
+          [](clexulator::OrderParameter &m, Index linear_site_index,
+             Index dof_component, double new_value) -> Eigen::VectorXd const & {
+            return m.local_delta_value(linear_site_index, dof_component,
+                                       new_value);
+          },
+          py::return_value_policy::reference_internal,
+          R"pbdoc(
+          Calculate and return change in order parameter value due to a change in a local DoF component
+
+          Parameters
+          ----------
+          linear_site_index: int
+              Linear site indices (as defined by a :class:`~libcasm.xtal.SiteIndexConverter`) where the local DoF value is changed.
+          dof_component: int
+              Index of the the local DoF component that is changed.
+          new_value: float
+              The value the local DoF component is changed to.
+
+          Returns
+          -------
+          delta_value : np.ndarray
+              The change in order parameter values, as a const reference. Referred to values remain fixed until the next time a calculator function is called.
+          )pbdoc",
+          py::arg("linear_site_index"), py::arg("dof_component"),
+          py::arg("new_value"))
+      // global DoF
+      .def(
+          "global_delta_value",
+          [](clexulator::OrderParameter &m,
+             Eigen::VectorXd const &new_value) -> Eigen::VectorXd const & {
+            return m.global_delta_value(new_value);
+          },
+          py::return_value_policy::reference_internal,
+          R"pbdoc(
+          Calculate and return change in order parameter value due to a global DoF change
+
+          Parameters
+          ----------
+          new_value: np.ndarray
+              The value the global DoF is changed to.
+
+          Returns
+          -------
+          delta_value : np.ndarray
+              The change in order parameter values, as a const reference. Referred to values remain fixed until the next time a calculator function is called.
+          )pbdoc",
+          py::arg("new_value"))
+      .def(
+          "global_component_delta_value",
+          [](clexulator::OrderParameter &m, Index dof_component,
+             double new_value) -> Eigen::VectorXd const & {
+            return m.global_delta_value(dof_component, new_value);
+          },
+          py::return_value_policy::reference_internal,
+          R"pbdoc(
+          Calculate and return change in order parameter value due to a change in a global DoF component
+
+          Parameters
+          ----------
+          dof_component: int
+              Index of the the global DoF component that is changed.
+          new_value: float
+              The value the global DoF component is changed to.
+
+          Returns
+          -------
+          delta_value : np.ndarray
+              The change in order parameter values, as a const reference. Referred to values remain fixed until the next time a calculator function is called.
+          )pbdoc",
+          py::arg("dof_component"), py::arg("new_value"));
 
   //
   m.def(

@@ -51,6 +51,12 @@ class LocalCorrelations {
   std::set<xtal::UnitCellCoord> required_update_neighborhood(
       Index equivalent_index) const;
 
+  /// \brief Number of correlations
+  Index corr_size() const;
+
+  /// \brief The elements of the correlations vector that will be calculated.
+  std::vector<unsigned int> const &correlation_indices() const;
+
   /// \brief Calculate and return local correlations
   Eigen::VectorXd const &local(Index unitcell_index, Index equivalent_index);
 

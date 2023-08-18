@@ -72,7 +72,7 @@ class Correlations {
 
   /// \brief Calculate and return intensive correlations
   Eigen::VectorXd const &intensive(
-      Eigen::VectorXd const &extrinsic_correlations);
+      Eigen::VectorXd const &extensive_correlations);
 
   /// \brief Calculate and return extensive correlations
   Eigen::VectorXd const &extensive();
@@ -126,7 +126,7 @@ class Correlations {
   /// global continuous DoF change
   Eigen::VectorXd const &global_delta(
       DoFKey const &key, Eigen::VectorXd const &new_value,
-      Eigen::VectorXd const &reference_extrinsic_correlations);
+      Eigen::VectorXd const &reference_extensive_correlations);
 
  private:
   /// Holds all correlation indices
