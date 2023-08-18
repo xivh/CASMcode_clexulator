@@ -221,6 +221,14 @@ make_multi_local_cluster_expansion(
       coefficients, dof_values);
 }
 
+clexulator::DoFSpaceAxisInfo make_dof_space_axis_info(
+    std::string const &dof_key, xtal::BasicStructure const &prim,
+    std::optional<Eigen::Matrix3l> transformation_matrix_to_super,
+    std::optional<std::set<Index>> sites) {
+  return clexulator::DoFSpaceAxisInfo(dof_key, prim,
+                                      transformation_matrix_to_super, sites);
+}
+
 std::shared_ptr<clexulator::DoFSpace> make_dof_space(
     std::string const &dof_key,
     std::shared_ptr<xtal::BasicStructure const> const &prim,
@@ -1353,6 +1361,7 @@ PYBIND11_MODULE(_clexulator, m) {
       - One ClusterExpansion instance is needed to calculate the cluster expansion in each distinct supercell, using the appropriate :class:`~libcasm.clexulator.SuperNeighborList` at construction.
 
       - The cluster expansion is calculated for a :class:`~libcasm.clexulator.ConfigDoFValues` instance that can be given at construction or using the :func:`~libcasm.clexulator.ClusterExpansion.set` method.
+
         - If using the :func:`~libcasm.clexulator.ClusterExpansion.set` method, the :class:`~libcasm.clexulator.ConfigDoFValues` must be constructed consistent with the :class:`~libcasm.clexulator.SuperNeighborList`.
         - Once set by either method, ClusterExpansion maintains a non-owning pointer to that :class:`~libcasm.clexulator.ConfigDoFValues` instance.
         - The :class:`~libcasm.clexulator.ConfigDoFValues` can then be modified externally and subsequent calls of ClusterExpansion methods will use the current DoF values.
@@ -1781,6 +1790,76 @@ PYBIND11_MODULE(_clexulator, m) {
               to get the neighborhood for.
           )pbdoc");
 
+  // DoFSpaceAxisInfo
+  py::class_<clexulator::DoFSpaceAxisInfo>(m, "DoFSpaceAxisInfo", R"pbdoc(
+      DoFSpace axis glossary, axis site index, and axis dof component
+
+      DoFSpaceAxisInfo describes the rows of a DoFSpace basis matrix.
+      )pbdoc")
+      .def(py::init(&make_dof_space_axis_info),
+           R"pbdoc(
+          Construct a DoFSpaceAxisInfo instance
+
+          Parameters
+          ----------
+          dof_key: str
+              A string indicating which DoF type (e.g., "disp", "Hstrain", "occ")
+          xtal_prim : libcasm.xtal.Prim
+              A :class:`~libcasm.xtal.Prim`
+          transformation_matrix_to_super : array_like, shape=(3,3), dtype=int
+              Specifies the supercell for a local DoF space. Ignored for global DoF. The transformation matrix, T, relating the superstructure lattice vectors, S, defining the DoF space to the unit structure lattice vectors, L, according to S = L @ T, where S and L are shape=(3,3) matrices with lattice vectors as columns.
+          site_indices : Optional[list[int]] = None
+              A set of linear index of sites in the supercell to be included in a local DoF space. Ignored for global DoF. If dof_key specifies a local DoF and this does not have a value, all sites in the supercell are included.
+          )pbdoc",
+           py::arg("dof_key"), py::arg("xtal_prim"),
+           py::arg("transformation_matrix_to_super") = std::nullopt,
+           py::arg("site_indices") = std::nullopt)
+      .def_readonly("glossary", &clexulator::DoFSpaceAxisInfo::glossary,
+                    R"pbdoc(
+          List[str] : Names the DoF corresponding to each row of the DoFSpace basis.
+          )pbdoc")
+      .def_readonly("linear_site_index",
+                    &clexulator::DoFSpaceAxisInfo::site_index,
+                    R"pbdoc(
+          Optional[List[int]] : Lookup the `linear_site_index` for each row in the DoFSpace basis.
+
+          This has value for occupant DoF and local DoF only. It allows using the `basis_row_index` to lookup the `linear_site_index` associated with a DoFSpace basis row as follows:
+
+          .. code-block:: Python
+
+              linear_site_index = axis_info.linear_site_index[basis_row_index]
+
+
+          )pbdoc")
+      .def_readonly("dof_component_index",
+                    &clexulator::DoFSpaceAxisInfo::dof_component,
+                    R"pbdoc(
+          Optional[List[int]] : Lookup the `dof_component_index` for each row in the DoFSpace basis.
+
+          This has value for occupant DoF and local DoF only. It allows using the `basis_row_index` to lookup the `dof_component_index` associated with a DoFSpace basis row as follows:
+
+          .. code-block:: Python
+
+              dof_component_index = axis_info.dof_component_index[basis_row_index]
+
+
+          - For local continuous DoF this is the index into the DoFSetBasis on the associated site.
+          - For occupant DoF this gives the index into list of occupants on the associated site.
+
+          )pbdoc")
+      .def_readonly("basis_row_index",
+                    &clexulator::DoFSpaceAxisInfo::basis_row_index,
+                    R"pbdoc(
+          Optional[List[List[int]]] : Lookup the DoFSpace basis row by `linear_site_index` and `dof_component_index`.
+
+          This has value for occupant DoF and local DoF only. It allows using the `linear_site_index` and `dof_component_index` to lookup the corresponding DoFSpace basis row index as follows:
+
+          .. code-block:: Python
+
+              basis_row_index = basis_row_index[linear_site_index][dof_component_index]
+
+          )pbdoc");
+
   // DoFSpace
   py::class_<clexulator::DoFSpace, std::shared_ptr<clexulator::DoFSpace>>(
       m, "DoFSpace", R"pbdoc(
@@ -1788,7 +1867,7 @@ PYBIND11_MODULE(_clexulator, m) {
 
       A DoFSpace defines a subset of the space of allowed degrees of freedom (DoF) values.
       A choice of basis, :math:`Q`, with column basis vectors :math:`q_i`, spanning
-      the space or a subspace provides a definition for order parameters,
+      the space or a subspace provides a definition for order parameters, :math:`\eta`,
       according to :math:`Q \eta = x`, where :math:`x` are DoF values in the prim
       basis.
       )pbdoc")
@@ -1803,16 +1882,46 @@ PYBIND11_MODULE(_clexulator, m) {
           xtal_prim : libcasm.xtal.Prim
               A :class:`~libcasm.xtal.Prim`
           transformation_matrix_to_super : array_like, shape=(3,3), dtype=int
-              Specifies the supercell for a local DoF space. Ignored for global DoF. The transformation matrix, T, relating the superstructure lattice vectors, S, defining the DoF space to the unit structure lattice vectors, L, according to S = L @ T, where S and L are shape=(3,3)  matrices with lattice vectors as columns.
+              Specifies the supercell for a local DoF space. Ignored for global DoF. The transformation matrix, T, relating the superstructure lattice vectors, S, defining the DoF space to the unit structure lattice vectors, L, according to S = L @ T, where S and L are shape=(3,3) matrices with lattice vectors as columns.
           site_indices : Optional[list[int]] = None
               A set of linear index of sites in the supercell to be included in a local DoF space. Ignored for global DoF. If dof_key specifies a local DoF and this does not have a value, all sites in the supercell are included.
           basis : Optional[array_like] = None
-              Allows specifying a subspace of the space determined from dof_key, and for local DoF, transformation_matrix_to_super and sites. The rows of `basis` correspond to prim DoF basis axes. If this does not have a value, the standard basis (identify matrix of appropriate dimension) is used.
+              The DoF space basis, :math:`Q`, with column basis vectors :math:`q_i`, spanning the space or a subspace provides a definition for order parameters, according to :math:`Q \eta = x`, where :math:`x` are DoF values in the prim basis. May be a subspace (cols <= rows). The rows of `basis` correspond to prim DoF basis axes (i.e. for local DoF a site and DoF component, or for global DoF just a DoF component). If this does not have a value, an identify matrix of appropriate dimension is used.
           )pbdoc",
            py::arg("dof_key"), py::arg("xtal_prim"),
            py::arg("transformation_matrix_to_super") = std::nullopt,
            py::arg("site_indices") = std::nullopt,
            py::arg("basis") = std::nullopt)
+      .def_readonly("dof_key", &clexulator::DoFSpace::dof_key, R"pbdoc(
+          str : The DoF type for this DoFSpace.
+          )pbdoc")
+      .def_readonly("is_global", &clexulator::DoFSpace::dof_key, R"pbdoc(
+          bool : True if the DoF type is a global DoF, False otherwise.
+          )pbdoc")
+      .def_readonly("prim", &clexulator::DoFSpace::prim, R"pbdoc(
+          ~libcasm.xtal.Prim : The prim for this DoFSpace.
+          )pbdoc")
+      .def_readonly("transformation_matrix_to_super",
+                    &clexulator::DoFSpace::transformation_matrix_to_super,
+                    R"pbdoc(
+          np.ndarray : The shape=(3,3) integer matrix specifiyfing the supercell for a local DoF space.
+          )pbdoc")
+      .def_readonly("site_indices", &clexulator::DoFSpace::sites, R"pbdoc(
+          Optional[List[int]] : The set of linear index of sites in the supercell to be included in a local DoF space.
+          )pbdoc")
+      .def_readonly("basis", &clexulator::DoFSpace::basis, R"pbdoc(
+          np.ndarray : The DoFSpace basis, :math:`Q`.
+          )pbdoc")
+      .def_readonly("basis_inv", &clexulator::DoFSpace::basis_inv, R"pbdoc(
+          np.ndarray : The pseudo-inverse of the DoFSpace basis.
+          )pbdoc")
+      .def_readonly("subspace_dim", &clexulator::DoFSpace::subspace_dim,
+                    R"pbdoc(
+          int : The DoF subspace dimension (equal to number of columns in basis).
+          )pbdoc")
+      .def_readonly("axis_info", &clexulator::DoFSpace::axis_info, R"pbdoc(
+          ~libcasm.clexulator.DoFSpaceAxisInfo : Holds a description of each row of the DoFSpace basis
+          )pbdoc")
       .def_static(
           "from_dict",
           [](const nlohmann::json &data,
@@ -1886,7 +1995,7 @@ PYBIND11_MODULE(_clexulator, m) {
       -----
 
       - An OrderParameter is set to calculate order parameters in one supercell at a time, using the appropriate :class:`~libcasm.xtal.SiteIndexConverter`. This can be set using the call operator or the :func:`~libcasm.clexulator.OrderParameter.update` method.
-      - Order parameters are calculated for a :class:`~libcasm.clexulator.ConfigDoFValues` instance that can be given at construction or using using the call operator, the :func:`~libcasm.clexulator.OrderParameter.update` method, or the :func:`~libcasm.clexulator.ClusterExpansion.set` method.
+      - Order parameters are calculated for a :class:`~libcasm.clexulator.ConfigDoFValues` instance that can be specified using the call operator, the :func:`~libcasm.clexulator.OrderParameter.update` method, or the :func:`~libcasm.clexulator.ClusterExpansion.set` method.
 
         - The :class:`~libcasm.clexulator.ConfigDoFValues` must be constructed consistent with the :class:`~libcasm.xtal.SiteIndexConverter`.
         - Once set by any method, OrderParameter maintains a non-owning pointer to that :class:`~libcasm.clexulator.ConfigDoFValues` instance.
@@ -1911,6 +2020,7 @@ PYBIND11_MODULE(_clexulator, m) {
             m.update(transformation_matrix_to_super, supercell_index_converter,
                      dof_values);
           },
+          py::return_value_policy::reference,
           R"pbdoc(
           Set internal data to calculate order parameters in a particular supercell
 
@@ -1920,9 +2030,8 @@ PYBIND11_MODULE(_clexulator, m) {
               Specifies the supercell that config_dof_values is defined in.
           site_index_converter : ~libcasm.xtal.SiteIndexConverter
               Index converter for the specified supercell.
-          config_dof_values: ConfigDoFValues
-              Configuration degree of freedom (DoF) values input.
-              A :class:`~libcasm.xtal.Prim`
+          config_dof_values: ~libcasm.clexulator.ConfigDoFValues
+              The :class:`~libcasm.clexulator.ConfigDoFValues` instance OrderParameter uses to calculate the order parameter value. OrderParameter maintains a pointer to the underlying data, which must have a lifetime as long as OrderParameter is used to calculate with its data.
 
           )pbdoc",
           py::arg("transformation_matrix_to_super"),

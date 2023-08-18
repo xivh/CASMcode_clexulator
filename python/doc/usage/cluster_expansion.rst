@@ -72,6 +72,8 @@ Then, the cluster expansion value can be evaluated with:
     value_per_unitcell = cluster_expansion.intensive_value()
 
 
+.. _change-and-re-evaluate-clex:
+
 Change DoF values and re-evaluate
 ---------------------------------
 
