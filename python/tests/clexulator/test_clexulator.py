@@ -1,14 +1,14 @@
-import pathlib
-import numpy as np
+import pytest
+
 from libcasm.clexulator import (
-    PrimNeighborList,
     Clexulator,
     LocalClexulator,
+    PrimNeighborList,
     make_clexulator,
     make_local_clexulator,
 )
+
 from .functions import make_source
-import pytest
 
 
 def test_constructor():

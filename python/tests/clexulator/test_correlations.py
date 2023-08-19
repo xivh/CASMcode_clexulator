@@ -1,10 +1,12 @@
 import json
+
 import numpy as np
+import pytest
+
 import libcasm.clexulator as clex
 import libcasm.xtal as xtal
-import libcasm.xtal.prims as xtal_prims
+
 from .functions import make_source
-import pytest
 
 
 @pytest.mark.slow

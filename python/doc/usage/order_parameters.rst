@@ -10,38 +10,106 @@ Evaluating order parameters
 DoFSpace
 --------
 
-A :class:`~libcasm.clexulator.DoFSpace` defines a subset of the space of allowed degrees of freedom (DoF) values of a particular DoF type, using the prim DoF basis. A choice of order parameter basis, :math:`Q`, with column basis vectors :math:`q_i`, provides a definition for order parameters, :math:`\eta`, according to :math:`Q \eta = \bar{x}`, where :math:`\bar{x}` are DoF values in the prim basis, averaged over the configuration supercell.
+A :class:`~libcasm.clexulator.DoFSpace` specifies a subspace of allowed degrees of freedom (DoF) values of a particular DoF type, with subspace basis :math:`Q` (with column basis vectors :math:`q_i`), in terms of the prim DoF basis. This provides a definition for order parameters, :math:`\vec{\eta}`, according to :math:`Q \vec{\eta} = \vec{x}`, where :math:`\vec{x}` is a vector that is determined from the DoF values of a configuration.
 
-- For occupant DoF and local continuous DoF, :class:`~libcasm.clexulator.DoFSpace` is constructed with a supercell transformation matrix and optional list of site indices in that supercell.
+.. admonition:: Examples
 
-  - For occupant DoF, a row in :math:`Q` corresponds to a particular site and occupant in that supercell.
+    - For occupant DoF, :math:`\vec{x}` represents sublattice concentrations in the supercell commensurate with all ordered structures of interest, for example:
 
-    - For example, there will be 8 rows for a 4-site supercell in a binary alloy, and 12 rows for a 4-site supercell in a ternary alloy.
+      .. math::
 
-  - For local DoF, a row in :math:`Q` corresponds to a particular site and prim basis DoF component in that supercell.
+          \vec{x} = [n_A^1, n_B^1, n_A^2, n_B^2, \dots],
 
-    - For example, there will be twelve rows for a 4-site supercell with three-dimensional displacements allowed on each site.
+      where :math:`n_X^j` is the concentration of species :math:`X` on sublattice :math:`j` in the supercell.
+    - For displacement DoF using the standard basis, :math:`\vec{x}` represents the average values of each displacement component on a sublattice in the supercell commensurate with all ordered structures of interest, for example:
 
-- For global DoF, a row in :math:`Q` just corresponds to a particular prim basis DoF component.
+      .. math::
 
+          \vec{x} = [\bar{dx}^1, \bar{dy}^1, \bar{dz}^1, \bar{dx}^2, \bar{dy}^2, \bar{dz}^2, \dots],
+
+      where :math:`\bar{dx}^j,\bar{dy}^j,\bar{dj}^j` indicates the average of the :math:`x,y,z` displacement component, respectively, on sublattice :math:`j` in the supercell.
+    - For strain DoF, :math:`\vec{x}` represents the strain DoF values, for example:
+
+      .. math::
+
+          \vec{x} = [E_{xx}, E_{yy}, E_{zz}, \sqrt{2}E_{yz}, \sqrt{2}E_{xz}, \sqrt{2}E_{xy}].
+
+
+.. admonition:: Examples, non-standard prim basis
+
+    It is also possible to define order parameters in terms of a non-standard prim basis:
+
+    - For displacement DoF using a non-standard prim basis allowing two-dimensional displacements:
+
+      .. math::
+
+          \vec{x} = [\bar{d\alpha}^1, \bar{d\beta}^1, \bar{d\alpha}^2, \bar{d\beta}^2, \dots],
+
+      where :math:`\bar{d\alpha}^j,\bar{d\beta}^j` indicates the average of the :math:`\alpha-,\beta-` displacement component, respectively, on sublattice :math:`j` in the supercell commensurate with all ordered structures of interest.
+    - For strain DoF using a symmetry-adapted prim strain basis, excluding shear:
+
+      .. math::
+
+          \vec{x} = [e_1, e_2, e_3],
+
+      where :math:`e_1, e_2, e_3` are symmetry-adapted strains (see :cite:t:`THOMAS2017a`):
+
+      .. math::
+
+          \vec{e} = \left( \begin{array}{ccc} e_1 \\ e_2 \\ e_3  \end{array} \right) = \left( \begin{array}{ccc} \left( E_{xx} + E_{yy} + E_{zz} \right)/\sqrt{3} \\ \left( E_{xx} - E_{yy} \right)/\sqrt{2} \\ \left( 2E_{zz} - E_{xx} - E_{yy} + \right)/\sqrt{6} \end{array} \right).
+
+
+
+
+Symmetry operations transform the DoF values of a configuration and the effect :math:`\vec{x} \to \vec{x}'` can be represented by a symmetry representation matrix, :math:`M_i`, such that :math:`\vec{x}' = M_i \vec{x}`.
+
+.. note::
+
+    For each DoF type, there is a set of symmetry representation matrices, :math:`M_i`, which describe how the sublattice concentrations, average displacement components, and strain components, respectively, transform under symmetry operations.
+
+Matrix representations, :math:`\tilde{M}_i`, that transform :math:`\vec{\eta}` according to :math:`\vec{\eta}' = \tilde{M}_i \vec{\eta}`, are calculated as :math:`\tilde{M}_i = Q^{-1} M_i Q`.
+
+To calculate symmetry adapted order parameters, a DoFSpace should be constructed with a symmetry adapted basis, :math:`Q`, which block diagonalizes the matrix representations :math:`\tilde{M}_i` with the smallest possible blocks (the `irreducible representations`). A block-diagonal matrix representation can only transform vectors in the subspace corresponding to the block into other vectors in the same subspace. These are `invariant subspaces` under the application of the symmetry, and the order parameters in these subspaces can be used as input variables to symmetry adapted basis functions for properties of the configuration.
+
+Construction of a symmetry adapted basis can be done using methods in `libcasm-configuration`, which provides support for determining and applying symmetry representations representations. This package provides the underlying methods that calculate :math:`\vec{\eta}` for a configuration (represented using :class:`~libcasm.clexulator.ConfigDoFValues`) given a particular choice of order parameter basis, :math:`Q`.
+
+.. seealso::
+
+    For more details on symmetry adapated order parameters, see :cite:t:`natarajan2017symmetry`. Note that the paper uses the convention :math:`\vec{\eta} = Q \vec{x}`, differing from the convention used here that :math:`Q` is the order parameter basis :math:`Q \vec{\eta} = \vec{x}`.
+
+
+Global DoF
+----------
+
+For global DoF, each row of :math:`Q`, and corresponding element of :math:`\vec{x}`, is associated with one index:
+
+- `dof_component_index`: The index of the relevant global DoF value component on that site
+
+Each element of :math:`\vec{x}` is the `dof_component_index`-th component of the global DoF value.
+
+
+Local DoF
+---------
+
+For local continuous DoF and occupant DoF, :class:`~libcasm.clexulator.DoFSpace` is constructed with a supercell transformation matrix, :math:`T`, defining a DoFSpace supercell which specifies the periodicity of the order parameter. The DoFSpace supercell lattice vectors, as a column vector matrix, are :math:`S = L T`, where :math:`L` are the prim lattice vectors, as a column vector matrix.
+
+Each row of :math:`Q`, and corresponding element in :math:`\vec{x}`, is associated with two indices:
+
+- `linear_site_index`: The index of the associated site in the DoFSpace supercell
+- `dof_component_index`: The index of the relevant DoF value component on that site
 
 .. note::
 
     The DoFSpace member function :func:`~libcasm.clexulator.DoFSpace.axis_info` can be used to lookup the mapping of DoF components to rows of :math:`Q`. For occupant DoF and local DoF, this includes the `linear_site_index` of the site where the DoF component is located.
 
-To calculate symmetry adapted order parameters, a DoFSpace should be constructed with a symmetry adapted basis. Construction of a symmetry adapted basis can be done using methods in CASMcode_configuration, which provides support for determining symmetry operations and applying symmetry representations.
 
+For local continuous DoF, :math:`\vec{x}` is the average of the `dof_component_index`-th local DoF value component on sites belonging to the `linear_site_index`-th sublattice of the DoFSpace supercell.
 
-Quickstart
-----------
+For occupant DoF, :math:`\vec{x}` is the fraction sites belonging to the `linear_site_index`-th sublattice of the DoFSpace supercell that are occupied by the `dof_component_index`-th allowed occupant.
 
-The :func:`~libcasm.clexulator.calc_order_parameters` function allows quickly and safely calculating order parameters given a `~libcasm.clexulator.DoFSpace`:
+.. note::
 
-.. code-block:: Python
-
-    eta =
-
-Each time the :func:`~libcasm.clexulator.calc_order_parameters` function is called, some setup is necessary to prepare for order parameter calculations. When efficiency is very important, such as in Monte Carlo calcutions, it is preferable to use the :class:`~libcasm.clexulator.OrderParameter` calculator class so that setup is done once and re-used.
+    For occupant DoF, elements of :math:`\vec{x}` as defined here are not independent. The sum of elements of :math:`\vec{x}` with the same `linear_site_index` must be 1.
 
 
 The OrderParameter calculator
@@ -150,7 +218,7 @@ Then, the cluster expansion value can be evaluated with:
     # eta is a const reference of type numpy.ndarray[numpy.float64[d, 1]],
     # where d is the dimension of the DoFSpace basis (number of columns)
 
-Internally, this uses `config_dof_values` to construct a vector, :math:`\bar{x}`, of the DoF values in the DoF space, averaged over the configuration supercell. Then, solving :math:`Q \eta = \bar{x}` yields :math:`\eta`.
+Internally, this uses `config_dof_values` to construct a vector, :math:`\vec{x}`, of the DoF values in the DoF space, averaged over the configuration supercell. Then, solving :math:`Q \vec{\eta} = \vec{x}` yields :math:`\vec{\eta}`.
 
 
 Change DoF values and re-evaluate

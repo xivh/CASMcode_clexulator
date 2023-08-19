@@ -50,6 +50,12 @@ A :class:`~libcasm.clexulator.ClusterExpansion` calculator and default configura
 .. note::
 
     - Before running, set the environment variable ``CASM_PREFIX`` to the location where CASM is installed in order to enable proper compilation and linking of the clexulator source code using the CASM libraries.
+
+      .. code-block:: bash
+
+          export CASM_PREFIX=$(python -m libcasm.casmglobal --prefix)
+
+
     - In some cases, finer control of compilation and linking options may be necessary, which can be done as described in the :class:`~libcasm.clexulator.make_clexulator` documentation.
 
 

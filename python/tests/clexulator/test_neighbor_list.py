@@ -1,6 +1,7 @@
 import numpy as np
-from libcasm.clexulator import PrimNeighborList, SuperNeighborList
+
 import libcasm.xtal.lattices as xtal_lattices
+from libcasm.clexulator import PrimNeighborList
 
 
 def test_make_weight_matrix():
