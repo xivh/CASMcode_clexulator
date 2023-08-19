@@ -83,6 +83,7 @@ jobs:
         shell: bash
         run: |
           cd build_cxx_test
+          export CASM_PREFIX=$(python -m libcasm.casmglobal --prefix)
           make test
 
       - name: upload test log

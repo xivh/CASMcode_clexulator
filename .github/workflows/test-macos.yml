@@ -27,4 +27,5 @@ jobs:
       - name: make test
         shell: bash
         run: |
+          export CASM_PREFIX=$(python -m libcasm.casmglobal --prefix)
           python -m pytest -rsap python/tests

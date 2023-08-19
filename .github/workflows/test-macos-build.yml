@@ -32,6 +32,7 @@ jobs:
       - name: make test
         shell: bash
         run: |
+          export CASM_PREFIX=$(python -m libcasm.casmglobal --prefix)
           python -m pytest -rsap python/tests
 
       - name: upload libcasm-clexulator-macos-latest-x86_64-dist
