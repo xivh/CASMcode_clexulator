@@ -1,6 +1,5 @@
-import pytest
 
-import subprocess
+import pytest
 
 from libcasm.clexulator import (
     Clexulator,

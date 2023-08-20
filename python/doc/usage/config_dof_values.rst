@@ -3,10 +3,6 @@
 The ConfigDoFValues data structure
 ==================================
 
-.. toctree::
-    :maxdepth: 2
-    :hidden:
-
 Overview
 --------
 

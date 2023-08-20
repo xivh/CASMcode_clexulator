@@ -4,14 +4,40 @@
 Evaluating a cluster expansion
 ==============================
 
-.. toctree::
-    :maxdepth: 2
-    :hidden:
+The :class:`~libcasm.clexulator.ClusterExpansion` class is used to calculate:
+
+- the value of a cluster expansion
+- the change in the value of a cluster expansion given changes in degree of freedom (DoF) values
+
+Evaluating a cluster expansion requires:
+
+- Cluster expansion basis functions, as a CASM :class:`~libcasm.clexulator.Clexulator` source code file
+- Cluster expansion coefficients, as a :class:`~libcasm.clexulator.SparseCoefficients` object
+- Configuration degree of freedom (DoF) values, as a :class:`~libcasm.clexulator.ConfigDoFValues` object
+- A neighbor list for the supercell of the configuration, which is used to find the correct degree of freedom (DoF) values for each basis function, as a :class:`~libcasm.clexulator.SuperNeighborList`.
+
 
 Construct a ClusterExpansion
 ----------------------------
 
-A :class:`~libcasm.clexulator.ClusterExpansion` calculator and default configuration degree of freedom (DoF) values in a particular supercell can be quickly constructed using :func:`~libcasm.clexulator.make_cluster_expansion` as follows:
+The :func:`~libcasm.clexulator.make_cluster_expansion` method can be used to construct a :class:`~libcasm.clexulator.ClusterExpansion` calculator along with consistent :class:`~libcasm.clexulator.ConfigDoFValues` and :class:`~libcasm.clexulator.SuperNeighborList` objects, given a :class:`~libcasm.xtal.Prim` and the integer transformation matrix for the supercell containing the configuration:
+
+.. note::
+
+    Before running, set the environment variable ``CASM_PREFIX`` to the location where CASM is installed in order to enable proper compilation and linking of the CASM clexulator using the CASM libraries.
+
+    .. code-block:: bash
+
+        export CASM_PREFIX=$(python -m libcasm.casmglobal --prefix)
+
+
+    In some cases, finer control of compilation and linking options may be necessary, which can be done as described in the :class:`~libcasm.clexulator.make_clexulator` documentation. For example, compiling and linking with gcc may require:
+
+    .. code-block:: bash
+
+        export CASM_SOFLAGS="-shared -Wl,--no-as-needed"
+
+
 
 .. code-block:: Python
 
@@ -47,22 +73,16 @@ A :class:`~libcasm.clexulator.ClusterExpansion` calculator and default configura
     config_dof_values = info.config_dof_values
 
 
-.. note::
+In this example, the :func:`~libcasm.clexulator.make_cluster_expansion` method returns two objects:
 
-    - Before running, set the environment variable ``CASM_PREFIX`` to the location where CASM is installed in order to enable proper compilation and linking of the clexulator source code using the CASM libraries.
-
-      .. code-block:: bash
-
-          export CASM_PREFIX=$(python -m libcasm.casmglobal --prefix)
-
-
-    - In some cases, finer control of compilation and linking options may be necessary, which can be done as described in the :class:`~libcasm.clexulator.make_clexulator` documentation.
+- `cluster_expansion`: The constructed :class:`~libcasm.clexulator.ClusterExpansion` calculator
+- `info`: A :class:`~libcasm.clexulator.ClusterExpansionInfo` instance which provides the supercell neighbor list and a default initialized :class:`~libcasm.clexulator.ConfigDoFValues` instance for the specified supercell
 
 
 Evaluate the cluster expansion
 ------------------------------
 
-The variable `config_dof_values` returned by :func:`~libcasm.clexulator.make_cluster_expansion` is an instance of :class:`~libcasm.clexulator.ConfigDoFValues` which the :class:`~libcasm.clexulator.ClusterExpansion` is set to evaluate.
+To evaluate the cluster expansion, the :class:`~libcasm.clexulator.ClusterExpansion` calculator must be set to point at a :class:`~libcasm.clexulator.ConfigDoFValues` instance. This is done at automatically for the objects returned by :func:`~libcasm.clexulator.make_cluster_expansion`.
 
 Then, the cluster expansion value can be evaluated with:
 
@@ -80,8 +100,8 @@ Then, the cluster expansion value can be evaluated with:
 
 .. _change-and-re-evaluate-clex:
 
-Change DoF values and re-evaluate
----------------------------------
+Change DoF values and re-calculate
+----------------------------------
 
 To change DoF values and re-calculate the cluster expansion, just modify the values of the :class:`~libcasm.clexulator.ConfigDoFValues` instance and re-evaluate:
 
@@ -172,6 +192,11 @@ The function :func:`~libcasm.clexulator.ClusterExpansion.set` may be used to poi
     value_per_unitcell = cluster_expansion.intensive_value()
 
 
+.. warning::
+
+    To calculate the cluster expansion in a different supercell, a new :func:`~libcasm.clexulator.ClusterExpansion` instance must be constructed.
+
+
 Calculate the effect of changes in DoF values
 ---------------------------------------------
 
@@ -204,213 +229,3 @@ As an example, the following is pseudo-code that uses :func:`~libcasm.clexulator
 
 
 
-.. _eval-local-cluster-expansion:
-
-Evaluating a local cluster expansion
-====================================
-
-Construct a LocalClusterExpansion
----------------------------------
-
-By setting the `cluster_expansion_type` parameter to `"local"`, :func:`~libcasm.clexulator.make_cluster_expansion` can also be used to construct a :class:`~libcasm.clexulator.LocalClusterExpansion` calculator:
-
-.. code-block:: Python
-
-    # construct a LocalClusterExpansion calculator
-    local_cluster_expansion, info = make_cluster_expansion(
-        cluster_expansion_type="local",
-        xtal_prim=xtal_prim,
-        clexulator_source=clexulator_source,
-        coefficients=coefficients,
-        transformation_matrix_to_super=transformation_matrix_to_super,
-    )
-
-    # get the ConfigDoFValues that cluster_expansion will evaluate
-    config_dof_values = info.config_dof_values
-
-For local cluster expansion construction, `clexulator_source` is the path to the :ref:`prototype local clexulator source code file <local-clexulator-files>` (i.e. `/path/to/<primname>_Clexulator_<bsetname>.cc`) and source code files for the symmetrically equivalent local basis sets (i.e. `/path/to/<i>/<primname>_Clexulator_<bsetname>_<i>.cc` with `i` equal to 0, 1, ...) are found relative to `clexulator_source`.
-
-Evaluate the local cluster expansion
-------------------------------------
-
-The local cluster expansion value can be evaluated at a particular choice of:
-
-- `unitcell_index`: Linear unit cell index specifying in which unit cell to evaluate the local correlations, as defined by :class:`~libcasm.xtal.UnitCellIndexConverter`.
-- `equivalent_index`: Index of the equivalent local basis set to evaluate. This index specifies a combined choice of (i) a particular `phenomenal` cluster of sites and (ii) a particular orientation of the local basis set at that cluster, when there are multiple symmetrically equivalent local basis sets around the same phenomenal cluster.
-
-For a particular application, there should be a method that helps find the correct `unitcell_index` and `equivalent_index`, which depends on the details of the phenomena being modeled.
-
-For example, :class:`~libcasm.occ_events.OccEvent` is a class which describes a diffusive hop of one or more occupants. A local cluster expansion can be used to predict the kinetically resolved activation barrier around a particular hop. The correct `unitcell_index` and `equivalent_index` to use for evaluating the local cluster expansion around a particular hop in a particular supercell can be found using the method :func:`~libcasm.enumerate.get_occevent_coordinate`, which searches a list of phenomenal :class:`~libcasm.occ_events.OccEvent` to find which one is a strictly translational equivalent:
-
-.. code-block:: Python
-
-    from libcasm.enumerate import get_occevent_coordinate
-
-    # ... calculate local cluster expansion value for the current state
-    #     of the ConfigDoFValues that local_cluster_expansion has been set with ...
-
-    # evaluate and return local cluster expansion value:
-    unitcell_index, equivalent_index = get_occevent_coordinate(
-        occ_event=occ_event, # libcasm.occ_events.OccEvent
-        phenomenal_occevent=phenomenal_occevent, # List[libcasm.occ_events.OccEvent]
-        supercell=supercell, # libcasm.configuration.Supercell
-    )
-    value = local_cluster_expansion.value(unitcell_index, equivalent_index)
-
-
-Cluster expansion details
-=========================
-
-The CASM Clexulator
--------------------
-
-CASM generates custom code for very efficient calculation of basis functions given a particular :class:`~libcasm.xtal.Prim` and choice of cluster expansion basis functions. This source code is written to a file and then may be compiled, linked, and used at runtime via the class  :class:`~libcasm.clexulator.Clexulator` (clexulator = CLuster EXpansion calcULATOR).
-
-For periodic cluster expansions, CASM custom generates:
-
-- `<primname>_Clexulator_<bsetname>.cc`: a clexulator source code file that evaluates the basis functions
-- `basis.json`: a JSON file describing the cluster basis functions.
-
-These files are written to a basis set directory, which is usually organized as:
-
-.. code-block::
-
-    /path/to/basis_sets/bset.<bsetname>/
-    ├── <primname>_Clexulator_<bsetname>.cc
-    └── basis.json
-
-Here, `<primname>` is the name given to the :class:`~libcasm.xtal.Prim` and `<bsetname>` is a unique name for the cluster expansion basis set.
-
-.. _local-clexulator-files:
-
-For local cluster expansions, CASM custom generates:
-
-- `<primname>_Clexulator_<bsetname>.cc`: a clexulator source code file for a prototype local cluster expansion
-- `basis.json`: a JSON file describing the cluster basis functions for the prototype
-- `<equivalent_index>/<primname>_Clexulator_<bsetname>_<equivalent_index>.cc`: source code files for each symmetrically equivalent local cluster expansion per unit cell
-- `equivalents_info.json`: a JSON file which describes the prototype local expansion basis set's cluster basis and the symmetry operations which relate the prototype local expansion basis set to the symmetrically equivalent local cluster expansion basis sets.
-
-From this information, CASM can compile functions to evaluate all the local cluster expansion basis functions and use a single set of expansion coefficients for each of the symmetrically equivalent local cluster expansions.
-
-The files for necessary for a local cluster expansion are all written to a local basis set directory, which is usually organized as:
-
-.. code-block::
-
-    /path/to/basis_sets/bset.<bsetname>/
-    ├── 0
-    │   └── <primname>_Clexulator_<bsetname>_0.cc
-    ├── 1
-    │   └── <primname>_Clexulator_<bsetname>_1.cc
-    ├── ...
-    ├── <primname>_Clexulator_<bsetname>.cc
-    ├── equivalents_info.json
-    └── basis.json
-
-As before, `<primname>` is the name given to the :class:`~libcasm.xtal.Prim` and `<bsetname>` is a unique name for the local cluster expansion basis set.
-
-
-Neighbor lists
---------------
-
-:class:`~libcasm.clexulator.Clexulator` source code contains the definition for a single translational equivalent of each cluster basis function. A neighbor list is used to determine the correct degree of freedom (DoF) values to evaluate the cluster basis function at a particular lattice translation. There are two types of neighbor lists:
-
-- :class:`~libcasm.clexulator.PrimNeighborList`: A prim neighbor list, defines an ordering of unit cells in the local neighborhood of a unit cell for a particular :class:`~libcasm.xtal.Prim`.
-- :class:`~libcasm.clexulator.SuperNeighborList`: A neighbor list that uses the ordering specified by a prim neighbor list to construct a neighbor list for each unit cell in a supercell. One of these must be generated for each supercell in which cluster basis functions are evaluated.
-
-Constructing a Clexulator
--------------------------
-
-A :class:`~libcasm.clexulator.Clexulator` is constructed using a :class:`~libcasm.clexulator.PrimNeighborList` and the path to a CASM clexulator source file, using the factory function :class:`~libcasm.clexulator.make_clexulator`:
-
-.. code-block:: Python
-
-    from libcasm.clexulator import make_clexulator, PrimNeighborList
-    prim_neighbor_list = PrimNeighborList()
-    clexulator = make_clexulator(
-        source="/path/to/.../<primname>_Clexulator_<bsetname>.cc",
-        prim_neighbor_list=prim_neighbor_list,
-    )
-
-.. note::
-
-    - Before running, set the environment variable ``CASM_PREFIX`` to the location where CASM is installed in order to enable proper compilation and linking of the clexulator source code.
-    - In some cases, finer control of compilation and linking options may be necessary, which can be done as described in the :class:`~libcasm.clexulator.make_clexulator` documentation.
-
-The :class:`~libcasm.clexulator.PrimNeighborList` provided to :class:`~libcasm.clexulator.make_clexulator` is expanded as necessary to include all sites required by the cluster basis functions.
-
-
-Constructing a LocalClexulator
-------------------------------
-
-A :class:`~libcasm.clexulator.LocalClexulator` is constructed in a similar manner as :class:`~libcasm.clexulator.Clexulator`, using the factory function :class:`~libcasm.clexulator.make_local_clexulator`:
-
-.. code-block:: Python
-
-    from libcasm.clexulator import make_local_clexulator, PrimNeighborList
-    prim_neighbor_list = PrimNeighborList()
-    local_clexulator = make_local_clexulator(
-        source="/path/to/.../<primname>_Clexulator_<bsetname>.cc",
-        prim_neighbor_list=prim_neighbor_list,
-    )
-
-.. note::
-
-    - Before running, set the environment variable ``CASM_PREFIX`` to the location where CASM is installed in order to enable proper compilation and linking of the clexulator source code.
-    - In some cases, finer control of compilation and linking options may be necessary, which can be done as described in the :class:`~libcasm.clexulator.make_local_clexulator` documentation.
-
-
-ClusterExpansion Examples
--------------------------
-
-Construction:
-
-.. code-block:: Python
-
-    import numpy as np
-    import libcasm.xtal as xtal
-    from libcasm.clexulator import (
-        make_clexulator,
-        make_default_config_dof_values,
-        ClusterExpansion,
-        PrimNeighborList,
-        SparseCoefficients,
-        SuperNeighborList,
-    )
-
-    # ... construct the Prim ...
-    xtal_prim = xtal.Prim(...)
-
-    # ... construct Clexulator ...
-    prim_neighbor_list = PrimNeighborList()
-    clexulator_source = ... path to Clexulator source file ...
-    formation_energy_clexulator = make_clexulator(
-        clexulator_source, prim_neighbor_list)
-
-    # ... construct Monte Carlo cell with default ConfigDoFValues...
-    l_unitcells = ... specify l * l * l sized supercell ...
-    transformation_matrix_to_super = np.eye(3) * l_unitcells
-    coefficients = SparseCoefficients(...)
-    supercell_neighbor_list = SuperNeighborList(
-        transformation_matrix_to_super=transformation_matrix_to_super,
-        prim_neighbor_list=prim_neighbor_list,
-    )
-    config_dof_values = make_default_config_dof_values(
-        xtal_prim, transformation_matrix_to_super)
-
-    # ... construct ClusterExpansion, setting it to point
-    #     at the ConfigDoFValues that will be used by the calculator ...
-    cluster_expansion = ClusterExpansion(
-        supercell_neighbor_list=supercell_neighbor_list,
-        clexulator=formation_energy_clexulator,
-        coefficients=coefficients,
-        config_dof_values=config_dof_values,
-    )
-
-Calculating the cluster expansion value:
-
-.. code-block:: Python
-
-    # ... calculate cluster expansion value for the current state
-    #     of the ConfigDoFValues that cluster_expansion has been set with ...
-    value_per_unitcell = cluster_expansion.intensive_value()
-    value_per_supercell = cluster_expansion.extensive_value()

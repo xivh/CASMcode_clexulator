@@ -38,10 +38,10 @@ Documentation
 .. toctree::
     :maxdepth: 2
 
-    Installation <installation>
-    Usage <usage>
+    installation
+    usage
     Reference <reference/libcasm/index>
-    Bibliography <bibliography>
+    bibliography
 
 libcasm-clexulator is available on GitHub_.
 
