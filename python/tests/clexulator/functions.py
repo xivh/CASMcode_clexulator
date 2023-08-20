@@ -1,5 +1,4 @@
 import pathlib
-import pytest
 
 
 def make_source(dir, title, bsetname):

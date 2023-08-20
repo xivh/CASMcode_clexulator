@@ -1,8 +1,9 @@
 import numpy as np
 import pytest
-from libcasm.clexulator import ConfigDoFValues, make_default_config_dof_values
+
 import libcasm.xtal as xtal
 import libcasm.xtal.prims as xtal_prims
+from libcasm.clexulator import ConfigDoFValues, make_default_config_dof_values
 
 
 def test_constructor():
@@ -72,8 +73,8 @@ def test_occupation_2():
     with pytest.raises(ValueError):
         occupation_out[0] = 2
     assert dof_values.occ(0) == 1
-    assert occupation_out.flags.writeable == False
-    assert occupation_out.flags.owndata == False
+    assert occupation_out.flags.writeable is False
+    assert occupation_out.flags.owndata is False
 
 
 def test_copy_config_dof_values():

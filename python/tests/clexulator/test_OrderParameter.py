@@ -1,19 +1,18 @@
 import numpy as np
-import pytest
-from libcasm.clexulator import DoFSpace, OrderParameter, make_default_config_dof_values
+
 import libcasm.xtal as xtal
 import libcasm.xtal.prims as xtal_prims
+from libcasm.clexulator import DoFSpace, OrderParameter, make_default_config_dof_values
 
 
 def test_OrderParameter_constructor_1():
     xtal_prim = xtal_prims.FCC(r=1.0, occ_dof=["A", "B", "Va"])
     T = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]], dtype=int)
-    n_unitcells = round(np.linalg.det(T))
+    round(np.linalg.det(T))
 
     dof_space = DoFSpace(
-        dof_key="occ",
-        xtal_prim=xtal_prim,
-        transformation_matrix_to_super=T)
+        dof_key="occ", xtal_prim=xtal_prim, transformation_matrix_to_super=T
+    )
 
     # construct a OrderParameter calculator
     order_parameter = OrderParameter(
@@ -22,17 +21,16 @@ def test_OrderParameter_constructor_1():
 
     assert isinstance(order_parameter, OrderParameter)
 
-def test_OrderParameter_occ_1():
 
+def test_OrderParameter_occ_1():
     # DoFSpace is a single unit cell -> eta is mean site composition
     xtal_prim = xtal_prims.FCC(r=1.0, occ_dof=["A", "B", "Va"])
     T_dof_space = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]], dtype=int)
 
     # construct occ DoFSpace with default basis
     dof_space = DoFSpace(
-        dof_key="occ",
-        xtal_prim=xtal_prim,
-        transformation_matrix_to_super=T_dof_space)
+        dof_key="occ", xtal_prim=xtal_prim, transformation_matrix_to_super=T_dof_space
+    )
 
     # construct a OrderParameter calculator
     order_parameter = OrderParameter(
@@ -64,32 +62,30 @@ def test_OrderParameter_occ_1():
     eta = order_parameter.value()
     assert isinstance(eta, np.ndarray)
     assert eta.shape == (3,)
-    assert np.allclose(eta, np.array([1.,0.,0.]))
+    assert np.allclose(eta, np.array([1.0, 0.0, 0.0]))
 
-    config_dof_values.set_occupation([1., 1., 1., 1., 1., 1., 1., 1.])
+    config_dof_values.set_occupation([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
     eta = order_parameter.value()
-    assert np.allclose(eta, np.array([0.,1.,0.]))
+    assert np.allclose(eta, np.array([0.0, 1.0, 0.0]))
 
-    config_dof_values.set_occupation([2., 2., 2., 2., 2., 2., 2., 2.])
+    config_dof_values.set_occupation([2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0])
     eta = order_parameter.value()
-    assert np.allclose(eta, np.array([0.,0.,1.]))
+    assert np.allclose(eta, np.array([0.0, 0.0, 1.0]))
 
-    config_dof_values.set_occupation([1., 0., 0., 0., 0., 0., 0., 0.])
+    config_dof_values.set_occupation([1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
     eta = order_parameter.value()
-    assert np.allclose(eta, np.array([7./8., 1./8., 0.]))
+    assert np.allclose(eta, np.array([7.0 / 8.0, 1.0 / 8.0, 0.0]))
 
 
 def test_OrderParameter_occ_2():
-
     # DoFSpace is a 2 unit cell supercell -> eta is mean sublat composition
     xtal_prim = xtal_prims.FCC(r=1.0, occ_dof=["A", "B", "Va"])
     T_dof_space = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 2]], dtype=int)
 
     # construct occ DoFSpace with default basis
     dof_space = DoFSpace(
-        dof_key="occ",
-        xtal_prim=xtal_prim,
-        transformation_matrix_to_super=T_dof_space)
+        dof_key="occ", xtal_prim=xtal_prim, transformation_matrix_to_super=T_dof_space
+    )
 
     # construct a OrderParameter calculator
     order_parameter = OrderParameter(
@@ -125,23 +121,24 @@ def test_OrderParameter_occ_2():
     eta = order_parameter.value()
     assert isinstance(eta, np.ndarray)
     assert eta.shape == (6,)
-    assert np.allclose(eta, np.array([1.,0.,0.,1.,0.,0.]))
+    assert np.allclose(eta, np.array([1.0, 0.0, 0.0, 1.0, 0.0, 0.0]))
 
-    config_dof_values.set_occupation([1., 1., 1., 1., 1., 1., 1., 1.])
+    config_dof_values.set_occupation([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
     eta = order_parameter.value()
-    assert np.allclose(eta, np.array([0.,1.,0.,0.,1.,0.]))
+    assert np.allclose(eta, np.array([0.0, 1.0, 0.0, 0.0, 1.0, 0.0]))
 
-    config_dof_values.set_occupation([1., 1., 1., 1., 2., 2., 2., 2.])
+    config_dof_values.set_occupation([1.0, 1.0, 1.0, 1.0, 2.0, 2.0, 2.0, 2.0])
     eta = order_parameter.value()
-    assert np.allclose(eta, np.array([0.,1.,0.,0.,0.,1.]))
+    assert np.allclose(eta, np.array([0.0, 1.0, 0.0, 0.0, 0.0, 1.0]))
 
-    config_dof_values.set_occupation([1., 0., 0., 0., 1., 2., 2., 2.])
+    config_dof_values.set_occupation([1.0, 0.0, 0.0, 0.0, 1.0, 2.0, 2.0, 2.0])
     eta = order_parameter.value()
-    assert np.allclose(eta, np.array([3./4., 1./4., 0., 0., 1./4., 3/4.]))
+    assert np.allclose(
+        eta, np.array([3.0 / 4.0, 1.0 / 4.0, 0.0, 0.0, 1.0 / 4.0, 3 / 4.0])
+    )
 
 
 def test_OrderParameter_occ_3():
-
     # DoFSpace is a 2 unit cell supercell, single basis vector
     xtal_prim = xtal_prims.FCC(r=1.0, occ_dof=["A", "B", "Va"])
     T_dof_space = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 2]], dtype=int)
@@ -151,14 +148,16 @@ def test_OrderParameter_occ_3():
         dof_key="occ",
         xtal_prim=xtal_prim,
         transformation_matrix_to_super=T_dof_space,
-        basis=np.array([
-            [1.0, 0.0, 0.0, 0.0, 1.0, 0.0],
-            [0.0, 1.0, 0.0, 1.0, 0.0, 0.0],
-            [0.0, 0.0, 1.0, 0.0, 0.0, 0.0],
-            [1.0, 0.0, 0.0, 0.0, -1.0, 0.0],
-            [0.0, 1.0, 0.0, -1.0, 0.0, 0.0],
-            [0.0, 0.0, 0.0, 0.0, 0.0, 1.0],
-        ]).transpose(),
+        basis=np.array(
+            [
+                [1.0, 0.0, 0.0, 0.0, 1.0, 0.0],
+                [0.0, 1.0, 0.0, 1.0, 0.0, 0.0],
+                [0.0, 0.0, 1.0, 0.0, 0.0, 0.0],
+                [1.0, 0.0, 0.0, 0.0, -1.0, 0.0],
+                [0.0, 1.0, 0.0, -1.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0, 0.0, 1.0],
+            ]
+        ).transpose(),
     )
 
     # construct a OrderParameter calculator
@@ -193,23 +192,23 @@ def test_OrderParameter_occ_3():
     )
 
     # Q * eta = \bar{x}
-    config_dof_values.set_occupation([0., 0., 0., 0., 1., 1., 1., 1.])
+    config_dof_values.set_occupation([0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0])
     eta = order_parameter.value()
     assert isinstance(eta, np.ndarray)
     assert eta.shape == (6,)
     print(eta)
-    assert np.allclose(eta, np.array([1., 0., 0., 0., 0., 0.]))
+    assert np.allclose(eta, np.array([1.0, 0.0, 0.0, 0.0, 0.0, 0.0]))
 
-    config_dof_values.set_occupation([1., 1., 1., 1., 0., 0., 0., 0.])
+    config_dof_values.set_occupation([1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0])
     eta = order_parameter.value()
     assert isinstance(eta, np.ndarray)
     assert eta.shape == (6,)
     print(eta)
-    assert np.allclose(eta, np.array([0., 1., 0., 0., 0., 0.]))
+    assert np.allclose(eta, np.array([0.0, 1.0, 0.0, 0.0, 0.0, 0.0]))
 
-    config_dof_values.set_occupation([2., 2., 2., 2., 2., 2., 2., 2.])
+    config_dof_values.set_occupation([2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0])
     eta = order_parameter.value()
     assert isinstance(eta, np.ndarray)
     assert eta.shape == (6,)
     print(eta)
-    assert np.allclose(eta, np.array([0., 0., 1., 0., 0., 1.]))
+    assert np.allclose(eta, np.array([0.0, 0.0, 1.0, 0.0, 0.0, 1.0]))

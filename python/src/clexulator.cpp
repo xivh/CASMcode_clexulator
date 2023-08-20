@@ -1066,7 +1066,7 @@ PYBIND11_MODULE(_clexulator, m) {
 
           Returns
           -------
-          result : List[int]
+          result : list[int]
               The site index corresponding to each row of the matrix returned by `all_points`.
           )pbdoc",
            py::arg("include_all_sites"))
@@ -1109,9 +1109,9 @@ PYBIND11_MODULE(_clexulator, m) {
 
           Parameters
           ----------
-          linear_site_index: List[int]
+          linear_site_index: list[int]
               Linear site indices (as defined by a :class:`~libcasm.xtal.SiteIndexConverter`) where occupant DoF values are changed.
-          new_occ: List[int]
+          new_occ: list[int]
               The value the occupant DoF are changed to.
 
           Returns
@@ -1253,18 +1253,18 @@ PYBIND11_MODULE(_clexulator, m) {
       .def(py::init<std::vector<unsigned int>, std::vector<double>>(), R"pbdoc(
         Parameters
         ----------
-        index: List[int]
+        index: list[int]
             Indices of basis functions with non-zero coefficients
-        value: List[float]
+        value: list[float]
             Expansion coefficients, for the basis functions specified by `index`
         )pbdoc",
            py::arg("index") = std::vector<unsigned int>(),
            py::arg("value") = std::vector<double>())
       .def_readwrite("index", &clexulator::SparseCoefficients::index, R"pbdoc(
-        List[int]: Indices of basis functions with non-zero coefficients
+        list[int]: Indices of basis functions with non-zero coefficients
         )pbdoc")
       .def_readwrite("value", &clexulator::SparseCoefficients::index, R"pbdoc(
-        List[float]: Expansion coefficients, for the basis functions specified by `index`
+        list[float]: Expansion coefficients, for the basis functions specified by `index`
         )pbdoc")
       .def_static(
           "from_data",
@@ -1425,9 +1425,9 @@ PYBIND11_MODULE(_clexulator, m) {
           ----------
           key: str
               The type of local DoF that is changed.
-          linear_site_index: List[int]
+          linear_site_index: list[int]
               Linear site indices where occupant DoF values are changed.
-          new_occ: List[int]
+          new_occ: list[int]
              The value the occupant DoF are changed to.
           )pbdoc",
           py::arg("linear_site_index"), py::arg("new_occ"))
@@ -1494,7 +1494,7 @@ PYBIND11_MODULE(_clexulator, m) {
               The :class:`~libcasm.clexulator.SuperNeighborList` for the supercell consistent with `config_dof_values`.
           clexulator: :class:`~libcasm.clexulator.Clexulator`
               The :class:`~libcasm.clexulator.Clexulator` used to evaluate basis functions
-          coefficients: List[SparseCoefficients]
+          coefficients: list[SparseCoefficients]
               Cluster expansions coefficients used to evaluate the cluster expansions. An internal :class:`~libcasm.clexulator.Correlations` calculator is set to only evaluate the cluster basis functions corresponding to at least one non-zero coefficient.
           config_dof_values: :class:`~libcasm.clexulator.ConfigDoFValues`
               Configuration degree of freedom (DoF) values input to the basis functions. The MultiClusterExpansion instance stores a pointer to the underlying data, which must have a lifetime as long as MultiClusterExpansion is used to calculate with its data.
@@ -1558,9 +1558,9 @@ PYBIND11_MODULE(_clexulator, m) {
           ----------
           key: str
               The type of local DoF that is changed.
-          linear_site_index: List[int]
+          linear_site_index: list[int]
               Linear site indices where occupant DoF values are changed.
-          new_occ: List[int]
+          new_occ: list[int]
              The value the occupant DoF are changed to.
 
           Returns
@@ -1695,7 +1695,7 @@ PYBIND11_MODULE(_clexulator, m) {
           [](clexulator::LocalClusterExpansion &x)
               -> clexulator::SparseCoefficients & { return x.coefficients(); },
           py::return_value_policy::reference_internal, R"pbdoc(
-         The List[:class:`~libcasm.clexulator.SparseCoefficients`] used internally to calculate cluster expansion values, as a reference.
+         The list[:class:`~libcasm.clexulator.SparseCoefficients`] used internally to calculate cluster expansion values, as a reference.
          )pbdoc")
       .def("required_update_neighborhood",
            &clexulator::LocalClusterExpansion::required_update_neighborhood,
@@ -1725,7 +1725,7 @@ PYBIND11_MODULE(_clexulator, m) {
               The :class:`~libcasm.clexulator.SuperNeighborList` for the supercell consistent with `config_dof_values`.
           clexulator: :class:`~libcasm.clexulator.LocalClexulator`
               The :class:`~libcasm.clexulator.LocalClexulator` used to evaluate basis functions
-          coefficients: List[:class:`~libcasm.clexulator.SparseCoefficients`]
+          coefficients: list[:class:`~libcasm.clexulator.SparseCoefficients`]
               Cluster expansions coefficients used to evaluate the cluster expansion. Internal :class:`~libcasm.clexulator.LocalCorrelations` calculators are set to only evaluate the cluster basis functions corresponding to at least one non-zero coefficient.
           config_dof_values: :class:`~libcasm.clexulator.ConfigDoFValues`
               Configuration degree of freedom (DoF) values input to the basis functions. The MultiLocalClusterExpansion instance stores a pointer to the underlying data, which must have a lifetime as long as MultiLocalClusterExpansion is used to calculate with its data.
@@ -1816,12 +1816,12 @@ PYBIND11_MODULE(_clexulator, m) {
            py::arg("site_indices") = std::nullopt)
       .def_readonly("glossary", &clexulator::DoFSpaceAxisInfo::glossary,
                     R"pbdoc(
-          List[str] : Names the DoF corresponding to each row of the DoFSpace basis.
+          list[str] : Names the DoF corresponding to each row of the DoFSpace basis.
           )pbdoc")
       .def_readonly("linear_site_index",
                     &clexulator::DoFSpaceAxisInfo::site_index,
                     R"pbdoc(
-          Optional[List[int]] : Lookup the `linear_site_index` for each row in the DoFSpace basis.
+          Optional[list[int]] : Lookup the `linear_site_index` for each row in the DoFSpace basis.
 
           This has value for occupant DoF and local DoF only. It allows using the `basis_row_index` to lookup the `linear_site_index` associated with a DoFSpace basis row as follows:
 
@@ -1834,7 +1834,7 @@ PYBIND11_MODULE(_clexulator, m) {
       .def_readonly("dof_component_index",
                     &clexulator::DoFSpaceAxisInfo::dof_component,
                     R"pbdoc(
-          Optional[List[int]] : Lookup the `dof_component_index` for each row in the DoFSpace basis.
+          Optional[list[int]] : Lookup the `dof_component_index` for each row in the DoFSpace basis.
 
           This has value for occupant DoF and local DoF only. It allows using the `basis_row_index` to lookup the `dof_component_index` associated with a DoFSpace basis row as follows:
 
@@ -1850,7 +1850,7 @@ PYBIND11_MODULE(_clexulator, m) {
       .def_readonly("basis_row_index",
                     &clexulator::DoFSpaceAxisInfo::basis_row_index,
                     R"pbdoc(
-          Optional[List[List[int]]] : Lookup the DoFSpace basis row by `linear_site_index` and `dof_component_index`.
+          Optional[list[list[int]]] : Lookup the DoFSpace basis row by `linear_site_index` and `dof_component_index`.
 
           This has value for occupant DoF and local DoF only. It allows using the `linear_site_index` and `dof_component_index` to lookup the corresponding DoFSpace basis row index as follows:
 
@@ -1907,7 +1907,7 @@ PYBIND11_MODULE(_clexulator, m) {
           np.ndarray : The shape=(3,3) integer matrix specifiyfing the supercell for a local DoF space.
           )pbdoc")
       .def_readonly("site_indices", &clexulator::DoFSpace::sites, R"pbdoc(
-          Optional[List[int]] : The set of linear index of sites in the supercell to be included in a local DoF space.
+          Optional[list[int]] : The set of linear index of sites in the supercell to be included in a local DoF space.
           )pbdoc")
       .def_readonly("basis", &clexulator::DoFSpace::basis, R"pbdoc(
           np.ndarray : The DoFSpace basis, :math:`Q`.
@@ -2086,9 +2086,9 @@ PYBIND11_MODULE(_clexulator, m) {
 
           Parameters
           ----------
-          linear_site_index: List[int]
+          linear_site_index: list[int]
               Linear site indices (as defined by a :class:`~libcasm.xtal.SiteIndexConverter`) where occupant DoF values are changed.
-          new_occ: List[int]
+          new_occ: list[int]
               The values the occupant DoF are changed to.
 
           Returns
