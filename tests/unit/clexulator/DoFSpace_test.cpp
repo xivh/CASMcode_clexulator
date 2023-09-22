@@ -431,6 +431,84 @@ TEST_F(VariableLocalDoFSpaceTest1, ExcludeHomogeneousModeSpace) {
   EXPECT_EQ(dof_space_1.subspace_dim, 9);
 }
 
+/// Tests on a structure with a restricted local basis (2d displacements), and
+/// the basis is different on from site to site such that no rigid translations
+/// are possible
+class VariableLocalDoFSpaceTest2 : public testing::Test {
+ protected:
+  std::shared_ptr<xtal::BasicStructure const> prim;
+  Eigen::Matrix3l transformation_matrix_to_super;
+
+  static xtal::BasicStructure make_prim();
+
+  VariableLocalDoFSpaceTest2()
+      : prim(make_shared_prim(make_prim())),
+        transformation_matrix_to_super(Eigen::Matrix3l::Identity()) {}
+};
+
+xtal::BasicStructure VariableLocalDoFSpaceTest2::make_prim() {
+  // FCC base structure,
+  // - with corner atoms not allowed to displace
+  // - with face atoms allowed to displace in 3d,
+  // -> test case where some sites are not allowed to displace and some are
+  //    so no rigid translations are possible
+  using namespace xtal;
+
+  Molecule A = Molecule::make_atom("A");
+
+  SiteDoFSet disp_xyz{
+      AnisoValTraits::disp(),       // AnisoVal type
+      {"d0x", "d0y", "d0z"},        // axes names
+      Eigen::Matrix3d::Identity(),  // basis
+      {}                            // excluded_occs
+  };
+
+  Lattice lat{Eigen::Vector3d{4.0, 0.0, 0.0}, Eigen::Vector3d{0.0, 4.0, 0.0},
+              Eigen::Vector3d{0.0, 0.0, 4.0}};
+
+  BasicStructure struc{lat};
+  struc.set_basis(
+      {Site{Coordinate{0.0, 0.0, 0.0, lat, FRAC}, {A}},
+       Site{Coordinate{0.5, 0.5, 0.0, lat, FRAC}, {A}, {disp_xyz}},
+       Site{Coordinate{0.0, 0.5, 0.5, lat, FRAC}, {A}, {disp_xyz}},
+       Site{Coordinate{0.5, 0.0, 0.5, lat, FRAC}, {A}, {disp_xyz}}});
+  return struc;
+}
+
+TEST_F(VariableLocalDoFSpaceTest2, FactorGroupSize) {
+  EXPECT_EQ(xtal::make_factor_group(*prim).size(), 48);
+}
+
+TEST_F(VariableLocalDoFSpaceTest2, ExcludeHomogeneousModeSpace) {
+  // In this structure, not all sites allow displacements, so no rigid
+  // translations are possible
+
+  // Construct the restricted disp DoF space.
+  DoFKey dof_key = "disp";
+  clexulator::DoFSpace dof_space_0 = clexulator::make_local_dof_space(
+      dof_key, prim, transformation_matrix_to_super);
+  // std::cout << "including homogeneous_mode_space: \n"
+  //           << dof_space_0.basis << std::endl;
+  EXPECT_EQ(dof_space_0.dim, 9);
+  EXPECT_EQ(dof_space_0.subspace_dim, 9);
+
+  // check make homogeneous mode space
+  Eigen::MatrixXd homogeneous_mode_space =
+      clexulator::make_homogeneous_mode_space(dof_space_0);
+  // std::cout << "homogeneous_mode_space: \n"
+  //           << homogeneous_mode_space << std::endl;
+  EXPECT_EQ(homogeneous_mode_space.rows(), 9);
+  EXPECT_EQ(homogeneous_mode_space.cols(), 0);
+
+  // check exclude homogeneous mode space
+  clexulator::DoFSpace dof_space_1 =
+      clexulator::exclude_homogeneous_mode_space(dof_space_0);
+  // std::cout << "excluding homogeneous_mode_space: \n"
+  //           << dof_space_1.basis << std::endl;
+  EXPECT_EQ(dof_space_1.dim, 9);
+  EXPECT_EQ(dof_space_1.subspace_dim, 9);
+}
+
 /// This test class uses the pattern of the previous tests to allow for
 /// customization to tests various structures that are found to be problematic
 class DebugLocalDoFSpaceTest : public testing::Test {
