@@ -1,4 +1,3 @@
-
 import pytest
 
 from libcasm.clexulator import (
