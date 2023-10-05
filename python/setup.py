@@ -83,7 +83,7 @@ setup(
     install_requires=[
         "pybind11",
         "libcasm-global>=2.0.2",
-        "libcasm-xtal>=2.0a2",
+        "libcasm-xtal>=2.0a4",
     ],
     ext_modules=ext_modules,
     cmdclass={"build_ext": build_ext},
