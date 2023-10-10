@@ -141,9 +141,23 @@ template <typename DoFSetType>
 Eigen::MatrixXd local_to_standard_values(
     Eigen::MatrixXd const &dof_values, Index N_sublat, Index N_volume,
     std::vector<DoFSetType> const &dof_info) {
+  Index N_sites = N_volume * N_sublat;
   Index rows = dof_info.front().basis().rows();
-  Eigen::MatrixXd standard_values(rows, dof_values.cols());
+  if (dof_values.rows() != max_dim(dof_info) || dof_values.cols() != N_sites) {
+    std::stringstream msg;
+    msg << "Invalid dof values input size in "
+           "local_to_standard_values: "
+        << "Expected rows=" << max_dim(dof_info)
+        << ", received rows=" << dof_values.rows()
+        << ", expected cols=" << N_sites
+        << ", received cols=" << dof_values.cols();
+    throw std::runtime_error(msg.str());
+  }
+  Eigen::MatrixXd standard_values = Eigen::MatrixXd::Zero(rows, N_sites);
   for (Index b = 0; b < N_sublat; ++b) {
+    if (dof_info[b].dim() == 0) {
+      continue;
+    }
     standard_values.block(0, b * N_volume, rows, N_volume) =
         dof_info[b].basis() *
         sublattice_block(dof_values, b, N_volume).topRows(dof_info[b].dim());
@@ -161,7 +175,7 @@ Eigen::MatrixXd local_from_standard_values(
       standard_values.cols() != N_sites) {
     std::stringstream msg;
     msg << "Invalid standard values input size in "
-           "local_dof_values_from_standard_basis: "
+           "local_from_standard_value: "
         << "Expected rows=" << dof_info.front().basis().rows()
         << ", received rows=" << standard_values.rows()
         << ", expected cols=" << N_sites
@@ -169,10 +183,14 @@ Eigen::MatrixXd local_from_standard_values(
     throw std::runtime_error(msg.str());
   }
   Eigen::MatrixXd result = Eigen::MatrixXd::Zero(max_dim(dof_info), N_sites);
-  for (Index b = 0; b < N_sublat; ++b)
+  for (Index b = 0; b < N_sublat; ++b) {
+    if (dof_info[b].dim() == 0) {
+      continue;
+    }
     sublattice_block(result, b, N_volume).topRows(dof_info[b].dim()) =
         dof_info[b].inv_basis() *
         sublattice_block(standard_values, b, N_volume);
+  }
   return result;
 }
 
