@@ -128,6 +128,10 @@ class Correlations {
       DoFKey const &key, Eigen::VectorXd const &new_value,
       Eigen::VectorXd const &reference_extensive_correlations);
 
+  // --- Gradients of correlations
+
+  Eigen::MatrixXd const grad_correlations(DoFKey const &key);
+
  private:
   /// Holds all correlation indices
   std::vector<unsigned int> m_correlation_indices;
