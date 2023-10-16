@@ -1161,7 +1161,22 @@ PYBIND11_MODULE(_clexulator, m) {
               Change in extensive correlations, relative to `reference_extensive_correlations`.
           )pbdoc",
            py::arg("key"), py::arg("new_value"),
-           py::arg("`reference_extensive_correlations"));
+           py::arg("`reference_extensive_correlations"))
+      .def("grad_correlations", &clexulator::Correlations::grad_correlations,
+           py::return_value_policy::reference_internal, R"pbdoc(
+          Calculate and return gradients of correlations
+
+          Parameters
+          ----------
+          key: str
+              Specifies the type of DoF
+
+          Returns
+          -------
+          gradients_of_correlations: np.ndarray
+	  	gradients_of_correlations
+          )pbdoc",
+           py::arg("key"));
 
   py::class_<clexulator::LocalCorrelations,
              std::shared_ptr<clexulator::LocalCorrelations>>(
