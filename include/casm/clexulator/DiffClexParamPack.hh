@@ -9,8 +9,8 @@
 #include "casm/casm_io/enum/json_io.hh"
 #include "casm/casm_io/enum/stream_io.hh"
 #include "casm/clexulator/ClexParamPack.hh"
-#include "casm/external/fadbad/badiff.h"
-#include "casm/external/fadbad/fadiff.h"
+#include "casm/clexulator/external/fadbad/badiff.h"
+#include "casm/clexulator/external/fadbad/fadiff.h"
 #include "casm/global/definitions.hh"
 
 namespace CASM {
