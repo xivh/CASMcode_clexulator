@@ -1895,7 +1895,7 @@ PYBIND11_MODULE(_clexulator, m) {
       .def_readonly("dof_key", &clexulator::DoFSpace::dof_key, R"pbdoc(
           str : The DoF type for this DoFSpace.
           )pbdoc")
-      .def_readonly("is_global", &clexulator::DoFSpace::dof_key, R"pbdoc(
+      .def_readonly("is_global", &clexulator::DoFSpace::is_global, R"pbdoc(
           bool : True if the DoF type is a global DoF, False otherwise.
           )pbdoc")
       .def_readonly("prim", &clexulator::DoFSpace::prim, R"pbdoc(

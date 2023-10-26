@@ -1,6 +1,6 @@
 import os
 
-__version__ = "2.0a2"
+__version__ = "2.0a3"
 
 # Available at setup time due to pyproject.toml
 from pybind11.setup_helpers import Pybind11Extension, build_ext
@@ -83,7 +83,7 @@ setup(
     install_requires=[
         "pybind11",
         "libcasm-global>=2.0.2",
-        "libcasm-xtal>=2.0a2",
+        "libcasm-xtal>=2.0a5",
     ],
     ext_modules=ext_modules,
     cmdclass={"build_ext": build_ext},
