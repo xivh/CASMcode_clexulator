@@ -5,6 +5,13 @@ All notable changes to `libcasm-clexulator` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0a4] - 2023-10-26
+
+### Added
+
+- Added gradients of correlations functionality in C++, Python functions
+- Added FADBAD library to support compiling of Clexulators capable of calculating gradients 
+
 ## [2.0a3] - 2023-10-25
 
 ### Fixed
