@@ -1,10 +1,7 @@
-import os
-import json
 import pytest
 import numpy as np
 import libcasm.xtal
 import libcasm.clexulator
-import libcasm.configuration
 from .functions import make_source
 
 
@@ -46,7 +43,7 @@ def test_make_diff_clexulator(diff_clexulator):
     assert clexulator.n_functions() == 7
 
 
-def test_gradients_of_correlations(diff_clexulator, session_shared_datadir):
+def test_gradients_of_correlations(diff_clexulator):
     """Tests if the gradients of correlations being made
     matches the analytical gradients
 
@@ -70,25 +67,15 @@ def test_gradients_of_correlations(diff_clexulator, session_shared_datadir):
 
     clexulator, prim_neighbor_list = diff_clexulator
 
-    square_lattice_prim_path = os.path.join(
-        session_shared_datadir, "square_lattice_prim.json"
-    )
-    with open(square_lattice_prim_path, "r") as f:
-        square_lattice_prim_dict = json.load(f)
-
     # make a configuration of supercell size 1
     T = np.eye(3)
-    square_lattice_prim = libcasm.xtal.Prim.from_dict(square_lattice_prim_dict)
-    square_lattice_prim_config = libcasm.configuration.Prim(square_lattice_prim)
-    supercell = libcasm.configuration.Supercell(square_lattice_prim_config, T)
-    config = libcasm.configuration.Configuration(supercell)
 
     # assing disp site dofs to the configuration
     # There is only one site in volume 1 supercell
     # dof_values correspond to dx, dy, dz of that site
     dof_values = np.array([1.0, -0.5, 0.5])
     config_dof_values = libcasm.clexulator.ConfigDoFValues()
-    config_dof_values.set_occupation(config.occupation())
+    config_dof_values.set_occupation([0])
     config_dof_values.insert_or_assign_local_dof_values("disp", dof_values)
 
     # make SuperNeighborList
