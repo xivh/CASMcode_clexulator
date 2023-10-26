@@ -154,20 +154,20 @@ def test_gradients_of_correlations(diff_clexulator, session_shared_datadir):
     # third row of gradients_of_correlations will be derviatives of all the 7 correlations with dz
     derviatives_with_dz = gradients_of_correlations[2, :]
 
-    # derivative of \\Phi_{0} with dy will be 0.0
+    # derivative of \\Phi_{0} with dz will be 0.0
     assert np.allclose(derviatives_with_dz[0], 0.0)
-    # derivative of \\Phi_{1} with dy will be 0.0
+    # derivative of \\Phi_{1} with dz will be 0.0
     assert np.allclose(derviatives_with_dz[1], 0.0)
-    # derivative of \\Phi_{2} with dy will be 2 * dz
+    # derivative of \\Phi_{2} with dz will be 2 * dz
     assert np.allclose(derviatives_with_dz[2], 2 * dz)
-    # derivative of \\Phi_{3} with dy will be 0.0
+    # derivative of \\Phi_{3} with dz will be 0.0
     assert np.allclose(derviatives_with_dz[3], 0.0)
-    # derivative of \\Phi_{4} with dy will be 0.0
+    # derivative of \\Phi_{4} with dz will be 0.0
     assert np.allclose(derviatives_with_dz[4], 0.0)
-    # derivative of \\Phi_{5} with dy will be 2 * \\sqrt(3) * dz (dx**2 + dy**2)
+    # derivative of \\Phi_{5} with dz will be 2 * \\sqrt(3) * dz (dx**2 + dy**2)
     assert np.allclose(
         derviatives_with_dz[5],
         2 * np.sqrt(3) * dz * (np.power(dx, 2) + np.power(dy, 2)),
     )
-    # derivative of \\Phi_{6} with dy will be 4 * dz**3
+    # derivative of \\Phi_{6} with dz will be 4 * dz**3
     assert np.allclose(derviatives_with_dz[6], 4 * np.power(dz, 3))
