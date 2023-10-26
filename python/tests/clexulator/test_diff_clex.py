@@ -61,7 +61,6 @@ def test_gradients_of_correlations(diff_clexulator):
     Parameters
     ----------
     diff_clexulator : libcasm.clexulator.Clexulator
-    session_shared_datadir : str
 
     """
 
@@ -70,7 +69,7 @@ def test_gradients_of_correlations(diff_clexulator):
     # make a configuration of supercell size 1
     T = np.eye(3)
 
-    # assing disp site dofs to the configuration
+    # assign disp site dofs to the configuration
     # There is only one site in volume 1 supercell
     # dof_values correspond to dx, dy, dz of that site
     dof_values = np.array([1.0, -0.5, 0.5])

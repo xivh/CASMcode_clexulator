@@ -616,6 +616,19 @@ std::vector<unsigned int> all_correlation_indices(Index n) {
 }
 
 /// Gradients of Correlations
+///	  Returns a :math:`\\mathbf{M} \times \\mathbf{N}` matrix,
+///	  where :math:`\\mathbf{M}` represents the number of correlations,
+///	  and :math:`\\mathbf{N} represents the dimensions of the degrees
+///	  of freedom corresponding to `dof_key`
+///
+///
+///	  For example, if `dof_key` is `Hstrain`, N will be 6.
+///	  if `dof_key` is `disp`, and there are 3 sites in the configuration,
+///	  N will be 9 (:math:`x, y, z` displacements for each site)
+///
+///	  Each row of the matrix corresponds to gradients of all
+///:math:`\\mathbf{M}` 	  correlations with respect to one of the dimensions of
+///degrees of freedom 	  corresponding to `dof_key`
 
 Eigen::MatrixXd const Correlations::grad_correlations(DoFKey const &key) {
   ClexParamKey paramkey;
