@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed error messages for conversion of local DoF to the standard basis
 - Fixed DiffClexParamPack traits namespace
+- Fixed DoFSpace.is_global binding
 
 ### Added
 
