@@ -100,8 +100,8 @@ endif()
 ### libcasm_testing ###
 set(
   libcasm_testing_SOURCES
-  ${PROJECT_SOURCE_DIR}/unit/autotools.cc
   ${PROJECT_SOURCE_DIR}/unit/testdir.cc
+  ${PROJECT_SOURCE_DIR}/unit/autotools.cc
 )
 add_library(casm_testing SHARED ${libcasm_testing_SOURCES})
 target_include_directories(casm_testing
@@ -127,19 +127,19 @@ enable_testing()
 # casm_unit_clexulator
 add_executable(casm_unit_clexulator
   ${PROJECT_SOURCE_DIR}/unit/gtest_main_run_all.cpp
-  ${PROJECT_SOURCE_DIR}/unit/clexulator/ConfigDoFValuesTools_test.cpp
-  ${PROJECT_SOURCE_DIR}/unit/clexulator/ConfigDoFValues_json_io_test.cpp
-  ${PROJECT_SOURCE_DIR}/unit/clexulator/OrderParameter_test.cpp
-  ${PROJECT_SOURCE_DIR}/unit/clexulator/LocalClusterExpansion_test.cpp
-  ${PROJECT_SOURCE_DIR}/unit/clexulator/ClusterExpansion_test.cpp
-  ${PROJECT_SOURCE_DIR}/unit/clexulator/LocalOccClexulator_test.cpp
-  ${PROJECT_SOURCE_DIR}/unit/clexulator/ConfigDoFValues_test.cpp
-  ${PROJECT_SOURCE_DIR}/unit/clexulator/DoFSpace_test.cpp
-  ${PROJECT_SOURCE_DIR}/unit/clexulator/DoFSpace_values_test.cpp
-  ${PROJECT_SOURCE_DIR}/unit/clexulator/version_test.cpp
-  ${PROJECT_SOURCE_DIR}/unit/clexulator/OccClexulator_test.cpp
   ${PROJECT_SOURCE_DIR}/unit/clexulator/Clexulator_json_io_test.cpp
+  ${PROJECT_SOURCE_DIR}/unit/clexulator/ConfigDoFValuesTools_test.cpp
+  ${PROJECT_SOURCE_DIR}/unit/clexulator/OccClexulator_test.cpp
+  ${PROJECT_SOURCE_DIR}/unit/clexulator/version_test.cpp
+  ${PROJECT_SOURCE_DIR}/unit/clexulator/DoFSpace_test.cpp
+  ${PROJECT_SOURCE_DIR}/unit/clexulator/ConfigDoFValues_json_io_test.cpp
+  ${PROJECT_SOURCE_DIR}/unit/clexulator/LocalClusterExpansion_test.cpp
+  ${PROJECT_SOURCE_DIR}/unit/clexulator/LocalOccClexulator_test.cpp
+  ${PROJECT_SOURCE_DIR}/unit/clexulator/DoFSpace_values_test.cpp
   ${PROJECT_SOURCE_DIR}/unit/clexulator/DoFSpace_json_io_test.cpp
+  ${PROJECT_SOURCE_DIR}/unit/clexulator/ClusterExpansion_test.cpp
+  ${PROJECT_SOURCE_DIR}/unit/clexulator/OrderParameter_test.cpp
+  ${PROJECT_SOURCE_DIR}/unit/clexulator/ConfigDoFValues_test.cpp
   ${PROJECT_SOURCE_DIR}/unit/clexulator/SparseCoefficients_json_io_test.cpp
 )
 target_link_libraries(casm_unit_clexulator

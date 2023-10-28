@@ -128,6 +128,18 @@ class Correlations {
       DoFKey const &key, Eigen::VectorXd const &new_value,
       Eigen::VectorXd const &reference_extensive_correlations);
 
+  // --- Gradients of correlations
+  /// \brief Calculates and returns gradients of correlations with respect
+  /// to DoF corresponding to key
+  /// Returns a M x N matrix, where M represents the number of correlations,
+  /// and N represents the dimensions of the degrees of freedom corresponding to
+  /// key. For example, if key is Hstrain, N will be 6. If key is disp, and
+  /// there are 3 sites in the configuration, N will be 9 (x, y, z displacements
+  /// for each site). Each row of the matrix corresponds to gradients of all M
+  /// correlations with respect to one of the dimensions of degrees of freedom
+  /// corresponding to key
+  Eigen::MatrixXd const grad_correlations(DoFKey const &key);
+
  private:
   /// Holds all correlation indices
   std::vector<unsigned int> m_correlation_indices;

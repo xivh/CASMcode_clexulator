@@ -1161,7 +1161,41 @@ PYBIND11_MODULE(_clexulator, m) {
               Change in extensive correlations, relative to `reference_extensive_correlations`.
           )pbdoc",
            py::arg("key"), py::arg("new_value"),
-           py::arg("`reference_extensive_correlations"));
+           py::arg("reference_extensive_correlations"))
+      .def("grad_correlations", &clexulator::Correlations::grad_correlations,
+           py::return_value_policy::reference_internal, R"pbdoc(
+          Calculates and returns gradients of correlations with respect to 
+	  degrees of freedom corresponding to `dof_key`
+
+	  Returns a :math:`\\mathbf{M} \times \\mathbf{N}` matrix, 
+	  where :math:`\\mathbf{M}` represents the number of correlations,
+	  and :math:`\\mathbf{N} represents the dimensions of the degrees 
+	  of freedom corresponding to `dof_key`
+	
+
+	  For example, if `dof_key` is `Hstrain`, N will be 6.
+	  if `dof_key` is `disp`, and there are 3 sites in the configuration,
+	  N will be 9 (:math:`x, y, z` displacements for each site)
+
+	  Each row of the matrix corresponds to gradients of all :math:`\\mathbf{M}`
+	  correlations with respect to one of the dimensions of degrees of freedom
+	  corresponding to `dof_key`
+
+          Parameters
+          ----------
+          dof_key: str
+              Specifies the type of DoF
+	      Can be `occ`, `disp`, `Hstrain`, etc.
+	      DoF that is set in the `Prim` 
+
+          Returns
+          -------
+          gradients_of_correlations: np.ndarray[np.float64[m,n]]
+	  	gradients_of_correlations
+		where m represents number of correlations and 
+		n represents number of degrees of freedom
+          )pbdoc",
+           py::arg("dof_key"));
 
   py::class_<clexulator::LocalCorrelations,
              std::shared_ptr<clexulator::LocalCorrelations>>(

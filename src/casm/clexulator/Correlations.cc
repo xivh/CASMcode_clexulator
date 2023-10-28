@@ -1,7 +1,9 @@
 #include "casm/clexulator/Correlations.hh"
 
+#include "casm/clexulator/ClexParamPack.hh"
 #include "casm/clexulator/Clexulator.hh"
 #include "casm/clexulator/NeighborList.hh"
+#include "casm/crystallography/AnisoValTraits.hh"
 
 namespace CASM {
 
@@ -611,6 +613,90 @@ std::vector<unsigned int> all_correlation_indices(Index n) {
     corr_indices.push_back(i);
   }
   return corr_indices;
+}
+
+/// Gradients of Correlations
+
+Eigen::MatrixXd const Correlations::grad_correlations(DoFKey const &key) {
+  ClexParamKey paramkey;
+  clexulator::ClexParamKey corr_key(m_clexulator->param_pack().key("corr"));
+  clexulator::ClexParamKey dof_key;
+
+  if (key == "occ") {
+    paramkey =
+        m_clexulator->param_pack().key("diff/corr/" + key + "_site_func");
+    dof_key = m_clexulator->param_pack().key("occ_site_func");
+  } else {
+    paramkey = m_clexulator->param_pack().key("diff/corr/" + key + "_var");
+    dof_key = m_clexulator->param_pack().key(key + "_var");
+  }
+
+  std::string em_corr, em_dof;
+  em_corr = m_clexulator->param_pack().eval_mode(corr_key);
+  em_dof = m_clexulator->param_pack().eval_mode(dof_key);
+
+  // this const_cast is not great...
+  // but it seems like the only place passing const Clexulator is a problem and
+  // it is not actually changing clexulator before/after this function
+
+  const_cast<Clexulator &>(*m_clexulator)
+      .param_pack()
+      .set_eval_mode(corr_key, "DIFF");
+  const_cast<Clexulator &>(*m_clexulator)
+      .param_pack()
+      .set_eval_mode(dof_key, "DIFF");
+
+  Eigen::MatrixXd gcorr;
+  Index scel_vol = m_supercell_neighbor_list->n_unitcells();
+  if (AnisoValTraits(key).global()) {
+    Eigen::MatrixXd gcorr_func = m_dof_values->global_dof_values.at(key);
+    gcorr.setZero(gcorr_func.size(), m_clexulator->corr_size());
+    // Holds contribution to global correlations from a particular Neighborhood
+
+    // std::vector<double> corr(clexulator.corr_size(), 0.0);
+    for (int v = 0; v < scel_vol; v++) {
+      // Fill up contributions
+      m_clexulator->calc_global_corr_contribution(
+          *m_dof_values, m_supercell_neighbor_list->sites(v).data());
+
+      for (Index c = 0; c < m_clexulator->corr_size(); ++c)
+        gcorr.col(c) += m_clexulator->param_pack().read(paramkey(c));
+    }
+  } else {
+    Eigen::MatrixXd gcorr_func;
+    gcorr.setZero(m_dof_values->local_dof_values.at(key).size(),
+                  m_clexulator->corr_size());
+    // Holds contribution to global correlations from a particular Neighborhood
+    Index l;
+    for (int v = 0; v < scel_vol; v++) {
+      // Fill up contributions
+      m_clexulator->calc_global_corr_contribution(
+          *m_dof_values, m_supercell_neighbor_list->sites(v).data());
+
+      for (Index c = 0; c < m_clexulator->corr_size(); ++c) {
+        gcorr_func = m_clexulator->param_pack().read(paramkey(c));
+
+        for (Index n = 0; n < m_clexulator->nlist_size(); ++n) {
+          l = m_supercell_neighbor_list->sites(v)[n];
+          // for(Index i=0; i<gcorr_func.cols(); ++i){
+          gcorr.block(l * gcorr_func.rows(), c, gcorr_func.rows(), 1) +=
+              gcorr_func.col(n);
+          // std::cout << "Block: (" << l * gcorr_func.rows() << ", " << c << ",
+          // " << gcorr_func.rows() << ", " << 1 << ") += " <<
+          // gcorr_func.col(n).transpose() << "\n";
+          //}
+        }
+      }
+    }
+  }
+  const_cast<Clexulator &>(*m_clexulator)
+      .param_pack()
+      .set_eval_mode(corr_key, em_corr);
+  const_cast<Clexulator &>(*m_clexulator)
+      .param_pack()
+      .set_eval_mode(dof_key, em_dof);
+
+  return gcorr;
 }
 
 }  // namespace clexulator
