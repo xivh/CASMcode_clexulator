@@ -405,6 +405,19 @@ class Clexulator {
     m_clex->calc_delta_point_corr(neighbor_ind, occ_i, occ_f, corr_begin);
   }
 
+  /// \brief Similar to calc_delta_point_corr, using
+  ///     ConfigDoFValues::multi_occupation
+  void calc_multi_occ_delta_point_corr(ConfigDoFValues const &dof_values,
+                                       long int const *nlist_begin,
+                                       int neighbor_ind, int discrete_dof_index,
+                                       int occ_i, int occ_f,
+                                       double *corr_begin) const {
+    m_clex->set_configdofvalues(dof_values);
+    m_clex->set_nlist(nlist_begin);
+    m_clex->calc_multi_occ_delta_point_corr(neighbor_ind, discrete_dof_index,
+                                            occ_i, occ_f, corr_begin);
+  }
+
   /// \brief Calculate the change in select point correlations due to changing
   /// an occupant
   ///
@@ -459,6 +472,20 @@ class Clexulator {
     m_clex->set_nlist(nlist_begin);
     m_clex->calc_restricted_delta_point_corr(
         neighbor_ind, occ_i, occ_f, corr_begin, corr_ind_begin, corr_ind_end);
+  }
+
+  /// \brief Similar to calc_restricted_delta_point_corr, using
+  ///     ConfigDoFValues::multi_occupation
+  void calc_multi_occ_restricted_delta_point_corr(
+      ConfigDoFValues const &dof_values, long int const *nlist_begin,
+      int neighbor_ind, int discrete_dof_index, int occ_i, int occ_f,
+      double *corr_begin, size_type const *corr_ind_begin,
+      size_type const *corr_ind_end) const {
+    m_clex->set_configdofvalues(dof_values);
+    m_clex->set_nlist(nlist_begin);
+    m_clex->calc_multi_occ_restricted_delta_point_corr(
+        neighbor_ind, discrete_dof_index, occ_i, occ_f, corr_begin,
+        corr_ind_begin, corr_ind_end);
   }
 
  private:

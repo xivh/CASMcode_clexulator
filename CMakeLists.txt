@@ -40,7 +40,7 @@ if(NOT DEFINED CASM_PREFIX)
       message(STATUS "found libcasm-global")
       execute_process(COMMAND ${Python_EXECUTABLE} -m libcasm.casmglobal --prefix
                       OUTPUT_VARIABLE CASM_PREFIX_RAW)
-      string(STRIP ${CASM_PREFIX_RAW} CASM_PREFIX)
+      string(STRIP "${CASM_PREFIX_RAW}" CASM_PREFIX)
       message(STATUS "CASM_PREFIX: ${CASM_PREFIX}")
     else()
       message(STATUS "did not find libcasm-global")
@@ -78,52 +78,52 @@ ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 # create libcasm_clexulator
 set(
   libcasm_clexulator_HEADERS
-  ${PROJECT_SOURCE_DIR}/include/casm/clexulator/Correlations.hh
+  ${PROJECT_SOURCE_DIR}/include/casm/clexulator/BaseClexulator.hh
   ${PROJECT_SOURCE_DIR}/include/casm/clexulator/BasicClexParamPack.hh
-  ${PROJECT_SOURCE_DIR}/include/casm/clexulator/SparseCoefficients.hh
-  ${PROJECT_SOURCE_DIR}/include/casm/clexulator/NeighborList.hh
-  ${PROJECT_SOURCE_DIR}/include/casm/clexulator/ImpactTable.hh
-  ${PROJECT_SOURCE_DIR}/include/casm/clexulator/ConfigDoFValuesTools_impl.hh
+  ${PROJECT_SOURCE_DIR}/include/casm/clexulator/ClexParamPack.hh
+  ${PROJECT_SOURCE_DIR}/include/casm/clexulator/Clexulator.hh
   ${PROJECT_SOURCE_DIR}/include/casm/clexulator/ClusterExpansion.hh
   ${PROJECT_SOURCE_DIR}/include/casm/clexulator/ConfigDoFValues.hh
-  ${PROJECT_SOURCE_DIR}/include/casm/clexulator/LocalCorrelations.hh
-  ${PROJECT_SOURCE_DIR}/include/casm/clexulator/BaseClexulator.hh
-  ${PROJECT_SOURCE_DIR}/include/casm/clexulator/DoFSpace.hh
-  ${PROJECT_SOURCE_DIR}/include/casm/clexulator/LocalClusterExpansion.hh
-  ${PROJECT_SOURCE_DIR}/include/casm/clexulator/version.hh
-  ${PROJECT_SOURCE_DIR}/include/casm/clexulator/Clexulator.hh
   ${PROJECT_SOURCE_DIR}/include/casm/clexulator/ConfigDoFValuesTools.hh
-  ${PROJECT_SOURCE_DIR}/include/casm/clexulator/DoFSpaceAxisInfo.hh
-  ${PROJECT_SOURCE_DIR}/include/casm/clexulator/ClexParamPack.hh
+  ${PROJECT_SOURCE_DIR}/include/casm/clexulator/ConfigDoFValuesTools_impl.hh
+  ${PROJECT_SOURCE_DIR}/include/casm/clexulator/Correlations.hh
   ${PROJECT_SOURCE_DIR}/include/casm/clexulator/DiffClexParamPack.hh
+  ${PROJECT_SOURCE_DIR}/include/casm/clexulator/DoFSpace.hh
+  ${PROJECT_SOURCE_DIR}/include/casm/clexulator/DoFSpaceAxisInfo.hh
+  ${PROJECT_SOURCE_DIR}/include/casm/clexulator/ImpactTable.hh
+  ${PROJECT_SOURCE_DIR}/include/casm/clexulator/LocalClusterExpansion.hh
+  ${PROJECT_SOURCE_DIR}/include/casm/clexulator/LocalCorrelations.hh
+  ${PROJECT_SOURCE_DIR}/include/casm/clexulator/NeighborList.hh
   ${PROJECT_SOURCE_DIR}/include/casm/clexulator/OrderParameter.hh
-  ${PROJECT_SOURCE_DIR}/include/casm/clexulator/external/fadbad/fadbad.h
+  ${PROJECT_SOURCE_DIR}/include/casm/clexulator/SparseCoefficients.hh
   ${PROJECT_SOURCE_DIR}/include/casm/clexulator/external/fadbad/badiff.h
-  ${PROJECT_SOURCE_DIR}/include/casm/clexulator/external/fadbad/tadiff.h
+  ${PROJECT_SOURCE_DIR}/include/casm/clexulator/external/fadbad/fadbad.h
   ${PROJECT_SOURCE_DIR}/include/casm/clexulator/external/fadbad/fadiff.h
-  ${PROJECT_SOURCE_DIR}/include/casm/clexulator/io/json/ConfigDoFValues_json_io.hh
-  ${PROJECT_SOURCE_DIR}/include/casm/clexulator/io/json/SparseCoefficients_json_io.hh
+  ${PROJECT_SOURCE_DIR}/include/casm/clexulator/external/fadbad/tadiff.h
   ${PROJECT_SOURCE_DIR}/include/casm/clexulator/io/json/Clexulator_json_io.hh
+  ${PROJECT_SOURCE_DIR}/include/casm/clexulator/io/json/ConfigDoFValues_json_io.hh
   ${PROJECT_SOURCE_DIR}/include/casm/clexulator/io/json/DoFSpace_json_io.hh
+  ${PROJECT_SOURCE_DIR}/include/casm/clexulator/io/json/SparseCoefficients_json_io.hh
+  ${PROJECT_SOURCE_DIR}/include/casm/clexulator/version.hh
 )
 set(
   libcasm_clexulator_SOURCES
-  ${PROJECT_SOURCE_DIR}/src/casm/clexulator/LocalClusterExpansion.cc
-  ${PROJECT_SOURCE_DIR}/src/casm/clexulator/OrderParameter.cc
-  ${PROJECT_SOURCE_DIR}/src/casm/clexulator/DoFSpaceAxisInfo.cc
-  ${PROJECT_SOURCE_DIR}/src/casm/clexulator/ClusterExpansion.cc
-  ${PROJECT_SOURCE_DIR}/src/casm/clexulator/Clexulator.cc
   ${PROJECT_SOURCE_DIR}/src/casm/clexulator/BaseClexulator.cc
-  ${PROJECT_SOURCE_DIR}/src/casm/clexulator/NeighborList.cc
-  ${PROJECT_SOURCE_DIR}/src/casm/clexulator/ImpactTable.cc
-  ${PROJECT_SOURCE_DIR}/src/casm/clexulator/DoFSpace.cc
-  ${PROJECT_SOURCE_DIR}/src/casm/clexulator/LocalCorrelations.cc
+  ${PROJECT_SOURCE_DIR}/src/casm/clexulator/Clexulator.cc
+  ${PROJECT_SOURCE_DIR}/src/casm/clexulator/ClusterExpansion.cc
   ${PROJECT_SOURCE_DIR}/src/casm/clexulator/Correlations.cc
-  ${PROJECT_SOURCE_DIR}/src/casm/clexulator/version.cc
-  ${PROJECT_SOURCE_DIR}/src/casm/clexulator/io/json/DoFSpace_json_io.cc
+  ${PROJECT_SOURCE_DIR}/src/casm/clexulator/DoFSpace.cc
+  ${PROJECT_SOURCE_DIR}/src/casm/clexulator/DoFSpaceAxisInfo.cc
+  ${PROJECT_SOURCE_DIR}/src/casm/clexulator/ImpactTable.cc
+  ${PROJECT_SOURCE_DIR}/src/casm/clexulator/LocalClusterExpansion.cc
+  ${PROJECT_SOURCE_DIR}/src/casm/clexulator/LocalCorrelations.cc
+  ${PROJECT_SOURCE_DIR}/src/casm/clexulator/NeighborList.cc
+  ${PROJECT_SOURCE_DIR}/src/casm/clexulator/OrderParameter.cc
   ${PROJECT_SOURCE_DIR}/src/casm/clexulator/io/json/Clexulator_json_io.cc
   ${PROJECT_SOURCE_DIR}/src/casm/clexulator/io/json/ConfigDoFValues_json_io.cc
+  ${PROJECT_SOURCE_DIR}/src/casm/clexulator/io/json/DoFSpace_json_io.cc
   ${PROJECT_SOURCE_DIR}/src/casm/clexulator/io/json/SparseCoefficients_json_io.cc
+  ${PROJECT_SOURCE_DIR}/src/casm/clexulator/version.cc
 )
 add_library(casm_clexulator SHARED ${libcasm_clexulator_SOURCES})
 target_include_directories(casm_clexulator
@@ -217,7 +217,7 @@ if(DEFINED SKBUILD)
   # call pybind11-config to obtain the root of the cmake package
   execute_process(COMMAND ${PYTHON_EXECUTABLE} -m pybind11 --cmakedir
                   OUTPUT_VARIABLE pybind11_ROOT_RAW)
-  string(STRIP ${pybind11_ROOT_RAW} pybind11_ROOT)
+  string(STRIP "${pybind11_ROOT_RAW}" pybind11_ROOT)
   find_package(pybind11)
 
   # The extension modules must load:
