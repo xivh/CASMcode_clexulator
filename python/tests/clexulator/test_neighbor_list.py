@@ -80,7 +80,10 @@ def test_prim_neighbor_list_3():
         assert len(linear_site_indices) == 54
         # print(f"{linear_unitcell_index}:", linear_site_indices)
         for i, j in enumerate(linear_site_indices):
-            assert super_neighbor_list.nbor_linear_site_index(linear_unitcell_index, i) == j
+            assert (
+                super_neighbor_list.nbor_linear_site_index(linear_unitcell_index, i)
+                == j
+            )
 
     # check agreement of SuperNeighborList.unitcells
     # and SuperNeighborList.linear_unitcell_index
@@ -92,7 +95,8 @@ def test_prim_neighbor_list_3():
         # print(f"{linear_unitcell_index}:", linear_unitcell_indices)
         for i, j in enumerate(linear_unitcell_indices):
             assert (
-                super_neighbor_list.nbor_linear_unitcell_index(linear_unitcell_index, i) == j
+                super_neighbor_list.nbor_linear_unitcell_index(linear_unitcell_index, i)
+                == j
             )
 
 
