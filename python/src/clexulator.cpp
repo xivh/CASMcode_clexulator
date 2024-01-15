@@ -518,6 +518,13 @@ PYBIND11_MODULE(_clexulator, m) {
 
           .. rubric:: Constructor
 
+          .. note::
+
+              In most cases, it is preferable to construct a
+              :class:`~libcasm.clexulator.PrimNeighborList` with appropriate parameters
+              for a given :class:`~libcasm.xtal.Prim` using the factory function
+              :func:`~libcasm.clexulator.make_default_prim_neighbor_list`.
+
           Parameters
           ----------
           lattice_weight_matrix : Optional[array_like] = None
@@ -527,10 +534,10 @@ PYBIND11_MODULE(_clexulator, m) {
               constructed. Otherwise, the `lattice_weight_matrix`
               can be specified explicitly.
 
-              In the neighbor list, unit cells are ordered by the distance,
-              :math:`x^{\mathsf{T} W x`, where :math:`x` is the integer
-              unit cell coordinates, and :math:`W` is the lattice weight
-              matrix.
+              In the neighbor list, unit cells are ordered by the integer
+              distance, :math:`r = x^{\mathsf{T}} W x`, where :math:`x` is the
+              integer unit cell coordinates, and :math:`W` is the integer lattice
+              weight matrix.
 
               An appropriate value for the weight matrix of a given lattice
               can be generated using
@@ -573,18 +580,17 @@ PYBIND11_MODULE(_clexulator, m) {
           -------
           lattice_weight_matrix: array_like, shape=(3,3), dtype=int
               Weight matrix, that defines the shape of neighborhood that
-              orders neighbors. In the
-              :class:`~libcasm.clexulator.PrimNeighborList`, unit cells
-              are ordered by the distance, :math:`x^{\mathsf{T} W x`,
-              where :math:`x` is the integer unit cell coordinates. The
-              weight matrix is constructed such that
-              :math:`x^{\mathsf{T} W x` is approximately spherical in
+              orders neighbors. In the :class:`~libcasm.clexulator.PrimNeighborList`,
+              unit cells are ordered by the integer distance,
+              :math:`r = x^{\mathsf{T}} W x`, where :math:`x` is the integer unit
+              cell coordinates. The integer weight matrix, :math:`W`, is constructed
+              such that :math:`x^{\mathsf{T}} W x` is approximately spherical in
               Cartesian coordinates, subject to the `max_element_value`.
           )pbdoc",
                   py::arg("lattice_column_vector_matrix"),
                   py::arg("max_element_value") = 10, py::arg("tol") = CASM::TOL)
-      .def_static("default_nlist_weight_matrix",
-                  &clexulator::PrimNeighborList::default_nlist_weight_matrix,
+      .def_static("default_lattice_weight_matrix",
+                  &clexulator::PrimNeighborList::default_weight_matrix,
                   R"pbdoc(
           Make default weight matrix for approximately spherical neighborhood
           in Cartesian coordinates
@@ -598,21 +604,19 @@ PYBIND11_MODULE(_clexulator, m) {
           -------
           lattice_weight_matrix: array_like, shape=(3,3), dtype=int
               Weight matrix, that defines the shape of neighborhood that
-              orders neighbors. In the
-              :class:`~libcasm.clexulator.PrimNeighborList`, unit cells
-              are ordered by the distance, :math:`x^{\mathsf{T} W x`,
-              where :math:`x` is the integer unit cell coordinates. The
-              weight matrix is constructed such that
-              :math:`x^{\mathsf{T} W x` is approximately spherical in
-              Cartesian coordinates, subject to the `max_element_value`.
+              orders neighbors. In the :class:`~libcasm.clexulator.PrimNeighborList`,
+              unit cells are ordered by the integer distance,
+              :math:`r = x^{\mathsf{T}} W x`, where :math:`x` is the integer unit
+              cell coordinates. The integer weight matrix, :math:`W`, is constructed
+              such that :math:`x^{\mathsf{T}} W x` is approximately spherical in
+              Cartesian coordinates, with maximum element value being 10.
           )pbdoc",
                   py::arg("xtal_prim"))
       .def_static(
-          "default_nlist_sublattice_indices",
+          "default_sublattice_indices",
           [](xtal::BasicStructure const &xtal_prim) {
             std::set<int> _sublat_indices =
-                clexulator::PrimNeighborList::default_nlist_sublat_indices(
-                    xtal_prim);
+                clexulator::PrimNeighborList::default_sublat_indices(xtal_prim);
             return std::vector<int>(_sublat_indices.begin(),
                                     _sublat_indices.end());
           },
@@ -630,29 +634,6 @@ PYBIND11_MODULE(_clexulator, m) {
           sublattice_indices: list[int]
               Indices of sublattices that have 2 or more occupant degrees of freedom
               (DoF) or 1 or more continuous DoF.
-          )pbdoc",
-          py::arg("xtal_prim"))
-      .def_static(
-          "default_nlist",
-          [](xtal::BasicStructure const &xtal_prim) {
-            PrimNeighborListWrapper x;
-            x.prim_neighbor_list =
-                clexulator::PrimNeighborList::default_nlist(xtal_prim);
-            return x;
-          },
-          R"pbdoc(
-          Make PrimNeighborList with default parameters for the given Prim
-
-          Parameters
-          ----------
-          xtal_prim : xtal.Prim
-              The Prim.
-
-          Returns
-          -------
-          prim_neighbor_list: PrimNeighborList
-              A PrimNeighborList with the default lattice weight matrix and selection
-              of sublattice indices for the given Prim.
           )pbdoc",
           py::arg("xtal_prim"))
       .def(
@@ -686,7 +667,8 @@ PYBIND11_MODULE(_clexulator, m) {
           Parameters
           ----------
           unitcell: array_like of int, shape=(3,)
-              Specify a unit cell, as multiples of the prim lattice vectors.
+              A unit cell, with position given as multiples of the prim lattice vectors
+              relative to the origin unit cell.
           )pbdoc",
           py::arg("unitcell_indices"))
       .def(
@@ -702,7 +684,8 @@ PYBIND11_MODULE(_clexulator, m) {
           Parameters
           ----------
           integral_site_coordinate: libcasm.xtal.IntegralSiteCoordinate
-              A site, relative to the origin unit cell.
+              A site, with unit cell position given as multiples of the prim lattice
+              vectors relative to the origin unit cell.
           )pbdoc",
           py::arg("integral_site_coordinate"))
       .def(
@@ -777,6 +760,38 @@ PYBIND11_MODULE(_clexulator, m) {
           },
           py::keep_alive<
               0, 1>() /* Essential: keep object alive while iterator exists */);
+
+  m.def(
+      "make_default_prim_neighbor_list",
+      [](xtal::BasicStructure const &xtal_prim) {
+        PrimNeighborListWrapper x;
+        x.prim_neighbor_list =
+            clexulator::make_default_prim_neighbor_list(xtal_prim);
+        return x;
+      },
+      R"pbdoc(
+          Make a PrimNeighborList with default parameters for the given Prim
+
+          In the :class:`~libcasm.clexulator.PrimNeighborList`, unit cells are ordered
+          by the integer distance, :math:`r = x^{\mathsf{T}} W x`, where :math:`x` is
+          the integer unit cell coordinates. The integer weight matrix, :math:`W`, is
+          constructed such that :math:`x^{\mathsf{T}} W x` is approximately spherical in
+          Cartesian coordinates.
+
+
+          Parameters
+          ----------
+          xtal_prim : xtal.Prim
+              The Prim.
+
+          Returns
+          -------
+          prim_neighbor_list: PrimNeighborList
+              A PrimNeighborList that includes sublattices that have 2 or more occupant
+              degrees of freedom (DoF) or 1 or more continuous DoF. The lattice weight
+              matrix is chosen with maximum element being 10.
+          )pbdoc",
+      py::arg("xtal_prim"));
 
   py::class_<clexulator::SuperNeighborList,
              std::shared_ptr<clexulator::SuperNeighborList>>(

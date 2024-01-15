@@ -21,6 +21,7 @@ from ._clexulator import (
     from_standard_values,
     make_clexulator,
     make_default_config_dof_values,
+    make_default_prim_neighbor_list,
     make_default_standard_config_dof_values,
     make_local_clexulator,
     to_standard_values,

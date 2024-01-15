@@ -3,7 +3,11 @@ import numpy as np
 import libcasm.xtal as xtal
 import libcasm.xtal.lattices as xtal_lattices
 import libcasm.xtal.prims as xtal_prims
-from libcasm.clexulator import PrimNeighborList, SuperNeighborList
+from libcasm.clexulator import (
+    PrimNeighborList,
+    SuperNeighborList,
+    make_default_prim_neighbor_list,
+)
 
 
 def test_make_weight_matrix():
@@ -36,7 +40,7 @@ def test_prim_neighbor_list_3():
     xtal_prim = xtal_prims.HCP(a=1.0, occ_dof=["A", "B"])
 
     # Construct the default neighbor list
-    prim_neighbor_list = PrimNeighborList.default_nlist(xtal_prim)
+    prim_neighbor_list = make_default_prim_neighbor_list(xtal_prim)
 
     # Expand the neighbor list to include unit cell :math:`(0, 1, 1)`
     prim_neighbor_list.add_unitcell([0, 1, 1])
@@ -104,7 +108,7 @@ def test_prim_neighbor_list_4():
     xtal_prim = xtal_prims.HCP(a=1.0, occ_dof=["A", "B"])
 
     # Construct the default neighbor list
-    prim_neighbor_list = PrimNeighborList.default_nlist(xtal_prim)
+    prim_neighbor_list = make_default_prim_neighbor_list(xtal_prim)
 
     # Expand the neighbor list to include unit cell
     prim_neighbor_list.add_unitcell([0, 0, 0])
@@ -117,11 +121,11 @@ def test_prim_neighbor_list_5():
     # Construct the default neighbor list
 
     # Expand the neighbor list to include unit cell
-    prim_neighbor_list = PrimNeighborList.default_nlist(xtal_prim)
+    prim_neighbor_list = make_default_prim_neighbor_list(xtal_prim)
     prim_neighbor_list.add_unitcell([1, 0, 0])
     assert len(prim_neighbor_list) == 7
 
     # Expand the neighbor list to include site
-    prim_neighbor_list = PrimNeighborList.default_nlist(xtal_prim)
+    prim_neighbor_list = make_default_prim_neighbor_list(xtal_prim)
     prim_neighbor_list.add_site(xtal.IntegralSiteCoordinate(1, [1, 0, 0]))
     assert len(prim_neighbor_list) == 7

@@ -98,17 +98,12 @@ class PrimNeighborList {
 
   /// \brief Make default weight matrix for approximately spherical neighborhood
   /// in Cartesian coordinates
-  static Eigen::Matrix3l default_nlist_weight_matrix(
+  static Eigen::Matrix3l default_weight_matrix(
       xtal::BasicStructure const &prim);
 
   /// \brief Make default list of sublattice indices that will be included in
   /// the neighbor list
-  static std::set<int> default_nlist_sublat_indices(
-      xtal::BasicStructure const &prim);
-
-  /// \brief Make the PrimNeighborList with default parameters
-  static std::shared_ptr<PrimNeighborList> default_nlist(
-      xtal::BasicStructure const &prim);
+  static std::set<int> default_sublat_indices(xtal::BasicStructure const &prim);
 
   /// \brief Get neighborlist index of UnitCellCoord @param _ucc, expanding
   /// neighborhood if necessary
@@ -178,6 +173,10 @@ class PrimNeighborList {
   /// \brief the total number of sublattices
   size_type m_n_sublattices;
 };
+
+/// \brief Make the PrimNeighborList with default parameters
+std::shared_ptr<PrimNeighborList> make_default_prim_neighbor_list(
+    xtal::BasicStructure const &prim);
 
 /// SuperNeighborList, linear indices of neighboring sites and unit cells
 ///

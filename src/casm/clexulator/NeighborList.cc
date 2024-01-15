@@ -227,7 +227,7 @@ PrimNeighborList::Matrix3Type PrimNeighborList::make_weight_matrix(
 /// \param prim The prim
 /// \return The weight matrix that gives an approximately spherical neighborhood
 ///     in Cartesian coordinates
-Eigen::Matrix3l PrimNeighborList::default_nlist_weight_matrix(
+Eigen::Matrix3l PrimNeighborList::default_weight_matrix(
     xtal::BasicStructure const &prim) {
   return PrimNeighborList::make_weight_matrix(prim.lattice().lat_column_mat(),
                                               10, prim.lattice().tol());
@@ -243,7 +243,7 @@ Eigen::Matrix3l PrimNeighborList::default_nlist_weight_matrix(
 /// \param prim The prim
 /// \return The indices of sublattices that should typically be included in the
 ///     neighbor lists
-std::set<int> PrimNeighborList::default_nlist_sublat_indices(
+std::set<int> PrimNeighborList::default_sublat_indices(
     xtal::BasicStructure const &prim) {
   std::set<int> sublat_indices;
   for (int b = 0; b < prim.basis().size(); ++b) {
@@ -259,15 +259,14 @@ std::set<int> PrimNeighborList::default_nlist_sublat_indices(
 ///
 /// \param prim The prim
 /// \return The PrimNeighborList with weight matrix generated using
-///     `default_nlist_weight_matrix` and sublattice indices from
-///     `default_nlist_sublat_indcies`.
-std::shared_ptr<PrimNeighborList> PrimNeighborList::default_nlist(
+///     `PrimNeighborList::default_weight_matrix` and sublattice indices from
+///     `PrimNeighborList::default_sublat_indcies`.
+std::shared_ptr<PrimNeighborList> make_default_prim_neighbor_list(
     xtal::BasicStructure const &prim) {
-  std::set<int> sublat_indices =
-      PrimNeighborList::default_nlist_sublat_indices(prim);
+  std::set<int> sublat_indices = PrimNeighborList::default_sublat_indices(prim);
   return std::make_shared<PrimNeighborList>(
-      PrimNeighborList::default_nlist_weight_matrix(prim),
-      sublat_indices.begin(), sublat_indices.end(), prim.basis().size());
+      PrimNeighborList::default_weight_matrix(prim), sublat_indices.begin(),
+      sublat_indices.end(), prim.basis().size());
 }
 
 /// \brief Clone
