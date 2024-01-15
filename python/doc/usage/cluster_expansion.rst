@@ -82,7 +82,7 @@ In this example, the :func:`~libcasm.clexulator.make_cluster_expansion` method r
 Evaluate the cluster expansion
 ------------------------------
 
-To evaluate the cluster expansion, the :class:`~libcasm.clexulator.ClusterExpansion` calculator must be set to point at a :class:`~libcasm.clexulator.ConfigDoFValues` instance. This is done at automatically for the objects returned by :func:`~libcasm.clexulator.make_cluster_expansion`.
+To evaluate the cluster expansion, the :class:`~libcasm.clexulator.ClusterExpansion` calculator must be set to point at a :class:`~libcasm.clexulator.ConfigDoFValues` instance. This is done automatically for the objects returned by :func:`~libcasm.clexulator.make_cluster_expansion`.
 
 Then, the cluster expansion value can be evaluated with:
 

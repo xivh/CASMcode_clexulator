@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added methods to libcasm.clexulator.PrimNeighborList to construct a PrimNeighborList with default parameters for a libcasm.xtal.Prim and to expand and access the neighbors.
 - Added methods to libcasm.clexulator.SuperNeighborList to access the neighbor sites and unitcells.
 
+### Changed
+
+- Updated docs for PyData Sphinx Theme 0.14.3, particularly dark theme colors and logo
+
 
 ## [2.0a3] - 2023-10-25
 
