@@ -1,6 +1,7 @@
 #include "casm/clexulator/NeighborList.hh"
 
 #include "casm/container/Counter.hh"
+#include "casm/crystallography/BasicStructure.hh"
 #include "casm/crystallography/LinearIndexConverter.hh"
 #include "casm/misc/CASM_Eigen_math.hh"
 #include "casm/misc/CASM_math.hh"
@@ -212,6 +213,61 @@ PrimNeighborList::Matrix3Type PrimNeighborList::make_weight_matrix(
     n += 1.0;
   }
   return lround(n * W);
+}
+
+/// \brief Make default weight matrix for approximately spherical neighborhood
+/// in Cartesian coordinates
+///
+/// Equivalent to:
+/// \code
+/// PrimNeighborList::make_weight_matrix(
+///     prim.lattice().lat_column_mat(), 10, prim.lattice().tol());
+/// \endcode
+///
+/// \param prim The prim
+/// \return The weight matrix that gives an approximately spherical neighborhood
+///     in Cartesian coordinates
+Eigen::Matrix3l PrimNeighborList::default_nlist_weight_matrix(
+    xtal::BasicStructure const &prim) {
+  return PrimNeighborList::make_weight_matrix(prim.lattice().lat_column_mat(),
+                                              10, prim.lattice().tol());
+}
+
+/// \brief Make default list of sublattice indices that will be included in the
+/// neighbor list
+///
+/// Includes sublattices with either:
+/// - 2 or more occupants (Site::occupant_dof().size() >= 2)
+/// - Continuous degrees of freedom (Site::dof_size() > 0)
+///
+/// \param prim The prim
+/// \return The indices of sublattices that should typically be included in the
+///     neighbor lists
+std::set<int> PrimNeighborList::default_nlist_sublat_indices(
+    xtal::BasicStructure const &prim) {
+  std::set<int> sublat_indices;
+  for (int b = 0; b < prim.basis().size(); ++b) {
+    if (prim.basis()[b].occupant_dof().size() >= 2 ||
+        prim.basis()[b].dof_size() > 0) {
+      sublat_indices.insert(b);
+    }
+  }
+  return sublat_indices;
+}
+
+/// \brief Make the PrimNeighborList with default parameters
+///
+/// \param prim The prim
+/// \return The PrimNeighborList with weight matrix generated using
+///     `default_nlist_weight_matrix` and sublattice indices from
+///     `default_nlist_sublat_indcies`.
+std::shared_ptr<PrimNeighborList> PrimNeighborList::default_nlist(
+    xtal::BasicStructure const &prim) {
+  std::set<int> sublat_indices =
+      PrimNeighborList::default_nlist_sublat_indices(prim);
+  return std::make_shared<PrimNeighborList>(
+      PrimNeighborList::default_nlist_weight_matrix(prim),
+      sublat_indices.begin(), sublat_indices.end(), prim.basis().size());
 }
 
 /// \brief Clone

@@ -509,10 +509,14 @@ PYBIND11_MODULE(_clexulator, m) {
       depend on the choice of supercell. The PrimNeighborList is then used to
       construct a SuperNeighborList, which defines a neighbor list for a
       particular supercell in terms of linear site indices in that supercell.
+
+      For details, see the section :ref:`Neighbor lists <neighbor-lists-index>`.
+
       )pbdoc")
       .def(py::init(&make_prim_neighbor_list),
            R"pbdoc(
-          Constructor
+
+          .. rubric:: Constructor
 
           Parameters
           ----------
@@ -579,14 +583,200 @@ PYBIND11_MODULE(_clexulator, m) {
           )pbdoc",
                   py::arg("lattice_column_vector_matrix"),
                   py::arg("max_element_value") = 10, py::arg("tol") = CASM::TOL)
+      .def_static("default_nlist_weight_matrix",
+                  &clexulator::PrimNeighborList::default_nlist_weight_matrix,
+                  R"pbdoc(
+          Make default weight matrix for approximately spherical neighborhood
+          in Cartesian coordinates
+
+          Parameters
+          ----------
+          xtal_prim : xtal.Prim
+              The Prim.
+
+          Returns
+          -------
+          lattice_weight_matrix: array_like, shape=(3,3), dtype=int
+              Weight matrix, that defines the shape of neighborhood that
+              orders neighbors. In the
+              :class:`~libcasm.clexulator.PrimNeighborList`, unit cells
+              are ordered by the distance, :math:`x^{\mathsf{T} W x`,
+              where :math:`x` is the integer unit cell coordinates. The
+              weight matrix is constructed such that
+              :math:`x^{\mathsf{T} W x` is approximately spherical in
+              Cartesian coordinates, subject to the `max_element_value`.
+          )pbdoc",
+                  py::arg("xtal_prim"))
+      .def_static(
+          "default_nlist_sublattice_indices",
+          [](xtal::BasicStructure const &xtal_prim) {
+            std::set<int> _sublat_indices =
+                clexulator::PrimNeighborList::default_nlist_sublat_indices(
+                    xtal_prim);
+            return std::vector<int>(_sublat_indices.begin(),
+                                    _sublat_indices.end());
+          },
+          R"pbdoc(
+          Make default list of sublattices that should be included in the
+          neighbor list
+
+          Parameters
+          ----------
+          xtal_prim : xtal.Prim
+              The Prim.
+
+          Returns
+          -------
+          sublattice_indices: list[int]
+              Indices of sublattices that have 2 or more occupant degrees of freedom
+              (DoF) or 1 or more continuous DoF.
+          )pbdoc",
+          py::arg("xtal_prim"))
+      .def_static(
+          "default_nlist",
+          [](xtal::BasicStructure const &xtal_prim) {
+            PrimNeighborListWrapper x;
+            x.prim_neighbor_list =
+                clexulator::PrimNeighborList::default_nlist(xtal_prim);
+            return x;
+          },
+          R"pbdoc(
+          Make PrimNeighborList with default parameters for the given Prim
+
+          Parameters
+          ----------
+          xtal_prim : xtal.Prim
+              The Prim.
+
+          Returns
+          -------
+          prim_neighbor_list: PrimNeighborList
+              A PrimNeighborList with the default lattice weight matrix and selection
+              of sublattice indices for the given Prim.
+          )pbdoc",
+          py::arg("xtal_prim"))
       .def(
           "sublattice_indices",
           [](PrimNeighborListWrapper const &x) {
-            return x.prim_neighbor_list->sublat_indices();
+            std::set<int> sublat_indices =
+                x.prim_neighbor_list->sublat_indices();
+            return std::vector<int>(sublat_indices.begin(),
+                                    sublat_indices.end());
           },
           R"pbdoc(
-          Indices of sublattices included in the neighbor list.
-        )pbdoc");
+          list[int]: Indices of sublattices included in the neighbor list.
+          )pbdoc")
+      .def(
+          "total_n_sublattice",
+          [](PrimNeighborListWrapper const &x) {
+            return x.prim_neighbor_list->n_sublattices();
+          },
+          R"pbdoc(
+          int: The total number of sublattices in the relevant Prim.
+          )pbdoc")
+      .def(
+          "add_unitcell",
+          [](PrimNeighborListWrapper const &x,
+             Eigen::Vector3l const &unitcell) {
+            x.prim_neighbor_list->expand(unitcell);
+          },
+          R"pbdoc(
+          Expand the neighborlist to ensure it includes a given unit cell
+
+          Parameters
+          ----------
+          unitcell: array_like of int, shape=(3,)
+              Specify a unit cell, as multiples of the prim lattice vectors.
+          )pbdoc",
+          py::arg("unitcell_indices"))
+      .def(
+          "add_site",
+          [](PrimNeighborListWrapper const &x,
+             xtal::UnitCellCoord const &_ucc) {
+            x.prim_neighbor_list->expand(_ucc);
+          },
+          R"pbdoc(
+          Expand the neighborlist to ensure it includes the unit cell containing a
+          given site
+
+          Parameters
+          ----------
+          integral_site_coordinate: libcasm.xtal.IntegralSiteCoordinate
+              A site, relative to the origin unit cell.
+          )pbdoc",
+          py::arg("integral_site_coordinate"))
+      .def(
+          "neighbor_index",
+          [](PrimNeighborListWrapper const &x,
+             xtal::UnitCellCoord const &integral_site_coordinate) {
+            return x.prim_neighbor_list->neighbor_index(
+                integral_site_coordinate);
+          },
+          R"pbdoc(
+          Get neighborlist index of a site, expanding the neighborhood if necessary
+
+          Parameters
+          ----------
+          integral_site_coordinate: libcasm.xtal.IntegralSiteCoordinate
+              The site to get the neighbor list index of.
+
+          Returns
+          -------
+          neighbor_index: int
+              The index of the site in the neighbor list of the origin unit cell.
+          )pbdoc",
+          py::arg("integral_site_coordinate"))
+      .def(
+          "n_neighborhood_sites",
+          [](PrimNeighborListWrapper const &x) {
+            return x.prim_neighbor_list->size() *
+                   x.prim_neighbor_list->sublat_indices().size();
+          },
+          R"pbdoc(
+          The number of sites included in the neighborhood
+
+          Returns
+          -------
+          n_neighborhood_sites: int
+              The number of sites included in the neighborhood. This is equal to
+              ``len(self) * len(self.sublattice_indices)``.
+          )pbdoc")
+      .def(
+          "n_neighborhood_unitcells",
+          [](PrimNeighborListWrapper const &x) {
+            return x.prim_neighbor_list->size();
+          },
+          R"pbdoc(
+          The number of unit cells included in the neighborhood
+
+          Returns
+          -------
+          n_neighborhood_unitcells: int
+              The number of unit cells included in the neighborhood. This is equal to
+              ``len(self)``.
+          )pbdoc")
+      .def(
+          "__len__",
+          [](PrimNeighborListWrapper const &x) {
+            return x.prim_neighbor_list->size();
+          },
+          R"pbdoc(
+          The number of unit cells included in the neighborhood
+
+          Returns
+          -------
+          size: int
+              The number of unit cells included in the neighborhood. This is equal to
+              ``self.n_neighborhood_unitcells()``.
+          )pbdoc")
+      .def(
+          "__iter__",
+          [](PrimNeighborListWrapper const &x) {
+            return py::make_iterator(x.prim_neighbor_list->begin(),
+                                     x.prim_neighbor_list->end());
+          },
+          py::keep_alive<
+              0, 1>() /* Essential: keep object alive while iterator exists */);
 
   py::class_<clexulator::SuperNeighborList,
              std::shared_ptr<clexulator::SuperNeighborList>>(
@@ -615,14 +805,234 @@ PYBIND11_MODULE(_clexulator, m) {
           )pbdoc",
            py::arg("transformation_matrix_to_super"),
            py::arg("prim_neighbor_list"))
+      .def("n_supercell_unitcells", &clexulator::SuperNeighborList::n_unitcells,
+           R"pbdoc(
+           int: The number of unit cells in the supercell
+           )pbdoc")
+      .def("n_supercell_sites", &clexulator::SuperNeighborList::n_sites,
+           R"pbdoc(
+           int: The total number of sites in the supercell
+           )pbdoc")
+      .def("linear_unitcell_index",
+           &clexulator::SuperNeighborList::unitcell_index,
+           R"pbdoc(
+          Get the linear unit cell index of the unit cell containing a given site
+
+          Parameters
+          ----------
+          linear_site_index: int
+              The linear index of a site in the supercell.  Must be in
+              the range `[0, n_supercell_sites)`, where `n_supercell_sites` is the
+              value of :func:`SuperNeighborList.n_supercell_sites`.
+
+          Returns
+          -------
+          linear_unitcell_index: int
+              The linear unit cell index of the unit cell containing the site
+          )pbdoc",
+           py::arg("linear_site_index"))
+      .def("sublattice_index", &clexulator::SuperNeighborList::sublat_index,
+           R"pbdoc(
+          Get the sublattice index of a given site
+
+          Parameters
+          ----------
+          linear_site_index: int
+              The linear index of a site in the supercell. Must be in
+              the range `[0, n_supercell_sites)`, where `n_supercell_sites` is the
+              value of :func:`SuperNeighborList.n_supercell_sites`.
+
+          Returns
+          -------
+          sublattice_index: int
+              The index of the sublattice containing the site
+          )pbdoc",
+           py::arg("linear_site_index"))
+      .def(
+          "sites",
+          [](clexulator::SuperNeighborList const &x,
+             Index linear_unitcell_index) {
+            return py::make_iterator(x.sites(linear_unitcell_index).begin(),
+                                     x.sites(linear_unitcell_index).end());
+          },
+          py::keep_alive<
+              0, 1>() /* Essential: keep object alive while iterator exists */,
+          R"pbdoc(
+          Get an iterator over the linear site indices of the neighbor sites of a given
+          unit cell
+
+          .. rubric:: Example usage
+
+          .. code-block:: Python
+
+              import libcasm.xtal as xtal
+
+              # Get the linear site index of sites neighboring unitcell [0, 3, 1]:
+
+              # transformation_matrix_to_super: numpy.ndarray[numpy.int64[3, 3]
+              # prim_neighbor_list: PrimNeighborList
+
+              super_neighbor_list = SuperNeighborList(
+                  transformation_matrix_to_super, prim_neighbor_list)
+              unitcell_index_converter =
+                  xtal.UnitCellIndexConverter(transformation_matrix_to_super)
+              site_index_converter =
+                  xtal.SiteIndexConverter(transformation_matrix_to_super, prim_neighbor_list.n_sublattices())
+
+              unitcell = np.array([0, 3, 1])
+              linear_unitcell_index = unitcell_index_converter.linear_unitcell_index(
+                  unitcell,
+              )
+
+              print("Neighbor sites")
+              for i, linear_site_index in enumerate(super_neighbor_list.sites(linear_unitcell_index)):
+                  integral_site_coordinate =
+                      site_index_converter.integral_site_coordinate(linear_site_index)
+                  print(
+                      f"neighbor {i}: "
+                      f"linear_site_index: {linear_site_index} "
+                      f"integral_site_coordinate: {integral_site_coordinate}"
+                  )
+
+          Parameters
+          ----------
+          linear_unitcell_index: int
+              The linear unit cell index of a unit cell in the supercell.  Must be in
+              the range `[0, n_supercell_unitcells)`, where `n_supercell_unitcells` is
+              the value of :func:`SuperNeighborList.n_supercell_unitcells`.
+
+          Returns
+          -------
+          sites_iterator:
+              An iterator over the linear site indices of the sites in the neighborhood
+              of the given unit cell.
+          )pbdoc",
+          py::arg("linear_unitcell_index"))
+      .def(
+          "nbor_linear_site_index",
+          [](clexulator::SuperNeighborList const &x,
+             Index linear_unitcell_index, Index site_neighbor_list_index) {
+            return x.sites(linear_unitcell_index)[site_neighbor_list_index];
+          },
+          R"pbdoc(
+          Get the linear site index of a particular neighbor of a given unit cell
+
+          Parameters
+          ----------
+          linear_unitcell_index: int
+              The linear unit cell index of a unit cell in the supercell. Must be in
+              the range `[0, n_supercell_unitcells)`, where `n_supercell_unitcells` is
+              the value of :func:`SuperNeighborList.n_supercell_unitcells`.
+          site_neighbor_list_index: int
+              An index into the list of neighboring sites. Must be in the range
+              `[0, n_neighborhood_sites)`, where `n_neighborhood_sites` is the value of
+              :func:`PrimNeighborList.n_neighborhood_sites` (at the time the
+              :class:`SuperNeighborList` was constructed).
+
+
+          Returns
+          -------
+          nbor_linear_site_index:
+              The linear site index of the specified neighboring site.
+          )pbdoc",
+          py::arg("linear_unitcell_index"), py::arg("site_neighbor_list_index"))
+      .def(
+          "unitcells",
+          [](clexulator::SuperNeighborList const &x,
+             Index linear_unitcell_index) {
+            return py::make_iterator(x.unitcells(linear_unitcell_index).begin(),
+                                     x.unitcells(linear_unitcell_index).end());
+          },
+          py::keep_alive<
+              0, 1>() /* Essential: keep object alive while iterator exists */,
+          R"pbdoc(
+          Get an iterator over the linear unit cell indices of the neighbor unit cells
+          of a given unit cell
+
+          .. rubric:: Example usage
+
+          .. code-block:: Python
+
+              import libcasm.xtal as xtal
+
+              # Get the linear unit cell index of unit cells neighboring unitcell [0, 3, 1]:
+
+              # transformation_matrix_to_super: numpy.ndarray[numpy.int64[3, 3]
+              # prim_neighbor_list: PrimNeighborList
+
+              super_neighbor_list = SuperNeighborList(
+                  transformation_matrix_to_super, prim_neighbor_list)
+              unitcell_index_converter =
+                  xtal.UnitCellIndexConverter(transformation_matrix_to_super)
+
+              unitcell = np.array([0, 3, 1])
+              linear_unitcell_index = unitcell_index_converter.linear_unitcell_index(
+                  unitcell,
+              )
+
+              print("Neighbor unit cells")
+              for i, nbor_linear_site_index in enumerate(super_neighbor_list.unitcells(linear_unitcell_index)):
+                  nbor_unitcell = unitcell_index_converter.unitcell(nbor_linear_unitcell_index)
+                  print(
+                      f"neighbor {i}: "
+                      f"nbor_linear_unitcell_index: {nbor_linear_unitcell_index} "
+                      f"nbor_unitcell: {nbor_unitcell}"
+                  )
+
+          Parameters
+          ----------
+          linear_unitcell_index: int
+              The linear unit cell index of a unit cell in the supercell.  Must be in
+              the range `[0, n_supercell_unitcells)`, where `n_supercell_unitcells` is
+              the value of :func:`SuperNeighborList.n_supercell_unitcells`.
+
+          Returns
+          -------
+          unitcell_iterator:
+              An iterator over the linear site indices of the unit cells in the
+              neighborhood of the given unit cell.
+          )pbdoc",
+          py::arg("linear_unitcell_index"))
+      .def(
+          "nbor_linear_unitcell_index",
+          [](clexulator::SuperNeighborList const &x,
+             Index linear_unitcell_index, Index unitcell_neighbor_list_index) {
+            return x.unitcells(
+                linear_unitcell_index)[unitcell_neighbor_list_index];
+          },
+          R"pbdoc(
+          Get the linear site index of a particular neighbor of a given unit cell
+
+          Parameters
+          ----------
+          linear_unitcell_index: int
+              The linear unit cell index of a unit cell in the supercell.  Must be in
+              the range `[0, n_supercell_unitcells)`, where `n_supercell_unitcells` is
+              the value of :func:`SuperNeighborList.n_supercell_unitcells`.
+          unitcell_neighbor_list_index: int
+              An index into the list of neighboring unit cells. Must be in the range
+              `[0, n_neighborhood_unitcells)`, where `n_neighborhood_unitcells` is the
+              value of :func:`PrimNeighborList.n_neighborhood_unitcells` (at the time
+              the :class:`SuperNeighborList` was constructed).
+
+
+          Returns
+          -------
+          nbor_linear_unitcell_index:
+              The linear site index of the specified neighboring unit cell.
+          )pbdoc",
+          py::arg("linear_unitcell_index"),
+          py::arg("unitcell_neighbor_list_index"))
       .def("overlaps", &clexulator::SuperNeighborList::overlaps,
            R"pbdoc(
           Returns true if periodic images of the neighbor list overlap
 
           Returns
           -------
-          result: PrimNeighborList
-              If periodic images of the neighborhood overlap, Clexulator 'delta' values must be calculated from the difference between final and initial point values.
+          result: bool
+              If periodic images of the neighborhood overlap, Clexulator 'delta' values
+              must be calculated from the difference between final and initial point
+              values.
 
           )pbdoc");
 

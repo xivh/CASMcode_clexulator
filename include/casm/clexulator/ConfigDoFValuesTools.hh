@@ -412,7 +412,6 @@ inline std::vector<std::vector<int>> make_occupation_shape_factors(
   // Ex: (for a particular sublattice, b)
 
   std::vector<std::vector<int>> occupation_shape_factors;
-  int b = 0;
   for (auto const &discrete_dof_dim_on_b : discrete_dof_dim) {
     std::vector<int> _occupation_shape_factors;
     for (int i = 0; i < discrete_dof_dim_on_b.size(); ++i) {
@@ -423,7 +422,6 @@ inline std::vector<std::vector<int>> make_occupation_shape_factors(
       _occupation_shape_factors.push_back(factor);
     }
     occupation_shape_factors.push_back(_occupation_shape_factors);
-    ++b;
   }
   return occupation_shape_factors;
 }

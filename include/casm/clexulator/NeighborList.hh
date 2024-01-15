@@ -96,6 +96,20 @@ class PrimNeighborList {
   static Matrix3Type make_weight_matrix(const Eigen::Matrix3d lat_column_mat,
                                         Index max_element_value, double tol);
 
+  /// \brief Make default weight matrix for approximately spherical neighborhood
+  /// in Cartesian coordinates
+  static Eigen::Matrix3l default_nlist_weight_matrix(
+      xtal::BasicStructure const &prim);
+
+  /// \brief Make default list of sublattice indices that will be included in
+  /// the neighbor list
+  static std::set<int> default_nlist_sublat_indices(
+      xtal::BasicStructure const &prim);
+
+  /// \brief Make the PrimNeighborList with default parameters
+  static std::shared_ptr<PrimNeighborList> default_nlist(
+      xtal::BasicStructure const &prim);
+
   /// \brief Get neighborlist index of UnitCellCoord @param _ucc, expanding
   /// neighborhood if necessary
   Scalar neighbor_index(xtal::UnitCellCoord const &_ucc);
