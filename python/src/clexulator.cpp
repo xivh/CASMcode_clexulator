@@ -524,7 +524,7 @@ PYBIND11_MODULE(_clexulator, m) {
               can be specified explicitly.
 
               In the neighbor list, unit cells are ordered by the distance,
-              :math:`x^{\mathsf{T} W x`, where :math:`x` is the integer
+              :math:`x^{\mathsf{T}} W x`, where :math:`x` is the integer
               unit cell coordinates, and :math:`W` is the lattice weight
               matrix.
 
@@ -571,10 +571,10 @@ PYBIND11_MODULE(_clexulator, m) {
               Weight matrix, that defines the shape of neighborhood that
               orders neighbors. In the
               :class:`~libcasm.clexulator.PrimNeighborList`, unit cells
-              are ordered by the distance, :math:`x^{\mathsf{T} W x`,
+              are ordered by the distance, :math:`x^{\mathsf{T}} W x`,
               where :math:`x` is the integer unit cell coordinates. The
               weight matrix is constructed such that
-              :math:`x^{\mathsf{T} W x` is approximately spherical in
+              :math:`x^{\mathsf{T}} W x` is approximately spherical in
               Cartesian coordinates, subject to the `max_element_value`.
           )pbdoc",
                   py::arg("lattice_column_vector_matrix"),
