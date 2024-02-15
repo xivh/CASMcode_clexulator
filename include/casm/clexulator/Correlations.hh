@@ -70,12 +70,12 @@ class Correlations {
   /// \brief The elements of the correlations vector that will be calculated.
   std::vector<unsigned int> const &correlation_indices() const;
 
-  /// \brief Calculate and return intensive correlations
-  Eigen::VectorXd const &intensive(
-      Eigen::VectorXd const &extensive_correlations);
+  /// \brief Calculate and return per_unitcell correlations
+  Eigen::VectorXd const &per_unitcell(
+      Eigen::VectorXd const &per_supercell_correlations);
 
-  /// \brief Calculate and return extensive correlations
-  Eigen::VectorXd const &extensive();
+  /// \brief Calculate and return per_supercell correlations
+  Eigen::VectorXd const &per_supercell();
 
   /// \brief Calculate and return the contribution from a particular unit cell
   Eigen::VectorXd const &contribution(Index linear_unitcell_index);
@@ -100,21 +100,21 @@ class Correlations {
 
   // --- Occupation ---
 
-  /// \brief Calculate and return change in (extensive) correlations due to an
-  /// occupation change
+  /// \brief Calculate and return change in (per_supercell) correlations due to
+  /// an occupation change
   Eigen::VectorXd const &occ_delta(
       Index linear_site_index, int new_occ,
       Eigen::VectorXd const &reference_point_correlations);
 
-  /// \brief Calculate and return change in (extensive) correlations due to
+  /// \brief Calculate and return change in (per_supercell) correlations due to
   /// multiple occupation changes
   Eigen::VectorXd const &occ_delta(std::vector<Index> const &linear_site_index,
                                    std::vector<int> const &new_occ);
 
   // --- Local continuous ---
 
-  /// \brief Calculate and return change in (extensive) correlations due to a
-  /// local continuous DoF change
+  /// \brief Calculate and return change in (per_supercell) correlations due to
+  /// a local continuous DoF change
   Eigen::VectorXd const &local_delta(
       DoFKey const &key, Index linear_site_index,
       Eigen::VectorXd const &new_value,
@@ -122,11 +122,11 @@ class Correlations {
 
   // --- Global continuous ---
 
-  /// \brief Calculate and return change in (extensive) correlations due to a
-  /// global continuous DoF change
+  /// \brief Calculate and return change in (per_supercell) correlations due to
+  /// a global continuous DoF change
   Eigen::VectorXd const &global_delta(
       DoFKey const &key, Eigen::VectorXd const &new_value,
-      Eigen::VectorXd const &reference_extensive_correlations);
+      Eigen::VectorXd const &reference_per_supercell_correlations);
 
   // --- Gradients of correlations
   /// \brief Calculates and returns gradients of correlations with respect
@@ -153,11 +153,11 @@ class Correlations {
   /// Holds last point correlation results
   Eigen::VectorXd m_point_corr;
 
-  /// Holds last extensive correlation results
-  Eigen::VectorXd m_extensive_corr;
+  /// Holds last per_supercell correlation results
+  Eigen::VectorXd m_per_supercell_corr;
 
-  /// Holds last intensive correlation results
-  Eigen::VectorXd m_intensive_corr;
+  /// Holds last per_unitcell correlation results
+  Eigen::VectorXd m_per_unitcell_corr;
 
   /// Holds last delta correlation results
   Eigen::VectorXd m_delta_corr;

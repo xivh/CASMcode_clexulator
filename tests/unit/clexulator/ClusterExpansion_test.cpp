@@ -112,23 +112,24 @@ class OccZrOClexTest : public test::TestClexulatorBase {
     EXPECT_EQ(clexulator->neighborhood().size(), 107);
   }
 
-  void check_intensive_value(double expected_value) {
-    Eigen::VectorXd corr_extensive = clex->correlations().extensive();
-    Eigen::VectorXd corr_intensive =
-        clex->correlations().intensive(corr_extensive);
+  void check_per_unitcell(double expected_value) {
+    Eigen::VectorXd corr_per_supercell = clex->correlations().per_supercell();
+    Eigen::VectorXd corr_per_unitcell =
+        clex->correlations().per_unitcell(corr_per_supercell);
     double sum = 0.0;
     for (Index i = 0; i < coefficients.index.size(); ++i) {
       Index coeff_index = coefficients.index[i];
       double coeff_value = coefficients.value[i];
-      double contrib = corr_intensive(coeff_index) * coeff_value;
+      double contrib = corr_per_unitcell(coeff_index) * coeff_value;
       sum += contrib;
-      // std::cout << coeff_index << ": " << corr_intensive(coeff_index) << " "
+      // std::cout << coeff_index << ": " << corr_per_unitcell(coeff_index) << "
+      // "
       // << coeff_value << " " << contrib << " " << sum << std::endl;
     }
-    double intensive_value = clex->intensive_value();
-    // std::cout << "value: " << intensive_value << std::endl;
-    EXPECT_TRUE(CASM::almost_equal(intensive_value, sum));
-    EXPECT_TRUE(CASM::almost_equal(intensive_value, expected_value));
+    double per_unitcell = clex->per_unitcell();
+    // std::cout << "value: " << per_unitcell << std::endl;
+    EXPECT_TRUE(CASM::almost_equal(per_unitcell, sum));
+    EXPECT_TRUE(CASM::almost_equal(per_unitcell, expected_value));
   };
 
   void MakeClex_tests() {
@@ -152,17 +153,17 @@ class OccZrOClexTest : public test::TestClexulatorBase {
 
     // original DoF values
     clex->set(&config.dof_values);
-    check_intensive_value(0.0);
+    check_per_unitcell(0.0);
 
     config.dof_values.occupation(16) = 1;
-    check_intensive_value(expected_value);
+    check_per_unitcell(expected_value);
 
     // copied DoF values
     clex->set(&dof_values_2);
-    check_intensive_value(0.0);
+    check_per_unitcell(0.0);
 
     dof_values_2.occupation(16) = 1;
-    check_intensive_value(expected_value);
+    check_per_unitcell(expected_value);
   }
 
   void MakeMultiClex_tests() {
@@ -177,7 +178,7 @@ class OccZrOClexTest : public test::TestClexulatorBase {
     multiclex->set(&config.dof_values);
     // default config
     {
-      Eigen::VectorXd const &values = multiclex->intensive_value();
+      Eigen::VectorXd const &values = multiclex->per_unitcell();
       EXPECT_EQ(values.size(), 2);
       EXPECT_TRUE(CASM::almost_equal(values(0), 1.0));
       EXPECT_TRUE(CASM::almost_equal(values(1), 1.0));
@@ -188,7 +189,7 @@ class OccZrOClexTest : public test::TestClexulatorBase {
       config.dof_values.occupation(l) = 1;
     }
     {
-      Eigen::VectorXd const &values = multiclex->intensive_value();
+      Eigen::VectorXd const &values = multiclex->per_unitcell();
       EXPECT_EQ(values.size(), 2);
       EXPECT_TRUE(CASM::almost_equal(values(0), 1.0));
       EXPECT_TRUE(CASM::almost_equal(values(1), 2.0));

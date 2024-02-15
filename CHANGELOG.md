@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Updated docs for PyData Sphinx Theme 0.14.3, particularly dark theme colors and logo
+- Changed "intensive_value" methods to "per_unitcell" and "extensive_value" methods to "per_supercell"
 
 
 ## [2.0a3] - 2023-10-25

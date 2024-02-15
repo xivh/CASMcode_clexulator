@@ -1242,7 +1242,7 @@ PYBIND11_MODULE(_clexulator, m) {
         py::arg("so_options") = std::nullopt);
 
   m.def(
-      "calc_intensive_correlations",
+      "calc_per_unitcell_correlations",
       [](std::shared_ptr<clexulator::Clexulator> const &clexulator,
          clexulator::ConfigDoFValues const &config_dof_values,
          std::shared_ptr<clexulator::SuperNeighborList const> const
@@ -1250,21 +1250,21 @@ PYBIND11_MODULE(_clexulator, m) {
          std::optional<std::vector<unsigned int>> indices) {
         if (!clexulator->initialized()) {
           throw std::runtime_error(
-              "Error in calc_intensive_correlations: clexulator is not "
+              "Error in calc_per_unitcell_correlations: clexulator is not "
               "initialized");
         }
         if (indices.has_value()) {
           clexulator::Correlations f(supercell_neighbor_list, clexulator,
                                      *indices, &config_dof_values);
-          return f.intensive(f.extensive());
+          return f.per_unitcell(f.per_supercell());
         } else {
           clexulator::Correlations f(supercell_neighbor_list, clexulator,
                                      &config_dof_values);
-          return f.intensive(f.extensive());
+          return f.per_unitcell(f.per_supercell());
         }
       },
       R"pbdoc(
-      Calculate intensive correlations
+      Calculate per_unitcell correlations
 
       This method is safe and easy to use, but may be slower than using
       the :class:`~libcasm.clexulator.Correlations` class directly.
@@ -1284,7 +1284,7 @@ PYBIND11_MODULE(_clexulator, m) {
 
       Returns
       -------
-      intensive_correlations: np.ndarray
+      per_unitcell_correlations: np.ndarray
           The correlations, normalized per unit cell.
 
       )pbdoc",
@@ -1394,22 +1394,22 @@ PYBIND11_MODULE(_clexulator, m) {
           equivalent_index: int
               Index indicating which of the symmetrically local cluster basis sets to get the neighborhood for.
           )pbdoc")
-      .def("extensive", &clexulator::Correlations::extensive,
+      .def("per_supercell", &clexulator::Correlations::per_supercell,
            py::return_value_policy::reference_internal, R"pbdoc(
-          Calculate and return extensive correlations, as const reference.
+          Calculate and return per_supercell correlations, as const reference.
 
           Returns
           -------
           value : np.ndarray
               Extensive correlations (per supercell). The same size correlation array is always returned, but if this instance was constructed with the indices of specific basis functions to calculate other values will be of undefined value.
           )pbdoc")
-      .def("intensive", &clexulator::Correlations::intensive,
+      .def("per_unitcell", &clexulator::Correlations::per_unitcell,
            py::return_value_policy::reference_internal, R"pbdoc(
-          Calculate and return intensive correlations, as const reference.
+          Calculate and return per_unitcell correlations, as const reference.
 
           Parameters
           ----------
-          extensive_correlations: np.ndarray
+          per_supercell_correlations: np.ndarray
               Extensive correlations (per supercell), to be normalized by the number of unit cells in the supercell.
 
           Returns
@@ -1417,7 +1417,7 @@ PYBIND11_MODULE(_clexulator, m) {
           value : np.ndarray
               Intensive correlations  (per unit cell). The same size correlation array is always returned, but if this instance was constructed with the indices of specific basis functions to calculate other values will be of undefined value.
           )pbdoc",
-           py::arg("extensive_correlations"))
+           py::arg("per_supercell_correlations"))
       .def("contribution", &clexulator::Correlations::contribution,
            py::return_value_policy::reference_internal, R"pbdoc(
           Calculate and return the contribution from a particular unit cell, as const reference.
@@ -1504,7 +1504,7 @@ PYBIND11_MODULE(_clexulator, m) {
                                reference_point_correlations);
           },
           py::return_value_policy::reference_internal, R"pbdoc(
-          Calculate and return change in (extensive) correlations due to an occupation change
+          Calculate and return change in (per_supercell) correlations due to an occupation change
 
           Parameters
           ----------
@@ -1518,7 +1518,7 @@ PYBIND11_MODULE(_clexulator, m) {
           Returns
           -------
           delta_value : np.ndarray
-              Change in extensive correlations, relative to `reference_point_correlations`.
+              Change in per_supercell correlations, relative to `reference_point_correlations`.
           )pbdoc",
           py::arg("linear_site_index"), py::arg("new_occ"),
           py::arg("reference_point_correlations"))
@@ -1530,7 +1530,7 @@ PYBIND11_MODULE(_clexulator, m) {
             return x.occ_delta(linear_site_index, new_occ);
           },
           py::return_value_policy::reference_internal, R"pbdoc(
-          Calculate and return change in (extensive) correlations due to multiple occupation changes
+          Calculate and return change in (per_supercell) correlations due to multiple occupation changes
 
           Parameters
           ----------
@@ -1542,12 +1542,12 @@ PYBIND11_MODULE(_clexulator, m) {
           Returns
           -------
           delta_value : np.ndarray
-              Change in extensive correlations due to specified occupant changes.
+              Change in per_supercell correlations due to specified occupant changes.
           )pbdoc",
           py::arg("linear_site_index"), py::arg("new_occ"))
       .def("local_delta", &clexulator::Correlations::local_delta,
            py::return_value_policy::reference_internal, R"pbdoc(
-          Calculate and return change in (extensive) correlations due to a local DoF change
+          Calculate and return change in (per_supercell) correlations due to a local DoF change
 
           Parameters
           ----------
@@ -1563,13 +1563,13 @@ PYBIND11_MODULE(_clexulator, m) {
           Returns
           -------
           delta_value : np.ndarray
-              Change in extensive correlations, relative to `reference_point_correlations`.
+              Change in per_supercell correlations, relative to `reference_point_correlations`.
           )pbdoc",
            py::arg("key"), py::arg("linear_site_index"), py::arg("new_value"),
            py::arg("reference_point_correlations"))
       .def("global_delta", &clexulator::Correlations::global_delta,
            py::return_value_policy::reference_internal, R"pbdoc(
-          Calculate and return change in (extensive) correlations due to a global DoF change
+          Calculate and return change in (per_supercell) correlations due to a global DoF change
 
           Parameters
           ----------
@@ -1577,16 +1577,16 @@ PYBIND11_MODULE(_clexulator, m) {
               Specifies the type of DoF
           new_value: np.ndarray
               The value the global DoF is changed to, in the prim basis.
-          reference_extensive_correlations: np.ndarray
-              The extensive correlations before the change in global DoF value.
+          reference_per_supercell_correlations: np.ndarray
+              The per_supercell correlations before the change in global DoF value.
 
           Returns
           -------
           delta_value : np.ndarray
-              Change in extensive correlations, relative to `reference_extensive_correlations`.
+              Change in per_supercell correlations, relative to `reference_per_supercell_correlations`.
           )pbdoc",
            py::arg("key"), py::arg("new_value"),
-           py::arg("reference_extensive_correlations"))
+           py::arg("reference_per_supercell_correlations"))
       .def("grad_correlations", &clexulator::Correlations::grad_correlations,
            py::return_value_policy::reference_internal, R"pbdoc(
           Calculates and returns gradients of correlations with respect to 
@@ -1845,11 +1845,11 @@ PYBIND11_MODULE(_clexulator, m) {
       .def("set", &clexulator::ClusterExpansion::set, R"pbdoc(
           Set the :class:`~libcasm.clexulator.ConfigDoFValues` instance ClusterExpansion uses to calculate the cluster expansion value. ClusterExpansion maintains a pointer to the underlying data, which must have a lifetime as long as ClusterExpansion is used to calculate with its data.
           )pbdoc")
-      .def("intensive_value", &clexulator::ClusterExpansion::intensive_value,
+      .def("per_unitcell", &clexulator::ClusterExpansion::per_unitcell,
            R"pbdoc(
           float: Calculate the cluster expansion value per unit cell
           )pbdoc")
-      .def("extensive_value", &clexulator::ClusterExpansion::extensive_value,
+      .def("per_supercell", &clexulator::ClusterExpansion::per_supercell,
            R"pbdoc(
           float: Calculate the cluster expansion value
           )pbdoc")
@@ -1963,8 +1963,8 @@ PYBIND11_MODULE(_clexulator, m) {
       .def("set", &clexulator::MultiClusterExpansion::set, R"pbdoc(
           Set the :class:`~libcasm.clexulator.ConfigDoFValues` instance ClusterExpansion uses to calculate the cluster expansion value. ClusterExpansion maintains a pointer to the underlying data, which must have a lifetime as long as ClusterExpansion is used to calculate with its data.
           )pbdoc")
-      .def("intensive_value",
-           &clexulator::MultiClusterExpansion::intensive_value, R"pbdoc(
+      .def("per_unitcell", &clexulator::MultiClusterExpansion::per_unitcell,
+           R"pbdoc(
           Calculate the cluster expansion values per unit cell
 
           Returns
@@ -1972,8 +1972,8 @@ PYBIND11_MODULE(_clexulator, m) {
           value : np.ndarray
               Cluster expansion values, per unit cell, as a const reference. The i-th element is the value of the i-th cluster expansion. Referred to values remain fixed until the next time a calculator function is called.
           )pbdoc")
-      .def("extensive_value",
-           &clexulator::MultiClusterExpansion::extensive_value, R"pbdoc(
+      .def("per_supercell", &clexulator::MultiClusterExpansion::per_supercell,
+           R"pbdoc(
           Calculate the cluster expansion values
 
           Returns

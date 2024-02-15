@@ -220,10 +220,10 @@ void run_correlations_checks(
   Index n_corr = clexulator->corr_size();
   Index n_sites = config.supercell_neighbor_list->n_sites();
 
-  // -- intensive, extensive, contribution checks --
-  auto const &e = correlations.extensive();
+  // -- per_unitcell, per_supercell, contribution checks --
+  auto const &e = correlations.per_supercell();
   EXPECT_EQ(e.size(), n_corr);
-  EXPECT_EQ(correlations.intensive(e).size(), n_corr);
+  EXPECT_EQ(correlations.per_unitcell(e).size(), n_corr);
   EXPECT_EQ(correlations.contribution(0).size(), n_corr);
 
   // -- single point corr checks --

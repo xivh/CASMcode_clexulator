@@ -39,13 +39,13 @@ SparseCoefficients const &ClusterExpansion::coefficients() const {
   return m_coefficients;
 }
 
-double ClusterExpansion::intensive_value() {
-  auto const &e = m_correlations.extensive();
-  return m_coefficients * m_correlations.intensive(e);
+double ClusterExpansion::per_unitcell() {
+  auto const &e = m_correlations.per_supercell();
+  return m_coefficients * m_correlations.per_unitcell(e);
 }
 
-double ClusterExpansion::extensive_value() {
-  return m_coefficients * m_correlations.extensive();
+double ClusterExpansion::per_supercell() {
+  return m_coefficients * m_correlations.per_supercell();
 }
 
 /// \brief Calculate change in cluster expansion value due to a single
@@ -76,7 +76,7 @@ double ClusterExpansion::local_delta_value(DoFKey const &key,
 
 double ClusterExpansion::global_delta_value(DoFKey const &key,
                                             Eigen::VectorXd const &new_value) {
-  auto const &e = m_correlations.extensive();
+  auto const &e = m_correlations.per_supercell();
   return m_coefficients * m_correlations.global_delta(key, new_value, e);
 }
 
@@ -142,13 +142,13 @@ std::vector<SparseCoefficients> const &MultiClusterExpansion::coefficients()
   return m_coefficients;
 }
 
-Eigen::VectorXd const &MultiClusterExpansion::intensive_value() {
-  auto const &e = m_correlations.extensive();
-  return _calc(m_correlations.intensive(e));
+Eigen::VectorXd const &MultiClusterExpansion::per_unitcell() {
+  auto const &e = m_correlations.per_supercell();
+  return _calc(m_correlations.per_unitcell(e));
 }
 
-Eigen::VectorXd const &MultiClusterExpansion::extensive_value() {
-  return _calc(m_correlations.extensive());
+Eigen::VectorXd const &MultiClusterExpansion::per_supercell() {
+  return _calc(m_correlations.per_supercell());
 }
 
 /// \brief Calculate change in cluster expansion value due to a single
@@ -179,7 +179,7 @@ Eigen::VectorXd const &MultiClusterExpansion::local_delta_value(
 
 Eigen::VectorXd const &MultiClusterExpansion::global_delta_value(
     DoFKey const &key, Eigen::VectorXd const &new_value) {
-  auto const &e = m_correlations.extensive();
+  auto const &e = m_correlations.per_supercell();
   return _calc(m_correlations.global_delta(key, new_value, e));
 }
 

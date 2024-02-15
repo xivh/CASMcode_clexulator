@@ -15,7 +15,7 @@ from ._clexulator import (
     PrimNeighborList,
     SparseCoefficients,
     SuperNeighborList,
-    calc_intensive_correlations,
+    calc_per_unitcell_correlations,
     calc_local_correlations,
     calc_order_parameters,
     from_standard_values,
