@@ -494,6 +494,15 @@ class Clexulator {
   std::shared_ptr<RuntimeLibrary> m_lib;
 };
 
+struct LocalClexulatorWrapper {
+  LocalClexulatorWrapper() {}
+  LocalClexulatorWrapper(
+      std::shared_ptr<std::vector<clexulator::Clexulator>> _local_clexulator)
+      : local_clexulator(_local_clexulator) {}
+
+  std::shared_ptr<std::vector<clexulator::Clexulator>> local_clexulator;
+};
+
 /// \brief Default log for compilation info output
 ///
 /// Initially this writes to `std::cout`, but it can be reset.

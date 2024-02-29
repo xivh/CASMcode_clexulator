@@ -174,6 +174,16 @@ class PrimNeighborList {
   size_type m_n_sublattices;
 };
 
+/// \brief Wrapper class used with PyBind11
+struct PrimNeighborListWrapper {
+  PrimNeighborListWrapper() {}
+  PrimNeighborListWrapper(
+      std::shared_ptr<clexulator::PrimNeighborList> _prim_neighbor_list)
+      : prim_neighbor_list(_prim_neighbor_list) {}
+
+  std::shared_ptr<clexulator::PrimNeighborList> prim_neighbor_list;
+};
+
 /// \brief Make the PrimNeighborList with default parameters
 std::shared_ptr<PrimNeighborList> make_default_prim_neighbor_list(
     xtal::BasicStructure const &prim);

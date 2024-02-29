@@ -48,18 +48,11 @@ struct PrimDoFInfo {
   std::map<DoFKey, std::vector<xtal::SiteDoFSet>> local_dof_info;
 };
 
-// Need to allow constructing empty
-// std::shared_ptr<clexulator::PrimNeighborList>, but PyBind11 won't allow it,
-// so use this wrapper class
-struct PrimNeighborListWrapper {
-  std::shared_ptr<clexulator::PrimNeighborList> prim_neighbor_list;
-};
-
-std::shared_ptr<PrimNeighborListWrapper> make_prim_neighbor_list(
+std::shared_ptr<clexulator::PrimNeighborListWrapper> make_prim_neighbor_list(
     std::optional<Eigen::Matrix3l> const &weight_matrix,
     std::optional<std::vector<int>> sublattice_indices,
     std::optional<int> total_n_sublattice) {
-  auto wrapper = std::make_shared<PrimNeighborListWrapper>();
+  auto wrapper = std::make_shared<clexulator::PrimNeighborListWrapper>();
   if (!weight_matrix.has_value()) {
     return wrapper;
   }
@@ -74,7 +67,7 @@ std::shared_ptr<PrimNeighborListWrapper> make_prim_neighbor_list(
 
 std::shared_ptr<clexulator::SuperNeighborList> make_super_neighbor_list(
     Eigen::Matrix3l const &transformation_matrix_to_super,
-    PrimNeighborListWrapper const &wrapper) {
+    clexulator::PrimNeighborListWrapper const &wrapper) {
   if (wrapper.prim_neighbor_list == nullptr) {
     throw std::runtime_error(
         "Error in make_super_neighbor_list: prim_neighbor_list is not "
@@ -89,7 +82,8 @@ std::shared_ptr<clexulator::Clexulator> make_empty_clexulator() {
 }
 
 std::shared_ptr<clexulator::Clexulator> make_clexulator(
-    std::string source, std::shared_ptr<PrimNeighborListWrapper> wrapper,
+    std::string source,
+    std::shared_ptr<clexulator::PrimNeighborListWrapper> wrapper,
     std::optional<std::string> compile_options,
     std::optional<std::string> so_options) {
   // Use JSON parser to avoid duplication and give nice error messages
@@ -108,19 +102,17 @@ std::shared_ptr<clexulator::Clexulator> make_clexulator(
   return std::make_shared<clexulator::Clexulator>(std::move(*parser.value));
 }
 
-struct LocalClexulatorWrapper {
-  std::shared_ptr<std::vector<clexulator::Clexulator>> local_clexulator;
-};
-
-std::shared_ptr<LocalClexulatorWrapper> make_empty_local_clexulator() {
-  auto lclex_wrapper = std::make_shared<LocalClexulatorWrapper>();
+std::shared_ptr<clexulator::LocalClexulatorWrapper>
+make_empty_local_clexulator() {
+  auto lclex_wrapper = std::make_shared<clexulator::LocalClexulatorWrapper>();
   lclex_wrapper->local_clexulator =
       std::make_shared<std::vector<clexulator::Clexulator>>();
   return lclex_wrapper;
 }
 
-std::shared_ptr<LocalClexulatorWrapper> make_local_clexulator(
-    std::string source, std::shared_ptr<PrimNeighborListWrapper> wrapper,
+std::shared_ptr<clexulator::LocalClexulatorWrapper> make_local_clexulator(
+    std::string source,
+    std::shared_ptr<clexulator::PrimNeighborListWrapper> wrapper,
     std::optional<std::string> compile_options,
     std::optional<std::string> so_options) {
   // Use JSON parser to avoid duplication and give nice error messages
@@ -138,7 +130,7 @@ std::shared_ptr<LocalClexulatorWrapper> make_local_clexulator(
       "Error in libcasm.clexulator.make_local_clexulator"};
   report_and_throw_if_invalid(parser, CASM::log(), error_if_invalid);
 
-  auto lclex_wrapper = std::make_shared<LocalClexulatorWrapper>();
+  auto lclex_wrapper = std::make_shared<clexulator::LocalClexulatorWrapper>();
   lclex_wrapper->local_clexulator =
       std::make_shared<std::vector<clexulator::Clexulator>>(
           std::move(*parser.value));
@@ -164,7 +156,8 @@ std::shared_ptr<clexulator::Correlations> make_correlations(
 std::shared_ptr<clexulator::LocalCorrelations> make_local_correlations(
     std::shared_ptr<clexulator::SuperNeighborList const> const
         &supercell_neighbor_list,
-    std::shared_ptr<LocalClexulatorWrapper> const &local_clexulator_wrapper,
+    std::shared_ptr<clexulator::LocalClexulatorWrapper> const
+        &local_clexulator_wrapper,
     clexulator::ConfigDoFValues const *dof_values,
     std::optional<std::vector<unsigned int>> correlation_indices) {
   if (correlation_indices.has_value()) {
@@ -201,7 +194,8 @@ std::shared_ptr<clexulator::MultiClusterExpansion> make_multi_cluster_expansion(
 std::shared_ptr<clexulator::LocalClusterExpansion> make_local_cluster_expansion(
     std::shared_ptr<clexulator::SuperNeighborList const> const
         &supercell_neighbor_list,
-    std::shared_ptr<LocalClexulatorWrapper> const &local_clexulator_wrapper,
+    std::shared_ptr<clexulator::LocalClexulatorWrapper> const
+        &local_clexulator_wrapper,
     clexulator::SparseCoefficients const &coefficients,
     clexulator::ConfigDoFValues const *dof_values) {
   return std::make_shared<clexulator::LocalClusterExpansion>(
@@ -213,7 +207,8 @@ std::shared_ptr<clexulator::MultiLocalClusterExpansion>
 make_multi_local_cluster_expansion(
     std::shared_ptr<clexulator::SuperNeighborList const> const
         &supercell_neighbor_list,
-    std::shared_ptr<LocalClexulatorWrapper> const &local_clexulator_wrapper,
+    std::shared_ptr<clexulator::LocalClexulatorWrapper> const
+        &local_clexulator_wrapper,
     std::vector<clexulator::SparseCoefficients> const &coefficients,
     clexulator::ConfigDoFValues const *dof_values) {
   return std::make_shared<clexulator::MultiLocalClusterExpansion>(
@@ -499,7 +494,8 @@ PYBIND11_MODULE(_clexulator, m) {
       "basis.",
       py::arg("dof_values"), py::arg("xtal_prim"), py::arg("n_unitcells"));
 
-  py::class_<PrimNeighborListWrapper, std::shared_ptr<PrimNeighborListWrapper>>(
+  py::class_<clexulator::PrimNeighborListWrapper,
+             std::shared_ptr<clexulator::PrimNeighborListWrapper>>(
       m, "PrimNeighborList", R"pbdoc(
       A neighbor list, generated for a Prim, relative to the origin unit cell.
 
@@ -638,7 +634,7 @@ PYBIND11_MODULE(_clexulator, m) {
           py::arg("xtal_prim"))
       .def(
           "sublattice_indices",
-          [](PrimNeighborListWrapper const &x) {
+          [](clexulator::PrimNeighborListWrapper const &x) {
             std::set<int> sublat_indices =
                 x.prim_neighbor_list->sublat_indices();
             return std::vector<int>(sublat_indices.begin(),
@@ -649,7 +645,7 @@ PYBIND11_MODULE(_clexulator, m) {
           )pbdoc")
       .def(
           "total_n_sublattice",
-          [](PrimNeighborListWrapper const &x) {
+          [](clexulator::PrimNeighborListWrapper const &x) {
             return x.prim_neighbor_list->n_sublattices();
           },
           R"pbdoc(
@@ -657,7 +653,7 @@ PYBIND11_MODULE(_clexulator, m) {
           )pbdoc")
       .def(
           "add_unitcell",
-          [](PrimNeighborListWrapper const &x,
+          [](clexulator::PrimNeighborListWrapper const &x,
              Eigen::Vector3l const &unitcell) {
             x.prim_neighbor_list->expand(unitcell);
           },
@@ -673,7 +669,7 @@ PYBIND11_MODULE(_clexulator, m) {
           py::arg("unitcell_indices"))
       .def(
           "add_site",
-          [](PrimNeighborListWrapper const &x,
+          [](clexulator::PrimNeighborListWrapper const &x,
              xtal::UnitCellCoord const &_ucc) {
             x.prim_neighbor_list->expand(_ucc);
           },
@@ -690,7 +686,7 @@ PYBIND11_MODULE(_clexulator, m) {
           py::arg("integral_site_coordinate"))
       .def(
           "neighbor_index",
-          [](PrimNeighborListWrapper const &x,
+          [](clexulator::PrimNeighborListWrapper const &x,
              xtal::UnitCellCoord const &integral_site_coordinate) {
             return x.prim_neighbor_list->neighbor_index(
                 integral_site_coordinate);
@@ -711,7 +707,7 @@ PYBIND11_MODULE(_clexulator, m) {
           py::arg("integral_site_coordinate"))
       .def(
           "n_neighborhood_sites",
-          [](PrimNeighborListWrapper const &x) {
+          [](clexulator::PrimNeighborListWrapper const &x) {
             return x.prim_neighbor_list->size() *
                    x.prim_neighbor_list->sublat_indices().size();
           },
@@ -726,7 +722,7 @@ PYBIND11_MODULE(_clexulator, m) {
           )pbdoc")
       .def(
           "n_neighborhood_unitcells",
-          [](PrimNeighborListWrapper const &x) {
+          [](clexulator::PrimNeighborListWrapper const &x) {
             return x.prim_neighbor_list->size();
           },
           R"pbdoc(
@@ -740,7 +736,7 @@ PYBIND11_MODULE(_clexulator, m) {
           )pbdoc")
       .def(
           "__len__",
-          [](PrimNeighborListWrapper const &x) {
+          [](clexulator::PrimNeighborListWrapper const &x) {
             return x.prim_neighbor_list->size();
           },
           R"pbdoc(
@@ -754,7 +750,7 @@ PYBIND11_MODULE(_clexulator, m) {
           )pbdoc")
       .def(
           "__iter__",
-          [](PrimNeighborListWrapper const &x) {
+          [](clexulator::PrimNeighborListWrapper const &x) {
             return py::make_iterator(x.prim_neighbor_list->begin(),
                                      x.prim_neighbor_list->end());
           },
@@ -764,7 +760,7 @@ PYBIND11_MODULE(_clexulator, m) {
   m.def(
       "make_default_prim_neighbor_list",
       [](xtal::BasicStructure const &xtal_prim) {
-        PrimNeighborListWrapper x;
+        clexulator::PrimNeighborListWrapper x;
         x.prim_neighbor_list =
             clexulator::make_default_prim_neighbor_list(xtal_prim);
         return x;
@@ -1101,7 +1097,8 @@ PYBIND11_MODULE(_clexulator, m) {
           },
           "Sublat indices in the Prim");
   //
-  py::class_<LocalClexulatorWrapper, std::shared_ptr<LocalClexulatorWrapper>>(
+  py::class_<clexulator::LocalClexulatorWrapper,
+             std::shared_ptr<clexulator::LocalClexulatorWrapper>>(
       m, "LocalClexulator", R"pbdoc(
       Evaluate local basis set functions
 
@@ -1117,13 +1114,13 @@ PYBIND11_MODULE(_clexulator, m) {
           )pbdoc")
       .def(
           "n_functions",
-          [](LocalClexulatorWrapper const &wrapper) {
+          [](clexulator::LocalClexulatorWrapper const &wrapper) {
             return wrapper.local_clexulator->at(0).corr_size();
           },
           "Return the number of basis functions")
       .def(
           "n_equivalents",
-          [](LocalClexulatorWrapper const &wrapper) {
+          [](clexulator::LocalClexulatorWrapper const &wrapper) {
             return wrapper.local_clexulator->size();
           },
           "Return the number of equivalent local basis sets");
@@ -1293,7 +1290,7 @@ PYBIND11_MODULE(_clexulator, m) {
 
   m.def(
       "calc_local_correlations",
-      [](LocalClexulatorWrapper const &wrapper,
+      [](clexulator::LocalClexulatorWrapper const &wrapper,
          clexulator::ConfigDoFValues const &config_dof_values,
          std::shared_ptr<clexulator::SuperNeighborList const> const
              &supercell_neighbor_list,
