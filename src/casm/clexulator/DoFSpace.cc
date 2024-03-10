@@ -678,22 +678,19 @@ Eigen::VectorXd get_normal_coordinate(
   }
 }
 
-/// \brief Return DoF value in the DoFSpace basis of the subset of the
-/// configuration located at a particular coordinate
+/// \brief Return DoF values as a unrolled coordinate in the prim basis for
+///     the subset of the configuration located at a particular coordinate
 ///
 /// This method may be used for local DoF values at a particular location in a
 /// configuration. It may be used even if config and dof_space do not have the
-/// same supercell, in order to construct an average as if being evalauted in a
+/// same supercell, in order to construct an average as if being evaluated in a
 /// commensurate supercell.
 ///
-/// The following relations apply:
-///
-///     standard_dof_values = dof_set.basis() * prim_dof_values
-///     prim_dof_values = dof_space.basis() * normal_coordinate
+/// For occupation DoF, these are the indicator variables.
 ///
 /// \throws If dof_space.dof_key() is a global DoF type.
 ///
-Eigen::VectorXd get_normal_coordinate_at(
+Eigen::VectorXd get_dof_vector_value_at(
     ConfigDoFValues const &dof_values, DoFSpace const &dof_space,
     DoFSpaceIndexConverter const &index_converter,
     xtal::UnitCell integral_lattice_coordinate) {
@@ -701,7 +698,7 @@ Eigen::VectorXd get_normal_coordinate_at(
 
   if (AnisoValTraits(dof_key).global()) {
     std::stringstream msg;
-    msg << "Error: get_normal_coordinate_at is not valid for dof type '"
+    msg << "Error: get_dof_vector_value_at is not valid for dof type '"
         << dof_key << "'" << std::endl;
     throw std::runtime_error(msg.str());
   } else {
@@ -717,7 +714,7 @@ Eigen::VectorXd get_normal_coordinate_at(
         occ_values[i] = (dof_values.occupation(l) == axis_dof_component[i]);
       }
       Eigen::VectorXd prim_dof_values = occ_values.cast<double>();
-      return dof_space.basis_inv * prim_dof_values;
+      return prim_dof_values;
 
     } else {
       Eigen::VectorXd vector_values = Eigen::VectorXd::Zero(dim);
@@ -729,18 +726,43 @@ Eigen::VectorXd get_normal_coordinate_at(
             axis_site_index[i], integral_lattice_coordinate);
         vector_values[i] = matrix_values(axis_dof_component[i], l);
       }
-      return dof_space.basis_inv * vector_values;
+      return vector_values;
     }
   }
 }
 
-/// \brief Return mean DoF value of configuration in the DoFSpace basis
+/// \brief Return DoF value in the DoFSpace basis of the subset of the
+/// configuration located at a particular coordinate
+///
+/// This method may be used for local DoF values at a particular location in a
+/// configuration. It may be used even if config and dof_space do not have the
+/// same supercell, in order to construct an average as if being evaluated in a
+/// commensurate supercell.
+///
+/// The following relations apply:
+///
+///     standard_dof_values = dof_set.basis() * prim_dof_values
+///     prim_dof_values = dof_space.basis() * normal_coordinate
+///
+/// \throws If dof_space.dof_key() is a global DoF type.
+///
+Eigen::VectorXd get_normal_coordinate_at(
+    ConfigDoFValues const &dof_values, DoFSpace const &dof_space,
+    DoFSpaceIndexConverter const &index_converter,
+    xtal::UnitCell integral_lattice_coordinate) {
+  return dof_space.basis_inv *
+         get_dof_vector_value_at(dof_values, dof_space, index_converter,
+                                 integral_lattice_coordinate);
+}
+
+/// \brief Return mean DoF value of configuration as a unrolled coordinate in
+///     the prim basis
 ///
 /// This method may be used for global or local DoF values. For local DoF
 /// values it determines the commensurate supercell for the config and
-/// dof_space supercells and calls `get_normal_coordinate_at` repeatedly as if
+/// dof_space supercells and calls `get_dof_vector_value_at` repeatedly as if
 /// the mutually commensurate supercell had been constructed and filled with
-/// `dof_values` in order to calculate a mean normal coordinate value.
+/// `dof_values` in order to calculate mean DoF values.
 ///
 /// The following relations apply:
 ///
@@ -749,7 +771,7 @@ Eigen::VectorXd get_normal_coordinate_at(
 ///
 /// \throws If dof_space.dof_key is a global DoF type.
 ///
-Eigen::VectorXd get_mean_normal_coordinate(
+Eigen::VectorXd get_mean_dof_vector_value(
     ConfigDoFValues const &dof_values,
     Eigen::Matrix3l const &transformation_matrix_to_super,
     DoFSpace const &dof_space) {
@@ -759,8 +781,7 @@ Eigen::VectorXd get_mean_normal_coordinate(
   auto const &dof_key = dof_space.dof_key;
 
   if (AnisoValTraits(dof_key).global()) {
-    auto const &vector_values = dof_values.global_dof_values.at(dof_key);
-    return dof_space.basis_inv * vector_values;
+    return dof_values.global_dof_values.at(dof_key);
   } else {
     Index dim = dof_space.dim;
     xtal::Lattice const &P = config_superlattice.prim_lattice();
@@ -787,16 +808,40 @@ Eigen::VectorXd get_mean_normal_coordinate(
     DoFSpaceIndexConverter index_converter{unitcellcoord_index_converter,
                                            dof_space};
 
-    Eigen::VectorXd normal_coordinate_sum = Eigen::VectorXd::Zero(dim);
+    Eigen::VectorXd dof_vector_value_sum = Eigen::VectorXd::Zero(dim);
     for (Index i = 0; i < N; ++i) {
       // to get UnitCell lattice coordinate in config, need to multiply by T
       xtal::UnitCell ijk = T * sub_supercell_coordinates(i);
-      normal_coordinate_sum +=
-          get_normal_coordinate_at(dof_values, dof_space, index_converter, ijk);
+      dof_vector_value_sum +=
+          get_dof_vector_value_at(dof_values, dof_space, index_converter, ijk);
     }
-    Eigen::VectorXd mean_normal_coordinate_sum = normal_coordinate_sum / N;
-    return mean_normal_coordinate_sum;
+    Eigen::VectorXd mean_dof_vector_value = dof_vector_value_sum / N;
+    return mean_dof_vector_value;
   }
+}
+
+/// \brief Return mean DoF value of configuration in the DoFSpace basis
+///
+/// This method may be used for global or local DoF values. For local DoF
+/// values it determines the commensurate supercell for the config and
+/// dof_space supercells and calls `get_normal_coordinate_at` repeatedly as if
+/// the mutually commensurate supercell had been constructed and filled with
+/// `dof_values` in order to calculate a mean normal coordinate value.
+///
+/// The following relations apply:
+///
+///     standard_dof_values = dof_set.basis * prim_dof_values
+///     prim_dof_values = dof_space.basis * normal_coordinate
+///
+/// \throws If dof_space.dof_key is a global DoF type.
+///
+Eigen::VectorXd get_mean_normal_coordinate(
+    ConfigDoFValues const &dof_values,
+    Eigen::Matrix3l const &transformation_matrix_to_super,
+    DoFSpace const &dof_space) {
+  return dof_space.basis_inv *
+         get_mean_dof_vector_value(dof_values, transformation_matrix_to_super,
+                                   dof_space);
 }
 
 /// \brief Set DoF values from a coordinate in the DoFSpace basis

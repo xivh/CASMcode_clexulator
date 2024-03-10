@@ -2360,7 +2360,7 @@ PYBIND11_MODULE(_clexulator, m) {
       .def_readonly("transformation_matrix_to_super",
                     &clexulator::DoFSpace::transformation_matrix_to_super,
                     R"pbdoc(
-          np.ndarray : The shape=(3,3) integer matrix specifiyfing the supercell for a local DoF space.
+          Optional[np.ndarray] : The shape=(3,3) integer matrix specifying the supercell for a local DoF space.
           )pbdoc")
       .def_readonly("site_indices", &clexulator::DoFSpace::sites, R"pbdoc(
           Optional[list[int]] : The set of linear index of sites in the supercell to be included in a local DoF space.

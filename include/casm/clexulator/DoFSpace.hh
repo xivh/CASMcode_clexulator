@@ -209,12 +209,26 @@ Eigen::VectorXd get_normal_coordinate(
     Eigen::Matrix3l const &transformation_matrix_to_super,
     DoFSpace const &dof_space);
 
+/// \brief Return DoF values as a unrolled coordinate in the prim basis for
+///     the subset of the configuration located at a particular coordinate
+Eigen::VectorXd get_dof_vector_value_at(
+    ConfigDoFValues const &dof_values, DoFSpace const &dof_space,
+    DoFSpaceIndexConverter const &index_converter,
+    xtal::UnitCell integral_lattice_coordinate);
+
 /// \brief Return DoF value in the DoFSpace basis of the subset of the
 /// configuration located at a particular coordinate
 Eigen::VectorXd get_normal_coordinate_at(
     ConfigDoFValues const &dof_values, DoFSpace const &dof_space,
     DoFSpaceIndexConverter const &index_converter,
     xtal::UnitCell integral_lattice_coordinate);
+
+/// \brief Return mean DoF value of configuration as a unrolled coordinate in
+///     the prim basis
+Eigen::VectorXd get_mean_dof_vector_value(
+    ConfigDoFValues const &dof_values,
+    Eigen::Matrix3l const &transformation_matrix_to_super,
+    DoFSpace const &dof_space);
 
 /// \brief Return mean DoF value of configuration in the DoFSpace basis
 Eigen::VectorXd get_mean_normal_coordinate(
