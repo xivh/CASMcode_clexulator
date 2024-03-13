@@ -109,11 +109,7 @@ DoFSpace::DoFSpace(
                                   transformation_matrix_to_super, sites)),
       basis(_basis.has_value() ? _basis.value()
                                : Eigen::MatrixXd::Identity(dim, dim)),
-      basis_inv(
-          basis.transpose()
-              .colPivHouseholderQr()
-              .solve(Eigen::MatrixXd::Identity(basis.cols(), basis.cols()))
-              .transpose()),
+      basis_inv(basis.completeOrthogonalDecomposition().pseudoInverse()),
       subspace_dim(basis.cols()),
       axis_info(std::move(_axis_info)) {
   if (is_global) {
