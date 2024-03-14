@@ -9,7 +9,7 @@ xtal_prim = xtal_prims.HCP(a=1.0, occ_dof=["A", "B"])
 prim_neighbor_list = make_default_prim_neighbor_list(xtal_prim)
 
 ###
-import numpy as np # noqa
+import numpy as np  # noqa
 
 site = xtal.IntegralSiteCoordinate(
     sublattice=1,
@@ -27,7 +27,7 @@ site -= reference_unitcell
 neighbor_index = prim_neighbor_list.neighbor_index(site)
 
 ###
-from libcasm.clexulator import SuperNeighborList # noqa
+from libcasm.clexulator import SuperNeighborList  # noqa
 
 # transformation_matrix_to_super: numpy.ndarray[numpy.int64[3, 3]
 transformation_matrix_to_super = np.eye(3, dtype=int) * 10
