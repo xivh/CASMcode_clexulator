@@ -5,12 +5,33 @@ All notable changes to `libcasm-clexulator` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.0a4] - 2023-10-26
+## [2.0a4] - Unreleased
+
+### Fixed
+
+- Fixed DoFSpace basis pseudoinverse calculation
 
 ### Added
 
 - Added gradients of correlations functionality in C++, Python functions
 - Added FADBAD library to support compiling of Clexulators capable of calculating gradients 
+- Added methods to libcasm.clexulator.PrimNeighborList to construct a PrimNeighborList with default parameters for a libcasm.xtal.Prim and to expand and access the neighbors.
+- Added libcasm.clexulator.make_default_prim_neighbor_list
+- Added methods to libcasm.clexulator.SuperNeighborList to access the neighbor sites and unitcells.
+- Added support in ConfigDoFValues for multiple discrete DoF
+- Added CASM::clexulator::get_dof_vector_value_at and CASM::clexulator::get_mean_dof_vector_value
+
+
+### Changed
+
+- Updated docs for PyData Sphinx Theme 0.14.3, particularly dark theme colors and logo
+- Changed "intensive_value" methods to "per_unitcell" and "extensive_value" methods to "per_supercell"
+- Changed names of libcasm.clexulator.PrimNeighborList methods default_nlist_weight_matrix to default_lattice_weight_matrix and default_nlist_sublattice_indices to default_sublattice_indices
+
+### Removed
+
+- Removed libcasm.clexulator.PrimNeighborList.default_nlist
+
 
 ## [2.0a3] - 2023-10-25
 

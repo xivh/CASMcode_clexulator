@@ -97,7 +97,7 @@ def header_files(search_root):
         for file in files
         if is_extensionless_Eigen_header(file) or has_header_extension(file)
     ]
-    return _header_files
+    return sorted(_header_files)
 
 
 def source_files(search_root):
@@ -108,7 +108,7 @@ def source_files(search_root):
     _source_files = [
         os.path.join(d, f) for d, fs in files for f in fs if has_source_extension(f)
     ]
-    return _source_files
+    return sorted(_source_files)
 
 
 def libcasm_testing_source_files(search_dir):
@@ -117,7 +117,7 @@ def libcasm_testing_source_files(search_dir):
         for file in os.listdir(search_dir)
         if file != "gtest_main_run_all.cpp" and has_source_extension(file)
     ]
-    return files
+    return sorted(files)
 
 
 def unit_test_source_files(search_dir, additional):
@@ -127,7 +127,7 @@ def unit_test_source_files(search_dir, additional):
         for file in os.listdir(search_dir)
         if has_source_extension(file)
     ]
-    return files
+    return sorted(files)
 
 
 def as_cmake_file_strings(files):

@@ -100,6 +100,42 @@ ConfigDoFValues from_standard_values(
     std::map<DoFKey, GlobalDoFSetType> const &global_dof_info,
     std::map<DoFKey, std::vector<LocalDoFSetType>> const &local_dof_info);
 
+/// \brief Calculate the shape factors needed for updates between
+///     ConfigDoFValues::occupation and ConfigDoFValues::multi_occupation
+std::vector<std::vector<int>> make_occupation_shape_factors(
+    std::vector<std::vector<int>> const &discrete_dof_dim);
+
+/// \brief Make the default ConfigDoFValues::multi_occupation matrix
+void make_default_multi_occupation(
+    ConfigDoFValues &dof_values, Index N_sublat, Index N_volume,
+    std::vector<std::vector<int>> const &discrete_dof_dim);
+
+/// \brief Update ConfigDoFValues::occupation to be consistent with
+///     ConfigDoFValues::multi_occupation, on a single site
+void update_single_occupation(ConfigDoFValues &dof_values, Index N_sublat,
+                              Index N_volume,
+                              std::vector<int> const &occupation_shape_factors,
+                              Index linear_site_index);
+
+/// \brief Update ConfigDoFValues::occupation to be consistent with
+///     ConfigDoFValues::multi_occupation
+void update_single_occupation(ConfigDoFValues &dof_values, Index N_sublat,
+                              Index N_volume,
+                              std::vector<int> const &occupation_shape_factors);
+
+/// \brief Update ConfigDoFValues::multi_occupation to be consistent with
+///     ConfigDoFValues::occupation, on a single site
+void update_multi_occupation(ConfigDoFValues &dof_values, Index N_sublat,
+                             Index N_volume,
+                             std::vector<int> const &occupation_shape_factors,
+                             Index linear_site_index);
+
+/// \brief Update ConfigDoFValues::multi_occupation to be consistent with
+///     ConfigDoFValues::occupation
+void update_multi_occupation(ConfigDoFValues &dof_values, Index N_sublat,
+                             Index N_volume,
+                             std::vector<int> const &occupation_shape_factors);
+
 // --- Inline & template definitions ---
 
 /// Returns the block of DoF values from one sublattice
@@ -354,6 +390,105 @@ ConfigDoFValues from_standard_values(
   }
 
   return dof_values;
+}
+
+/// \brief Calculate the shape factors needed for updates between
+///     ConfigDoFValues::occupation and ConfigDoFValues::multi_occupation
+///
+/// \param discrete_dof_dim The value
+///     `discrete_dof_dim[sublattice_index][dof_type_index]` is the number
+///     of allowed discrete values for the `dof_type_index`-th discrete
+///     DoF on the `sublattice_index`-th sublattice.
+/// \return occupation_shape_factors The values in
+///     `occupation_shape_factors[sublattice_index]` are used to convert
+///     between single and multi occupation indices for the discrete dof,
+///     on the `sublattice_index`-th sublattice, where a column in
+///     `ConfigDofValues::multi_occupation` is like "rolled" indices
+///     (i.e. [0,0], [0,1], [0,2], [1,0], ...), and corresponds to a
+///     value in `ConfigDoFValues::occupation` which is like an
+///     "unrolled" index (i.e. 0, 1, 2, 3, ...).
+inline std::vector<std::vector<int>> make_occupation_shape_factors(
+    std::vector<std::vector<int>> const &discrete_dof_dim) {
+  // Ex: (for a particular sublattice, b)
+
+  std::vector<std::vector<int>> occupation_shape_factors;
+  for (auto const &discrete_dof_dim_on_b : discrete_dof_dim) {
+    std::vector<int> _occupation_shape_factors;
+    for (int i = 0; i < discrete_dof_dim_on_b.size(); ++i) {
+      int factor = 1;
+      for (int j = i + 1; j < discrete_dof_dim_on_b.size(); ++j) {
+        factor *= discrete_dof_dim_on_b[j];
+      }
+      _occupation_shape_factors.push_back(factor);
+    }
+    occupation_shape_factors.push_back(_occupation_shape_factors);
+  }
+  return occupation_shape_factors;
+}
+
+/// \brief Update ConfigDoFValues::occupation to be consistent with
+///     ConfigDoFValues::multi_occupation, on a single site
+inline void update_single_occupation(
+    ConfigDoFValues &dof_values, Index N_sublat, Index N_volume,
+    std::vector<std::vector<int>> const &occupation_shape_factors,
+    Index linear_site_index) {
+  Index b = linear_site_index / N_volume;
+  dof_values.occupation(linear_site_index) = 0;
+  for (int i = 0; i < occupation_shape_factors[b].size(); ++i) {
+    dof_values.occupation(linear_site_index) +=
+        occupation_shape_factors[b][i] *
+        dof_values.multi_occupation(i, linear_site_index);
+  }
+}
+
+/// \brief Make the default ConfigDoFValues::multi_occupation matrix
+inline void make_default_multi_occupation(
+    ConfigDoFValues &dof_values, Index N_sublat, Index N_volume,
+    std::vector<std::vector<int>> const &discrete_dof_dim) {
+  Index N_sites = N_sublat * N_volume;
+  dof_values.multi_occupation.resize(discrete_dof_dim.size(), N_sites);
+  dof_values.multi_occupation.setZero();
+}
+
+/// \brief Update ConfigDoFValues::occupation to be consistent with
+///     ConfigDoFValues::multi_occupation
+inline void update_single_occupation(
+    ConfigDoFValues &dof_values, Index N_sublat, Index N_volume,
+    std::vector<std::vector<int>> const &occupation_shape_factors) {
+  Index N_sites = N_sublat * N_volume;
+  for (Index l = 0; l < N_sites; ++l) {
+    update_single_occupation(dof_values, N_sublat, N_volume,
+                             occupation_shape_factors, l);
+  }
+}
+
+/// \brief Update ConfigDoFValues::multi_occupation to be consistent with
+///     ConfigDoFValues::occupation, on a single site
+inline void update_multi_occupation(
+    ConfigDoFValues &dof_values, Index N_sublat, Index N_volume,
+    std::vector<std::vector<int>> const &occupation_shape_factors,
+    Index linear_site_index) {
+  Index b = linear_site_index / N_volume;
+  int remaining = dof_values.occupation(linear_site_index);
+  for (int i = 0; i < occupation_shape_factors[b].size(); ++i) {
+    dof_values.multi_occupation(i, linear_site_index) = 0;
+    while (occupation_shape_factors[b][i] <= remaining) {
+      dof_values.multi_occupation(i, linear_site_index) += 1;
+      remaining -= occupation_shape_factors[b][i];
+    }
+  }
+}
+
+/// \brief Update ConfigDoFValues::multi_occupation to be consistent with
+///     ConfigDoFValues::occupation
+inline void update_multi_occupation(
+    ConfigDoFValues &dof_values, Index N_sublat, Index N_volume,
+    std::vector<std::vector<int>> const &occupation_shape_factors) {
+  Index N_sites = N_sublat * N_volume;
+  for (Index l = 0; l < N_sites; ++l) {
+    update_multi_occupation(dof_values, N_sublat, N_volume,
+                            occupation_shape_factors, l);
+  }
 }
 
 }  // namespace clexulator

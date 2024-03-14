@@ -110,9 +110,9 @@ std::vector<unsigned int> const &Correlations::correlation_indices() const {
   return m_correlation_indices;
 }
 
-/// \brief Calculate and return intensive correlations
+/// \brief Calculate and return per_unitcell correlations
 ///
-/// \param extensive_correlations Extensive correlations, to be normalized
+/// \param per_supercell_correlations Extensive correlations, to be normalized
 ///     by the number of unit cells in the supercell.
 ///
 /// Notes:
@@ -120,21 +120,21 @@ std::vector<unsigned int> const &Correlations::correlation_indices() const {
 /// - Constructor specifies which vector elements are defined.
 /// - Result is a reference to an internal Eigen::VectorXd. The reference is
 ///   valid until the next time this method is called.
-Eigen::VectorXd const &Correlations::intensive(
-    Eigen::VectorXd const &extensive_correlations) {
-  if (m_intensive_corr.size() != m_corr_size) {
-    m_intensive_corr.resize(m_corr_size);
-    m_intensive_corr.setZero();
+Eigen::VectorXd const &Correlations::per_unitcell(
+    Eigen::VectorXd const &per_supercell_correlations) {
+  if (m_per_unitcell_corr.size() != m_corr_size) {
+    m_per_unitcell_corr.resize(m_corr_size);
+    m_per_unitcell_corr.setZero();
   }
   double n_unitcells = (double)m_supercell_neighbor_list->n_unitcells();
   for (auto it = m_corr_indices_begin; it != m_corr_indices_end; ++it) {
-    *(m_intensive_corr.data() + *it) =
-        *(extensive_correlations.data() + *it) / n_unitcells;
+    *(m_per_unitcell_corr.data() + *it) =
+        *(per_supercell_correlations.data() + *it) / n_unitcells;
   }
-  return m_intensive_corr;
+  return m_per_unitcell_corr;
 }
 
-/// \brief Calculate and return extensive correlations
+/// \brief Calculate and return per_supercell correlations
 ///
 /// \returns The basis function values summed over the entire configuration
 ///
@@ -143,10 +143,10 @@ Eigen::VectorXd const &Correlations::intensive(
 /// - Constructor specifies which vector elements are defined.
 /// - Result is a reference to an internal Eigen::VectorXd. The reference is
 ///   valid until the next time this method is called.
-Eigen::VectorXd const &Correlations::extensive() {
-  if (m_extensive_corr.size() != m_corr_size) {
-    m_extensive_corr.resize(m_corr_size);
-    m_extensive_corr.setZero();
+Eigen::VectorXd const &Correlations::per_supercell() {
+  if (m_per_supercell_corr.size() != m_corr_size) {
+    m_per_supercell_corr.resize(m_corr_size);
+    m_per_supercell_corr.setZero();
   }
   if (m_tcorr.size() != m_corr_size) {
     m_tcorr.resize(m_corr_size);
@@ -155,7 +155,7 @@ Eigen::VectorXd const &Correlations::extensive() {
   int n_unitcells = m_supercell_neighbor_list->n_unitcells();
 
   for (auto it = m_corr_indices_begin; it != m_corr_indices_end; ++it) {
-    *(m_extensive_corr.data() + *it) = 0.0;
+    *(m_per_supercell_corr.data() + *it) = 0.0;
   }
 
   for (int unitcell_index = 0; unitcell_index < n_unitcells; unitcell_index++) {
@@ -165,10 +165,10 @@ Eigen::VectorXd const &Correlations::extensive() {
         m_tcorr.data(), m_corr_indices_begin, m_corr_indices_end);
 
     for (auto it = m_corr_indices_begin; it != m_corr_indices_end; ++it) {
-      *(m_extensive_corr.data() + *it) += *(m_tcorr.data() + *it);
+      *(m_per_supercell_corr.data() + *it) += *(m_tcorr.data() + *it);
     }
   }
-  return m_extensive_corr;
+  return m_per_supercell_corr;
 }
 
 /// \brief Calculate and return the contribution from a particular
@@ -329,7 +329,7 @@ std::vector<Index> Correlations::all_points_site_indices(
   return site_indices;
 }
 
-/// \brief Calculate and return change in (extensive) correlations due to an
+/// \brief Calculate and return change in (per_supercell) correlations due to an
 /// occupation change
 ///
 /// \param linear_site_index Linear site index (as defined by a
@@ -340,7 +340,7 @@ std::vector<Index> Correlations::all_points_site_indices(
 ///     and ignored if the supercell is large enough (`supercell_neighbor_list-
 ///     >overlap == false`).
 ///
-/// \returns Change in extensive correlations, relative to
+/// \returns Change in per_supercell correlations, relative to
 ///     `reference_point_correlations`
 ///
 /// Notes:
@@ -395,7 +395,7 @@ Eigen::VectorXd const &Correlations::occ_delta(
   }
 }
 
-/// \brief Calculate and return change in (extensive) correlations due to
+/// \brief Calculate and return change in (per_supercell) correlations due to
 /// multiple occupation changes
 Eigen::VectorXd const &Correlations::occ_delta(
     std::vector<Index> const &linear_site_index,
@@ -481,7 +481,7 @@ Eigen::VectorXd const &Correlations::occ_delta(
   return m_delta_corr;
 }
 
-/// \brief Calculate and return change in (extensive) correlations due to a
+/// \brief Calculate and return change in (per_supercell) correlations due to a
 /// local continuous DoF change
 ///
 /// \param key Specifies the type of DoF
@@ -491,7 +491,7 @@ Eigen::VectorXd const &Correlations::occ_delta(
 /// \param reference_point_correlations The point correlations of the specified
 ///     site before the change in value.
 ///
-/// \returns Change in extensive correlations, relative to
+/// \returns Change in per_supercell correlations, relative to
 ///     `reference_point_correlations`
 ///
 /// Notes:
@@ -539,15 +539,16 @@ Eigen::VectorXd const &Correlations::local_delta(
   return m_delta_corr;
 }
 
-/// \brief Calculate and return change in (extensive) correlations due to a
+/// \brief Calculate and return change in (per_supercell) correlations due to a
 /// global continuous DoF change
 ///
 /// \param key Specifies the type of DoF
 /// \param new_value Final value to calculate the change in correlations for.
-/// \param reference_extensive_correlations The extensive correlations of before
+/// \param reference_per_supercell_correlations The per_supercell correlations
+/// of before
 ///     the change in value.
 ///
-/// \returns Change in extensive correlations, relative to
+/// \returns Change in per_supercell correlations, relative to
 ///     `reference_point_correlations`
 ///
 /// Notes:
@@ -558,7 +559,7 @@ Eigen::VectorXd const &Correlations::local_delta(
 
 Eigen::VectorXd const &Correlations::global_delta(
     DoFKey const &key, Eigen::VectorXd const &new_value,
-    Eigen::VectorXd const &reference_extensive_correlations) {
+    Eigen::VectorXd const &reference_per_supercell_correlations) {
   if (m_tcorr.size() != m_corr_size) {
     m_tcorr.resize(m_corr_size);
     m_tcorr.setZero();
@@ -576,7 +577,7 @@ Eigen::VectorXd const &Correlations::global_delta(
   Eigen::VectorXd &mutable_value = const_cast<Eigen::VectorXd &>(value);
   mutable_value = new_value;
 
-  // Calculate extensive correlations after change (store in m_delta_corr)
+  // Calculate per_supercell correlations after change (store in m_delta_corr)
   // ----
   int n_unitcells = m_supercell_neighbor_list->n_unitcells();
 
@@ -597,7 +598,7 @@ Eigen::VectorXd const &Correlations::global_delta(
   // ----
 
   // dcorr = after - before
-  Eigen::VectorXd const &before = reference_extensive_correlations;
+  Eigen::VectorXd const &before = reference_per_supercell_correlations;
   for (auto it = m_corr_indices_begin; it != m_corr_indices_end; ++it) {
     *(m_delta_corr.data() + *it) -= *(before.data() + *it);
   }

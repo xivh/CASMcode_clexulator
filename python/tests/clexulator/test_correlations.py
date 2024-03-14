@@ -11,7 +11,7 @@ from .functions import make_source
 
 @pytest.mark.slow
 @pytest.mark.very_slow
-def test_calc_intensive_correlations(session_shared_datadir):
+def test_calc_per_unitcell_correlations(session_shared_datadir):
     source = make_source(session_shared_datadir, "OccClexulatorZrOTest", "default")
 
     with open(session_shared_datadir / "ZrO_prim.json", "r") as f:
@@ -25,7 +25,7 @@ def test_calc_intensive_correlations(session_shared_datadir):
 
     dof_values = clex.make_default_config_dof_values(xtal_prim, n_unitcells)
     assert len(dof_values.occupation()) == 4 * n_unitcells
-    correlations = clex.calc_intensive_correlations(
+    correlations = clex.calc_per_unitcell_correlations(
         clexulator, dof_values, supercell_neighbor_list
     )
     assert isinstance(correlations, np.ndarray)

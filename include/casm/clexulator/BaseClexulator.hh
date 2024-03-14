@@ -238,6 +238,15 @@ class BaseClexulator {
     _calc_delta_point_corr(neighbor_ind, occ_i, occ_f, _corr_begin);
   }
 
+  /// \brief Similar to calc_delta_point_corr, using
+  ///     ConfigDoFValues::multi_occupation
+  void calc_multi_occ_delta_point_corr(int neighbor_ind, int discrete_dof_index,
+                                       int occ_i, int occ_f,
+                                       double *corr_begin) const {
+    _calc_multi_occ_delta_point_corr(neighbor_ind, discrete_dof_index, occ_i,
+                                     occ_f, corr_begin);
+  }
+
   /// \brief Calculate the change in select point correlations due to changing
   /// an occupant
   ///
@@ -257,6 +266,17 @@ class BaseClexulator {
                                         size_type const *_corr_ind_end) const {
     _calc_restricted_delta_point_corr(neighbor_ind, occ_i, occ_f, _corr_begin,
                                       _corr_ind_begin, _corr_ind_end);
+  }
+
+  /// \brief Similar to calc_restricted_delta_point_corr, using
+  ///     ConfigDoFValues::multi_occupation
+  void calc_multi_occ_restricted_delta_point_corr(
+      int neighbor_ind, int discrete_dof_index, int occ_i, int occ_f,
+      double *_corr_begin, size_type const *_corr_ind_begin,
+      size_type const *_corr_ind_end) const {
+    _calc_multi_occ_restricted_delta_point_corr(
+        neighbor_ind, discrete_dof_index, occ_i, occ_f, _corr_begin,
+        _corr_ind_begin, _corr_ind_end);
   }
 
  private:
@@ -308,6 +328,21 @@ class BaseClexulator {
   virtual void _calc_delta_point_corr(int neighbor_ind, int occ_i, int occ_f,
                                       double *_corr_begin) const = 0;
 
+  virtual void _calc_multi_occ_delta_point_corr(int neighbor_ind,
+                                                int discrete_dof_index,
+                                                int occ_i, int occ_f) const {
+    throw std::runtime_error(
+        "Error: _calc_multi_occ_delta_point_corr-1 not implemented");
+  }
+
+  virtual void _calc_multi_occ_delta_point_corr(int neighbor_ind,
+                                                int discrete_dof_index,
+                                                int occ_i, int occ_f,
+                                                double *_corr_begin) const {
+    throw std::runtime_error(
+        "Error: _calc_multi_occ_delta_point_corr-2 not implemented");
+  }
+
   virtual void _calc_restricted_delta_point_corr(
       int neighbor_ind, int occ_i, int occ_f, size_type const *_corr_ind_begin,
       size_type const *_corr_ind_end) const = 0;
@@ -316,6 +351,21 @@ class BaseClexulator {
       int neighbor_ind, int occ_i, int occ_f, double *_corr_begin,
       size_type const *_corr_ind_begin,
       size_type const *_corr_ind_end) const = 0;
+
+  virtual void _calc_multi_occ_restricted_delta_point_corr(
+      int neighbor_ind, int discrete_dof_index, int occ_i, int occ_f,
+      size_type const *_corr_ind_begin, size_type const *_corr_ind_end) const {
+    throw std::runtime_error(
+        "Error: _calc_multi_occ_restricted_delta_point_corr-1 not implemented");
+  }
+
+  virtual void _calc_multi_occ_restricted_delta_point_corr(
+      int neighbor_ind, int discrete_dof_index, int occ_i, int occ_f,
+      double *_corr_begin, size_type const *_corr_ind_begin,
+      size_type const *_corr_ind_end) const {
+    throw std::runtime_error(
+        "Error: _calc_multi_occ_restricted_delta_point_corr-2 not implemented");
+  }
 
   void _register_local_dof(std::string const &_type_name, Index _ind) {
     Index new_size = std::max(Index(_ind), Index(m_local_dof_ptrs.size())) + 1;

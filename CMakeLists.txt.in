@@ -40,7 +40,7 @@ if(NOT DEFINED CASM_PREFIX)
       message(STATUS "found libcasm-global")
       execute_process(COMMAND ${Python_EXECUTABLE} -m libcasm.casmglobal --prefix
                       OUTPUT_VARIABLE CASM_PREFIX_RAW)
-      string(STRIP ${CASM_PREFIX_RAW} CASM_PREFIX)
+      string(STRIP "${CASM_PREFIX_RAW}" CASM_PREFIX)
       message(STATUS "CASM_PREFIX: ${CASM_PREFIX}")
     else()
       message(STATUS "did not find libcasm-global")
@@ -174,7 +174,7 @@ if(DEFINED SKBUILD)
   # call pybind11-config to obtain the root of the cmake package
   execute_process(COMMAND ${PYTHON_EXECUTABLE} -m pybind11 --cmakedir
                   OUTPUT_VARIABLE pybind11_ROOT_RAW)
-  string(STRIP ${pybind11_ROOT_RAW} pybind11_ROOT)
+  string(STRIP "${pybind11_ROOT_RAW}" pybind11_ROOT)
   find_package(pybind11)
 
   # The extension modules must load:

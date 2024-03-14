@@ -48,18 +48,11 @@ struct PrimDoFInfo {
   std::map<DoFKey, std::vector<xtal::SiteDoFSet>> local_dof_info;
 };
 
-// Need to allow constructing empty
-// std::shared_ptr<clexulator::PrimNeighborList>, but PyBind11 won't allow it,
-// so use this wrapper class
-struct PrimNeighborListWrapper {
-  std::shared_ptr<clexulator::PrimNeighborList> prim_neighbor_list;
-};
-
-std::shared_ptr<PrimNeighborListWrapper> make_prim_neighbor_list(
+std::shared_ptr<clexulator::PrimNeighborListWrapper> make_prim_neighbor_list(
     std::optional<Eigen::Matrix3l> const &weight_matrix,
     std::optional<std::vector<int>> sublattice_indices,
     std::optional<int> total_n_sublattice) {
-  auto wrapper = std::make_shared<PrimNeighborListWrapper>();
+  auto wrapper = std::make_shared<clexulator::PrimNeighborListWrapper>();
   if (!weight_matrix.has_value()) {
     return wrapper;
   }
@@ -74,7 +67,7 @@ std::shared_ptr<PrimNeighborListWrapper> make_prim_neighbor_list(
 
 std::shared_ptr<clexulator::SuperNeighborList> make_super_neighbor_list(
     Eigen::Matrix3l const &transformation_matrix_to_super,
-    PrimNeighborListWrapper const &wrapper) {
+    clexulator::PrimNeighborListWrapper const &wrapper) {
   if (wrapper.prim_neighbor_list == nullptr) {
     throw std::runtime_error(
         "Error in make_super_neighbor_list: prim_neighbor_list is not "
@@ -89,7 +82,8 @@ std::shared_ptr<clexulator::Clexulator> make_empty_clexulator() {
 }
 
 std::shared_ptr<clexulator::Clexulator> make_clexulator(
-    std::string source, std::shared_ptr<PrimNeighborListWrapper> wrapper,
+    std::string source,
+    std::shared_ptr<clexulator::PrimNeighborListWrapper> wrapper,
     std::optional<std::string> compile_options,
     std::optional<std::string> so_options) {
   // Use JSON parser to avoid duplication and give nice error messages
@@ -108,19 +102,17 @@ std::shared_ptr<clexulator::Clexulator> make_clexulator(
   return std::make_shared<clexulator::Clexulator>(std::move(*parser.value));
 }
 
-struct LocalClexulatorWrapper {
-  std::shared_ptr<std::vector<clexulator::Clexulator>> local_clexulator;
-};
-
-std::shared_ptr<LocalClexulatorWrapper> make_empty_local_clexulator() {
-  auto lclex_wrapper = std::make_shared<LocalClexulatorWrapper>();
+std::shared_ptr<clexulator::LocalClexulatorWrapper>
+make_empty_local_clexulator() {
+  auto lclex_wrapper = std::make_shared<clexulator::LocalClexulatorWrapper>();
   lclex_wrapper->local_clexulator =
       std::make_shared<std::vector<clexulator::Clexulator>>();
   return lclex_wrapper;
 }
 
-std::shared_ptr<LocalClexulatorWrapper> make_local_clexulator(
-    std::string source, std::shared_ptr<PrimNeighborListWrapper> wrapper,
+std::shared_ptr<clexulator::LocalClexulatorWrapper> make_local_clexulator(
+    std::string source,
+    std::shared_ptr<clexulator::PrimNeighborListWrapper> wrapper,
     std::optional<std::string> compile_options,
     std::optional<std::string> so_options) {
   // Use JSON parser to avoid duplication and give nice error messages
@@ -138,7 +130,7 @@ std::shared_ptr<LocalClexulatorWrapper> make_local_clexulator(
       "Error in libcasm.clexulator.make_local_clexulator"};
   report_and_throw_if_invalid(parser, CASM::log(), error_if_invalid);
 
-  auto lclex_wrapper = std::make_shared<LocalClexulatorWrapper>();
+  auto lclex_wrapper = std::make_shared<clexulator::LocalClexulatorWrapper>();
   lclex_wrapper->local_clexulator =
       std::make_shared<std::vector<clexulator::Clexulator>>(
           std::move(*parser.value));
@@ -164,7 +156,8 @@ std::shared_ptr<clexulator::Correlations> make_correlations(
 std::shared_ptr<clexulator::LocalCorrelations> make_local_correlations(
     std::shared_ptr<clexulator::SuperNeighborList const> const
         &supercell_neighbor_list,
-    std::shared_ptr<LocalClexulatorWrapper> const &local_clexulator_wrapper,
+    std::shared_ptr<clexulator::LocalClexulatorWrapper> const
+        &local_clexulator_wrapper,
     clexulator::ConfigDoFValues const *dof_values,
     std::optional<std::vector<unsigned int>> correlation_indices) {
   if (correlation_indices.has_value()) {
@@ -201,7 +194,8 @@ std::shared_ptr<clexulator::MultiClusterExpansion> make_multi_cluster_expansion(
 std::shared_ptr<clexulator::LocalClusterExpansion> make_local_cluster_expansion(
     std::shared_ptr<clexulator::SuperNeighborList const> const
         &supercell_neighbor_list,
-    std::shared_ptr<LocalClexulatorWrapper> const &local_clexulator_wrapper,
+    std::shared_ptr<clexulator::LocalClexulatorWrapper> const
+        &local_clexulator_wrapper,
     clexulator::SparseCoefficients const &coefficients,
     clexulator::ConfigDoFValues const *dof_values) {
   return std::make_shared<clexulator::LocalClusterExpansion>(
@@ -213,7 +207,8 @@ std::shared_ptr<clexulator::MultiLocalClusterExpansion>
 make_multi_local_cluster_expansion(
     std::shared_ptr<clexulator::SuperNeighborList const> const
         &supercell_neighbor_list,
-    std::shared_ptr<LocalClexulatorWrapper> const &local_clexulator_wrapper,
+    std::shared_ptr<clexulator::LocalClexulatorWrapper> const
+        &local_clexulator_wrapper,
     std::vector<clexulator::SparseCoefficients> const &coefficients,
     clexulator::ConfigDoFValues const *dof_values) {
   return std::make_shared<clexulator::MultiLocalClusterExpansion>(
@@ -499,7 +494,8 @@ PYBIND11_MODULE(_clexulator, m) {
       "basis.",
       py::arg("dof_values"), py::arg("xtal_prim"), py::arg("n_unitcells"));
 
-  py::class_<PrimNeighborListWrapper, std::shared_ptr<PrimNeighborListWrapper>>(
+  py::class_<clexulator::PrimNeighborListWrapper,
+             std::shared_ptr<clexulator::PrimNeighborListWrapper>>(
       m, "PrimNeighborList", R"pbdoc(
       A neighbor list, generated for a Prim, relative to the origin unit cell.
 
@@ -509,10 +505,21 @@ PYBIND11_MODULE(_clexulator, m) {
       depend on the choice of supercell. The PrimNeighborList is then used to
       construct a SuperNeighborList, which defines a neighbor list for a
       particular supercell in terms of linear site indices in that supercell.
+
+      For details, see the section :ref:`Neighbor lists <neighbor-lists-index>`.
+
       )pbdoc")
       .def(py::init(&make_prim_neighbor_list),
            R"pbdoc(
-          Constructor
+
+          .. rubric:: Constructor
+
+          .. note::
+
+              In most cases, it is preferable to construct a
+              :class:`~libcasm.clexulator.PrimNeighborList` with appropriate parameters
+              for a given :class:`~libcasm.xtal.Prim` using the factory function
+              :func:`~libcasm.clexulator.make_default_prim_neighbor_list`.
 
           Parameters
           ----------
@@ -523,10 +530,10 @@ PYBIND11_MODULE(_clexulator, m) {
               constructed. Otherwise, the `lattice_weight_matrix`
               can be specified explicitly.
 
-              In the neighbor list, unit cells are ordered by the distance,
-              :math:`x^{\mathsf{T} W x`, where :math:`x` is the integer
-              unit cell coordinates, and :math:`W` is the lattice weight
-              matrix.
+              In the neighbor list, unit cells are ordered by the integer
+              distance, :math:`r = x^{\mathsf{T}} W x`, where :math:`x` is the
+              integer unit cell coordinates, and :math:`W` is the integer lattice
+              weight matrix.
 
               An appropriate value for the weight matrix of a given lattice
               can be generated using
@@ -569,24 +576,218 @@ PYBIND11_MODULE(_clexulator, m) {
           -------
           lattice_weight_matrix: array_like, shape=(3,3), dtype=int
               Weight matrix, that defines the shape of neighborhood that
-              orders neighbors. In the
-              :class:`~libcasm.clexulator.PrimNeighborList`, unit cells
-              are ordered by the distance, :math:`x^{\mathsf{T} W x`,
-              where :math:`x` is the integer unit cell coordinates. The
-              weight matrix is constructed such that
-              :math:`x^{\mathsf{T} W x` is approximately spherical in
+              orders neighbors. In the :class:`~libcasm.clexulator.PrimNeighborList`,
+              unit cells are ordered by the integer distance,
+              :math:`r = x^{\mathsf{T}} W x`, where :math:`x` is the integer unit
+              cell coordinates. The integer weight matrix, :math:`W`, is constructed
+              such that :math:`x^{\mathsf{T}} W x` is approximately spherical in
               Cartesian coordinates, subject to the `max_element_value`.
           )pbdoc",
                   py::arg("lattice_column_vector_matrix"),
                   py::arg("max_element_value") = 10, py::arg("tol") = CASM::TOL)
-      .def(
-          "sublattice_indices",
-          [](PrimNeighborListWrapper const &x) {
-            return x.prim_neighbor_list->sublat_indices();
+      .def_static("default_lattice_weight_matrix",
+                  &clexulator::PrimNeighborList::default_weight_matrix,
+                  R"pbdoc(
+          Make default weight matrix for approximately spherical neighborhood
+          in Cartesian coordinates
+
+          Parameters
+          ----------
+          xtal_prim : xtal.Prim
+              The Prim.
+
+          Returns
+          -------
+          lattice_weight_matrix: array_like, shape=(3,3), dtype=int
+              Weight matrix, that defines the shape of neighborhood that
+              orders neighbors. In the :class:`~libcasm.clexulator.PrimNeighborList`,
+              unit cells are ordered by the integer distance,
+              :math:`r = x^{\mathsf{T}} W x`, where :math:`x` is the integer unit
+              cell coordinates. The integer weight matrix, :math:`W`, is constructed
+              such that :math:`x^{\mathsf{T}} W x` is approximately spherical in
+              Cartesian coordinates, with maximum element value being 10.
+          )pbdoc",
+                  py::arg("xtal_prim"))
+      .def_static(
+          "default_sublattice_indices",
+          [](xtal::BasicStructure const &xtal_prim) {
+            std::set<int> _sublat_indices =
+                clexulator::PrimNeighborList::default_sublat_indices(xtal_prim);
+            return std::vector<int>(_sublat_indices.begin(),
+                                    _sublat_indices.end());
           },
           R"pbdoc(
-          Indices of sublattices included in the neighbor list.
-        )pbdoc");
+          Make default list of sublattices that should be included in the
+          neighbor list
+
+          Parameters
+          ----------
+          xtal_prim : xtal.Prim
+              The Prim.
+
+          Returns
+          -------
+          sublattice_indices: list[int]
+              Indices of sublattices that have 2 or more occupant degrees of freedom
+              (DoF) or 1 or more continuous DoF.
+          )pbdoc",
+          py::arg("xtal_prim"))
+      .def(
+          "sublattice_indices",
+          [](clexulator::PrimNeighborListWrapper const &x) {
+            std::set<int> sublat_indices =
+                x.prim_neighbor_list->sublat_indices();
+            return std::vector<int>(sublat_indices.begin(),
+                                    sublat_indices.end());
+          },
+          R"pbdoc(
+          list[int]: Indices of sublattices included in the neighbor list.
+          )pbdoc")
+      .def(
+          "total_n_sublattice",
+          [](clexulator::PrimNeighborListWrapper const &x) {
+            return x.prim_neighbor_list->n_sublattices();
+          },
+          R"pbdoc(
+          int: The total number of sublattices in the relevant Prim.
+          )pbdoc")
+      .def(
+          "add_unitcell",
+          [](clexulator::PrimNeighborListWrapper const &x,
+             Eigen::Vector3l const &unitcell) {
+            x.prim_neighbor_list->expand(unitcell);
+          },
+          R"pbdoc(
+          Expand the neighborlist to ensure it includes a given unit cell
+
+          Parameters
+          ----------
+          unitcell: array_like of int, shape=(3,)
+              A unit cell, with position given as multiples of the prim lattice vectors
+              relative to the origin unit cell.
+          )pbdoc",
+          py::arg("unitcell_indices"))
+      .def(
+          "add_site",
+          [](clexulator::PrimNeighborListWrapper const &x,
+             xtal::UnitCellCoord const &_ucc) {
+            x.prim_neighbor_list->expand(_ucc);
+          },
+          R"pbdoc(
+          Expand the neighborlist to ensure it includes the unit cell containing a
+          given site
+
+          Parameters
+          ----------
+          integral_site_coordinate: libcasm.xtal.IntegralSiteCoordinate
+              A site, with unit cell position given as multiples of the prim lattice
+              vectors relative to the origin unit cell.
+          )pbdoc",
+          py::arg("integral_site_coordinate"))
+      .def(
+          "neighbor_index",
+          [](clexulator::PrimNeighborListWrapper const &x,
+             xtal::UnitCellCoord const &integral_site_coordinate) {
+            return x.prim_neighbor_list->neighbor_index(
+                integral_site_coordinate);
+          },
+          R"pbdoc(
+          Get neighborlist index of a site, expanding the neighborhood if necessary
+
+          Parameters
+          ----------
+          integral_site_coordinate: libcasm.xtal.IntegralSiteCoordinate
+              The site to get the neighbor list index of.
+
+          Returns
+          -------
+          neighbor_index: int
+              The index of the site in the neighbor list of the origin unit cell.
+          )pbdoc",
+          py::arg("integral_site_coordinate"))
+      .def(
+          "n_neighborhood_sites",
+          [](clexulator::PrimNeighborListWrapper const &x) {
+            return x.prim_neighbor_list->size() *
+                   x.prim_neighbor_list->sublat_indices().size();
+          },
+          R"pbdoc(
+          The number of sites included in the neighborhood
+
+          Returns
+          -------
+          n_neighborhood_sites: int
+              The number of sites included in the neighborhood. This is equal to
+              ``len(self) * len(self.sublattice_indices)``.
+          )pbdoc")
+      .def(
+          "n_neighborhood_unitcells",
+          [](clexulator::PrimNeighborListWrapper const &x) {
+            return x.prim_neighbor_list->size();
+          },
+          R"pbdoc(
+          The number of unit cells included in the neighborhood
+
+          Returns
+          -------
+          n_neighborhood_unitcells: int
+              The number of unit cells included in the neighborhood. This is equal to
+              ``len(self)``.
+          )pbdoc")
+      .def(
+          "__len__",
+          [](clexulator::PrimNeighborListWrapper const &x) {
+            return x.prim_neighbor_list->size();
+          },
+          R"pbdoc(
+          The number of unit cells included in the neighborhood
+
+          Returns
+          -------
+          size: int
+              The number of unit cells included in the neighborhood. This is equal to
+              ``self.n_neighborhood_unitcells()``.
+          )pbdoc")
+      .def(
+          "__iter__",
+          [](clexulator::PrimNeighborListWrapper const &x) {
+            return py::make_iterator(x.prim_neighbor_list->begin(),
+                                     x.prim_neighbor_list->end());
+          },
+          py::keep_alive<
+              0, 1>() /* Essential: keep object alive while iterator exists */);
+
+  m.def(
+      "make_default_prim_neighbor_list",
+      [](xtal::BasicStructure const &xtal_prim) {
+        clexulator::PrimNeighborListWrapper x;
+        x.prim_neighbor_list =
+            clexulator::make_default_prim_neighbor_list(xtal_prim);
+        return x;
+      },
+      R"pbdoc(
+          Make a PrimNeighborList with default parameters for the given Prim
+
+          In the :class:`~libcasm.clexulator.PrimNeighborList`, unit cells are ordered
+          by the integer distance, :math:`r = x^{\mathsf{T}} W x`, where :math:`x` is
+          the integer unit cell coordinates. The integer weight matrix, :math:`W`, is
+          constructed such that :math:`x^{\mathsf{T}} W x` is approximately spherical in
+          Cartesian coordinates.
+
+
+          Parameters
+          ----------
+          xtal_prim : xtal.Prim
+              The Prim.
+
+          Returns
+          -------
+          prim_neighbor_list: PrimNeighborList
+              A PrimNeighborList that includes sublattices that have 2 or more occupant
+              degrees of freedom (DoF) or 1 or more continuous DoF. The lattice weight
+              matrix is chosen with maximum element being 10.
+          )pbdoc",
+      py::arg("xtal_prim"));
 
   py::class_<clexulator::SuperNeighborList,
              std::shared_ptr<clexulator::SuperNeighborList>>(
@@ -615,14 +816,234 @@ PYBIND11_MODULE(_clexulator, m) {
           )pbdoc",
            py::arg("transformation_matrix_to_super"),
            py::arg("prim_neighbor_list"))
+      .def("n_supercell_unitcells", &clexulator::SuperNeighborList::n_unitcells,
+           R"pbdoc(
+           int: The number of unit cells in the supercell
+           )pbdoc")
+      .def("n_supercell_sites", &clexulator::SuperNeighborList::n_sites,
+           R"pbdoc(
+           int: The total number of sites in the supercell
+           )pbdoc")
+      .def("linear_unitcell_index",
+           &clexulator::SuperNeighborList::unitcell_index,
+           R"pbdoc(
+          Get the linear unit cell index of the unit cell containing a given site
+
+          Parameters
+          ----------
+          linear_site_index: int
+              The linear index of a site in the supercell.  Must be in
+              the range `[0, n_supercell_sites)`, where `n_supercell_sites` is the
+              value of :func:`SuperNeighborList.n_supercell_sites`.
+
+          Returns
+          -------
+          linear_unitcell_index: int
+              The linear unit cell index of the unit cell containing the site
+          )pbdoc",
+           py::arg("linear_site_index"))
+      .def("sublattice_index", &clexulator::SuperNeighborList::sublat_index,
+           R"pbdoc(
+          Get the sublattice index of a given site
+
+          Parameters
+          ----------
+          linear_site_index: int
+              The linear index of a site in the supercell. Must be in
+              the range `[0, n_supercell_sites)`, where `n_supercell_sites` is the
+              value of :func:`SuperNeighborList.n_supercell_sites`.
+
+          Returns
+          -------
+          sublattice_index: int
+              The index of the sublattice containing the site
+          )pbdoc",
+           py::arg("linear_site_index"))
+      .def(
+          "sites",
+          [](clexulator::SuperNeighborList const &x,
+             Index linear_unitcell_index) {
+            return py::make_iterator(x.sites(linear_unitcell_index).begin(),
+                                     x.sites(linear_unitcell_index).end());
+          },
+          py::keep_alive<
+              0, 1>() /* Essential: keep object alive while iterator exists */,
+          R"pbdoc(
+          Get an iterator over the linear site indices of the neighbor sites of a given
+          unit cell
+
+          .. rubric:: Example usage
+
+          .. code-block:: Python
+
+              import libcasm.xtal as xtal
+
+              # Get the linear site index of sites neighboring unitcell [0, 3, 1]:
+
+              # transformation_matrix_to_super: numpy.ndarray[numpy.int64[3, 3]
+              # prim_neighbor_list: PrimNeighborList
+
+              super_neighbor_list = SuperNeighborList(
+                  transformation_matrix_to_super, prim_neighbor_list)
+              unitcell_index_converter =
+                  xtal.UnitCellIndexConverter(transformation_matrix_to_super)
+              site_index_converter =
+                  xtal.SiteIndexConverter(transformation_matrix_to_super, prim_neighbor_list.n_sublattices())
+
+              unitcell = np.array([0, 3, 1])
+              linear_unitcell_index = unitcell_index_converter.linear_unitcell_index(
+                  unitcell,
+              )
+
+              print("Neighbor sites")
+              for i, linear_site_index in enumerate(super_neighbor_list.sites(linear_unitcell_index)):
+                  integral_site_coordinate =
+                      site_index_converter.integral_site_coordinate(linear_site_index)
+                  print(
+                      f"neighbor {i}: "
+                      f"linear_site_index: {linear_site_index} "
+                      f"integral_site_coordinate: {integral_site_coordinate}"
+                  )
+
+          Parameters
+          ----------
+          linear_unitcell_index: int
+              The linear unit cell index of a unit cell in the supercell.  Must be in
+              the range `[0, n_supercell_unitcells)`, where `n_supercell_unitcells` is
+              the value of :func:`SuperNeighborList.n_supercell_unitcells`.
+
+          Returns
+          -------
+          sites_iterator:
+              An iterator over the linear site indices of the sites in the neighborhood
+              of the given unit cell.
+          )pbdoc",
+          py::arg("linear_unitcell_index"))
+      .def(
+          "nbor_linear_site_index",
+          [](clexulator::SuperNeighborList const &x,
+             Index linear_unitcell_index, Index site_neighbor_list_index) {
+            return x.sites(linear_unitcell_index)[site_neighbor_list_index];
+          },
+          R"pbdoc(
+          Get the linear site index of a particular neighbor of a given unit cell
+
+          Parameters
+          ----------
+          linear_unitcell_index: int
+              The linear unit cell index of a unit cell in the supercell. Must be in
+              the range `[0, n_supercell_unitcells)`, where `n_supercell_unitcells` is
+              the value of :func:`SuperNeighborList.n_supercell_unitcells`.
+          site_neighbor_list_index: int
+              An index into the list of neighboring sites. Must be in the range
+              `[0, n_neighborhood_sites)`, where `n_neighborhood_sites` is the value of
+              :func:`PrimNeighborList.n_neighborhood_sites` (at the time the
+              :class:`SuperNeighborList` was constructed).
+
+
+          Returns
+          -------
+          nbor_linear_site_index:
+              The linear site index of the specified neighboring site.
+          )pbdoc",
+          py::arg("linear_unitcell_index"), py::arg("site_neighbor_list_index"))
+      .def(
+          "unitcells",
+          [](clexulator::SuperNeighborList const &x,
+             Index linear_unitcell_index) {
+            return py::make_iterator(x.unitcells(linear_unitcell_index).begin(),
+                                     x.unitcells(linear_unitcell_index).end());
+          },
+          py::keep_alive<
+              0, 1>() /* Essential: keep object alive while iterator exists */,
+          R"pbdoc(
+          Get an iterator over the linear unit cell indices of the neighbor unit cells
+          of a given unit cell
+
+          .. rubric:: Example usage
+
+          .. code-block:: Python
+
+              import libcasm.xtal as xtal
+
+              # Get the linear unit cell index of unit cells neighboring unitcell [0, 3, 1]:
+
+              # transformation_matrix_to_super: numpy.ndarray[numpy.int64[3, 3]
+              # prim_neighbor_list: PrimNeighborList
+
+              super_neighbor_list = SuperNeighborList(
+                  transformation_matrix_to_super, prim_neighbor_list)
+              unitcell_index_converter =
+                  xtal.UnitCellIndexConverter(transformation_matrix_to_super)
+
+              unitcell = np.array([0, 3, 1])
+              linear_unitcell_index = unitcell_index_converter.linear_unitcell_index(
+                  unitcell,
+              )
+
+              print("Neighbor unit cells")
+              for i, nbor_linear_site_index in enumerate(super_neighbor_list.unitcells(linear_unitcell_index)):
+                  nbor_unitcell = unitcell_index_converter.unitcell(nbor_linear_unitcell_index)
+                  print(
+                      f"neighbor {i}: "
+                      f"nbor_linear_unitcell_index: {nbor_linear_unitcell_index} "
+                      f"nbor_unitcell: {nbor_unitcell}"
+                  )
+
+          Parameters
+          ----------
+          linear_unitcell_index: int
+              The linear unit cell index of a unit cell in the supercell.  Must be in
+              the range `[0, n_supercell_unitcells)`, where `n_supercell_unitcells` is
+              the value of :func:`SuperNeighborList.n_supercell_unitcells`.
+
+          Returns
+          -------
+          unitcell_iterator:
+              An iterator over the linear site indices of the unit cells in the
+              neighborhood of the given unit cell.
+          )pbdoc",
+          py::arg("linear_unitcell_index"))
+      .def(
+          "nbor_linear_unitcell_index",
+          [](clexulator::SuperNeighborList const &x,
+             Index linear_unitcell_index, Index unitcell_neighbor_list_index) {
+            return x.unitcells(
+                linear_unitcell_index)[unitcell_neighbor_list_index];
+          },
+          R"pbdoc(
+          Get the linear site index of a particular neighbor of a given unit cell
+
+          Parameters
+          ----------
+          linear_unitcell_index: int
+              The linear unit cell index of a unit cell in the supercell.  Must be in
+              the range `[0, n_supercell_unitcells)`, where `n_supercell_unitcells` is
+              the value of :func:`SuperNeighborList.n_supercell_unitcells`.
+          unitcell_neighbor_list_index: int
+              An index into the list of neighboring unit cells. Must be in the range
+              `[0, n_neighborhood_unitcells)`, where `n_neighborhood_unitcells` is the
+              value of :func:`PrimNeighborList.n_neighborhood_unitcells` (at the time
+              the :class:`SuperNeighborList` was constructed).
+
+
+          Returns
+          -------
+          nbor_linear_unitcell_index:
+              The linear site index of the specified neighboring unit cell.
+          )pbdoc",
+          py::arg("linear_unitcell_index"),
+          py::arg("unitcell_neighbor_list_index"))
       .def("overlaps", &clexulator::SuperNeighborList::overlaps,
            R"pbdoc(
           Returns true if periodic images of the neighbor list overlap
 
           Returns
           -------
-          result: PrimNeighborList
-              If periodic images of the neighborhood overlap, Clexulator 'delta' values must be calculated from the difference between final and initial point values.
+          result: bool
+              If periodic images of the neighborhood overlap, Clexulator 'delta' values
+              must be calculated from the difference between final and initial point
+              values.
 
           )pbdoc");
 
@@ -676,7 +1097,8 @@ PYBIND11_MODULE(_clexulator, m) {
           },
           "Sublat indices in the Prim");
   //
-  py::class_<LocalClexulatorWrapper, std::shared_ptr<LocalClexulatorWrapper>>(
+  py::class_<clexulator::LocalClexulatorWrapper,
+             std::shared_ptr<clexulator::LocalClexulatorWrapper>>(
       m, "LocalClexulator", R"pbdoc(
       Evaluate local basis set functions
 
@@ -692,13 +1114,13 @@ PYBIND11_MODULE(_clexulator, m) {
           )pbdoc")
       .def(
           "n_functions",
-          [](LocalClexulatorWrapper const &wrapper) {
+          [](clexulator::LocalClexulatorWrapper const &wrapper) {
             return wrapper.local_clexulator->at(0).corr_size();
           },
           "Return the number of basis functions")
       .def(
           "n_equivalents",
-          [](LocalClexulatorWrapper const &wrapper) {
+          [](clexulator::LocalClexulatorWrapper const &wrapper) {
             return wrapper.local_clexulator->size();
           },
           "Return the number of equivalent local basis sets");
@@ -817,7 +1239,7 @@ PYBIND11_MODULE(_clexulator, m) {
         py::arg("so_options") = std::nullopt);
 
   m.def(
-      "calc_intensive_correlations",
+      "calc_per_unitcell_correlations",
       [](std::shared_ptr<clexulator::Clexulator> const &clexulator,
          clexulator::ConfigDoFValues const &config_dof_values,
          std::shared_ptr<clexulator::SuperNeighborList const> const
@@ -825,21 +1247,21 @@ PYBIND11_MODULE(_clexulator, m) {
          std::optional<std::vector<unsigned int>> indices) {
         if (!clexulator->initialized()) {
           throw std::runtime_error(
-              "Error in calc_intensive_correlations: clexulator is not "
+              "Error in calc_per_unitcell_correlations: clexulator is not "
               "initialized");
         }
         if (indices.has_value()) {
           clexulator::Correlations f(supercell_neighbor_list, clexulator,
                                      *indices, &config_dof_values);
-          return f.intensive(f.extensive());
+          return f.per_unitcell(f.per_supercell());
         } else {
           clexulator::Correlations f(supercell_neighbor_list, clexulator,
                                      &config_dof_values);
-          return f.intensive(f.extensive());
+          return f.per_unitcell(f.per_supercell());
         }
       },
       R"pbdoc(
-      Calculate intensive correlations
+      Calculate per_unitcell correlations
 
       This method is safe and easy to use, but may be slower than using
       the :class:`~libcasm.clexulator.Correlations` class directly.
@@ -859,7 +1281,7 @@ PYBIND11_MODULE(_clexulator, m) {
 
       Returns
       -------
-      intensive_correlations: np.ndarray
+      per_unitcell_correlations: np.ndarray
           The correlations, normalized per unit cell.
 
       )pbdoc",
@@ -868,7 +1290,7 @@ PYBIND11_MODULE(_clexulator, m) {
 
   m.def(
       "calc_local_correlations",
-      [](LocalClexulatorWrapper const &wrapper,
+      [](clexulator::LocalClexulatorWrapper const &wrapper,
          clexulator::ConfigDoFValues const &config_dof_values,
          std::shared_ptr<clexulator::SuperNeighborList const> const
              &supercell_neighbor_list,
@@ -969,22 +1391,22 @@ PYBIND11_MODULE(_clexulator, m) {
           equivalent_index: int
               Index indicating which of the symmetrically local cluster basis sets to get the neighborhood for.
           )pbdoc")
-      .def("extensive", &clexulator::Correlations::extensive,
+      .def("per_supercell", &clexulator::Correlations::per_supercell,
            py::return_value_policy::reference_internal, R"pbdoc(
-          Calculate and return extensive correlations, as const reference.
+          Calculate and return per_supercell correlations, as const reference.
 
           Returns
           -------
           value : np.ndarray
               Extensive correlations (per supercell). The same size correlation array is always returned, but if this instance was constructed with the indices of specific basis functions to calculate other values will be of undefined value.
           )pbdoc")
-      .def("intensive", &clexulator::Correlations::intensive,
+      .def("per_unitcell", &clexulator::Correlations::per_unitcell,
            py::return_value_policy::reference_internal, R"pbdoc(
-          Calculate and return intensive correlations, as const reference.
+          Calculate and return per_unitcell correlations, as const reference.
 
           Parameters
           ----------
-          extensive_correlations: np.ndarray
+          per_supercell_correlations: np.ndarray
               Extensive correlations (per supercell), to be normalized by the number of unit cells in the supercell.
 
           Returns
@@ -992,7 +1414,7 @@ PYBIND11_MODULE(_clexulator, m) {
           value : np.ndarray
               Intensive correlations  (per unit cell). The same size correlation array is always returned, but if this instance was constructed with the indices of specific basis functions to calculate other values will be of undefined value.
           )pbdoc",
-           py::arg("extensive_correlations"))
+           py::arg("per_supercell_correlations"))
       .def("contribution", &clexulator::Correlations::contribution,
            py::return_value_policy::reference_internal, R"pbdoc(
           Calculate and return the contribution from a particular unit cell, as const reference.
@@ -1079,7 +1501,7 @@ PYBIND11_MODULE(_clexulator, m) {
                                reference_point_correlations);
           },
           py::return_value_policy::reference_internal, R"pbdoc(
-          Calculate and return change in (extensive) correlations due to an occupation change
+          Calculate and return change in (per_supercell) correlations due to an occupation change
 
           Parameters
           ----------
@@ -1093,7 +1515,7 @@ PYBIND11_MODULE(_clexulator, m) {
           Returns
           -------
           delta_value : np.ndarray
-              Change in extensive correlations, relative to `reference_point_correlations`.
+              Change in per_supercell correlations, relative to `reference_point_correlations`.
           )pbdoc",
           py::arg("linear_site_index"), py::arg("new_occ"),
           py::arg("reference_point_correlations"))
@@ -1105,7 +1527,7 @@ PYBIND11_MODULE(_clexulator, m) {
             return x.occ_delta(linear_site_index, new_occ);
           },
           py::return_value_policy::reference_internal, R"pbdoc(
-          Calculate and return change in (extensive) correlations due to multiple occupation changes
+          Calculate and return change in (per_supercell) correlations due to multiple occupation changes
 
           Parameters
           ----------
@@ -1117,12 +1539,12 @@ PYBIND11_MODULE(_clexulator, m) {
           Returns
           -------
           delta_value : np.ndarray
-              Change in extensive correlations due to specified occupant changes.
+              Change in per_supercell correlations due to specified occupant changes.
           )pbdoc",
           py::arg("linear_site_index"), py::arg("new_occ"))
       .def("local_delta", &clexulator::Correlations::local_delta,
            py::return_value_policy::reference_internal, R"pbdoc(
-          Calculate and return change in (extensive) correlations due to a local DoF change
+          Calculate and return change in (per_supercell) correlations due to a local DoF change
 
           Parameters
           ----------
@@ -1138,13 +1560,13 @@ PYBIND11_MODULE(_clexulator, m) {
           Returns
           -------
           delta_value : np.ndarray
-              Change in extensive correlations, relative to `reference_point_correlations`.
+              Change in per_supercell correlations, relative to `reference_point_correlations`.
           )pbdoc",
            py::arg("key"), py::arg("linear_site_index"), py::arg("new_value"),
            py::arg("reference_point_correlations"))
       .def("global_delta", &clexulator::Correlations::global_delta,
            py::return_value_policy::reference_internal, R"pbdoc(
-          Calculate and return change in (extensive) correlations due to a global DoF change
+          Calculate and return change in (per_supercell) correlations due to a global DoF change
 
           Parameters
           ----------
@@ -1152,16 +1574,16 @@ PYBIND11_MODULE(_clexulator, m) {
               Specifies the type of DoF
           new_value: np.ndarray
               The value the global DoF is changed to, in the prim basis.
-          reference_extensive_correlations: np.ndarray
-              The extensive correlations before the change in global DoF value.
+          reference_per_supercell_correlations: np.ndarray
+              The per_supercell correlations before the change in global DoF value.
 
           Returns
           -------
           delta_value : np.ndarray
-              Change in extensive correlations, relative to `reference_extensive_correlations`.
+              Change in per_supercell correlations, relative to `reference_per_supercell_correlations`.
           )pbdoc",
            py::arg("key"), py::arg("new_value"),
-           py::arg("reference_extensive_correlations"))
+           py::arg("reference_per_supercell_correlations"))
       .def("grad_correlations", &clexulator::Correlations::grad_correlations,
            py::return_value_policy::reference_internal, R"pbdoc(
           Calculates and returns gradients of correlations with respect to 
@@ -1420,11 +1842,11 @@ PYBIND11_MODULE(_clexulator, m) {
       .def("set", &clexulator::ClusterExpansion::set, R"pbdoc(
           Set the :class:`~libcasm.clexulator.ConfigDoFValues` instance ClusterExpansion uses to calculate the cluster expansion value. ClusterExpansion maintains a pointer to the underlying data, which must have a lifetime as long as ClusterExpansion is used to calculate with its data.
           )pbdoc")
-      .def("intensive_value", &clexulator::ClusterExpansion::intensive_value,
+      .def("per_unitcell", &clexulator::ClusterExpansion::per_unitcell,
            R"pbdoc(
           float: Calculate the cluster expansion value per unit cell
           )pbdoc")
-      .def("extensive_value", &clexulator::ClusterExpansion::extensive_value,
+      .def("per_supercell", &clexulator::ClusterExpansion::per_supercell,
            R"pbdoc(
           float: Calculate the cluster expansion value
           )pbdoc")
@@ -1538,8 +1960,8 @@ PYBIND11_MODULE(_clexulator, m) {
       .def("set", &clexulator::MultiClusterExpansion::set, R"pbdoc(
           Set the :class:`~libcasm.clexulator.ConfigDoFValues` instance ClusterExpansion uses to calculate the cluster expansion value. ClusterExpansion maintains a pointer to the underlying data, which must have a lifetime as long as ClusterExpansion is used to calculate with its data.
           )pbdoc")
-      .def("intensive_value",
-           &clexulator::MultiClusterExpansion::intensive_value, R"pbdoc(
+      .def("per_unitcell", &clexulator::MultiClusterExpansion::per_unitcell,
+           R"pbdoc(
           Calculate the cluster expansion values per unit cell
 
           Returns
@@ -1547,8 +1969,8 @@ PYBIND11_MODULE(_clexulator, m) {
           value : np.ndarray
               Cluster expansion values, per unit cell, as a const reference. The i-th element is the value of the i-th cluster expansion. Referred to values remain fixed until the next time a calculator function is called.
           )pbdoc")
-      .def("extensive_value",
-           &clexulator::MultiClusterExpansion::extensive_value, R"pbdoc(
+      .def("per_supercell", &clexulator::MultiClusterExpansion::per_supercell,
+           R"pbdoc(
           Calculate the cluster expansion values
 
           Returns
@@ -1938,7 +2360,7 @@ PYBIND11_MODULE(_clexulator, m) {
       .def_readonly("transformation_matrix_to_super",
                     &clexulator::DoFSpace::transformation_matrix_to_super,
                     R"pbdoc(
-          np.ndarray : The shape=(3,3) integer matrix specifiyfing the supercell for a local DoF space.
+          Optional[np.ndarray] : The shape=(3,3) integer matrix specifying the supercell for a local DoF space.
           )pbdoc")
       .def_readonly("site_indices", &clexulator::DoFSpace::sites, R"pbdoc(
           Optional[list[int]] : The set of linear index of sites in the supercell to be included in a local DoF space.

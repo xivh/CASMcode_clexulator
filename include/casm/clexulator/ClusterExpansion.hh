@@ -39,9 +39,9 @@ class ClusterExpansion {
   /// \brief Get internal SparseCoefficients
   SparseCoefficients const &coefficients() const;
 
-  double intensive_value();
+  double per_unitcell();
 
-  double extensive_value();
+  double per_supercell();
 
   /// \brief Calculate change in cluster expansion value due to a single
   ///     occupation change
@@ -95,9 +95,9 @@ class MultiClusterExpansion {
   /// \brief Get internal SparseCoefficients
   std::vector<SparseCoefficients> const &coefficients() const;
 
-  Eigen::VectorXd const &intensive_value();
+  Eigen::VectorXd const &per_unitcell();
 
-  Eigen::VectorXd const &extensive_value();
+  Eigen::VectorXd const &per_supercell();
 
   /// \brief Calculate change in cluster expansion value due to a single
   ///     occupation change

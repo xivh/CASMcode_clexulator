@@ -1,7 +1,9 @@
-import pytest
 import numpy as np
-import libcasm.xtal
+import pytest
+
 import libcasm.clexulator
+import libcasm.xtal
+
 from .functions import make_source
 
 
@@ -92,7 +94,8 @@ def test_gradients_of_correlations(diff_clexulator):
 
     # the shape of the gradients of correlations matrix should be 3x7
     # because there are 3 degrees of freedom (dx, dy, dz) and 7 correlations
-    # you will have derivatives with each of the correlations with each of the degrees of freedom
+    # you will have derivatives with each of the correlations with
+    # each of the degrees of freedom
 
     assert gradients_of_correlations.shape == (3, 7)
 
@@ -101,7 +104,8 @@ def test_gradients_of_correlations(diff_clexulator):
     dy = dof_values[1]
     dz = dof_values[2]
 
-    # first row of gradients_of_correlations will be derviatives of all the 7 correlations with dx
+    # first row of gradients_of_correlations will be derviatives
+    # of all the 7 correlations with dx
     derviatives_with_dx = gradients_of_correlations[0, :]
 
     # derivative of \\Phi_{0} with dx will be 0.0
@@ -119,7 +123,8 @@ def test_gradients_of_correlations(diff_clexulator):
     # derivative of \\Phi_{6} with dx will be 0.0
     assert np.allclose(derviatives_with_dx[6], 0.0)
 
-    # second row of gradients_of_correlations will be derviatives of all the 7 correlations with dy
+    # second row of gradients_of_correlations will be derviatives
+    # of all the 7 correlations with dy
     derviatives_with_dy = gradients_of_correlations[1, :]
 
     # derivative of \\Phi_{0} with dy will be 0.0
@@ -137,7 +142,8 @@ def test_gradients_of_correlations(diff_clexulator):
     # derivative of \\Phi_{6} with dy will be 0.0
     assert np.allclose(derviatives_with_dy[6], 0.0)
 
-    # third row of gradients_of_correlations will be derviatives of all the 7 correlations with dz
+    # third row of gradients_of_correlations will be derviatives
+    # of all the 7 correlations with dz
     derviatives_with_dz = gradients_of_correlations[2, :]
 
     # derivative of \\Phi_{0} with dz will be 0.0
