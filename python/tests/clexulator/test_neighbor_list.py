@@ -34,6 +34,7 @@ def test_prim_neighbor_list_2():
     W = PrimNeighborList.make_weight_matrix(lattice.column_vector_matrix())
     prim_neighbor_list = PrimNeighborList(W, [0], 1)
     assert isinstance(prim_neighbor_list, PrimNeighborList)
+    assert (prim_neighbor_list.weight_matrix() == W).all()
 
 
 def test_prim_neighbor_list_3():

@@ -633,6 +633,25 @@ PYBIND11_MODULE(_clexulator, m) {
           )pbdoc",
           py::arg("xtal_prim"))
       .def(
+          "weight_matrix",
+          [](clexulator::PrimNeighborListWrapper const &x) {
+            return x.prim_neighbor_list->weight_matrix();
+          },
+          R"pbdoc(
+          Get the weight matrix that defines the shape of neighborhood and \
+          orders neighbors.
+
+          Returns
+          -------
+          weight_matrix: np.ndarray, shape=(3,3), dtype=int
+              Weight matrix, :math:`W`, that defines the shape of neighborhood
+              that orders neighbors. In the
+              :class:`~libcasm.clexulator.PrimNeighborList`,
+              unit cells are ordered by the integer distance,
+              :math:`r = x^{\mathsf{T}} W x`, where :math:`x` is the integer
+              unit cell coordinates.
+          )pbdoc")
+      .def(
           "sublattice_indices",
           [](clexulator::PrimNeighborListWrapper const &x) {
             std::set<int> sublat_indices =
