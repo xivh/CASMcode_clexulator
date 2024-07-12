@@ -5,11 +5,16 @@ All notable changes to `libcasm-clexulator` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+
+## [2.0a5] - 2024-07-12
 
 ### Added
 
 - Added `libcasm.clexulator.PrimNeighborList.weight_matrix()` to access the weight matrix
+
+### Changed
+
+- Wheels compiled with numpy>=2.0.0
 
 
 ## [2.0a4] - 2024-03-14

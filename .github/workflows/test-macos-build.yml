@@ -1,6 +1,10 @@
 name: Testing build on macos-latest
 
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '0 12 * * 0'
 
 jobs:
   build:
@@ -35,9 +39,9 @@ jobs:
           export CASM_PREFIX=$(python -m libcasm.casmglobal --prefix)
           python -m pytest -rsap python/tests
 
-      - name: upload libcasm-clexulator-macos-latest-x86_64-dist
+      - name: upload libcasm-clexulator-macos-latest-dist
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: libcasm-mapping-macos-latest-x86_64-dist
+          name: libcasm-mapping-macos-latest-dist
           path: dist
