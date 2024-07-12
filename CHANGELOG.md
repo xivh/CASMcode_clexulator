@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Wheels compiled with numpy>=2.0.0
 
+### Fixed
+
+- Fixed missing include (#19)
+
 
 ## [2.0a4] - 2024-03-14
 
