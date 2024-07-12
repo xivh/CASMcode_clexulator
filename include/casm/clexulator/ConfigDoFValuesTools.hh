@@ -1,6 +1,7 @@
 #ifndef CASM_clexulator_ConfigDoFValuesTools
 #define CASM_clexulator_ConfigDoFValuesTools
 #include <algorithm>
+#include <vector>
 
 #include "casm/clexulator/ConfigDoFValues.hh"
 #include "casm/crystallography/DoFDecl.hh"
