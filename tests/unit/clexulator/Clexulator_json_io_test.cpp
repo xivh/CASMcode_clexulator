@@ -52,9 +52,8 @@ TEST_F(OccClexulatorFCCTernaryJsonIOTest, Test1) {
 class LocalOccClexulatorZrOJsonIOTest : public test::TestLocalClexulatorBase {
  protected:
   LocalOccClexulatorZrOJsonIOTest()
-      : TestLocalClexulatorBase("LocalOccClexulatorZrOTest_Clexulator",
-                                {"hop0", "hop1"}, "LocalOccClexulatorZrOTest",
-                                true) {}
+      : TestLocalClexulatorBase("ZrO_Clexulator", {"hop0", "hop1"},
+                                "LocalOccClexulatorZrOTest", true) {}
 };
 
 TEST_F(LocalOccClexulatorZrOJsonIOTest, Test1) {
@@ -64,6 +63,21 @@ TEST_F(LocalOccClexulatorZrOJsonIOTest, Test1) {
                           tmpdir.path() / "basis_sets", bset_name,
                           clexulator_basename);
   }
+
+  std::map<std::string, std::vector<std::vector<int>>> expected;
+
+  expected["hop0"] = std::vector<std::vector<int>>({
+      {53, 6, 53, 14},
+      {17, 6, 17, 8},
+  });
+  expected["hop1"] = std::vector<std::vector<int>>({
+      {66, 8, 66, 12},
+      {61, 8, 61, 12},
+      {63, 8, 63, 12},
+      {64, 8, 64, 12},
+      {62, 8, 62, 12},
+      {65, 8, 65, 12},
+  });
 
   // make Clexulator
   for (std::string const &bset_name : bset_names) {
@@ -78,15 +92,26 @@ TEST_F(LocalOccClexulatorZrOJsonIOTest, Test1) {
                                                             prim_neighbor_list);
     EXPECT_EQ(parser.valid(), true);
 
+    //    std::cout << "{" << std::endl;
+    //    for (auto &equiv_clexulator : *parser.value) {
+    //      std::cout << "  {" << equiv_clexulator.nlist_size() << ", "
+    //                << equiv_clexulator.corr_size() << ", "
+    //                << equiv_clexulator.n_point_corr() << ", "
+    //                << equiv_clexulator.neighborhood().size() << "}, " <<
+    //                std::endl;
+    //    }
+    //    std::cout << "}" << std::endl;
+
     // loop over clexulator for equivalent phenomenal clusters
-    Index i = 0;
+    int i = 0;
     for (auto &equiv_clexulator : *parser.value) {
       EXPECT_EQ(equiv_clexulator.name(), clexulator_basename + "_" + bset_name +
                                              "_" + std::to_string(i));
-      EXPECT_EQ(equiv_clexulator.nlist_size(), 53);
-      EXPECT_EQ(equiv_clexulator.corr_size(), 33);
-      EXPECT_EQ(equiv_clexulator.n_point_corr(), 53);
-      EXPECT_EQ(equiv_clexulator.neighborhood().size(), 26);
+      EXPECT_EQ(equiv_clexulator.nlist_size(), expected[bset_name][i][0]);
+      EXPECT_EQ(equiv_clexulator.corr_size(), expected[bset_name][i][1]);
+      EXPECT_EQ(equiv_clexulator.n_point_corr(), expected[bset_name][i][2]);
+      EXPECT_EQ(equiv_clexulator.neighborhood().size(),
+                expected[bset_name][i][3]);
       ++i;
     }
   }

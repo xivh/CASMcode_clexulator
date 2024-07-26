@@ -12,7 +12,12 @@ from .functions import make_source
 @pytest.mark.slow
 @pytest.mark.very_slow
 def test_calc_per_unitcell_correlations(session_shared_datadir):
-    source = make_source(session_shared_datadir, "OccClexulatorZrOTest", "default")
+    source = make_source(
+        session_shared_datadir,
+        "OccClexulatorZrOTest",
+        "OccClexulatorZrOTest",
+        "default",
+    )
 
     with open(session_shared_datadir / "ZrO_prim.json", "r") as f:
         xtal_prim = xtal.Prim.from_dict(json.load(f))
@@ -31,11 +36,39 @@ def test_calc_per_unitcell_correlations(session_shared_datadir):
     assert isinstance(correlations, np.ndarray)
     assert len(correlations) == 74
 
+    corr = clex.Correlations(
+        supercell_neighbor_list=supercell_neighbor_list,
+        clexulator=clexulator,
+        config_dof_values=dof_values,
+    )
+    neighbors = corr.required_update_neighborhood()
+    assert len(neighbors) == 176
+
+    corr = clex.Correlations(
+        supercell_neighbor_list=supercell_neighbor_list,
+        clexulator=clexulator,
+        config_dof_values=dof_values,
+        indices=[0],  # constant function only -> no neighborhood required
+    )
+    neighbors = corr.required_update_neighborhood()
+    assert len(neighbors) == 0
+
+    corr = clex.Correlations(
+        supercell_neighbor_list=supercell_neighbor_list,
+        clexulator=clexulator,
+        config_dof_values=dof_values,
+        indices=[0, 1],  # constant + point functions only
+    )
+    neighbors = corr.required_update_neighborhood()
+    assert len(neighbors) == 2  # 2 Va-O sites
+
 
 @pytest.mark.slow
 @pytest.mark.very_slow
 def test_calc_local_correlations(session_shared_datadir):
-    source = make_source(session_shared_datadir, "LocalOccClexulatorZrOTest", "hop0")
+    source = make_source(
+        session_shared_datadir, "LocalOccClexulatorZrOTest", "ZrO", "hop0"
+    )
 
     with open(session_shared_datadir / "ZrO_prim.json", "r") as f:
         xtal_prim = xtal.Prim.from_dict(json.load(f))
@@ -61,5 +94,37 @@ def test_calc_local_correlations(session_shared_datadir):
                 equivalent_index,
             )
             assert isinstance(correlations, np.ndarray)
-            assert len(correlations) == 33
+            assert len(correlations) == 6
             print(unitcell_index, equivalent_index, correlations.tolist())
+
+    corr = clex.LocalCorrelations(
+        supercell_neighbor_list=supercell_neighbor_list,
+        clexulator=local_clexulator,
+        config_dof_values=dof_values,
+    )
+    neighbors_0 = corr.required_update_neighborhood(equivalent_index=0)
+    assert len(neighbors_0) == 14
+    neighbors_1 = corr.required_update_neighborhood(equivalent_index=1)
+    assert len(neighbors_1) == 14
+
+    corr = clex.LocalCorrelations(
+        supercell_neighbor_list=supercell_neighbor_list,
+        clexulator=local_clexulator,
+        config_dof_values=dof_values,
+        indices=[0],  # constant function only -> no neighborhood required
+    )
+    neighbors_0 = corr.required_update_neighborhood(equivalent_index=0)
+    assert len(neighbors_0) == 0
+    neighbors_1 = corr.required_update_neighborhood(equivalent_index=1)
+    assert len(neighbors_1) == 0
+
+    corr = clex.LocalCorrelations(
+        supercell_neighbor_list=supercell_neighbor_list,
+        clexulator=local_clexulator,
+        config_dof_values=dof_values,
+        indices=[0, 1],  # constant + first point functions only
+    )
+    neighbors_0 = corr.required_update_neighborhood(equivalent_index=0)
+    assert [x.to_list() for x in neighbors_0] == [[2, 0, 0, 0], [3, 0, 0, 1]]
+    neighbors_1 = corr.required_update_neighborhood(equivalent_index=1)
+    assert [x.to_list() for x in neighbors_1] == [[3, 0, 0, -1], [2, 0, 0, 1]]

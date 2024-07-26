@@ -1401,14 +1401,15 @@ PYBIND11_MODULE(_clexulator, m) {
            py::return_value_policy::reference_internal, R"pbdoc(
           The elements of the correlations vector that will be calculated.
           )pbdoc")
-      .def("required_update_neighborhood",
-           &clexulator::Correlations::required_update_neighborhood, R"pbdoc(
+      .def(
+          "required_update_neighborhood",
+          [](clexulator::Correlations const &x) {
+            std::set<xtal::UnitCellCoord> nbors =
+                x.required_update_neighborhood();
+            return std::vector<xtal::UnitCellCoord>(nbors.begin(), nbors.end());
+          },
+          R"pbdoc(
           The coordinates of sites (relative to the origin unit cell) where a change in DoF values requires a local cluster expansions's values to be re-calculated.
-
-          Parameters
-          ----------
-          equivalent_index: int
-              Index indicating which of the symmetrically local cluster basis sets to get the neighborhood for.
           )pbdoc")
       .def("per_supercell", &clexulator::Correlations::per_supercell,
            py::return_value_policy::reference_internal, R"pbdoc(
@@ -1673,16 +1674,22 @@ PYBIND11_MODULE(_clexulator, m) {
            py::return_value_policy::reference_internal, R"pbdoc(
           The elements of the correlations vector that will be calculated.
           )pbdoc")
-      .def("required_update_neighborhood",
-           &clexulator::LocalCorrelations::required_update_neighborhood,
-           R"pbdoc(
+      .def(
+          "required_update_neighborhood",
+          [](clexulator::LocalCorrelations const &x, int equivalent_index) {
+            std::set<xtal::UnitCellCoord> nbors =
+                x.required_update_neighborhood(equivalent_index);
+            return std::vector<xtal::UnitCellCoord>(nbors.begin(), nbors.end());
+          },
+          R"pbdoc(
           The coordinates of sites (relative to the origin unit cell) where a change in DoF values requires a local cluster expansions's values to be re-calculated.
 
           Parameters
           ----------
           equivalent_index: int
               Index indicating which of the symmetrically local cluster basis sets to get the neighborhood for.
-          )pbdoc")
+          )pbdoc",
+          py::arg("equivalent_index"))
       .def("value", &clexulator::LocalCorrelations::local, R"pbdoc(
           Calculate the local correlations
 
@@ -1947,8 +1954,14 @@ PYBIND11_MODULE(_clexulator, m) {
           py::return_value_policy::reference_internal, R"pbdoc(
           The :class:`~libcasm.clexulator.SparseCoefficients` used internally to calculate the cluster expansion value, as a reference.
           )pbdoc")
-      .def("required_update_neighborhood",
-           &clexulator::ClusterExpansion::required_update_neighborhood, R"pbdoc(
+      .def(
+          "required_update_neighborhood",
+          [](clexulator::ClusterExpansion const &x) {
+            std::set<xtal::UnitCellCoord> nbors =
+                x.required_update_neighborhood();
+            return std::vector<xtal::UnitCellCoord>(nbors.begin(), nbors.end());
+          },
+          R"pbdoc(
          The coordinates of sites (relative to the origin unit cell) where a change in DoF values requires this calculator's values to be re-calculated.
          )pbdoc");
 
@@ -2107,9 +2120,14 @@ PYBIND11_MODULE(_clexulator, m) {
           The :class:`~libcasm.clexulator.SparseCoefficients` used internally to calculate the i-th cluster expansion value.
           )pbdoc",
           py::arg("i"))
-      .def("required_update_neighborhood",
-           &clexulator::MultiClusterExpansion::required_update_neighborhood,
-           R"pbdoc(
+      .def(
+          "required_update_neighborhood",
+          [](clexulator::MultiClusterExpansion const &x) {
+            std::set<xtal::UnitCellCoord> nbors =
+                x.required_update_neighborhood();
+            return std::vector<xtal::UnitCellCoord>(nbors.begin(), nbors.end());
+          },
+          R"pbdoc(
          The coordinates of sites (relative to the origin unit cell) where a change in DoF values requires this calculator's values to be re-calculated.
          )pbdoc");
 
@@ -2172,16 +2190,22 @@ PYBIND11_MODULE(_clexulator, m) {
           py::return_value_policy::reference_internal, R"pbdoc(
          The list[:class:`~libcasm.clexulator.SparseCoefficients`] used internally to calculate cluster expansion values, as a reference.
          )pbdoc")
-      .def("required_update_neighborhood",
-           &clexulator::LocalClusterExpansion::required_update_neighborhood,
-           R"pbdoc(
+      .def(
+          "required_update_neighborhood",
+          [](clexulator::LocalClusterExpansion const &x, int equivalent_index) {
+            std::set<xtal::UnitCellCoord> nbors =
+                x.required_update_neighborhood(equivalent_index);
+            return std::vector<xtal::UnitCellCoord>(nbors.begin(), nbors.end());
+          },
+          R"pbdoc(
           The coordinates of sites (relative to the origin unit cell) where a change in DoF values requires a local cluster expansions's values to be re-calculated.
 
           Parameters
           ----------
           equivalent_index: int
               Index indicating which of the symmetrically local cluster basis sets to get the neighborhood for.
-         )pbdoc");
+         )pbdoc",
+          py::arg("equivalent_index"));
 
   py::class_<clexulator::MultiLocalClusterExpansion,
              std::shared_ptr<clexulator::MultiLocalClusterExpansion>>(
@@ -2251,10 +2275,16 @@ PYBIND11_MODULE(_clexulator, m) {
           },
           py::return_value_policy::reference_internal, R"pbdoc(
           The :class:`~libcasm.clexulator.SparseCoefficients` used internally to calculate the i-th cluster expansion values, as a reference.
-          )pbdoc")
+          )pbdoc",
+          py::arg("i"))
       .def(
           "required_update_neighborhood",
-          &clexulator::MultiLocalClusterExpansion::required_update_neighborhood,
+          [](clexulator::MultiLocalClusterExpansion const &x,
+             int equivalent_index) {
+            std::set<xtal::UnitCellCoord> nbors =
+                x.required_update_neighborhood(equivalent_index);
+            return std::vector<xtal::UnitCellCoord>(nbors.begin(), nbors.end());
+          },
           R"pbdoc(
           The coordinates of sites (relative to the origin unit cell) where a change in DoF values requires a local cluster expansions's values to be re-calculated.
 
@@ -2263,7 +2293,8 @@ PYBIND11_MODULE(_clexulator, m) {
           equivalent_index: int
               Index indicating which of the symmetrically local cluster basis sets
               to get the neighborhood for.
-          )pbdoc");
+          )pbdoc",
+          py::arg("equivalent_index"));
 
   // DoFSpaceAxisInfo
   py::class_<clexulator::DoFSpaceAxisInfo>(m, "DoFSpaceAxisInfo", R"pbdoc(

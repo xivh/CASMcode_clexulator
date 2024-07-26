@@ -10,7 +10,10 @@ from .functions import make_source
 @pytest.fixture
 def diff_clexulator(session_shared_datadir):
     source = make_source(
-        session_shared_datadir, "DiffClexulatorSquareLatticeTest", "default"
+        session_shared_datadir,
+        "DiffClexulatorSquareLatticeTest",
+        "DiffClexulatorSquareLatticeTest",
+        "default",
     )
 
     prim_neighbor_list = libcasm.clexulator.PrimNeighborList()

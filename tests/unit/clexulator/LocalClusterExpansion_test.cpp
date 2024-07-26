@@ -29,8 +29,8 @@ namespace test {
 class OccZrOLocalClexTest : public test::TestLocalClexulatorBase {
  protected:
   OccZrOLocalClexTest()
-      : TestLocalClexulatorBase("LocalOccClexulatorZrOTest_Clexulator",
-                                {"hop0", "hop1"}, "LocalOccClexulatorZrOTest") {
+      : TestLocalClexulatorBase("ZrO_Clexulator", {"hop0", "hop1"},
+                                "LocalOccClexulatorZrOTest") {
     // can uncomment for debugging:
     tmpdir.do_not_remove_on_destruction();
   }

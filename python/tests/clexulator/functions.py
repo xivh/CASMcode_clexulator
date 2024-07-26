@@ -1,10 +1,10 @@
 import pathlib
 
 
-def make_source(dir, title, bsetname):
+def make_source(dir, subdir, title, bsetname):
     return str(
         pathlib.Path(dir)
-        / title
+        / subdir
         / "basis_sets"
         / ("bset." + bsetname)
         / (title + "_Clexulator_" + bsetname + ".cc")

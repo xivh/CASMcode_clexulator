@@ -33,8 +33,8 @@ void run_local_correlations_checks(
 class LocalOccClexulatorZrOTest : public test::TestLocalClexulatorBase {
  protected:
   LocalOccClexulatorZrOTest()
-      : TestLocalClexulatorBase("LocalOccClexulatorZrOTest_Clexulator",
-                                {"hop0", "hop1"}, "LocalOccClexulatorZrOTest") {
+      : TestLocalClexulatorBase("ZrO_Clexulator", {"hop0", "hop1"},
+                                "LocalOccClexulatorZrOTest") {
     // can uncomment for debugging:
     // tmpdir.do_not_remove_on_destruction();
   }
@@ -43,9 +43,28 @@ class LocalOccClexulatorZrOTest : public test::TestLocalClexulatorBase {
     // Check constructed clexulator
     EXPECT_EQ(this->clexulator.size(), 2);
 
+    std::map<std::string, int> expected_local_clexulator_size = {{"hop0", 2},
+                                                                 {"hop1", 6}};
+
+    std::map<std::string, std::vector<std::vector<int>>> expected;
+
+    expected["hop0"] = std::vector<std::vector<int>>({
+        {53, 6, 53, 14},
+        {17, 6, 17, 8},
+    });
+    expected["hop1"] = std::vector<std::vector<int>>({
+        {66, 8, 66, 12},
+        {61, 8, 61, 12},
+        {63, 8, 63, 12},
+        {64, 8, 64, 12},
+        {62, 8, 62, 12},
+        {65, 8, 65, 12},
+    });
+
     // loop over different basis sets
     for (auto const &bset_name : bset_names) {
-      EXPECT_EQ(this->clexulator[bset_name]->size(), 2);
+      EXPECT_EQ(this->clexulator[bset_name]->size(),
+                expected_local_clexulator_size[bset_name]);
 
       // loop over clexulator for equivalent phenomenal clusters
       Index i = 0;
@@ -53,10 +72,11 @@ class LocalOccClexulatorZrOTest : public test::TestLocalClexulatorBase {
         EXPECT_EQ(
             equiv_clexulator.name(),
             clexulator_basename + "_" + bset_name + "_" + std::to_string(i));
-        EXPECT_EQ(equiv_clexulator.nlist_size(), 53);
-        EXPECT_EQ(equiv_clexulator.corr_size(), 33);
-        EXPECT_EQ(equiv_clexulator.n_point_corr(), 53);
-        EXPECT_EQ(equiv_clexulator.neighborhood().size(), 26);
+        EXPECT_EQ(equiv_clexulator.nlist_size(), expected[bset_name][i][0]);
+        EXPECT_EQ(equiv_clexulator.corr_size(), expected[bset_name][i][1]);
+        EXPECT_EQ(equiv_clexulator.n_point_corr(), expected[bset_name][i][2]);
+        EXPECT_EQ(equiv_clexulator.neighborhood().size(),
+                  expected[bset_name][i][3]);
         ++i;
       }
     }
