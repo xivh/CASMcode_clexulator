@@ -1160,7 +1160,7 @@ PYBIND11_MODULE(_clexulator, m) {
       compile_options: str = None
           Options used to compile the Clexulator source file, if it is not yet
           compiled. Example: "g++ -O3 -Wall -fPIC --std=c++17 -I/path/to/include".
-          The default values can be configured with:
+          The default values can be configured by setting environment variables:
 
               CASM_CXX:
                   Set compiler; default="g++"
@@ -1177,7 +1177,7 @@ PYBIND11_MODULE(_clexulator, m) {
           Options used to compile the Clexulator shared object file, if it is not
           yet compiled. Example: "g++ -shared -L/path/to/lib -lcasm_clexulator "
 
-          The default values can be configured with:
+          The default values can be configured by setting environment variables:
 
               CASM_CXX:
                   Set compiler; default="g++"
@@ -1186,7 +1186,7 @@ PYBIND11_MODULE(_clexulator, m) {
               CASM_LIBDIR:
                   Set link search path, overriding CASM_PREFIX
               CASM_PREFIX:
-                  Set include search path to -L$CASM_PREFIX/lib; default
+                  Set library search path to -L$CASM_PREFIX/lib; default
                   tries to find "ccasm" or "casm" executables on PATH and
                   checks relative locations
 
