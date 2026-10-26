@@ -9,7 +9,12 @@ LocalClusterExpansion::LocalClusterExpansion(
     SparseCoefficients const &_coefficients, ConfigDoFValues const *_dof_values)
     : m_correlations(_supercell_neighbor_list, _clexulator, _coefficients.index,
                      _dof_values),
-      m_coefficients(_coefficients) {}
+      m_coefficients(_coefficients) {
+  // LocalCorrelations already checked that the clexulator vector is not empty
+  // and that all clexulators have the same corr_size
+  throw_if_invalid(m_coefficients);
+  throw_if_out_of_range(m_coefficients, (*_clexulator)[0].corr_size());
+}
 
 /// \brief Reset pointer to configuration currently being calculated
 void LocalClusterExpansion::set(ConfigDoFValues const *dof_values) {
@@ -82,6 +87,12 @@ MultiLocalClusterExpansion::MultiLocalClusterExpansion(
     : m_correlations(_supercell_neighbor_list, _clexulator,
                      make_all_indices(_coefficients), _dof_values),
       m_coefficients(_coefficients) {
+  // LocalCorrelations already checked that the clexulator vector is not empty
+  // and that all clexulators have the same corr_size
+  for (auto const &coeff : m_coefficients) {
+    throw_if_invalid(coeff);
+    throw_if_out_of_range(coeff, (*_clexulator)[0].corr_size());
+  }
   m_values.resize(m_coefficients.size());
 }
 

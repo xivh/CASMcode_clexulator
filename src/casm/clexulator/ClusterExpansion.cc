@@ -11,7 +11,10 @@ ClusterExpansion::ClusterExpansion(
     SparseCoefficients const &_coefficients, ConfigDoFValues const *_dof_values)
     : m_correlations(_supercell_neighbor_list, _clexulator, _coefficients.index,
                      _dof_values),
-      m_coefficients(_coefficients) {}
+      m_coefficients(_coefficients) {
+  throw_if_invalid(m_coefficients);
+  throw_if_out_of_range(m_coefficients, _clexulator->corr_size());
+}
 
 /// \brief Reset pointer to configuration currently being calculated
 void ClusterExpansion::set(ConfigDoFValues const *dof_values) {
@@ -110,6 +113,10 @@ MultiClusterExpansion::MultiClusterExpansion(
     : m_correlations(_supercell_neighbor_list, _clexulator,
                      make_all_indices(_coefficients), _dof_values),
       m_coefficients(_coefficients) {
+  for (auto const &coeff : m_coefficients) {
+    throw_if_invalid(coeff);
+    throw_if_out_of_range(coeff, _clexulator->corr_size());
+  }
   m_values.resize(m_coefficients.size());
 }
 

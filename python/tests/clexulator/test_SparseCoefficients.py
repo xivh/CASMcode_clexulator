@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 import libcasm.clexulator as clex
 
@@ -17,6 +18,26 @@ def test_SparseCoefficients_1():
     assert np.allclose(value, value)
 
 
+def test_SparseCoefficients_2():
+    index = [0, 2]
+    value = [1.1]
+
+    with pytest.raises(RuntimeError, match="sizes do not match"):
+        clex.SparseCoefficients(
+            index=index,
+            value=value,
+        )
+
+    index = [0]
+    value = [1.1, -0.3]
+
+    with pytest.raises(RuntimeError, match="sizes do not match"):
+        clex.SparseCoefficients(
+            index=index,
+            value=value,
+        )
+
+
 def test_SparseCoefficients_mul():
     index = [0, 2]
     value = [1.1, -0.3]
@@ -32,6 +53,14 @@ def test_SparseCoefficients_mul():
 
     corr = np.array([0.0, 0.1, 0.1, 0.1])
     assert np.isclose(coeff * corr, -0.03)
+
+    # test differing coefficient and correlation sizes
+    corr = np.array([0.1, 0.1, 0.1, 0.1, 0.1])
+    assert np.isclose(coeff * corr, 0.08)
+
+    corr = np.array([0.0, 0.1])
+    with pytest.raises(RuntimeError, match="out of range"):
+        coeff * corr
 
 
 def test_SparseCoefficients_tofrom_data_1():

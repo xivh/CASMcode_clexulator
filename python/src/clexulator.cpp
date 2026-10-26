@@ -1732,13 +1732,20 @@ PYBIND11_MODULE(_clexulator, m) {
           -0.03
 
     )pbdoc")
-      .def(py::init<std::vector<unsigned int>, std::vector<double>>(), R"pbdoc(
+      .def(py::init([](std::vector<unsigned int> const &index,
+                       std::vector<double> const &value) {
+             clexulator::SparseCoefficients coeff{index, value};
+             clexulator::throw_if_invalid(coeff);
+             return coeff;
+           }),
+           R"pbdoc(
         Parameters
         ----------
         index: list[int]
             Indices of basis functions with non-zero coefficients
         value: list[float]
             Expansion coefficients, for the basis functions specified by `index`
+
         )pbdoc",
            py::arg("index") = std::vector<unsigned int>(),
            py::arg("value") = std::vector<double>())
@@ -1788,6 +1795,9 @@ PYBIND11_MODULE(_clexulator, m) {
           "__mul__",
           [](clexulator::SparseCoefficients const &self,
              Eigen::VectorXd const &correlations) {
+            // index and value may have been changed after construction
+            clexulator::throw_if_invalid(self);
+            clexulator::throw_if_out_of_range(self, correlations.size());
             return self * correlations;
           },
           R"pbdoc(
